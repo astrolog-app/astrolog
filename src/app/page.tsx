@@ -1,5 +1,5 @@
 import { Page } from '@/components/ui/custom/page';
 
 export default function Home() {
-  return <Page></Page>;
+  return <Page>Log</Page>;
 }
