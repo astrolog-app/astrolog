@@ -3,8 +3,12 @@
 @tailwind utilities;
 
 :root {
-  --top-bar-height: 3rem;
+  --top-bar-height: 2.75rem;
   --side-nav-width: 15rem;
+}
+
+html {
+  user-select: none;
 }
 
 /* shadcn theme */

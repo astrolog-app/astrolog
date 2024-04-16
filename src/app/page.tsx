@@ -1,11 +1,5 @@
-import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/ui/themeToggle';
+import { Page } from '@/components/ui/custom/page';
 
 export default function Home() {
-  return (
-    <div>
-      <Button>Click me</Button>
-      <ThemeToggle></ThemeToggle>
-    </div>
-  );
+  return <Page></Page>;
 }

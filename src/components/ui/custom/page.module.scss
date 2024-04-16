@@ -1,0 +1,6 @@
+.page {
+  max-height: calc(100vh - var(--top-bar-height));
+  width: calc(100% - var(--side-nav-width));
+  overflow-y: auto;
+  padding: 0.5rem;
+}
