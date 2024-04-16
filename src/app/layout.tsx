@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from 'next-themes';
+import { TopBar } from '@/components/topBar';
+import { SideNav } from '@/components/sideNav';
+import styles from './layout.module.scss';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -19,7 +22,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system">
-          {children}
+          <TopBar></TopBar>
+          <div className={styles.content}>
+            <SideNav></SideNav>
+            {children}
+          </div>
         </ThemeProvider>
       </body>
     </html>
