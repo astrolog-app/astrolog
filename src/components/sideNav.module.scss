@@ -1,6 +1,7 @@
 .sideNav {
   height: calc(100vh - var(--top-bar-height));
   width: var(--side-nav-width);
-  border-right: 1px solid gray;
+  border-right: 1px solid hsl(var(--border));
   padding: 0.5rem;
+  overflow-y: auto;
 }
