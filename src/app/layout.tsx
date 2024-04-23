@@ -6,6 +6,7 @@ import { TopBar } from '@/components/topBar';
 import styles from './layout.module.scss';
 import Log from './log/log';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Analytics } from './analytics/analytics';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -23,14 +24,16 @@ export default function RootLayout() {
           <Tabs defaultValue="log" className={styles.tabs}>
             <TabsList className={styles.tabList}>
               <TabsTrigger value="log">Log</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="calibration">Calibration</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
             <TabsContent value="log" className={styles.tabsContent}>
               <Log />
             </TabsContent>
-            <TabsContent value="analytics"></TabsContent>
             <TabsContent value="calibration"></TabsContent>
+            <TabsContent value="analytics">
+              <Analytics />
+            </TabsContent>
           </Tabs>
         </ThemeProvider>
       </body>
