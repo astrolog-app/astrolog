@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import styles from './topBar.module.scss';
 import { ThemeToggle } from './ui/custom/themeToggle';
 import {
@@ -12,15 +15,22 @@ import {
   MenubarSubTrigger,
   MenubarTrigger,
 } from '@/components/ui/menubar';
+import { Modal } from './ui/custom/modal';
 
 export function TopBar() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen);
+  };
+
   return (
     <div className={styles.topBar}>
       <Menubar>
         <MenubarMenu>
           <MenubarTrigger>App</MenubarTrigger>
           <MenubarContent>
-            <MenubarItem>Preferences</MenubarItem>
+            <MenubarItem onClick={toggleModal}>Preferences</MenubarItem>
             <MenubarSeparator />
             <MenubarItem>Exit</MenubarItem>
           </MenubarContent>
@@ -66,6 +76,10 @@ export function TopBar() {
             <MenubarItem>Feedback</MenubarItem>
           </MenubarContent>
         </MenubarMenu>
+
+        <Modal isOpen={isModalOpen} onClose={toggleModal}>
+          Test
+        </Modal>
       </Menubar>
       <ThemeToggle></ThemeToggle>
     </div>

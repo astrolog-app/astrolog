@@ -1,0 +1,22 @@
+.background {
+  position: fixed;
+  height: 100vh;
+  width: 100%;
+  backdrop-filter: blur(5px) brightness(0.8);
+  left: 0;
+  top: 0;
+  z-index: 9;
+
+  .modal {
+    background-color: hsl(var(--background));
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+
+    border-radius: var(--radius);
+    padding: 1rem;
+    border: 0.1rem solid hsl(var(--border));
+  }
+}
