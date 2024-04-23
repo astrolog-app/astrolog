@@ -1,5 +1,7 @@
 import styles from './page.module.scss';
 
-export function Page({ children }: { children?: React.ReactNode }) {
-  return <div className={styles.page}>{children}</div>;
+import { cn } from '@/lib/utils';
+
+export function Page({ className, children }: { className?: string, children?: React.ReactNode }) {
+  return <div className={cn(className, styles.page)}>{children}</div>;
 }

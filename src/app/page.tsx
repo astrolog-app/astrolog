@@ -1,10 +1,34 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Page } from '@/components/ui/custom/page';
 import styles from './page.module.scss';
+import { SessionTable } from '@/components/sessionTable/sessionTable';
+import { columns } from '@/components/sessionTable/columns';
 
 export default function Home() {
+  const data = [
+    {
+      date: "22.22.2222",
+      target: "NGC 7655",
+      sub_length: 300,
+      total_subs: 20,
+      integrated_subs: 15,
+      filter: "string",
+      gain: 800,
+      offset: 0,
+      camera_temp: 15,
+      outside_temp: 7,
+      average_seeing: 0.43,
+      average_cloud_cover: 0.12,
+      telescope: "string",
+      flattener: "string",
+      mount: "string",
+      camera: "string",
+      notes: "string",
+    }
+  ]
+
   return (
-    <Page>
+    <Page className={styles.page}>
       <Card>
         <CardHeader>
           <CardTitle>Card Title</CardTitle>
@@ -15,12 +39,8 @@ export default function Home() {
         </CardContent>
       </Card>
       <div className={styles.content}>
-        <Card>
-          <CardContent>
-            <p>Card Content</p>
-          </CardContent>
-        </Card>
-        <Card>
+        <SessionTable columns={columns} data={data} />
+        <Card className={styles.imagePreviewCard}>
           <CardHeader>
             <CardTitle>Image Preview</CardTitle>
             <CardDescription>Card Description</CardDescription>
