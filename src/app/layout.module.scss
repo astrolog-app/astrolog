@@ -1,3 +1,9 @@
-.content {
+.tabs {
+  height: calc(100vh - var(--top-bar-height));
   display: flex;
+  flex-direction: column;
+
+  .tabsContent {
+    flex-grow: 1;
+  }
 }

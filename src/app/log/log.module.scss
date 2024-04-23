@@ -1,0 +1,27 @@
+.page {
+  display: flex;
+  flex-direction: column;
+
+  .content {
+    flex-grow: 1;
+    padding-top: var(--padding);
+    display: flex;
+    justify-content: space-between;
+
+    .table {
+      background-color: aqua;
+    }
+
+    .imagePreviewCard {
+      margin-left: var(--padding);
+      height: fit-content;
+
+      .imagePreview {
+        width: 25rem;
+        height: 25rem;
+        background-color: aquamarine;
+        border-radius: var(--radius);
+      }
+    }
+  }
+}

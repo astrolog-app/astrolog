@@ -1,4 +1,4 @@
-import { Page } from '@/components/ui/custom/page';
+import { Page } from '@/components/ui/custom/tab';
 
 export default function Calibration() {
   return <Page>Calibration</Page>;
