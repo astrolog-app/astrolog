@@ -21,16 +21,16 @@ export default function RootLayout() {
         <ThemeProvider attribute="class" defaultTheme="system">
           <TopBar />
           <Tabs defaultValue="log" className={styles.tabs}>
-            <TabsList>
+            <TabsList className={styles.tabList}>
               <TabsTrigger value="log">Log</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="calibration">Calibration</TabsTrigger>
             </TabsList>
             <TabsContent value="log" className={styles.tabsContent}>
               <Log />
             </TabsContent>
-            <TabsContent value="calibration">
-              Change your password here.
-            </TabsContent>
+            <TabsContent value="analytics"></TabsContent>
+            <TabsContent value="calibration"></TabsContent>
           </Tabs>
         </ThemeProvider>
       </body>

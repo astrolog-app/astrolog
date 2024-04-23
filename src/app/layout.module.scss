@@ -3,6 +3,13 @@
   display: flex;
   flex-direction: column;
 
+  .tabList {
+    width: fit-content;
+    margin: 0.75rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0rem;
+  }
+
   .tabsContent {
     flex-grow: 1;
   }
