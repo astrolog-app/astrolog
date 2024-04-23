@@ -1,0 +1,12 @@
+.content {
+    padding-top: var(--padding);
+    display: flex;
+    justify-content: space-between;
+
+    .imagePreview {
+        width: 25rem;
+        height: 25rem;
+        background-color: aquamarine;
+        border-radius: var(--radius);
+    }
+}
