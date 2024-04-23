@@ -2,7 +2,7 @@
   position: fixed;
   height: 100vh;
   width: 100%;
-  backdrop-filter: blur(5px) brightness(0.8);
+  backdrop-filter: blur(5px) brightness(0.5);
   left: 0;
   top: 0;
   z-index: 9;
@@ -18,5 +18,33 @@
     border-radius: var(--radius);
     padding: 1rem;
     border: 0.1rem solid hsl(var(--border));
+
+    .close {
+      width: 1.25rem;
+      aspect-ratio: 1/1;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 200ms ease;
+      border-radius: var(--radius);
+      padding: 0.25rem;
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+
+      svg {
+        fill: hsl(var(--foreground));
+      }
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    .title {
+      font-weight: 600;
+      font-size: larger;
+      margin-bottom: 0.5rem;
+      margin-right: 3rem;
+    }
   }
 }

@@ -15,13 +15,13 @@ import {
   MenubarSubTrigger,
   MenubarTrigger,
 } from '@/components/ui/menubar';
-import { Modal } from './ui/custom/modal';
+import { Preferences } from './modals/preferences';
 
 export function TopBar() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
 
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
+  const togglePreferencesModal = () => {
+    setIsPreferencesOpen(!isPreferencesOpen);
   };
 
   return (
@@ -30,7 +30,9 @@ export function TopBar() {
         <MenubarMenu>
           <MenubarTrigger>App</MenubarTrigger>
           <MenubarContent>
-            <MenubarItem onClick={toggleModal}>Preferences</MenubarItem>
+            <MenubarItem onClick={togglePreferencesModal}>
+              Preferences
+            </MenubarItem>
             <MenubarSeparator />
             <MenubarItem>Exit</MenubarItem>
           </MenubarContent>
@@ -77,9 +79,10 @@ export function TopBar() {
           </MenubarContent>
         </MenubarMenu>
 
-        <Modal isOpen={isModalOpen} onClose={toggleModal}>
-          Test
-        </Modal>
+        <Preferences
+          isOpen={isPreferencesOpen}
+          onClose={togglePreferencesModal}
+        />
       </Menubar>
       <ThemeToggle></ThemeToggle>
     </div>
