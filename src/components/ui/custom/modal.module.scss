@@ -54,10 +54,8 @@
         color: hsl(var(--muted-foreground));
       }
 
-      .divider {
-        width: 100%;
+      .separator {
         height: 2px;
-        background-color: hsl(var(--border));
         margin-top: 1.25rem;
       }
     }

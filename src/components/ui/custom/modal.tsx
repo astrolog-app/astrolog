@@ -1,13 +1,11 @@
+import { Separator } from '../separator';
 import styles from './modal.module.scss';
 
-import { cn } from '@/lib/utils';
-
-interface modalProps {
+interface ModalProps {
   className?: string;
   title?: string;
   subtitle?: string;
-  divider: boolean;
-  isOpen: boolean;
+  separator: boolean;
   onClose: () => void;
   children: React.ReactNode;
 }
@@ -16,11 +14,10 @@ export function Modal({
   className,
   title,
   subtitle,
-  divider,
-  isOpen,
+  separator,
   onClose,
   children,
-}: modalProps) {
+}: ModalProps) {
   const closeSvg = (
     <svg
       fill="#000000"
@@ -41,22 +38,18 @@ export function Modal({
   );
 
   return (
-    <div>
-      {isOpen && (
-        <div className={styles.background}>
-          <div className={cn(className, styles.modal)}>
-            <div className={styles.close} onClick={onClose}>
-              {closeSvg}
-            </div>
-            <div className={styles.header}>
-              <div className={styles.title}>{title}</div>
-              <div className={styles.subtitle}>{subtitle}</div>
-              {divider && <div className={styles.divider}></div>}
-            </div>
-            <div>{children}</div>
-          </div>
+    <div className={styles.background}>
+      <div className={styles.modal}>
+        <div className={styles.close} onClick={onClose}>
+          {closeSvg}
         </div>
-      )}
+        <div className={styles.header}>
+          <div className={styles.title}>{title}</div>
+          <div className={styles.subtitle}>{subtitle}</div>
+          {separator && <Separator className={styles.separator} />}
+        </div>
+        <div className={className}>{children}</div>
+      </div>
     </div>
   );
 }

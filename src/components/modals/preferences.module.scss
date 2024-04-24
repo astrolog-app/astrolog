@@ -1,0 +1,46 @@
+.preferences {
+  display: flex;
+  width: 57.5vw;
+  height: 65vh;
+
+  .tabsList {
+    flex-direction: column;
+    height: fit-content;
+    margin-right: 1rem;
+
+    button {
+      width: 10rem;
+      align-items: start;
+      justify-content: start;
+      margin-bottom: 0.25rem;
+
+      &:last-of-type {
+        margin-bottom: 0rem;
+      }
+    }
+  }
+
+  .tabsContent {
+    flex-grow: 1;
+  }
+}
+
+.header {
+  margin-bottom: 1.25rem;
+
+  .title {
+    font-weight: 600;
+    font-size: larger;
+    margin-right: 3rem;
+  }
+
+  .subtitle {
+    margin-top: 0.25rem;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .separator {
+    margin-top: 1.25rem;
+    width: 70%;
+  }
+}

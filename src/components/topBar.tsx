@@ -9,7 +9,6 @@ import {
   MenubarItem,
   MenubarMenu,
   MenubarSeparator,
-  MenubarShortcut,
   MenubarSub,
   MenubarSubContent,
   MenubarSubTrigger,
@@ -78,13 +77,9 @@ export function TopBar() {
             <MenubarItem>Feedback</MenubarItem>
           </MenubarContent>
         </MenubarMenu>
-
-        <Preferences
-          isOpen={isPreferencesOpen}
-          onClose={togglePreferencesModal}
-        />
       </Menubar>
       <ThemeToggle></ThemeToggle>
+      {isPreferencesOpen && <Preferences onClose={togglePreferencesModal} />}
     </div>
   );
 }
