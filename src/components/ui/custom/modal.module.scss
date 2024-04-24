@@ -40,11 +40,26 @@
       }
     }
 
-    .title {
-      font-weight: 600;
-      font-size: larger;
-      margin-bottom: 0.5rem;
-      margin-right: 3rem;
+    .header {
+      margin-bottom: 1.25rem;
+
+      .title {
+        font-weight: 600;
+        font-size: x-large;
+        margin-right: 3rem;
+      }
+
+      .subtitle {
+        margin-top: 0.25rem;
+        color: hsl(var(--muted-foreground));
+      }
+
+      .divider {
+        width: 100%;
+        height: 2px;
+        background-color: hsl(var(--border));
+        margin-top: 1.25rem;
+      }
     }
   }
 }

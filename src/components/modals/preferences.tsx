@@ -8,7 +8,13 @@ interface preferencesProps {
 
 export function Preferences({ isOpen, onClose }: preferencesProps) {
   return (
-    <Modal title="Preferences" isOpen={isOpen} onClose={onClose}>
+    <Modal
+      title="Preferences"
+      subtitle="Test"
+      divider={true}
+      isOpen={isOpen}
+      onClose={onClose}
+    >
       Test
     </Modal>
   );

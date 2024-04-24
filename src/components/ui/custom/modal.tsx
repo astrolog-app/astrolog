@@ -4,7 +4,9 @@ import { cn } from '@/lib/utils';
 
 interface modalProps {
   className?: string;
-  title: string;
+  title?: string;
+  subtitle?: string;
+  divider: boolean;
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
@@ -13,6 +15,8 @@ interface modalProps {
 export function Modal({
   className,
   title,
+  subtitle,
+  divider,
   isOpen,
   onClose,
   children,
@@ -44,7 +48,11 @@ export function Modal({
             <div className={styles.close} onClick={onClose}>
               {closeSvg}
             </div>
-            <div className={styles.title}>{title}</div>
+            <div className={styles.header}>
+              <div className={styles.title}>{title}</div>
+              <div className={styles.subtitle}>{subtitle}</div>
+              {divider && <div className={styles.divider}></div>}
+            </div>
             <div>{children}</div>
           </div>
         </div>
