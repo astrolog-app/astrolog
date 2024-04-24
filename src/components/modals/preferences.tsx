@@ -1,3 +1,4 @@
+import { Button } from '../ui/button';
 import { Modal } from '../ui/custom/modal';
 import { Separator } from '../ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -23,69 +24,94 @@ export function Preferences({ onClose }: PreferencesProps) {
           <TabsTrigger value="license">License</TabsTrigger>
         </TabsList>
         <TabsContent value="appearance" className={styles.tabsContent}>
-          <Appearance />
+          <Content
+            onClose={onClose}
+            title="Appearance"
+            subtitle="Customize the loook and feel of AstroLog."
+            buttonMessage="Update appearance"
+          >
+            <AppearanceForm />
+          </Content>
         </TabsContent>
         <TabsContent value="storage" className={styles.tabsContent}>
-          <Storage />
+          <Content
+            onClose={onClose}
+            title="Storage"
+            subtitle="Manage the way AstroLog saves and loads your data."
+            buttonMessage="Update storage"
+          >
+            <StorageForm />
+          </Content>
         </TabsContent>
         <TabsContent value="user" className={styles.tabsContent}>
-          <User />
+          <Content
+            onClose={onClose}
+            title="User"
+            subtitle="Change or specify user specific information."
+            buttonMessage="Update user"
+          >
+            <UserForm />
+          </Content>
         </TabsContent>
         <TabsContent value="license" className={styles.tabsContent}>
-          <License />
+          <Content
+            onClose={onClose}
+            title="License"
+            subtitle="Lookup your license key or activate AstroLog."
+            buttonMessage="Update license"
+          >
+            <LicenseForm />
+          </Content>
         </TabsContent>
       </Tabs>
     </Modal>
   );
 }
 
-interface HeaderProps {
+interface ContentProps {
+  onClose: () => void;
   title: string;
   subtitle: string;
+  buttonMessage: string;
+  children?: React.ReactNode;
 }
 
-function Header({ title, subtitle }: HeaderProps) {
+function Content({ onClose, title, subtitle, buttonMessage, children }: ContentProps) {
   return (
-    <div className={styles.header}>
-      <div className={styles.title}>{title}</div>
-      <div className={styles.subtitle}>{subtitle}</div>
-      <Separator className={styles.separator} />
+    <div className={styles.content}>
+      <div className={styles.header}>
+        <div className={styles.title}>{title}</div>
+        <div className={styles.subtitle}>{subtitle}</div>
+        <Separator className={styles.separator} />
+      </div>
+      <div className={styles.children}>{children}</div>
+      <div className={styles.footer}>
+        <Button onClick={onClose}>{buttonMessage}</Button>
+      </div>
     </div>
   );
 }
 
-function Appearance() {
+function AppearanceForm() {
   return (
-    <Header
-      title="Appearance"
-      subtitle="Customize the loook and feel of AstroLog."
-    ></Header>
+    <div></div>
   );
 }
 
-function Storage() {
+function StorageForm() {
   return (
-    <Header
-      title="Storage"
-      subtitle="Manage the way AstroLog saves and loads your data."
-    ></Header>
+    <div></div>
   );
 }
 
-function User() {
+function UserForm() {
   return (
-    <Header
-      title="User"
-      subtitle="Change or specify user specific information."
-    ></Header>
+    <div></div>
   );
 }
 
-function License() {
+function LicenseForm() {
   return (
-    <Header
-      title="License"
-      subtitle="Lookup your license key or activate AstroLog."
-    ></Header>
+    <div></div>
   );
 }
