@@ -3,10 +3,6 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from 'next-themes';
 import { TopBar } from '@/components/topBar';
-import styles from './layout.module.scss';
-import Log from './log/log';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Analytics } from './analytics/analytics';
 
 const inter = Inter({ subsets: ['latin'] });
 
