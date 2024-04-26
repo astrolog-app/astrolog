@@ -76,7 +76,13 @@ interface ContentProps {
   children?: React.ReactNode;
 }
 
-function Content({ onClose, title, subtitle, buttonMessage, children }: ContentProps) {
+function Content({
+  onClose,
+  title,
+  subtitle,
+  buttonMessage,
+  children,
+}: ContentProps) {
   return (
     <div className={styles.content}>
       <div className={styles.header}>
@@ -93,25 +99,17 @@ function Content({ onClose, title, subtitle, buttonMessage, children }: ContentP
 }
 
 function AppearanceForm() {
-  return (
-    <div></div>
-  );
+  return <div></div>;
 }
 
 function StorageForm() {
-  return (
-    <div></div>
-  );
+  return <div></div>;
 }
 
 function UserForm() {
-  return (
-    <div></div>
-  );
+  return <div></div>;
 }
 
 function LicenseForm() {
-  return (
-    <div></div>
-  );
+  return <div></div>;
 }
