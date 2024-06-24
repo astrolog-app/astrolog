@@ -1,6 +1,7 @@
 .preferences {
   display: flex;
   width: 57.5vw;
+  min-width: 40rem;
   height: 65vh;
 
   .tabsList {
@@ -46,7 +47,8 @@
 
     .separator {
       margin-top: 1.25rem;
-      width: 70%;
+      width: 100%;
+      max-width: 55rem;
     }
   }
 
@@ -57,5 +59,22 @@
 
   .footer {
     margin-top: auto;
+  }
+}
+
+@media only screen and (max-width: 1200px) {
+  .preferences {
+    flex-direction: column;
+
+    .tabsList {
+      flex-direction: row;
+      width: fit-content;
+      margin-bottom: 0.5rem;
+
+      button {
+        width: fit-content;
+        margin-bottom: 0rem;
+      }
+    }
   }
 }
