@@ -1,10 +1,67 @@
 use uuid::Uuid;
 
-struct ImagingFrameList {
+pub struct ImagingFrameList {
     light_frames: Vec<LightFrame>,
     dark_frames: Vec<DarkFrame>,
     bias_frames: Vec<BiasFrame>,
     flat_frames: Vec<FlatFrame>
+}
+
+// TODO: delete
+impl ImagingFrameList {
+    pub fn new() -> Self {
+        let light_frame = LightFrame {
+            id: Uuid::new_v4(),
+            camera_id: Uuid::new_v4(),
+            total_subs: 50,
+            gain: 120,
+            date: "2024-06-01".to_string(),
+            target: "Andromeda Galaxy".to_string(),
+            integrated_subs: 50,
+            filter_id: Uuid::new_v4(),
+            offset: 10,
+            camera_temp: -10,
+            outside_temp: 15,
+            average_seeing: 3,
+            average_cloud_cover: 20,
+            average_moon: 30,
+            telescope_id: Uuid::new_v4(),
+            flattener_id: Uuid::new_v4(),
+            mount_id: Uuid::new_v4(),
+            notes: "Clear sky with minimal disturbance".to_string(),
+            sub_length: 300,
+        };
+
+        let dark_frame = DarkFrame {
+            id: Uuid::new_v4(),
+            camera_id: Uuid::new_v4(),
+            total_subs: 20,
+            gain: 120,
+            camera_temp: -10,
+            sub_length: 300,
+        };
+
+        let bias_frame = BiasFrame {
+            id: Uuid::new_v4(),
+            camera_id: Uuid::new_v4(),
+            total_subs: 100,
+            gain: 120,
+        };
+
+        let flat_frame = FlatFrame {
+            id: Uuid::new_v4(),
+            camera_id: Uuid::new_v4(),
+            total_subs: 30,
+            gain: 120,
+        };
+
+        ImagingFrameList {
+            light_frames: vec![light_frame],
+            dark_frames: vec![dark_frame],
+            bias_frames: vec![bias_frame],
+            flat_frames: vec![flat_frame],
+        }
+    }
 }
 
 trait ImagingFrame {

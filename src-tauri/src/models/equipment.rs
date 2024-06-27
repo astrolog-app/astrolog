@@ -1,11 +1,61 @@
 use uuid::Uuid;
 
-struct EquipmentList {
+pub struct EquipmentList {
     telescopes: Vec<Telescope>,
     cameras: Vec<Camera>,
     mounts: Vec<Mount>,
     filters: Vec<Filter>,
     flatteners: Vec<Flattener>,
+}
+
+// TODO: delete
+impl EquipmentList {
+    pub fn new() -> Self {
+        let telescope = Telescope {
+            id: Uuid::new_v4(),
+            brand: "Celestron".to_string(),
+            name: "NexStar 8SE".to_string(),
+            focal_length: 2032,
+            aperture: 203,
+        };
+
+        let camera = Camera {
+            id: Uuid::new_v4(),
+            brand: "Canon".to_string(),
+            name: "EOS Rebel T7i".to_string(),
+            chip_size: "22.3mm x 14.9mm".to_string(),
+            mega_pixel: 24,
+            rgb: true,
+        };
+
+        let mount = Mount {
+            id: Uuid::new_v4(),
+            brand: "Orion".to_string(),
+            name: "SkyView Pro".to_string(),
+        };
+
+        let filter = Filter {
+            id: Uuid::new_v4(),
+            brand: "Baader".to_string(),
+            name: "UV/IR Cut Filter".to_string(),
+            filter_type: "UV/IR Cut".to_string(),
+        };
+
+        let flattener = Flattener {
+            id: Uuid::new_v4(),
+            brand: "Astro-Tech".to_string(),
+            name: "Field Flattener".to_string(),
+            factor: 1,
+        };
+
+        EquipmentList {
+            telescopes: vec![telescope],
+            cameras: vec![camera],
+            mounts: vec![mount],
+            filters: vec![filter],
+            flatteners: vec![flattener],
+        }
+    }
 }
 
 trait EquipmentItem {
