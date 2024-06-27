@@ -1,3 +1,5 @@
+'use client'
+
 import {
   Card,
   CardContent,
@@ -9,29 +11,24 @@ import { Tab } from '@/components/ui/custom/tab';
 import styles from './log.module.scss';
 import { SessionTable } from '@/components/sessionTable/sessionTable';
 import { columns } from '@/components/sessionTable/columns';
+import { useEffect, useState } from 'react';
+import { invoke } from '@tauri-apps/api/tauri'
 
 export default function Log() {
-  const data = [
-    {
-      date: '22.22.2222',
-      target: 'NGC 7655',
-      sub_length: 300,
-      total_subs: 20,
-      integrated_subs: 15,
-      filter: 'string',
-      gain: 800,
-      offset: 0,
-      camera_temp: 15,
-      outside_temp: 7,
-      average_seeing: 0.43,
-      average_cloud_cover: 0.12,
-      telescope: 'string',
-      flattener: 'string',
-      mount: 'string',
-      camera: 'string',
-      notes: 'string',
-    },
-  ];
+  const [data, setData] : any = useState([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const responseData = await invoke('get_log_data');
+        setData(responseData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    }
+
+    fetchData();
+  }, []);
 
   return (
     <Tab className={styles.page}>
