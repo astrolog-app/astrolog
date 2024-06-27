@@ -1,8 +1,8 @@
 [ {
   "id" : "044b7c65-f1c3-4634-95f3-b7b4af0a803b",
-  "folder_dir" : null,
-  "light_frameId" : "b7d68b1d-03b5-44bc-9c6c-712eb7f58400",
-  "flat_frameId" : null,
-  "dark_frameId" : null,
-  "bias_frameId" : null
+  "folder_dir" : "",
+  "light_frame_id" : "b7d68b1d-03b5-44bc-9c6c-712eb7f58400",
+  "flat_frame_id" : "3a67f76e-2cda-4363-be16-e73774283eaf",
+  "dark_frame_id" : "1690c5d1-db74-4cb4-8c3e-84e8cefec2cc",
+  "bias_frame_id" : "c0c1cd39-b585-4609-af26-2978c8ca5a73"
 } ]

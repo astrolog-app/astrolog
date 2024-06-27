@@ -42,7 +42,7 @@
     "used" : true,
     "brand" : "Optolong",
     "name" : "l-eNhance",
-    "filterType" : "Dual Band"
+    "filter_type" : "Dual Band"
   } ],
   "flatteners" : [ {
     "id" : "96f961e1-4fca-41b6-9990-2f7190bbb1d9",

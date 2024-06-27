@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod models;
+mod file_stores;
 mod state;
 
 use models::log::LogTableRow;
