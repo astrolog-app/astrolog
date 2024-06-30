@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use crate::state;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ImagingFrameList {
@@ -27,28 +28,28 @@ trait ImagingFrame {
     fn gain(&self) -> &i32;
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-struct LightFrame {
-    id: Uuid,
-    camera_id: Uuid,
-    total_subs: i32,
-    gain: i32,
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct LightFrame {
+    pub id: Uuid,
+    pub camera_id: Uuid,
+    pub total_subs: i32,
+    pub gain: i32,
 
-    date: String,
-    target: String,
-    integrated_subs: i32,
-    filter_id: Uuid,
-    offset: i32,
-    camera_temp: f64,
-    outside_temp: f64,
-    average_seeing: f64,
-    average_cloud_cover: f64,
-    average_moon: f64,
-    telescope_id: Uuid,
-    flattener_id: Uuid,
-    mount_id: Uuid,
-    notes: String,
-    sub_length: f64
+    pub date: String,
+    pub target: String,
+    pub integrated_subs: i32,
+    pub filter_id: Uuid,
+    pub offset: i32,
+    pub camera_temp: f64,
+    pub outside_temp: f64,
+    pub average_seeing: f64,
+    pub average_cloud_cover: f64,
+    pub average_moon: f64,
+    pub telescope_id: Uuid,
+    pub flattener_id: Uuid,
+    pub mount_id: Uuid,
+    pub notes: String,
+    pub sub_length: f64
 }
 
 impl ImagingFrame for LightFrame {
@@ -67,6 +68,16 @@ impl ImagingFrame for LightFrame {
     fn gain(&self) -> &i32 {
         &self.gain
     }
+}
+
+pub fn get_light_frame(id: &Uuid) -> LightFrame {
+    let app_state = state::get_readonly_app_state();
+    let light_frame_list = &app_state.imaging_frame_list.light_frames;
+
+    light_frame_list.iter()
+        .find(|&light_frame| &light_frame.id == id)
+        .cloned()
+        .expect("LightFrame not found")
 }
 
 #[derive(Debug, Serialize, Deserialize)]

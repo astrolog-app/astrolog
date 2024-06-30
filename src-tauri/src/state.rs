@@ -1,4 +1,4 @@
-use std::sync::Mutex;
+use std::sync::{Mutex, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use once_cell::sync::Lazy;
 use crate::models::equipment::EquipmentList;
 use crate::models::imaging_frames::ImagingFrameList;
@@ -8,9 +8,9 @@ use crate::file_stores::imaging_frames_store;
 use crate::file_stores::imaging_sessions_store;
 
 pub struct AppState {
-    equipment_list: EquipmentList,
-    imaging_frame_list: ImagingFrameList,
-    imaging_session_list: Vec<ImagingSession>
+    pub equipment_list: EquipmentList,
+    pub imaging_frame_list: ImagingFrameList,
+    pub imaging_session_list: Vec<ImagingSession>
 }
 
 impl AppState {
@@ -54,10 +54,16 @@ impl AppState {
     }
 }
 
-static APP_STATE: Lazy<Mutex<AppState>> = Lazy::new(|| {
-    Mutex::new(AppState::new())
+static APP_STATE: Lazy<RwLock<AppState>> = Lazy::new(|| {
+    RwLock::new(AppState::new())
 });
 
-pub fn get_app_state() -> &'static Mutex<AppState> {
-    &APP_STATE
+// Function to get a mutable reference to the AppState using RwLock
+pub fn get_app_state() -> RwLockWriteGuard<'static, AppState> {
+    APP_STATE.write().unwrap()
+}
+
+// Function to get a read-only reference to the AppState using RwLock
+pub fn get_readonly_app_state() -> RwLockReadGuard<'static, AppState> {
+    APP_STATE.read().unwrap()
 }

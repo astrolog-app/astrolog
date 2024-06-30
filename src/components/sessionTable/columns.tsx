@@ -72,6 +72,10 @@ export const columns: ColumnDef<Session>[] = [
     header: 'Average Cloud Cover',
   },
   {
+    accessorKey: 'average_moon',
+    header: 'Average Moon',
+  },
+  {
     accessorKey: 'telescope',
     header: 'Telescope',
   },

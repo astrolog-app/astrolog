@@ -9,14 +9,18 @@ use models::log::LogTableRow;
 
 #[tauri::command]
 fn get_log_data() -> Vec<LogTableRow> {
-  let log_entries = LogTableRow::new_table_data();
+  let app_state = state::get_readonly_app_state();
+  let imaging_session_list = &app_state.imaging_session_list;
+  let mut data: Vec<LogTableRow> = vec![];
 
-  log_entries.into()
+  for imaging_session in imaging_session_list {
+    data.push(LogTableRow::new(imaging_session));
+  }
+
+  data
 }
 
 fn main() {
-  state::get_app_state(); // This initializes APP_STATE
-
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![get_log_data])
     .run(tauri::generate_context!())
