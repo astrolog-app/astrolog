@@ -43,6 +43,18 @@ export function TopBar() {
           </MenubarContent>
         </MenubarMenu>
         <MenubarMenu>
+          <MenubarTrigger>Calibration</MenubarTrigger>
+          <MenubarContent>
+            <MenubarSub>
+              <MenubarSubTrigger>Create New</MenubarSubTrigger>
+              <MenubarSubContent>
+                <MenubarItem>Dark Frame</MenubarItem>
+                <MenubarItem>Bias Frame</MenubarItem>
+              </MenubarSubContent>
+            </MenubarSub>
+          </MenubarContent>
+        </MenubarMenu>
+        <MenubarMenu>
           <MenubarTrigger>Equipment</MenubarTrigger>
           <MenubarContent>
             <MenubarSub>
@@ -53,18 +65,6 @@ export function TopBar() {
                 <MenubarItem>Mount</MenubarItem>
                 <MenubarItem>Filter</MenubarItem>
                 <MenubarItem>Flattener</MenubarItem>
-              </MenubarSubContent>
-            </MenubarSub>
-          </MenubarContent>
-        </MenubarMenu>
-        <MenubarMenu>
-          <MenubarTrigger>Calibration</MenubarTrigger>
-          <MenubarContent>
-            <MenubarSub>
-              <MenubarSubTrigger>Create New</MenubarSubTrigger>
-              <MenubarSubContent>
-                <MenubarItem>Dark Frame</MenubarItem>
-                <MenubarItem>Bias Frame</MenubarItem>
               </MenubarSubContent>
             </MenubarSub>
           </MenubarContent>

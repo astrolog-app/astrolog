@@ -34,8 +34,8 @@ export default function Log() {
     <Tab className={styles.page}>
       <Card>
         <CardHeader>
-          <CardTitle>Card Title</CardTitle>
-          <CardDescription>Card Description</CardDescription>
+          <CardTitle>Astrophotography Log</CardTitle>
+          <CardDescription>Add imaging sessions and view your astrophotography log.</CardDescription>
         </CardHeader>
         <CardContent>
           <p>Card Content</p>
