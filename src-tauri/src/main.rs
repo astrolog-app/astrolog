@@ -6,6 +6,7 @@ mod file_stores;
 mod state;
 
 use models::log::LogTableRow;
+use crate::models::configuration::Configuration;
 
 #[tauri::command]
 fn get_log_data() -> Vec<LogTableRow> {
@@ -20,9 +21,16 @@ fn get_log_data() -> Vec<LogTableRow> {
   data
 }
 
+#[tauri::command]
+fn get_configuration() -> String {
+  let app_state = state::get_readonly_app_state();
+  serde_json::to_string(&app_state.configuration.clone()).unwrap()
+}
+
+
 fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![get_log_data])
+    .invoke_handler(tauri::generate_handler![get_log_data, get_configuration])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }

@@ -1,14 +1,45 @@
+import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { Modal } from '../ui/custom/modal';
+import { Form } from '../ui/form';
+import { Input } from '../ui/input';
 import { Separator } from '../ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import styles from './preferences.module.scss';
+import { invoke } from '@tauri-apps/api/tauri';
 
 interface PreferencesProps {
   onClose: () => void;
 }
 
+interface Preferences {
+  license: License;
+}
+
+interface License {
+  activated: boolean;
+  user_email: string;
+  license_key: string;
+}
+
 export function Preferences({ onClose }: PreferencesProps) {
+  const [preferences, setPreferences] = useState<Preferences | undefined>(undefined);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const responseData = await invoke<string>('get_configuration');
+        console.log(responseData)
+        setPreferences(JSON.parse(responseData));
+        console.log(preferences?.license.user_email)
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    }
+
+    fetchData();
+  }, []);
+
   return (
     <Modal
       title="Preferences"
@@ -60,7 +91,7 @@ export function Preferences({ onClose }: PreferencesProps) {
             subtitle="Lookup your license key or activate AstroLog."
             buttonMessage="Update license"
           >
-            <LicenseForm />
+            <LicenseForm license={preferences?.license} />
           </Content>
         </TabsContent>
       </Tabs>
@@ -110,6 +141,19 @@ function UserForm() {
   return <div></div>;
 }
 
-function LicenseForm() {
-  return <div></div>;
+function LicenseForm( { license } : { license : License | undefined }) {
+  return (
+    <form>
+      <div className={styles.paragraph}>
+        <div className={styles.paragraphHeader}>Email</div>
+        <Input className={styles.input} value={license?.user_email} disabled />
+        <div className={styles.paragraphFooter}>The email you purchased AstroLog with.</div>
+      </div>
+      <div className={styles.paragraph}>
+        <div className={styles.paragraphHeader}>License Key</div>
+        <Input className={styles.input} value={license?.license_key} disabled />
+        <div className={styles.paragraphFooter}>Your license key for AstroLog</div>
+      </div>
+    </form>
+  );
 }

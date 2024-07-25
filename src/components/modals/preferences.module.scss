@@ -7,7 +7,6 @@
   .tabsList {
     flex-direction: column;
     height: fit-content;
-    margin-right: 1rem;
 
     button {
       width: 10rem;
@@ -22,6 +21,7 @@
   }
 
   .tabsContent {
+    padding-left: 1rem;
     flex-grow: 1;
   }
 }
@@ -59,6 +59,29 @@
 
   .footer {
     margin-top: auto;
+  }
+}
+
+.paragraph {
+  margin-bottom: 2rem;
+
+  &:last-of-type {
+    margin-bottom: 0rem;
+  }
+
+  .paragraphHeader {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .paragraphFooter {
+    font-size: small;
+    margin-top: 0.5rem;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .input {
+    z-index: 100;
   }
 }
 
