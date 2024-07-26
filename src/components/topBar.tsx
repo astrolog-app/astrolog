@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import styles from './topBar.module.scss';
-import { ThemeToggle } from './ui/custom/themeToggle';
 import {
   Menubar,
   MenubarContent,
@@ -78,7 +77,6 @@ export function TopBar() {
           </MenubarContent>
         </MenubarMenu>
       </Menubar>
-      <ThemeToggle></ThemeToggle>
       {isPreferencesOpen && <Preferences onClose={togglePreferencesModal} />}
     </div>
   );

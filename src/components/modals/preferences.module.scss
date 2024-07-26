@@ -30,6 +30,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  max-width: 55rem;
 
   .header {
     margin-bottom: 1.25rem;
@@ -48,40 +49,45 @@
     .separator {
       margin-top: 1.25rem;
       width: 100%;
-      max-width: 55rem;
     }
   }
 
   .children {
     overflow: auto;
-    margin-bottom: 1rem;
-  }
-
-  .footer {
-    margin-top: auto;
+    flex-grow: 1;
   }
 }
 
-.paragraph {
-  margin-bottom: 2rem;
+.form {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-content: space-between;
 
-  &:last-of-type {
-    margin-bottom: 0rem;
+  .paragraph {
+    margin-bottom: 2rem;
+  
+    &:last-of-type {
+      margin-bottom: 0rem;
+    }
+  
+    .paragraphHeader {
+      font-weight: 600;
+    }
+  
+    .paragraphFooter {
+      font-size: small;
+      color: hsl(var(--muted-foreground));
+    }
+  
+    & > *:not(:last-child) {
+      margin-bottom: 0.5rem; 
+    } 
   }
-
-  .paragraphHeader {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-
-  .paragraphFooter {
-    font-size: small;
-    margin-top: 0.5rem;
-    color: hsl(var(--muted-foreground));
-  }
-
-  .input {
-    z-index: 100;
+  
+  .updateButton {
+    margin-top: auto;
+    width: fit-content;
   }
 }
 

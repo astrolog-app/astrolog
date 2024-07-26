@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Button } from '../ui/button';
 import { Modal } from '../ui/custom/modal';
-import { Form } from '../ui/form';
 import { Input } from '../ui/input';
 import { Separator } from '../ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import styles from './preferences.module.scss';
 import { invoke } from '@tauri-apps/api/tauri';
+import { ThemeToggle } from '../ui/custom/themeToggle';
+import { Button } from '../ui/button';
 
 interface PreferencesProps {
   onClose: () => void;
@@ -29,9 +29,7 @@ export function Preferences({ onClose }: PreferencesProps) {
     async function fetchData() {
       try {
         const responseData = await invoke<string>('get_configuration');
-        console.log(responseData)
         setPreferences(JSON.parse(responseData));
-        console.log(preferences?.license.user_email)
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -56,40 +54,32 @@ export function Preferences({ onClose }: PreferencesProps) {
         </TabsList>
         <TabsContent value="appearance" className={styles.tabsContent}>
           <Content
-            onClose={onClose}
             title="Appearance"
-            subtitle="Customize the loook and feel of AstroLog."
-            buttonMessage="Update appearance"
+            subtitle="Customize the look and feel of AstroLog."
           >
             <AppearanceForm />
           </Content>
         </TabsContent>
         <TabsContent value="storage" className={styles.tabsContent}>
           <Content
-            onClose={onClose}
             title="Storage"
             subtitle="Manage the way AstroLog saves and loads your data."
-            buttonMessage="Update storage"
           >
-            <StorageForm />
+            <StorageForm onClose={onClose} />
           </Content>
         </TabsContent>
         <TabsContent value="user" className={styles.tabsContent}>
           <Content
-            onClose={onClose}
             title="User"
             subtitle="Change or specify user specific information."
-            buttonMessage="Update user"
           >
-            <UserForm />
+            <UserForm onClose={onClose} />
           </Content>
         </TabsContent>
         <TabsContent value="license" className={styles.tabsContent}>
           <Content
-            onClose={onClose}
             title="License"
             subtitle="Lookup your license key or activate AstroLog."
-            buttonMessage="Update license"
           >
             <LicenseForm license={preferences?.license} />
           </Content>
@@ -100,18 +90,14 @@ export function Preferences({ onClose }: PreferencesProps) {
 }
 
 interface ContentProps {
-  onClose: () => void;
   title: string;
   subtitle: string;
-  buttonMessage: string;
   children?: React.ReactNode;
 }
 
 function Content({
-  onClose,
   title,
   subtitle,
-  buttonMessage,
   children,
 }: ContentProps) {
   return (
@@ -122,28 +108,51 @@ function Content({
         <Separator className={styles.separator} />
       </div>
       <div className={styles.children}>{children}</div>
-      <div className={styles.footer}>
-        <Button onClick={onClose}>{buttonMessage}</Button>
-      </div>
     </div>
   );
 }
 
 function AppearanceForm() {
-  return <div></div>;
-}
-
-function StorageForm() {
-  return <div></div>;
-}
-
-function UserForm() {
-  return <div></div>;
-}
-
-function LicenseForm( { license } : { license : License | undefined }) {
   return (
-    <form>
+    <form className={styles.form}>
+      <div className={styles.paragraph}>
+        <div className={styles.paragraphHeader}>Theme</div>
+        <div className={styles.paragraphFooter}>Select the theme for AstroLog.</div>
+        <ThemeToggle />
+      </div>
+    </form>
+  );
+}
+
+function StorageForm({ onClose }: { onClose: () => void }) {
+  return (
+    <form className={styles.form}>
+      <div className={styles.paragraph}>
+        <div className={styles.paragraphHeader}>Root Directory</div>
+        <Input className={styles.input} value="" />
+        <div className={styles.paragraphFooter}>The directory in your filesystem where all of your astrophotos are stored.</div>
+      </div>
+      <Button className={styles.updateButton} onClick={onClose}>Update storage</Button>
+    </form>
+  );
+}
+
+function UserForm({ onClose }: { onClose: () => void }) {
+  return (
+    <form className={styles.form}>
+      <div className={styles.paragraph}>
+        <div className={styles.paragraphHeader}>Weather API Key</div>
+        <Input className={styles.input} value="" />
+        <div className={styles.paragraphFooter}>The API key from OpenWeather.</div>
+      </div>
+      <Button className={styles.updateButton} onClick={onClose}>Update user</Button>
+    </form>
+  );
+}
+
+function LicenseForm({ license }: { license: License | undefined }) {
+  return (
+    <form className={styles.form}>
       <div className={styles.paragraph}>
         <div className={styles.paragraphHeader}>Email</div>
         <Input className={styles.input} value={license?.user_email} disabled />
@@ -152,7 +161,7 @@ function LicenseForm( { license } : { license : License | undefined }) {
       <div className={styles.paragraph}>
         <div className={styles.paragraphHeader}>License Key</div>
         <Input className={styles.input} value={license?.license_key} disabled />
-        <div className={styles.paragraphFooter}>Your license key for AstroLog</div>
+        <div className={styles.paragraphFooter}>Your license key for AstroLog.</div>
       </div>
     </form>
   );
