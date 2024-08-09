@@ -11,24 +11,10 @@ import { Tab } from '@/components/ui/custom/tab';
 import styles from './log.module.scss';
 import { SessionTable } from '@/components/sessionTable/sessionTable';
 import { columns } from '@/components/sessionTable/columns';
-import { useEffect, useState } from 'react';
-import { invoke } from '@tauri-apps/api/tauri'
+import { useAppState } from '@/context/stateProvider';
 
 export default function Log() {
-  const [data, setData] : any = useState([]);
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const responseData = await invoke('get_log_data');
-        setData(responseData);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    }
-
-    fetchData();
-  }, []);
+  const { log_data } = useAppState();
 
   return (
     <Tab className={styles.page}>
@@ -42,7 +28,7 @@ export default function Log() {
         </CardContent>
       </Card>
       <div className={styles.content}>
-        <SessionTable columns={columns} data={data} />
+        <SessionTable columns={columns} data={log_data} />
         <Card className={styles.imagePreviewCard}>
           <CardHeader>
             <CardTitle>Image Preview</CardTitle>

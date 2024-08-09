@@ -1,42 +1,19 @@
-import { useEffect, useState } from 'react';
 import { Modal } from '../ui/custom/modal';
 import { Input } from '../ui/input';
 import { Separator } from '../ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import styles from './preferences.module.scss';
-import { invoke } from '@tauri-apps/api/tauri';
 import { ThemeToggle } from '../ui/custom/themeToggle';
 import { Button } from '../ui/button';
+import { License, useAppState } from '@/context/stateProvider';
+
 
 interface PreferencesProps {
   onClose: () => void;
 }
 
-interface Preferences {
-  license: License;
-}
-
-interface License {
-  activated: boolean;
-  user_email: string;
-  license_key: string;
-}
-
 export function Preferences({ onClose }: PreferencesProps) {
-  const [preferences, setPreferences] = useState<Preferences | undefined>(undefined);
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const responseData = await invoke<string>('get_configuration');
-        setPreferences(JSON.parse(responseData));
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    }
-
-    fetchData();
-  }, []);
+  const { preferences } = useAppState();
 
   return (
     <Modal

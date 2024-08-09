@@ -1,26 +1,7 @@
 'use client';
 
+import { Session } from '@/context/stateProvider';
 import { ColumnDef } from '@tanstack/react-table';
-
-export type Session = {
-  date: string;
-  target: string;
-  sub_length: number;
-  total_subs: number;
-  integrated_subs: number;
-  filter: string;
-  gain: number;
-  offset: number;
-  camera_temp: number;
-  outside_temp: number;
-  average_seeing: number;
-  average_cloud_cover: number;
-  telescope: string;
-  flattener: string;
-  mount: string;
-  camera: string;
-  notes: string;
-};
 
 export const columns: ColumnDef<Session>[] = [
   {
