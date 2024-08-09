@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import {
   Card,
@@ -21,7 +21,9 @@ export default function Log() {
       <Card>
         <CardHeader>
           <CardTitle>Astrophotography Log</CardTitle>
-          <CardDescription>Add imaging sessions and view your astrophotography log.</CardDescription>
+          <CardDescription>
+            Add imaging sessions and view your astrophotography log.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <p>Card Content</p>

@@ -1,67 +1,67 @@
 .component {
-    display: flex;
+  display: flex;
 
-    .selectableWrapper {
-        &:first-of-type {
-            margin-right: 1rem;
-        }
-
-        .selectable {
-            width: 12.5rem;
-            border: 0.1rem solid hsl(var(--secondary));
-            border-radius: var(--radius);
-            padding: 0.25rem;
-            cursor: pointer;
-
-            .skeletons {
-                border-radius: var(--radius);
-                padding: 0.5rem;
-
-                .topSkeleton {
-                    height: 5rem;
-                    border-radius: var(--radius);
-                }
-
-                .middleSkeleton {
-                    height: 1rem;
-                    margin-top: 0.25rem;
-                    border-radius: var(--radius);
-                }
-
-                .bottomSkeleton {
-                    height: 1rem;
-                    width: 80%;
-                    margin-top: 0.25rem;
-                    border-radius: var(--radius);
-                }
-            }
-        }
-
-        .isSelected {
-            border-color: hsl(var(--primary));
-        }
-
-        .selectableSubtitle {
-            text-align: center;
-            margin-top: 0.25rem;
-            font-size: smaller;
-            font-weight: 600;
-        }
+  .selectableWrapper {
+    &:first-of-type {
+      margin-right: 1rem;
     }
+
+    .selectable {
+      width: 12.5rem;
+      border: 0.1rem solid hsl(var(--secondary));
+      border-radius: var(--radius);
+      padding: 0.25rem;
+      cursor: pointer;
+
+      .skeletons {
+        border-radius: var(--radius);
+        padding: 0.5rem;
+
+        .topSkeleton {
+          height: 5rem;
+          border-radius: var(--radius);
+        }
+
+        .middleSkeleton {
+          height: 1rem;
+          margin-top: 0.25rem;
+          border-radius: var(--radius);
+        }
+
+        .bottomSkeleton {
+          height: 1rem;
+          width: 80%;
+          margin-top: 0.25rem;
+          border-radius: var(--radius);
+        }
+      }
+    }
+
+    .isSelected {
+      border-color: hsl(var(--primary));
+    }
+
+    .selectableSubtitle {
+      text-align: center;
+      margin-top: 0.25rem;
+      font-size: smaller;
+      font-weight: 600;
+    }
+  }
 }
 
 .light {
-    background-color: hsl(0 0% 100%);
+  background-color: hsl(0 0% 100%);
 
-    div {
-        background-color: hsl(240 4.8% 90%);
-    }
+  div {
+    background-color: hsl(240 4.8% 90%);
+  }
 }
 
 .dark {
-    background-color: hsl(20 14.3% 4.1%);
+  background-color: hsl(20 14.3% 4.1%);
 
-    div {
-        background-color: hsl(0 0% 25%);
-    }
+  div {
+    background-color: hsl(0 0% 25%);
+  }
 }

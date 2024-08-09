@@ -7,7 +7,6 @@ import { ThemeToggle } from '../ui/custom/themeToggle';
 import { Button } from '../ui/button';
 import { License, useAppState } from '@/context/stateProvider';
 
-
 interface PreferencesProps {
   onClose: () => void;
 }
@@ -72,11 +71,7 @@ interface ContentProps {
   children?: React.ReactNode;
 }
 
-function Content({
-  title,
-  subtitle,
-  children,
-}: ContentProps) {
+function Content({ title, subtitle, children }: ContentProps) {
   return (
     <div className={styles.content}>
       <div className={styles.header}>
@@ -94,7 +89,9 @@ function AppearanceForm() {
     <form className={styles.form}>
       <div className={styles.paragraph}>
         <div className={styles.paragraphHeader}>Theme</div>
-        <div className={styles.paragraphFooter}>Select the theme for AstroLog.</div>
+        <div className={styles.paragraphFooter}>
+          Select the theme for AstroLog.
+        </div>
         <ThemeToggle />
       </div>
     </form>
@@ -107,9 +104,14 @@ function StorageForm({ onClose }: { onClose: () => void }) {
       <div className={styles.paragraph}>
         <div className={styles.paragraphHeader}>Root Directory</div>
         <Input className={styles.input} value="" />
-        <div className={styles.paragraphFooter}>The directory in your filesystem where all of your astrophotos are stored.</div>
+        <div className={styles.paragraphFooter}>
+          The directory in your filesystem where all of your astrophotos are
+          stored.
+        </div>
       </div>
-      <Button className={styles.updateButton} onClick={onClose}>Update storage</Button>
+      <Button className={styles.updateButton} onClick={onClose}>
+        Update storage
+      </Button>
     </form>
   );
 }
@@ -120,9 +122,13 @@ function UserForm({ onClose }: { onClose: () => void }) {
       <div className={styles.paragraph}>
         <div className={styles.paragraphHeader}>Weather API Key</div>
         <Input className={styles.input} value="" />
-        <div className={styles.paragraphFooter}>The API key from OpenWeather.</div>
+        <div className={styles.paragraphFooter}>
+          The API key from OpenWeather.
+        </div>
       </div>
-      <Button className={styles.updateButton} onClick={onClose}>Update user</Button>
+      <Button className={styles.updateButton} onClick={onClose}>
+        Update user
+      </Button>
     </form>
   );
 }
@@ -133,12 +139,16 @@ function LicenseForm({ license }: { license: License | undefined }) {
       <div className={styles.paragraph}>
         <div className={styles.paragraphHeader}>Email</div>
         <Input className={styles.input} value={license?.user_email} disabled />
-        <div className={styles.paragraphFooter}>The email you purchased AstroLog with.</div>
+        <div className={styles.paragraphFooter}>
+          The email you purchased AstroLog with.
+        </div>
       </div>
       <div className={styles.paragraph}>
         <div className={styles.paragraphHeader}>License Key</div>
         <Input className={styles.input} value={license?.license_key} disabled />
-        <div className={styles.paragraphFooter}>Your license key for AstroLog.</div>
+        <div className={styles.paragraphFooter}>
+          Your license key for AstroLog.
+        </div>
       </div>
     </form>
   );

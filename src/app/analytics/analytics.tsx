@@ -15,7 +15,9 @@ export function Analytics() {
       <Card className={styles.card}>
         <CardHeader>
           <CardTitle>Analytics</CardTitle>
-          <CardDescription>View the analytics of your imaging sessions.</CardDescription>
+          <CardDescription>
+            View the analytics of your imaging sessions.
+          </CardDescription>
         </CardHeader>
       </Card>
       <Card>

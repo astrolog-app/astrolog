@@ -66,25 +66,25 @@
 
   .paragraph {
     margin-bottom: 2rem;
-  
+
     &:last-of-type {
       margin-bottom: 0rem;
     }
-  
+
     .paragraphHeader {
       font-weight: 600;
     }
-  
+
     .paragraphFooter {
       font-size: small;
       color: hsl(var(--muted-foreground));
     }
-  
+
     & > *:not(:last-child) {
-      margin-bottom: 0.5rem; 
-    } 
+      margin-bottom: 0.5rem;
+    }
   }
-  
+
   .updateButton {
     margin-top: auto;
     width: fit-content;

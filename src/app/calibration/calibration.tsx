@@ -14,7 +14,9 @@ export default function Calibration() {
       <Card className={styles.card}>
         <CardHeader>
           <CardTitle>Calibration</CardTitle>
-          <CardDescription>Manage the calibration frames for your astrophotos.</CardDescription>
+          <CardDescription>
+            Manage the calibration frames for your astrophotos.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <p>Card Content</p>
