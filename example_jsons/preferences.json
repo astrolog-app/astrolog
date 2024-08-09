@@ -1,4 +1,10 @@
 {
+  "storage": {
+    "root_directory": ""
+  },
+  "user": {
+    "weather_api_key": ""
+  },
   "license": {
     "activated": true,
     "user_email": "xxx.xxx@xxx.xxx",

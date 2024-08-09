@@ -3,14 +3,14 @@ use once_cell::sync::Lazy;
 use crate::models::equipment::EquipmentList;
 use crate::models::imaging_frames::ImagingFrameList;
 use crate::models::imaging_session::ImagingSession;
-use crate::file_stores::configuration_store;
+use crate::file_stores::preferences_store;
 use crate::file_stores::equipment_store;
 use crate::file_stores::imaging_frames_store;
 use crate::file_stores::imaging_sessions_store;
-use crate::models::configuration::Configuration;
+use crate::models::preferences::Preferences;
 
 pub struct AppState {
-    pub configuration: Configuration,
+    pub preferences: Preferences,
     pub equipment_list: EquipmentList,
     pub imaging_frame_list: ImagingFrameList,
     pub imaging_session_list: Vec<ImagingSession>
@@ -18,14 +18,14 @@ pub struct AppState {
 
 impl AppState {
     fn new() -> Self {
-        let mut configuration = Configuration::new();
+        let mut preferences = Preferences::new();
         let mut equipment_list = EquipmentList::new();
         let mut imaging_frame_list = ImagingFrameList::new();
         let mut imaging_session_list = vec![];
 
-        match configuration_store::load("C:/Users/rouve/Documents/Programming/astrolog/example_jsons/configuration.json") {
+        match preferences_store::load("C:/Users/rouve/Documents/Programming/astrolog/example_jsons/preferences.json") {
             Ok(data) => {
-                configuration = data;
+                preferences = data;
             },
             Err(err) => {
                 eprintln!("Error loading {}: {}", "", err);
@@ -60,7 +60,7 @@ impl AppState {
         }
 
         AppState {
-            configuration,
+            preferences,
             equipment_list,
             imaging_frame_list,
             imaging_session_list

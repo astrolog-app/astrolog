@@ -7,18 +7,18 @@ mod state;
 
 use serde::{Deserialize, Serialize};
 use models::log::LogTableRow;
-use crate::models::configuration::Configuration;
+use crate::models::preferences::Preferences;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct FrontendData {
-  preferences: Configuration,
+  preferences: Preferences,
   log_data: Vec<LogTableRow>
 }
 
 #[tauri::command]
 fn get_frontend_data() -> String {
   let app_state = state::get_readonly_app_state();
-  let preferences = app_state.configuration.clone();
+  let preferences = app_state.preferences.clone();
   let imaging_session_list = &app_state.imaging_session_list;
   let mut log_data: Vec<LogTableRow> = vec![];
 

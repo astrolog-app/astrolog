@@ -15,7 +15,17 @@ interface AppState {
 }
 
 export interface Preferences {
+  storage: Storage;
+  user: User;
   license: License;
+}
+
+export interface Storage {
+  root_directory: string;
+}
+
+export interface User {
+  weather_api_key: string;
 }
 
 export interface License {
@@ -46,6 +56,12 @@ export interface Session {
 
 const defaultAppState: AppState = {
   preferences: {
+    storage: {
+      root_directory: ""
+    },
+    user : {
+      weather_api_key: ""
+    },
     license: {
       activated: false,
       user_email: '',
@@ -67,6 +83,7 @@ export default function StateProvider({ children }: { children: ReactNode }) {
         const responseData: AppState = JSON.parse(responseString);
 
         setAppState(responseData);
+        console.log(responseData)
       } catch (error) {
         console.error('Error fetching or parsing data:', error);
       }

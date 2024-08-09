@@ -1,9 +1,9 @@
 use std::fs::File;
 use std::io::Read;
 use serde_json::from_str;
-use crate::models::configuration::Configuration;
+use crate::models::preferences::Preferences;
 
-pub fn load(filename: &str) -> Result<Configuration, Box<dyn std::error::Error>> {
+pub fn load(filename: &str) -> Result<Preferences, Box<dyn std::error::Error>> {
     // Open the file in read-only mode
     let mut file = File::open(filename)?;
 
@@ -12,7 +12,7 @@ pub fn load(filename: &str) -> Result<Configuration, Box<dyn std::error::Error>>
     file.read_to_string(&mut contents)?;
 
     // Deserialize the JSON string into EquipmentList
-    let configuration: Configuration = from_str(&contents)?;
+    let preferences: Preferences = from_str(&contents)?;
 
-    Ok(configuration)
+    Ok(preferences)
 }
