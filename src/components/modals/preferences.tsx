@@ -6,6 +6,11 @@ import styles from './preferences.module.scss';
 import { ThemeToggle } from '../ui/custom/themeToggle';
 import { Button } from '../ui/button';
 import { License, useAppState } from '@/context/stateProvider';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { z } from "zod";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from 'react';
 
 interface PreferencesProps {
   onClose: () => void;
@@ -98,21 +103,59 @@ function AppearanceForm() {
   );
 }
 
+const formSchema = z.object({
+  rootDirectory: z.string().min(2, {
+    message: "Username must be at least 2 characters.", // change
+  }),
+})
+
 function StorageForm({ onClose }: { onClose: () => void }) {
+  const { preferences } = useAppState();
+  const [isChanged, setIsChanged] = useState(false);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      rootDirectory: preferences.storage.root_directory,
+    },
+  });
+
+  const originalValue = preferences.storage.root_directory;
+  const watchedValue = form.watch('rootDirectory');
+
+  useEffect(() => {
+    setIsChanged(watchedValue !== originalValue);
+  }, [watchedValue, originalValue]);
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log(values)
+  }
+
   return (
-    <form className={styles.form}>
-      <div className={styles.paragraph}>
-        <div className={styles.paragraphHeader}>Root Directory</div>
-        <Input className={styles.input} value="" />
-        <div className={styles.paragraphFooter}>
-          The directory in your filesystem where all of your astrophotos are
-          stored.
-        </div>
-      </div>
-      <Button className={styles.updateButton} onClick={onClose}>
-        Update storage
-      </Button>
-    </form>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className={styles.form}>
+        <FormField
+          control={form.control}
+          name="rootDirectory"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Root Directory</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormDescription>
+                The directory in your filesystem where all of your astrophotos are
+                stored.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button className={styles.updateButton} type="submit" disabled={!isChanged}>
+          Update storage
+        </Button>
+      </form>
+    </Form>
   );
 }
 
