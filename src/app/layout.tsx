@@ -4,6 +4,7 @@ import './globals.css';
 import { ThemeProvider } from 'next-themes';
 import { TopBar } from '@/components/topBar';
 import StateProvider from '@/context/stateProvider';
+import { Toaster } from '@/components/ui/toaster';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -24,6 +25,7 @@ export default function RootLayout({
           <StateProvider>
             <TopBar />
             {children}
+            <Toaster />
           </StateProvider>
         </ThemeProvider>
       </body>

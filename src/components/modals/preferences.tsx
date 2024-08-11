@@ -11,6 +11,8 @@ import { z } from "zod";
 import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from 'react';
+import { ToastAction } from "@/components/ui/toast"
+import { useToast } from "@/components/ui/use-toast"
 
 interface PreferencesProps {
   onClose: () => void;
@@ -110,6 +112,7 @@ const formSchema = z.object({
 })
 
 function StorageForm({ onClose }: { onClose: () => void }) {
+  const { toast } = useToast()
   const { preferences } = useAppState();
   const [isChanged, setIsChanged] = useState(false);
 
@@ -128,7 +131,12 @@ function StorageForm({ onClose }: { onClose: () => void }) {
   }, [watchedValue, originalValue]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
+    onClose();
+    toast({
+      title: "Success",
+      description: "Your preferences have been saved.",
+      action: <ToastAction onClick={()=> console.log("test")} altText="Undo">Undo</ToastAction>,
+    });
   }
 
   return (
