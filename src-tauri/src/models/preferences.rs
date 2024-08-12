@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Preferences {
-    storage: Storage,
+    pub storage: Storage,
     user: User,
     license: License
 }
@@ -26,8 +26,8 @@ impl Preferences {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-struct Storage {
-    root_directory: String
+pub struct Storage {
+    pub root_directory: String
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

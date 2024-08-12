@@ -1,3 +1,4 @@
+use std::path::{PathBuf};
 use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
@@ -10,18 +11,19 @@ use crate::file_stores::imaging_frames_store;
 use crate::file_stores::imaging_sessions_store;
 use crate::models::preferences::Preferences;
 use crate::models::log::LogTableRow;
+use crate::paths::{CACHE_PATH, ROOT_DIRECTORY_PATH};
 
 pub struct AppState {
     pub preferences: Preferences,
     pub equipment_list: EquipmentList,
     pub imaging_frame_list: ImagingFrameList,
-    pub imaging_session_list: Vec<ImagingSession>
+    pub imaging_session_list: Vec<ImagingSession>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 struct FrontendAppState {
     preferences: Preferences,
-    log_data: Vec<LogTableRow>
+    log_data: Vec<LogTableRow>,
 }
 
 impl AppState {
@@ -34,7 +36,7 @@ impl AppState {
         match preferences_store::load("C:/Users/rouve/Documents/Programming/astrolog/example_jsons/preferences.json") {
             Ok(data) => {
                 preferences = data;
-            },
+            }
             Err(err) => {
                 eprintln!("Error loading {}: {}", "", err);
             }
@@ -43,25 +45,25 @@ impl AppState {
         match equipment_store::load("C:/Users/rouve/Documents/Programming/astrolog/example_jsons/equipment.json") {
             Ok(data) => {
                 equipment_list = data;
-            },
+            }
             Err(err) => {
                 eprintln!("Error loading {}: {}", "", err);
             }
         }
 
-        match imaging_frames_store::load("C:/Users/rouve/Documents/Programming/astrolog/example_jsons/imagingFrames.json") {
+        match imaging_frames_store::load("C:/Users/rouve/Documents/Programming/astrolog/example_jsons/imaging_frames.json") {
             Ok(data) => {
                 imaging_frame_list = data;
-            },
+            }
             Err(err) => {
                 eprintln!("Error loading {}: {}", "", err);
             }
         }
 
-        match imaging_sessions_store::load("C:/Users/rouve/Documents/Programming/astrolog/example_jsons/imagingSessions.json") {
+        match imaging_sessions_store::load("C:/Users/rouve/Documents/Programming/astrolog/example_jsons/imaging_sessions.json") {
             Ok(data) => {
                 imaging_session_list = data;
-            },
+            }
             Err(err) => {
                 eprintln!("Error loading {}: {}", "", err);
             }
@@ -71,7 +73,7 @@ impl AppState {
             preferences,
             equipment_list,
             imaging_frame_list,
-            imaging_session_list
+            imaging_session_list,
         }
     }
 }
@@ -93,15 +95,22 @@ pub fn get_readonly_app_state() -> RwLockReadGuard<'static, AppState> {
 #[tauri::command]
 pub fn load_app_state() {}
 
-fn save_app_state(folder_dir: &str) { // TODO: don't panic
-    equipment_store::save(format!("{}equipment.json", folder_dir))
-        .expect("TODO: panic message");
-    imaging_sessions_store::save(format!("{}imagingSessions.json", folder_dir))
-        .expect("TODO: panic message");
-    imaging_frames_store::save(format!("{}imagingFrames.json", folder_dir))
-        .expect("TODO: panic message");
-    preferences_store::save(format!("{}preferences.json", folder_dir))
-        .expect("TODO: panic message");
+fn save_app_state(folder_dir: &PathBuf) { // TODO: don't panic
+    let mut path = folder_dir.clone();
+    path.push("equipment.json");
+    equipment_store::save(path).expect("Failed to save equipment.json");
+
+    let mut path = folder_dir.clone();
+    path.push("imaging_sessions.json");
+    imaging_sessions_store::save(path).expect("Failed to save imaging_sessions.json");
+
+    let mut path = folder_dir.clone();
+    path.push("imaging_frames.json");
+    imaging_frames_store::save(path).expect("Failed to save imaging_frames.json");
+
+    let mut path = folder_dir.clone();
+    path.push("preferences.json");
+    preferences_store::save(path).expect("Failed to save preferences.json");
 }
 
 #[tauri::command]
@@ -117,7 +126,7 @@ pub fn load_frontend_app_state() -> String {
 
     let data = FrontendAppState {
         preferences,
-        log_data
+        log_data,
     };
 
     serde_json::to_string(&data).unwrap()
@@ -126,13 +135,15 @@ pub fn load_frontend_app_state() -> String {
 #[tauri::command]
 pub fn save_frontend_app_state() {
     // save old app_state to cache
-    save_app_state("C:/Users/rouve/Documents/Programming/astrolog/cache/");
+    let mut path = &CACHE_PATH.clone();
+    path.push("example_jsons");
+    save_app_state(path);
 
     // sync the backend with the frontend
     // ...
 
     // save app_state
-    save_app_state("C:/Users/rouve/Documents/Programming/astrolog/example_jsons/");
+    save_app_state(&ROOT_DIRECTORY_PATH);
 
     // push new state to frontend
     // ...

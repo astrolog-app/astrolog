@@ -4,17 +4,18 @@
 mod models;
 mod file_stores;
 mod state;
+mod paths;
 
 use serde::{Deserialize, Serialize};
 use state::{load_app_state, save_frontend_app_state, load_frontend_app_state};
 
 fn main() {
-  tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![
+    tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![
       load_frontend_app_state,
       save_frontend_app_state,
       load_app_state
     ])
-    .run(tauri::generate_context!())
-    .expect("error while running tauri application");
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
 }
