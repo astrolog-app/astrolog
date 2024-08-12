@@ -7,6 +7,7 @@ use crate::state::get_readonly_app_state;
 pub static PROJECT_PATH: Lazy<PathBuf> = Lazy::new(get_project_path);
 pub static CACHE_PATH: Lazy<PathBuf> = Lazy::new(get_cache_path);
 pub static ROOT_DIRECTORY_PATH: Lazy<PathBuf> = Lazy::new(get_root_directory_path);
+pub static APP_DATA_PATH: Lazy<PathBuf> = Lazy::new(get_app_data_path);
 
 
 fn get_project_path() -> PathBuf {
@@ -26,7 +27,7 @@ fn get_project_path() -> PathBuf {
 
 fn get_cache_path() -> PathBuf {
     if let Some(mut cache_path) = path::cache_dir() {
-        cache_path.push("astrolog");
+        cache_path.push("AstroLog");
         cache_path
     } else {
         let mut project_path = get_project_path();
@@ -37,4 +38,12 @@ fn get_cache_path() -> PathBuf {
 
 fn get_root_directory_path() -> PathBuf {
     PathBuf::from(&get_readonly_app_state().preferences.storage.root_directory)
+}
+
+fn get_app_data_path() -> PathBuf {
+    let path = path::data_dir();
+    let mut path = path.unwrap_or_else(|| PathBuf::from(""));
+    path.push("AstroLog");
+
+    path
 }

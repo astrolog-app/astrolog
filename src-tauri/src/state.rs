@@ -1,4 +1,3 @@
-use std::path::{PathBuf};
 use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
@@ -11,7 +10,7 @@ use crate::file_stores::imaging_frames_store;
 use crate::file_stores::imaging_sessions_store;
 use crate::models::preferences::Preferences;
 use crate::models::log::LogTableRow;
-use crate::paths::{CACHE_PATH, ROOT_DIRECTORY_PATH};
+use crate::paths::{APP_DATA_PATH, CACHE_PATH, ROOT_DIRECTORY_PATH};
 
 pub struct AppState {
     pub preferences: Preferences,
@@ -95,22 +94,20 @@ pub fn get_readonly_app_state() -> RwLockReadGuard<'static, AppState> {
 #[tauri::command]
 pub fn load_app_state() {}
 
-fn save_app_state(folder_dir: &PathBuf) { // TODO: don't panic
-    let mut path = folder_dir.clone();
-    path.push("equipment.json");
-    equipment_store::save(path).expect("Failed to save equipment.json");
+fn save_app_state(cache: bool) { // TODO: don't panic
+    let mut e_path = if cache { CACHE_PATH.clone() } else { APP_DATA_PATH.clone() };
+    e_path.push("equipment.json");
+    let mut is_path = if cache { CACHE_PATH.clone() } else { ROOT_DIRECTORY_PATH.clone() };
+    is_path.push("imaging_sessions.json");
+    let mut if_path = if cache { CACHE_PATH.clone() } else { ROOT_DIRECTORY_PATH.clone() };
+    if_path.push("imaging_frames.json");
+    let mut p_path = if cache { CACHE_PATH.clone() } else { APP_DATA_PATH.clone() };
+    p_path.push("preferences.json");
 
-    let mut path = folder_dir.clone();
-    path.push("imaging_sessions.json");
-    imaging_sessions_store::save(path).expect("Failed to save imaging_sessions.json");
-
-    let mut path = folder_dir.clone();
-    path.push("imaging_frames.json");
-    imaging_frames_store::save(path).expect("Failed to save imaging_frames.json");
-
-    let mut path = folder_dir.clone();
-    path.push("preferences.json");
-    preferences_store::save(path).expect("Failed to save preferences.json");
+    equipment_store::save(e_path).expect("Failed to save equipment.json");
+    imaging_sessions_store::save(is_path).expect("Failed to save imaging_sessions.json");
+    imaging_frames_store::save(if_path).expect("Failed to save imaging_frames.json");
+    preferences_store::save(p_path).expect("Failed to save preferences.json");
 }
 
 #[tauri::command]
@@ -135,15 +132,13 @@ pub fn load_frontend_app_state() -> String {
 #[tauri::command]
 pub fn save_frontend_app_state() {
     // save old app_state to cache
-    let mut path = &CACHE_PATH.clone();
-    path.push("example_jsons");
-    save_app_state(path);
+    save_app_state(true);
 
     // sync the backend with the frontend
     // ...
 
     // save app_state
-    save_app_state(&ROOT_DIRECTORY_PATH);
+    save_app_state(false);
 
     // push new state to frontend
     // ...

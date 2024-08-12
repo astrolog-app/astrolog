@@ -6,7 +6,6 @@ mod file_stores;
 mod state;
 mod paths;
 
-use serde::{Deserialize, Serialize};
 use state::{load_app_state, save_frontend_app_state, load_frontend_app_state};
 
 fn main() {
