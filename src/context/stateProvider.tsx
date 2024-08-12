@@ -79,7 +79,7 @@ export default function StateProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function fetchData() {
       try {
-        const responseString = await invoke<string>('get_frontend_data');
+        const responseString = await invoke<string>('load_frontend_app_state');
         const responseData: AppState = JSON.parse(responseString);
 
         setAppState(responseData);
