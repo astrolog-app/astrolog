@@ -1,7 +1,5 @@
 import styles from './preferences.module.scss';
-import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from '@/components/ui/input';
 import { ToastAction } from '@/components/ui/toast';
 import { useToast } from "@/components/ui/use-toast";
 import { useAppState } from "@/context/stateProvider";
@@ -26,23 +24,18 @@ const formSchema = z.object({
 export default function StorageForm() {
     const { toast } = useToast()
     const { preferences } = useAppState();
-    const [isChanged, setIsChanged] = useState(false);
-
+    const [root, setRoot] = useState<string>(preferences.storage.root_directory);
+    const [backup, setBackup] = useState<string>(preferences.storage.backup_directory);
+    const [source, setSource] = useState<string>(preferences.storage.source_directory);
+ 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            rootDirectory: preferences.storage.root_directory,
-            backupDirectory: preferences.storage.backup_directory,
-            sourceDirectory: preferences.storage.source_directory
+            rootDirectory: root,
+            backupDirectory: backup,
+            sourceDirectory: source
         },
     });
-
-    const originalValue = preferences.storage.root_directory;
-    const watchedValue = form.watch('rootDirectory');
-
-    useEffect(() => {
-        setIsChanged(watchedValue !== originalValue);
-    }, [watchedValue, originalValue]);
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         toast({
@@ -62,9 +55,9 @@ export default function StorageForm() {
                         <FormItem>
                             <FormLabel>Root Directory</FormLabel>
                             <FormControl>
-                                <OptionInput {...field} disabled>
-                                    <OptionInputCopy {...field} />
-                                    <ChangeButton />
+                                <OptionInput value={root} disabled>
+                                    <OptionInputCopy value={root} />
+                                    <ChangeButton setValue={setRoot} />
                                 </OptionInput>
                             </FormControl>
                             <FormDescription>
@@ -83,9 +76,9 @@ export default function StorageForm() {
                         <FormItem>
                             <FormLabel>Backup Directory (Optional)</FormLabel>
                             <FormControl>
-                                <OptionInput {...field} disabled>
-                                    <OptionInputCopy {...field} />
-                                    <ChangeButton />
+                                <OptionInput value={backup} disabled>
+                                    <OptionInputCopy value={backup} />
+                                    <ChangeButton  setValue={setBackup} />
                                 </OptionInput>
                             </FormControl>
                             <FormDescription>
@@ -103,9 +96,9 @@ export default function StorageForm() {
                         <FormItem>
                             <FormLabel>Source Directory (Optional)</FormLabel>
                             <FormControl>
-                                <OptionInput {...field} disabled>
-                                    <OptionInputCopy {...field} />
-                                    <ChangeButton />
+                                <OptionInput value={source} disabled>
+                                    <OptionInputCopy value={source} />
+                                    <ChangeButton  setValue={setSource} />
                                 </OptionInput>
                             </FormControl>
                             <FormDescription>

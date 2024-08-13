@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Input } from './../input';
 import { Button } from './../button';
 import styles from './optionInput.module.scss';
+import { open } from '@tauri-apps/api/dialog';
 import {
     Tooltip,
     TooltipContent,
@@ -11,13 +12,17 @@ import {
 import { toast } from '../use-toast';
 
 interface OptionInputProps {
-    value?: string;
+    value: string;
     placeholder?: string;
     disabled?: boolean;
     children: React.ReactNode;
 }
 
 export default function OptionInput({ value, placeholder, disabled, children }: OptionInputProps) {
+    useEffect(() => {
+        console.log(value);
+    }, [value]);
+
     return (
         <div className={styles.input}>
             <Input value={value} placeholder={placeholder} disabled={disabled} />
@@ -69,8 +74,24 @@ export function OptionInputCopy({ value }: { value: string }) {
     );
 }
 
-export function ChangeButton() {
+export function ChangeButton({ setValue }: { setValue: React.Dispatch<React.SetStateAction<string>>; }) {
+    function onClick() {
+        open({
+            directory: true,
+            multiple: false
+        }
+    
+    ).then((selectedPath) => {
+            if (selectedPath) {
+                setValue(selectedPath as string);
+                console.log(selectedPath as string)
+            }
+        }).catch((err) => {
+            console.error(err);
+        });
+    }
+
     return (
-        <Button type='button'>Change</Button>
+        <Button type='button' onClick={onClick}>Change</Button>
     );
 }
