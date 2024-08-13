@@ -13,7 +13,7 @@ import {
   MenubarSubTrigger,
   MenubarTrigger,
 } from '@/components/ui/menubar';
-import { Preferences } from './modals/preferences';
+import { Preferences } from './modals/preferences/preferences';
 
 export function TopBar() {
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
