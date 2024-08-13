@@ -19,8 +19,6 @@ interface PreferencesProps {
 }
 
 export function Preferences({ onClose }: PreferencesProps) {
-  const { preferences } = useAppState();
-
   return (
     <Modal
       title="Preferences"
@@ -48,7 +46,7 @@ export function Preferences({ onClose }: PreferencesProps) {
             title="Storage"
             subtitle="Manage the way AstroLog saves and loads your data."
           >
-            <StorageForm onClose={onClose} />
+            <StorageForm />
           </Content>
         </TabsContent>
         <TabsContent value="user" className={styles.tabsContent}>
@@ -56,7 +54,7 @@ export function Preferences({ onClose }: PreferencesProps) {
             title="User"
             subtitle="Change or specify user specific information."
           >
-            <UserForm onClose={onClose} />
+            <UserForm />
           </Content>
         </TabsContent>
         <TabsContent value="license" className={styles.tabsContent}>
@@ -64,7 +62,7 @@ export function Preferences({ onClose }: PreferencesProps) {
             title="License"
             subtitle="Lookup your license key or activate AstroLog."
           >
-            <LicenseForm license={preferences?.license} />
+            <LicenseForm />
           </Content>
         </TabsContent>
       </Tabs>
@@ -92,34 +90,61 @@ function Content({ title, subtitle, children }: ContentProps) {
 }
 
 function AppearanceForm() {
+  const form = useForm<z.infer<typeof formSchemaStorage>>({});
+
   return (
-    <form className={styles.form}>
-      <div className={styles.paragraph}>
-        <div className={styles.paragraphHeader}>Theme</div>
-        <div className={styles.paragraphFooter}>
-          Select the theme for AstroLog.
-        </div>
-        <ThemeToggle />
-      </div>
-    </form>
+    <Form {...form}>
+      <form onSubmit={() => {}} className={styles.form}>
+        <FormField
+          control={form.control}
+          name="rootDirectory"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Theme</FormLabel>
+              <FormDescription>
+              Select the theme for AstroLog.
+              </FormDescription>
+              <FormControl>
+                <ThemeToggle></ThemeToggle>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div></div>
+      </form>
+    </Form>
   );
 }
 
-const formSchema = z.object({
+const formSchemaStorage = z.object({
   rootDirectory: z.string().min(2, {
+    message: "Username must be at least 2 characters.", // change
+  }),
+  backupDirectory: z.string().min(2, {
     message: "Username must be at least 2 characters.", // change
   }),
 })
 
-function StorageForm({ onClose }: { onClose: () => void }) {
+const formSchema = z.object({
+  userEmail: z.string().min(2, {
+    message: "Username must be at least 2 characters.", // change
+  }),
+  licenseKey: z.string().min(2, {
+    message: "Username must be at least 2 characters.", // change
+  }),
+})
+
+function StorageForm() {
   const { toast } = useToast()
   const { preferences } = useAppState();
   const [isChanged, setIsChanged] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof formSchemaStorage>>({
+    resolver: zodResolver(formSchemaStorage),
     defaultValues: {
       rootDirectory: preferences.storage.root_directory,
+      backupDirectory: preferences.storage.root_directory,
     },
   });
 
@@ -130,12 +155,11 @@ function StorageForm({ onClose }: { onClose: () => void }) {
     setIsChanged(watchedValue !== originalValue);
   }, [watchedValue, originalValue]);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    onClose();
+  function onSubmit(values: z.infer<typeof formSchemaStorage>) {
     toast({
       title: "Success",
       description: "Your preferences have been saved.",
-      action: <ToastAction onClick={()=> console.log("test")} altText="Undo">Undo</ToastAction>,
+      action: <ToastAction onClick={() => console.log("test")} altText="Undo">Undo</ToastAction>,
     });
   }
 
@@ -153,7 +177,25 @@ function StorageForm({ onClose }: { onClose: () => void }) {
               </FormControl>
               <FormDescription>
                 The directory in your filesystem where all of your astrophotos are
-                stored.
+                stored. For a better user experience, this data
+                should be available fast (e.g. on your computer).
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="backupDirectory"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Backup Directory</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormDescription>
+                The directory in your filesystem where all of your astrophotos are
+                stored as a backup. This is ideally on a cloud or a NAS.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -167,40 +209,117 @@ function StorageForm({ onClose }: { onClose: () => void }) {
   );
 }
 
-function UserForm({ onClose }: { onClose: () => void }) {
+function UserForm() {
+  const { toast } = useToast()
+  const { preferences } = useAppState();
+  const [isChanged, setIsChanged] = useState(false);
+
+  const form = useForm<z.infer<typeof formSchemaStorage>>({
+    resolver: zodResolver(formSchemaStorage),
+    defaultValues: {
+      rootDirectory: preferences.storage.root_directory,
+    },
+  });
+
+  const originalValue = preferences.storage.root_directory;
+  const watchedValue = form.watch('rootDirectory');
+
+  useEffect(() => {
+    setIsChanged(watchedValue !== originalValue);
+  }, [watchedValue, originalValue]);
+
+  function onSubmit(values: z.infer<typeof formSchemaStorage>) {
+    toast({
+      title: "Success",
+      description: "Your preferences have been saved.",
+      action: <ToastAction onClick={() => console.log("test")} altText="Undo">Undo</ToastAction>,
+    });
+  }
+
   return (
-    <form className={styles.form}>
-      <div className={styles.paragraph}>
-        <div className={styles.paragraphHeader}>Weather API Key</div>
-        <Input className={styles.input} value="" />
-        <div className={styles.paragraphFooter}>
-          The API key from OpenWeather.
-        </div>
-      </div>
-      <Button className={styles.updateButton} onClick={onClose}>
-        Update user
-      </Button>
-    </form>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className={styles.form}>
+        <FormField
+          control={form.control}
+          name="rootDirectory"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Weather API Key</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormDescription>
+                The API key from OpenWeather.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button className={styles.updateButton} type="submit" disabled={!isChanged}>
+          Update user
+        </Button>
+      </form>
+    </Form>
   );
 }
 
-function LicenseForm({ license }: { license: License | undefined }) {
+function LicenseForm() {
+  const { toast } = useToast()
+  const { preferences } = useAppState();
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      userEmail: preferences.license.user_email,
+      licenseKey: preferences.license.license_key,
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    toast({
+      title: "Success",
+      description: "Your preferences have been saved.",
+      action: <ToastAction onClick={() => console.log("test")} altText="Undo">Undo</ToastAction>,
+    });
+  }
+
   return (
-    <form className={styles.form}>
-      <div className={styles.paragraph}>
-        <div className={styles.paragraphHeader}>Email</div>
-        <Input className={styles.input} value={license?.user_email} disabled />
-        <div className={styles.paragraphFooter}>
-          The email you purchased AstroLog with.
-        </div>
-      </div>
-      <div className={styles.paragraph}>
-        <div className={styles.paragraphHeader}>License Key</div>
-        <Input className={styles.input} value={license?.license_key} disabled />
-        <div className={styles.paragraphFooter}>
-          Your license key for AstroLog.
-        </div>
-      </div>
-    </form>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className={styles.form}>
+        <FormField
+          control={form.control}
+          name="userEmail"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input {...field} disabled />
+              </FormControl>
+              <FormDescription>
+                The email you purchased AstroLog with.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="licenseKey"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>License Key</FormLabel>
+              <FormControl>
+                <Input {...field} disabled />
+              </FormControl>
+              <FormDescription>
+                Your license key for AstroLog.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div></div>
+      </form>
+    </Form>
   );
 }
