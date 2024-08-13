@@ -22,6 +22,8 @@ export interface Preferences {
 
 export interface Storage {
   root_directory: string;
+  backup_directory: string;
+  source_directory: string;
 }
 
 export interface User {
@@ -57,9 +59,11 @@ export interface Session {
 const defaultAppState: AppState = {
   preferences: {
     storage: {
-      root_directory: ""
+      root_directory: "",
+      backup_directory: "",
+      source_directory: ""
     },
-    user : {
+    user: {
       weather_api_key: ""
     },
     license: {

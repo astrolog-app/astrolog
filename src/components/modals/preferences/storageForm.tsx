@@ -8,6 +8,7 @@ import { useAppState } from "@/context/stateProvider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import OptionInput, { ChangeButton, OptionInputCopy } from "@/components/ui/custom/optionInput"
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -31,7 +32,8 @@ export default function StorageForm() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             rootDirectory: preferences.storage.root_directory,
-            backupDirectory: preferences.storage.root_directory,
+            backupDirectory: preferences.storage.backup_directory,
+            sourceDirectory: preferences.storage.source_directory
         },
     });
 
@@ -60,7 +62,10 @@ export default function StorageForm() {
                         <FormItem>
                             <FormLabel>Root Directory</FormLabel>
                             <FormControl>
-                                <Input {...field} />
+                                <OptionInput {...field} disabled>
+                                    <OptionInputCopy {...field} />
+                                    <ChangeButton />
+                                </OptionInput>
                             </FormControl>
                             <FormDescription>
                                 The directory in your filesystem where all of your astrophotos are
@@ -78,7 +83,10 @@ export default function StorageForm() {
                         <FormItem>
                             <FormLabel>Backup Directory (Optional)</FormLabel>
                             <FormControl>
-                                <Input {...field} />
+                                <OptionInput {...field} disabled>
+                                    <OptionInputCopy {...field} />
+                                    <ChangeButton />
+                                </OptionInput>
                             </FormControl>
                             <FormDescription>
                                 The directory in your filesystem where all of your astrophotos are
@@ -88,14 +96,17 @@ export default function StorageForm() {
                         </FormItem>
                     )}
                 />
-                                <FormField
+                <FormField
                     control={form.control}
                     name="sourceDirectory"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Source Directory (Optional)</FormLabel>
                             <FormControl>
-                                <Input {...field} />
+                                <OptionInput {...field} disabled>
+                                    <OptionInputCopy {...field} />
+                                    <ChangeButton />
+                                </OptionInput>
                             </FormControl>
                             <FormDescription>
                                 The default source directory of your new imaging sessions.
@@ -104,10 +115,10 @@ export default function StorageForm() {
                         </FormItem>
                     )}
                 />
-                <Button className={styles.updateButton} type="submit" disabled={!isChanged}>
-                    Update storage
-                </Button>
+                <div></div>
             </form>
         </Form>
     );
 }
+
+

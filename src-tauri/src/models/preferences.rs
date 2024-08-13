@@ -11,7 +11,9 @@ impl Preferences {
     pub fn new() -> Preferences {
         Preferences {
             storage: Storage {
-                root_directory: "".to_string()
+                root_directory: "".to_string(),
+                backup_directory: "".to_string(),
+                source_directory: "".to_string()
             },
             user: User {
                 weather_api_key: "".to_string()
@@ -27,7 +29,9 @@ impl Preferences {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Storage {
-    pub root_directory: String
+    pub root_directory: String,
+    backup_directory: String,
+    source_directory: String
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

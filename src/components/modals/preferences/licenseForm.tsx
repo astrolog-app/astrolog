@@ -1,3 +1,4 @@
+import OptionInput, { OptionInputCopy } from '@/components/ui/custom/optionInput';
 import styles from './preferences.module.scss';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from '@/components/ui/input';
@@ -47,7 +48,9 @@ export default function LicenseForm() {
                         <FormItem>
                             <FormLabel>Email</FormLabel>
                             <FormControl>
-                                <Input {...field} disabled />
+                                <OptionInput {...field} disabled>
+                                    <OptionInputCopy {...field} />
+                                </OptionInput>
                             </FormControl>
                             <FormDescription>
                                 The email you purchased AstroLog with.
@@ -63,7 +66,9 @@ export default function LicenseForm() {
                         <FormItem>
                             <FormLabel>License Key</FormLabel>
                             <FormControl>
-                                <Input {...field} disabled />
+                                <OptionInput {...field} disabled>
+                                    <OptionInputCopy {...field} />
+                                </OptionInput>
                             </FormControl>
                             <FormDescription>
                                 Your license key for AstroLog.

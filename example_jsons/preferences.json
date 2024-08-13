@@ -1,6 +1,8 @@
 {
   "storage": {
-    "root_directory": ""
+    "root_directory": "abc",
+    "backup_directory": "def",
+    "source_directory": "ghi"
   },
   "user": {
     "weather_api_key": ""
