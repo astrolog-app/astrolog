@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Input } from './../input';
 import { Button } from './../button';
 import styles from './optionInput.module.scss';
@@ -10,6 +10,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { toast } from '../use-toast';
+import { AppState, useAppState } from '@/context/stateProvider';
 
 interface OptionInputProps {
     value: string;
@@ -19,10 +20,6 @@ interface OptionInputProps {
 }
 
 export default function OptionInput({ value, placeholder, disabled, children }: OptionInputProps) {
-    useEffect(() => {
-        console.log(value);
-    }, [value]);
-
     return (
         <div className={styles.input}>
             <Input value={value} placeholder={placeholder} disabled={disabled} />
@@ -74,7 +71,14 @@ export function OptionInputCopy({ value }: { value: string }) {
     );
 }
 
-export function ChangeButton({ setValue }: { setValue: React.Dispatch<React.SetStateAction<string>>; }) {
+interface ChangeButtonProps {
+    saveAction: (path: string, setAppState: React.Dispatch<React.SetStateAction<AppState>>, value: string) => void;
+    path: string
+}
+
+export function ChangeButton({ path, saveAction }: ChangeButtonProps) {
+    const { setAppState } = useAppState();
+
     function onClick() {
         open({
             directory: true,
@@ -83,11 +87,14 @@ export function ChangeButton({ setValue }: { setValue: React.Dispatch<React.SetS
     
     ).then((selectedPath) => {
             if (selectedPath) {
-                setValue(selectedPath as string);
-                console.log(selectedPath as string)
+                saveAction(path, setAppState, selectedPath as string);
             }
         }).catch((err) => {
-            console.error(err);
+            toast({
+                variant: "destructive",
+                description: "Failed to open folder: " + err,
+            });
+            console.log(err);
         });
     }
 

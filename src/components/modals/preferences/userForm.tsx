@@ -18,17 +18,17 @@ const formSchema = z.object({
 
 export default function UserForm() {
     const { toast } = useToast()
-    const { preferences } = useAppState();
+    const { appState } = useAppState();
     const [isChanged, setIsChanged] = useState(false);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            rootDirectory: preferences.storage.root_directory,
+            rootDirectory: appState.preferences.storage.root_directory,
         },
     });
 
-    const originalValue = preferences.storage.root_directory;
+    const originalValue = appState.preferences.storage.root_directory;
     const watchedValue = form.watch('rootDirectory');
 
     useEffect(() => {

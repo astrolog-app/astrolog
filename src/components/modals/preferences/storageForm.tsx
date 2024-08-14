@@ -2,9 +2,8 @@ import styles from './preferences.module.scss';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { ToastAction } from '@/components/ui/toast';
 import { useToast } from "@/components/ui/use-toast";
-import { useAppState } from "@/context/stateProvider";
+import { AppState, useAppState } from "@/context/stateProvider";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import OptionInput, { ChangeButton, OptionInputCopy } from "@/components/ui/custom/optionInput"
 import { z } from "zod";
@@ -23,17 +22,14 @@ const formSchema = z.object({
 
 export default function StorageForm() {
     const { toast } = useToast()
-    const { preferences } = useAppState();
-    const [root, setRoot] = useState<string>(preferences.storage.root_directory);
-    const [backup, setBackup] = useState<string>(preferences.storage.backup_directory);
-    const [source, setSource] = useState<string>(preferences.storage.source_directory);
- 
+    const { appState } = useAppState();
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            rootDirectory: root,
-            backupDirectory: backup,
-            sourceDirectory: source
+            rootDirectory: appState.preferences.storage.root_directory,
+            backupDirectory: appState.preferences.storage.backup_directory,
+            sourceDirectory: appState.preferences.storage.source_directory,
         },
     });
 
@@ -55,9 +51,9 @@ export default function StorageForm() {
                         <FormItem>
                             <FormLabel>Root Directory</FormLabel>
                             <FormControl>
-                                <OptionInput value={root} disabled>
-                                    <OptionInputCopy value={root} />
-                                    <ChangeButton setValue={setRoot} />
+                                <OptionInput value={appState.preferences.storage.root_directory} disabled>
+                                    <OptionInputCopy value={appState.preferences.storage.root_directory} />
+                                    <ChangeButton path='preferences.storage.root_directory' saveAction={saveStorage} />
                                 </OptionInput>
                             </FormControl>
                             <FormDescription>
@@ -76,9 +72,9 @@ export default function StorageForm() {
                         <FormItem>
                             <FormLabel>Backup Directory (Optional)</FormLabel>
                             <FormControl>
-                                <OptionInput value={backup} disabled>
-                                    <OptionInputCopy value={backup} />
-                                    <ChangeButton  setValue={setBackup} />
+                                <OptionInput value={appState.preferences.storage.backup_directory} disabled>
+                                    <OptionInputCopy value={appState.preferences.storage.backup_directory} />
+                                    <ChangeButton path='preferences.storage.backup_directory' saveAction={saveStorage} />
                                 </OptionInput>
                             </FormControl>
                             <FormDescription>
@@ -96,9 +92,9 @@ export default function StorageForm() {
                         <FormItem>
                             <FormLabel>Source Directory (Optional)</FormLabel>
                             <FormControl>
-                                <OptionInput value={source} disabled>
-                                    <OptionInputCopy value={source} />
-                                    <ChangeButton  setValue={setSource} />
+                                <OptionInput value={appState.preferences.storage.source_directory} disabled>
+                                    <OptionInputCopy value={appState.preferences.storage.source_directory} />
+                                    <ChangeButton path='preferences.storage.source_directory' saveAction={saveStorage} />
                                 </OptionInput>
                             </FormControl>
                             <FormDescription>
@@ -114,4 +110,22 @@ export default function StorageForm() {
     );
 }
 
+function saveStorage(path: string, setAppState: React.Dispatch<React.SetStateAction<AppState>>, value: string) {
+    const keys = path.split('.');
 
+    setAppState((prevAppState) => {
+        const updatedState = { ...prevAppState };
+        let current: any = updatedState;
+
+        for (let i = 0; i < keys.length - 1; i++) {
+            const key = keys[i];
+            if (!current[key]) {
+                current[key] = {};
+            }
+            current = current[key];
+        }
+
+        current[keys[keys.length - 1]] = value;
+        return updatedState;
+    });
+}

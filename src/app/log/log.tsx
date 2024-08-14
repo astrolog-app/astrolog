@@ -14,7 +14,7 @@ import { columns } from '@/components/sessionTable/columns';
 import { useAppState } from '@/context/stateProvider';
 
 export default function Log() {
-  const { log_data } = useAppState();
+  const { appState } = useAppState();
 
   return (
     <Tab className={styles.page}>
@@ -30,7 +30,7 @@ export default function Log() {
         </CardContent>
       </Card>
       <div className={styles.content}>
-        <SessionTable columns={columns} data={log_data} />
+        <SessionTable columns={columns} data={appState.log_data} />
         <Card className={styles.imagePreviewCard}>
           <CardHeader>
             <CardTitle>Image Preview</CardTitle>

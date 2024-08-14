@@ -20,13 +20,13 @@ const formSchema = z.object({
 
 export default function LicenseForm() {
     const { toast } = useToast()
-    const { preferences } = useAppState();
+    const { appState } = useAppState();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            userEmail: preferences.license.user_email,
-            licenseKey: preferences.license.license_key,
+            userEmail: appState.preferences.license.user_email,
+            licenseKey: appState.preferences.license.license_key,
         },
     });
 

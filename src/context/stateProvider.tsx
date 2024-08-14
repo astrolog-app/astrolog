@@ -1,5 +1,6 @@
 'use client';
 
+import { Preferences } from '@/components/modals/preferences/preferences';
 import { invoke } from '@tauri-apps/api/tauri';
 import {
   createContext,
@@ -9,7 +10,7 @@ import {
   useState,
 } from 'react';
 
-interface AppState {
+export interface AppState {
   preferences: Preferences;
   log_data: Session[];
 }
@@ -75,7 +76,12 @@ const defaultAppState: AppState = {
   log_data: [],
 };
 
-const AppStateContext = createContext<AppState>(defaultAppState);
+interface AppStateContextType {
+  appState: AppState;
+  setAppState: React.Dispatch<React.SetStateAction<AppState>>;
+}
+
+const AppStateContext = createContext<AppStateContextType | undefined>(undefined);
 
 export default function StateProvider({ children }: { children: ReactNode }) {
   const [appState, setAppState] = useState<AppState>(defaultAppState);
@@ -87,7 +93,6 @@ export default function StateProvider({ children }: { children: ReactNode }) {
         const responseData: AppState = JSON.parse(responseString);
 
         setAppState(responseData);
-        console.log(responseData)
       } catch (error) {
         console.error('Error fetching or parsing data:', error);
       }
@@ -96,13 +101,21 @@ export default function StateProvider({ children }: { children: ReactNode }) {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    console.log(appState)
+  }, [appState]);
+
   return (
-    <AppStateContext.Provider value={appState}>
+    <AppStateContext.Provider value={{ appState, setAppState }}>
       {children}
     </AppStateContext.Provider>
   );
 }
 
 export function useAppState() {
-  return useContext(AppStateContext);
+  const context = useContext(AppStateContext);
+  if (!context) {
+    throw new Error('useAppState must be used within a StateProvider');
+  }
+  return context;
 }
