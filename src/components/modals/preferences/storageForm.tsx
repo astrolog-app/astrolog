@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/form';
 import { ToastAction } from '@/components/ui/toast';
 import { useToast } from '@/components/ui/use-toast';
-import { AppState, useAppState } from '@/context/stateProvider';
+import { savePreferences, useAppState } from '@/context/stateProvider';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import OptionInput, {
@@ -75,7 +75,7 @@ export default function StorageForm() {
                   />
                   <ChangeButton
                     path="preferences.storage.root_directory"
-                    saveAction={saveStorage}
+                    saveAction={savePreferences}
                   />
                 </OptionInput>
               </FormControl>
@@ -104,7 +104,7 @@ export default function StorageForm() {
                   />
                   <ChangeButton
                     path="preferences.storage.backup_directory"
-                    saveAction={saveStorage}
+                    saveAction={savePreferences}
                   />
                 </OptionInput>
               </FormControl>
@@ -132,7 +132,7 @@ export default function StorageForm() {
                   />
                   <ChangeButton
                     path="preferences.storage.source_directory"
-                    saveAction={saveStorage}
+                    saveAction={savePreferences}
                   />
                 </OptionInput>
               </FormControl>
@@ -147,28 +147,4 @@ export default function StorageForm() {
       </form>
     </Form>
   );
-}
-
-function saveStorage(
-  path: string,
-  setAppState: React.Dispatch<React.SetStateAction<AppState>>,
-  value: string,
-) {
-  const keys = path.split('.');
-
-  setAppState((prevAppState) => {
-    const updatedState = { ...prevAppState };
-    let current: any = updatedState;
-
-    for (let i = 0; i < keys.length - 1; i++) {
-      const key = keys[i];
-      if (!current[key]) {
-        current[key] = {};
-      }
-      current = current[key];
-    }
-
-    current[keys[keys.length - 1]] = value;
-    return updatedState;
-  });
 }

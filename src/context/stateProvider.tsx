@@ -121,3 +121,30 @@ export function useAppState() {
   }
   return context;
 }
+
+export function savePreferences(
+  appState: AppState,
+  setAppState: React.Dispatch<React.SetStateAction<AppState>>,
+  value: string,
+  path: string,
+) {
+  const keys = path.split('.');
+
+  setAppState((prevAppState) => {
+    const updatedState = { ...prevAppState };
+    let current: any = updatedState;
+
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i];
+      if (!current[key]) {
+        current[key] = {};
+      }
+      current = current[key];
+    }
+
+    current[keys[keys.length - 1]] = value;
+    return updatedState;
+  });
+
+  invoke("save_preferences", { preferences: appState.preferences });
+}

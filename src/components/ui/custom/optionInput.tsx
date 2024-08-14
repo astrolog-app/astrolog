@@ -93,15 +93,16 @@ export function OptionInputCopy({ value }: { value: string }) {
 
 interface ChangeButtonProps {
   saveAction: (
-    path: string,
+    appState: AppState,
     setAppState: React.Dispatch<React.SetStateAction<AppState>>,
     value: string,
+    path: string,
   ) => void;
   path: string;
 }
 
 export function ChangeButton({ path, saveAction }: ChangeButtonProps) {
-  const { setAppState } = useAppState();
+  const { appState, setAppState } = useAppState();
 
   function onClick() {
     open({
@@ -110,7 +111,7 @@ export function ChangeButton({ path, saveAction }: ChangeButtonProps) {
     })
       .then((selectedPath) => {
         if (selectedPath) {
-          saveAction(path, setAppState, selectedPath as string);
+          saveAction(appState, setAppState, selectedPath as string, path);
         }
       })
       .catch((err) => {
