@@ -1,15 +1,15 @@
 .input {
-    display: flex;
+  display: flex;
 
-    & > *:not(:last-child) {
-        margin-right: 0.25rem;
-    }
+  & > *:not(:last-child) {
+    margin-right: 0.25rem;
+  }
 }
 
 .svgButton {
-    padding: 0.6rem;
+  padding: 0.6rem;
 
-    svg {
-        fill: hsl(var(--foreground));
-    }
+  svg {
+    fill: hsl(var(--foreground));
+  }
 }

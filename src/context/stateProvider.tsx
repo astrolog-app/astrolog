@@ -60,12 +60,12 @@ export interface Session {
 const defaultAppState: AppState = {
   preferences: {
     storage: {
-      root_directory: "",
-      backup_directory: "",
-      source_directory: ""
+      root_directory: '',
+      backup_directory: '',
+      source_directory: '',
     },
     user: {
-      weather_api_key: ""
+      weather_api_key: '',
     },
     license: {
       activated: false,
@@ -81,7 +81,9 @@ interface AppStateContextType {
   setAppState: React.Dispatch<React.SetStateAction<AppState>>;
 }
 
-const AppStateContext = createContext<AppStateContextType | undefined>(undefined);
+const AppStateContext = createContext<AppStateContextType | undefined>(
+  undefined,
+);
 
 export default function StateProvider({ children }: { children: ReactNode }) {
   const [appState, setAppState] = useState<AppState>(defaultAppState);
@@ -102,7 +104,7 @@ export default function StateProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    console.log(appState)
+    console.log(appState);
   }, [appState]);
 
   return (

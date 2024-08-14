@@ -14,7 +14,7 @@ export function ThemeToggle() {
           <div
             className={cn(
               styles.selectable,
-              theme === 'light' ? styles.isSelected : ''
+              theme === 'light' ? styles.isSelected : '',
             )}
             onClick={() => setTheme('light')}
           >
@@ -30,7 +30,7 @@ export function ThemeToggle() {
           <div
             className={cn(
               styles.selectable,
-              theme === 'dark' ? styles.isSelected : ''
+              theme === 'dark' ? styles.isSelected : '',
             )}
             onClick={() => setTheme('dark')}
           >
@@ -48,7 +48,7 @@ export function ThemeToggle() {
           <div
             className={cn(
               styles.selectable,
-              theme === 'system' ? styles.isSelected : ''
+              theme === 'system' ? styles.isSelected : '',
             )}
             onClick={() => setTheme('system')}
           >

@@ -78,14 +78,18 @@
 }
 
 .system {
-  background: linear-gradient(144deg,
-      hsl(0 0% 100%) 50%,
-      hsl(20 14.3% 4.1%) 50%);
+  background: linear-gradient(
+    144deg,
+    hsl(0 0% 100%) 50%,
+    hsl(20 14.3% 4.1%) 50%
+  );
 
   div {
-    background: linear-gradient(144deg,
-        hsl(240 4.8% 90%) 50%,
-        hsl(0 0% 25%) 50%);
+    background: linear-gradient(
+      144deg,
+      hsl(240 4.8% 90%) 50%,
+      hsl(0 0% 25%) 50%
+    );
   }
 }
 
