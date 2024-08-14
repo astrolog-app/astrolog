@@ -46,7 +46,7 @@ export function OptionInputCopy({ value }: { value: string }) {
         <TooltipProvider>
             <div>
                 <Tooltip>
-                    <TooltipTrigger type='button'>
+                    <TooltipTrigger type='button' asChild>
                         <Button type='button' size={"icon"} variant={"outline"} className={styles.svgButton} onClick={onClick}>
                             <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 210.107 210.107">
