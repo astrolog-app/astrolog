@@ -3,7 +3,6 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use crate::file_store;
-use crate::models::equipment::EquipmentList;
 use crate::state::get_readonly_app_state;
 
 #[derive(Debug, Serialize, Deserialize)]
