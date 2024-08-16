@@ -71,8 +71,8 @@ export function OptionInputCopy({ value }: { value: string }) {
               type="button"
               size={'icon'}
               variant={'outline'}
-              className={styles.svgButton}
               onClick={onClick}
+              svg={true}
             >
               {copySVG}
             </Button>
@@ -161,8 +161,8 @@ export function DeleteButton({ value, saveAction, path }: DeleteButtonProps) {
               type="button"
               size={'icon'}
               variant={'outline'}
-              className={styles.svgButton}
               onClick={onClick}
+              svg={true}
             >
               {deleteSVG}
             </Button>
