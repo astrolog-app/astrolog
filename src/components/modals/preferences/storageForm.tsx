@@ -15,6 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import OptionInput, {
   ChangeButton,
+  DeleteButton,
   OptionInputCopy,
 } from '@/components/ui/custom/optionInput';
 import { z } from 'zod';
@@ -99,6 +100,11 @@ export default function StorageForm() {
                   value={appState.preferences.storage.backup_directory}
                   disabled
                 >
+                  <DeleteButton
+                    value={appState.preferences.storage.backup_directory}
+                    path="preferences.storage.backup_directory"
+                    saveAction={savePreferences}
+                  />
                   <OptionInputCopy
                     value={appState.preferences.storage.backup_directory}
                   />
@@ -127,6 +133,11 @@ export default function StorageForm() {
                   value={appState.preferences.storage.source_directory}
                   disabled
                 >
+                  <DeleteButton
+                    value={appState.preferences.storage.source_directory}
+                    path="preferences.storage.source_directory"
+                    saveAction={savePreferences}
+                  />
                   <OptionInputCopy
                     value={appState.preferences.storage.source_directory}
                   />

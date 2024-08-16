@@ -1,15 +1,15 @@
 {
   "storage": {
-    "root_directory": "abc",
-    "backup_directory": "def",
-    "source_directory": "ghi"
+    "root_directory": "C:\\Windows\\Boot\\PCAT",
+    "backup_directory": "C:\\Windows\\Boot",
+    "source_directory": ""
   },
   "user": {
     "weather_api_key": ""
   },
   "license": {
-    "activated": true,
-    "user_email": "xxx.xxx@xxx.xxx",
-    "license_key": "xyz"
+    "activated": false,
+    "user_email": "",
+    "license_key": ""
   }
 }

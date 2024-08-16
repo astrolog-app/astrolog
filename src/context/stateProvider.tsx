@@ -103,10 +103,6 @@ export default function StateProvider({ children }: { children: ReactNode }) {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    console.log(appState);
-  }, [appState]);
-
   return (
     <AppStateContext.Provider value={{ appState, setAppState }}>
       {children}
