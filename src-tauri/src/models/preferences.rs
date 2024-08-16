@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use serde_json::to_string_pretty;
 use crate::file_store;
-use crate::paths::ROOT_DIRECTORY_PATH;
+use crate::paths::{APP_DATA_PATH, ROOT_DIRECTORY_PATH};
 use crate::state::{get_app_state, get_readonly_app_state};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -67,5 +67,5 @@ struct License {
 #[tauri::command]
 pub fn save_preferences(preferences: Preferences) {
     get_app_state().preferences = preferences;
-    Preferences::save(ROOT_DIRECTORY_PATH.clone()).expect("TODO: panic message");
+    Preferences::save(APP_DATA_PATH.clone()).expect("TODO: panic message");
 }
