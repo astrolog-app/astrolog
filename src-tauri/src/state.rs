@@ -1,14 +1,13 @@
+use std::path::PathBuf;
 use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use crate::models::equipment::EquipmentList;
 use crate::models::imaging_frames::ImagingFrameList;
 use crate::models::imaging_session::ImagingSession;
-use crate::file_stores::equipment_store;
-use crate::file_stores::imaging_frames_store;
-use crate::file_stores::imaging_sessions_store;
 use crate::models::preferences::Preferences;
 use crate::models::log::LogTableRow;
+use crate::paths::APP_DATA_PATH;
 
 pub struct AppState {
     pub preferences: Preferences,
@@ -30,39 +29,39 @@ impl AppState {
         let mut imaging_frame_list = ImagingFrameList::new();
         let mut imaging_session_list = vec![];
 
-        match Preferences::load() {
+        match Preferences::load(APP_DATA_PATH.clone()) {
             Ok(data) => {
                 preferences = data;
             }
             Err(err) => {
-                eprintln!("Error loading {}: {}", "", err);
+                eprintln!("Error loading preferences {}: {}", "", err);
             }
         }
 
-        match equipment_store::load("C:/Users/rouve/Documents/Programming/astrolog/example_jsons/equipment.json") {
+        match EquipmentList::load(PathBuf::from(&preferences.storage.root_directory)) {
             Ok(data) => {
                 equipment_list = data;
             }
             Err(err) => {
-                eprintln!("Error loading {}: {}", "", err);
+                eprintln!("Error loading equipment_list {}: {}", "", err);
             }
         }
 
-        match imaging_frames_store::load("C:/Users/rouve/Documents/Programming/astrolog/example_jsons/imaging_frames.json") {
+        match ImagingFrameList::load(PathBuf::from(&preferences.storage.root_directory)) {
             Ok(data) => {
                 imaging_frame_list = data;
             }
             Err(err) => {
-                eprintln!("Error loading {}: {}", "", err);
+                eprintln!("Error loading imaging_frame_list {}: {}", "", err);
             }
         }
 
-        match imaging_sessions_store::load("C:/Users/rouve/Documents/Programming/astrolog/example_jsons/imaging_sessions.json") {
+        match ImagingSession::load_list(PathBuf::from(&preferences.storage.root_directory)) {
             Ok(data) => {
                 imaging_session_list = data;
             }
             Err(err) => {
-                eprintln!("Error loading {}: {}", "", err);
+                eprintln!("Error loading imaging_session_list {}: {}", "", err);
             }
         }
 

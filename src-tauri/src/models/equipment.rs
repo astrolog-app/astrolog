@@ -1,5 +1,9 @@
+use std::error::Error;
+use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use crate::file_store;
+use crate::state::get_readonly_app_state;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct EquipmentList {
@@ -19,6 +23,18 @@ impl EquipmentList {
             filters: vec![],
             flatteners: vec![],
         }
+    }
+
+    pub fn load(dir: PathBuf) -> Result<EquipmentList, Box<dyn Error>> {
+        let mut filename = dir;
+        filename.push("equipment_list.json");
+        Ok(file_store::load(filename)?)
+    }
+
+    pub fn save(dir: PathBuf) -> Result<(), Box<dyn Error>> {
+        let mut filename = dir.canonicalize().unwrap();
+        filename.push("equipment_list.json");
+        Ok(file_store::save(dir, serde_json::to_string_pretty(&get_readonly_app_state().equipment_list)?)?)
     }
 }
 

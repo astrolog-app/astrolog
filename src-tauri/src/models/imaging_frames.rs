@@ -1,6 +1,10 @@
+use std::error::Error;
+use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::state;
+use crate::models::equipment::EquipmentList;
+use crate::{file_store, state};
+use crate::state::get_readonly_app_state;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ImagingFrameList {
@@ -18,6 +22,18 @@ impl ImagingFrameList {
             bias_frames: vec![],
             flat_frames: vec![],
         }
+    }
+
+    pub fn load(dir: PathBuf) -> Result<ImagingFrameList, Box<dyn Error>> {
+        let mut filename = dir;
+        filename.push("imaging_frame_list.json");
+        Ok(file_store::load(filename)?)
+    }
+
+    pub fn save(dir: PathBuf) -> Result<(), Box<dyn Error>> {
+        let mut filename = dir.canonicalize().unwrap();
+        filename.push("imaging_frame_list.json");
+        Ok(file_store::save(dir, serde_json::to_string_pretty(&get_readonly_app_state().imaging_frame_list)?)?)
     }
 }
 

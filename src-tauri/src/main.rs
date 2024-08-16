@@ -2,9 +2,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod models;
-mod file_stores;
 mod state;
 mod paths;
+mod file_store;
 
 use state::load_frontend_app_state;
 use crate::models::preferences::save_preferences;
