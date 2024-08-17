@@ -26,7 +26,7 @@ export default function Log() {
       </Card>
       <div className={styles.content}>
         <Card className={styles.tableCard}>
-          <CardHeader>
+          <CardHeader className={styles.tableWrapper}>
             <SessionTable />
           </CardHeader>
         </Card>

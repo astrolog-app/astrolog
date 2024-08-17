@@ -27,17 +27,13 @@ import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMe
 import { Button } from '../ui/button';
 import { useAppState } from '@/context/stateProvider';
 import { columns as imagingSessionColumns } from './columns';
-
-interface DataTableProps<TData, TValue> {
-  className?: string;
-  columns: ColumnDef<TData, TValue>[];
-}
+import { ChevronDown } from 'lucide-react';
 
 export function SessionTable<TData, TValue>() {
   const { appState } = useAppState();
   const data: TData[] = appState.log_data as TData[];
   const columns: ColumnDef<TData, TValue>[] = imagingSessionColumns as ColumnDef<TData, TValue>[];
-  
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -62,22 +58,20 @@ export function SessionTable<TData, TValue>() {
   });
 
   return (
-    <div>
+    <div className={styles.component}>
       <div className={styles.header}>
-        <div className="flex items-center py-4">
-          <Input
-            placeholder="Search..."
-            value={(table.getColumn("target")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("target")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
-          />
-        </div>
+        <Input
+          placeholder="Search..."
+          value={(table.getColumn("target")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("target")?.setFilterValue(event.target.value)
+          }
+          className={styles.searchField}
+        />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
-              Columns
+              Columns <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -103,48 +97,50 @@ export function SessionTable<TData, TValue>() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && 'selected'}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+      <div className={styles.tableWrapper}>
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                    </TableHead>
+                  );
+                })}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
