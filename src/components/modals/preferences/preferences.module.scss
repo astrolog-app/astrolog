@@ -23,6 +23,7 @@
   .tabsContent {
     padding-left: 1rem;
     flex-grow: 1;
+    overflow-y: hidden;
   }
 }
 
@@ -87,6 +88,10 @@
         width: fit-content;
         margin-bottom: 0rem;
       }
+    }
+
+    .tabsContent {
+      padding-left: 0;
     }
   }
 }
