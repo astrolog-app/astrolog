@@ -33,7 +33,7 @@ export function SessionTable<TData, TValue>({
   });
 
   return (
-    <div className="rounded-md border overflow-x-auto">
+    <div className="rounded-md border overflow-x-auto flex">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
