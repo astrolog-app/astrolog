@@ -7,8 +7,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { SessionsChart } from '@/components/charts/sessionsChart';
+import SessionsChart from '@/components/charts/sessionsChart';
 import { EquipmentChart } from '@/components/charts/equipmentChart';
+import { IntegrationChart } from '@/components/charts/integrationChart';
 
 export function Analytics() {
   return (
@@ -21,17 +22,9 @@ export function Analytics() {
           </CardDescription>
         </CardHeader>
       </Card>
-      <Card>
-        <CardHeader></CardHeader>
-        <CardContent className={styles.chart}>
-          <SessionsChart />
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-        <EquipmentChart />
-        </CardHeader>
-      </Card>
+      <SessionsChart />
+      <EquipmentChart />
+      <IntegrationChart />
     </Tab>
   );
 }

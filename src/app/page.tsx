@@ -9,7 +9,7 @@ export default function Home() {
     <Tabs defaultValue="log" className={styles.tabs}>
       <TabsList className={styles.tabList}>
         <TabsTrigger value="log">Log</TabsTrigger>
-        <TabsTrigger value="calibration">Calibration</TabsTrigger>
+        <TabsTrigger value="calibration">Gallery</TabsTrigger>
         <TabsTrigger value="analytics">Analytics</TabsTrigger>
       </TabsList>
       <TabsContent value="log" className={styles.tabsContent}>
