@@ -20,6 +20,27 @@
       "mount_id": "8d00c203-a73f-4a9c-ad3b-aa608aaa8f68",
       "notes": "",
       "sub_length": 300
+    },
+    {
+      "id": "b7d68b1d-03b5-44bc-9c6c-712eb7f58410",
+      "camera_id": "8d00c203-a73f-4a9c-ad3b-aa608aaa8f97",
+      "total_subs": 10,
+      "gain": 100,
+      "date": "10.01.2024",
+      "target": "NGC 6888",
+      "integrated_subs": 8,
+      "filter_id": "8d00c203-a73f-4a9c-ad3b-aa608aaa8f98",
+      "offset": 0,
+      "camera_temp": 20.0,
+      "outside_temp": 20.0,
+      "average_seeing": 0,
+      "average_cloud_cover": 0,
+      "average_moon": 0,
+      "telescope_id": "8d00c203-a73f-4a9c-ad3b-aa608aaa8a98",
+      "flattener_id": "8d00c203-a73f-4a9c-ad3b-aa608aaa8f99",
+      "mount_id": "8d00c203-a73f-4a9c-ad3b-aa608aaa8f68",
+      "notes": "",
+      "sub_length": 300
     }
   ],
   "dark_frames": [
