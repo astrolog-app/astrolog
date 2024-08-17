@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { SessionsChart } from '@/components/charts/sessionsChart';
+import { EquipmentChart } from '@/components/charts/equipmentChart';
 
 export function Analytics() {
   return (
@@ -25,6 +26,11 @@ export function Analytics() {
         <CardContent className={styles.chart}>
           <SessionsChart />
         </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+        <EquipmentChart />
+        </CardHeader>
       </Card>
     </Tab>
   );
