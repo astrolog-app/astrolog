@@ -1,3 +1,5 @@
+'use client'
+
 import {
   Card,
   CardContent,
@@ -9,8 +11,17 @@ import { Tab } from '@/components/ui/custom/tab';
 import styles from './log.module.scss';
 import { SessionTable } from '@/components/sessionTable/sessionTable';
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import NewImagingSession from '@/components/modals/newImagingSession/newImagingSession';
 
 export default function Log() {
+  const [isModalOpen, setisModalOpen] = useState(false);
+
+  function toggleModal() {
+    setisModalOpen(!isModalOpen);
+    console.log(isModalOpen)
+  }
+
   return (
     <Tab className={styles.page}>
       <Card>
@@ -21,7 +32,7 @@ export default function Log() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button variant="secondary">Add Imaging Session</Button>
+          <Button variant="secondary" onClick={toggleModal}>Add Imaging Session</Button>
         </CardContent>
       </Card>
       <div className={styles.content}>
@@ -40,6 +51,7 @@ export default function Log() {
           </CardContent>
         </Card>
       </div>
+      {isModalOpen && <NewImagingSession onClose={toggleModal} />}
     </Tab>
   );
 }

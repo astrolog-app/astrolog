@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Input } from './../input';
-import { Button } from './../button';
+import { Button, ButtonProps } from './../button';
 import styles from './optionInput.module.scss';
 import { open } from '@tauri-apps/api/dialog';
 import {
@@ -86,7 +86,7 @@ export function OptionInputCopy({ value }: { value: string }) {
   );
 }
 
-interface ChangeButtonProps {
+interface ChangeButtonProps extends ButtonProps {
   saveAction: (
     appState: AppState,
     setAppState: React.Dispatch<React.SetStateAction<AppState>>,
@@ -96,7 +96,7 @@ interface ChangeButtonProps {
   path: string;
 }
 
-export function ChangeButton({ path, saveAction }: ChangeButtonProps) {
+export function ChangeButton({ path, saveAction, ...props }: ChangeButtonProps) {
   const { appState, setAppState } = useAppState();
 
   function onClick() {
@@ -119,7 +119,7 @@ export function ChangeButton({ path, saveAction }: ChangeButtonProps) {
   }
 
   return (
-    <Button type="button" onClick={onClick}>
+    <Button {...props} type="button" onClick={onClick}>
       Change
     </Button>
   );

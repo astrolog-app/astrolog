@@ -6,7 +6,7 @@ interface ModalProps {
   className?: string;
   title?: string;
   subtitle?: string;
-  separator: boolean;
+  separator?: boolean;
   onClose: () => void;
   children: React.ReactNode;
 }
