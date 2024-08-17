@@ -12,6 +12,10 @@ import styles from './log.module.scss';
 import { SessionTable } from '@/components/sessionTable/sessionTable';
 import { columns } from '@/components/sessionTable/columns';
 import { useAppState } from '@/context/stateProvider';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { ChevronDown } from 'lucide-react';
 
 export default function Log() {
   const { appState } = useAppState();
@@ -26,11 +30,30 @@ export default function Log() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p>Card Content</p>
+          <Button variant="secondary">Add Imaging Session</Button>
         </CardContent>
       </Card>
       <div className={styles.content}>
-        <SessionTable columns={columns} data={appState.log_data} />
+        <Card className={styles.tableCard}>
+          <CardHeader>
+            <div className={styles.tableHeader}>
+              <Input className={styles.searchField} placeholder='Search...' />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="ml-auto">
+                    Columns <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </CardHeader>
+          <CardContent className={styles.tableContent}>
+            <SessionTable columns={columns} data={appState.log_data} />
+          </CardContent>
+        </Card>
         <Card className={styles.imagePreviewCard}>
           <CardHeader>
             <CardTitle>Image Preview</CardTitle>

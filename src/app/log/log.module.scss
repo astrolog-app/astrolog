@@ -8,8 +8,24 @@
     display: flex;
     justify-content: space-between;
 
-    .table {
-      background-color: aqua;
+    .tableCard {
+      overflow-x: auto;
+      display: flex;
+      flex-direction: column;
+
+      .tableHeader {
+        display: flex;
+        
+        .searchField {
+          margin-right: 1rem;
+          max-width: 20rem;
+        }
+      }
+
+      .tableContent {
+        flex-grow: 1;
+        display: flex;
+      }
     }
 
     .imagePreviewCard {
