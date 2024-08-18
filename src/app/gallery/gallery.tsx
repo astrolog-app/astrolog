@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import {
   Card,
@@ -16,17 +16,17 @@ interface ImageView {
 }
 
 const data: ImageView[] = [
-  { title: "1" },
-  { title: "2" },
-  { title: "3" },
-  { title: "4" },
-  { title: "5" },
-  { title: "6" },
-  { title: "7" },
-  { title: "8" },
-  { title: "9" },
-  { title: "10" },
-]
+  { title: '1' },
+  { title: '2' },
+  { title: '3' },
+  { title: '4' },
+  { title: '5' },
+  { title: '6' },
+  { title: '7' },
+  { title: '8' },
+  { title: '9' },
+  { title: '10' },
+];
 
 export default function Gallery() {
   const [windowWidth, setWindowWidth] = useState<number>(2560);
@@ -59,9 +59,7 @@ export default function Gallery() {
       <Card className={styles.card}>
         <CardHeader>
           <CardTitle>Gallery</CardTitle>
-          <CardDescription>
-            View your processed astrophotos.
-          </CardDescription>
+          <CardDescription>View your processed astrophotos.</CardDescription>
         </CardHeader>
       </Card>
       <div
@@ -69,7 +67,7 @@ export default function Gallery() {
         style={{
           display: 'grid',
           gridTemplateColumns: `repeat(${columns}, 1fr)`,
-          gap: 'var(--padding)'
+          gap: 'var(--padding)',
         }}
       >
         {data.map((image, index) => (

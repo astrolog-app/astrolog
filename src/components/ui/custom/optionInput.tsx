@@ -38,7 +38,7 @@ export function OptionInputCopy({ value }: { value: string }) {
   const [selectable, setSelectable] = useState<boolean>(false);
 
   useEffect(() => {
-    if (value === "") {
+    if (value === '') {
       setSelectable(true);
     } else {
       setSelectable(false);
@@ -96,7 +96,11 @@ interface ChangeButtonProps extends ButtonProps {
   path: string;
 }
 
-export function ChangeButton({ path, saveAction, ...props }: ChangeButtonProps) {
+export function ChangeButton({
+  path,
+  saveAction,
+  ...props
+}: ChangeButtonProps) {
   const { appState, setAppState } = useAppState();
 
   function onClick() {
@@ -141,7 +145,7 @@ export function DeleteButton({ value, saveAction, path }: DeleteButtonProps) {
   const [selectable, setSelectable] = useState<boolean>(false);
 
   useEffect(() => {
-    if (value === "") {
+    if (value === '') {
       setSelectable(true);
     } else {
       setSelectable(false);
@@ -149,7 +153,7 @@ export function DeleteButton({ value, saveAction, path }: DeleteButtonProps) {
   }, [value]);
 
   function onClick() {
-    saveAction(appState, setAppState, "", path);
+    saveAction(appState, setAppState, '', path);
   }
 
   return (
@@ -157,7 +161,8 @@ export function DeleteButton({ value, saveAction, path }: DeleteButtonProps) {
       <div>
         <Tooltip>
           <TooltipTrigger type="button" asChild>
-            <Button disabled={selectable}
+            <Button
+              disabled={selectable}
               type="button"
               size={'icon'}
               variant={'outline'}

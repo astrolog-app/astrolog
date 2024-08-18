@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import {
   Card,
@@ -19,7 +19,7 @@ export default function Log() {
 
   function toggleModal() {
     setisModalOpen(!isModalOpen);
-    console.log(isModalOpen)
+    console.log(isModalOpen);
   }
 
   return (
@@ -32,7 +32,9 @@ export default function Log() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button variant="secondary" onClick={toggleModal}>Add Imaging Session</Button>
+          <Button variant="secondary" onClick={toggleModal}>
+            Add Imaging Session
+          </Button>
         </CardContent>
       </Card>
       <div className={styles.content}>

@@ -23,7 +23,12 @@ import {
 } from '@/components/ui/table';
 import React from 'react';
 import { Input } from '../ui/input';
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
 import { Button } from '../ui/button';
 import { useAppState } from '@/context/stateProvider';
 import { columns as imagingSessionColumns } from './columns';
@@ -32,11 +37,12 @@ import { ChevronDown } from 'lucide-react';
 export function SessionTable<TData, TValue>() {
   const { appState } = useAppState();
   const data: TData[] = appState.log_data as TData[];
-  const columns: ColumnDef<TData, TValue>[] = imagingSessionColumns as ColumnDef<TData, TValue>[];
+  const columns: ColumnDef<TData, TValue>[] =
+    imagingSessionColumns as ColumnDef<TData, TValue>[];
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+    [],
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -62,9 +68,9 @@ export function SessionTable<TData, TValue>() {
       <div className={styles.header}>
         <Input
           placeholder="Search..."
-          value={(table.getColumn("target")?.getFilterValue() as string) ?? ""}
+          value={(table.getColumn('target')?.getFilterValue() as string) ?? ''}
           onChange={(event) =>
-            table.getColumn("target")?.setFilterValue(event.target.value)
+            table.getColumn('target')?.setFilterValue(event.target.value)
           }
           className={styles.searchField}
         />
@@ -77,9 +83,7 @@ export function SessionTable<TData, TValue>() {
           <DropdownMenuContent align="end">
             {table
               .getAllColumns()
-              .filter(
-                (column) => column.getCanHide()
-              )
+              .filter((column) => column.getCanHide())
               .map((column) => {
                 return (
                   <DropdownMenuCheckboxItem
@@ -92,7 +96,7 @@ export function SessionTable<TData, TValue>() {
                   >
                     {column.id}
                   </DropdownMenuCheckboxItem>
-                )
+                );
               })}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -108,9 +112,9 @@ export function SessionTable<TData, TValue>() {
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </TableHead>
                   );
                 })}
@@ -126,14 +130,20 @@ export function SessionTable<TData, TValue>() {
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   No results.
                 </TableCell>
               </TableRow>

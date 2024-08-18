@@ -28,13 +28,13 @@ const buttonVariants = cva(
       },
       svg: {
         default: '',
-        true: 'p-2.5 [&>svg]:fill-[hsl(var(--foreground))]'
-      }
+        true: 'p-2.5 [&>svg]:fill-[hsl(var(--foreground))]',
+      },
     },
     defaultVariants: {
       variant: 'default',
       size: 'default',
-      svg: 'default'
+      svg: 'default',
     },
   },
 );

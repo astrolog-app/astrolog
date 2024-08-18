@@ -19,7 +19,6 @@ export function Modal({
   onClose,
   children,
 }: ModalProps) {
-
   return (
     <div className={styles.background}>
       <div className={styles.modal}>

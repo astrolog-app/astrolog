@@ -1,7 +1,7 @@
-"use client"
+'use client';
 
-import { TrendingUp } from "lucide-react"
-import { Label, PolarRadiusAxis, RadialBar, RadialBarChart } from "recharts"
+import { TrendingUp } from 'lucide-react';
+import { Label, PolarRadiusAxis, RadialBar, RadialBarChart } from 'recharts';
 
 import {
   Card,
@@ -10,32 +10,32 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from '@/components/ui/card';
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart"
-import { cn } from "@/lib/utils"
-const chartData = [{ month: "january", desktop: 20, mobile: 80 }]
+} from '@/components/ui/chart';
+import { cn } from '@/lib/utils';
+const chartData = [{ month: 'january', desktop: 20, mobile: 80 }];
 
 const chartConfig = {
   desktop: {
-    label: "Desktop",
-    color: "hsl(var(--chart-1))",
+    label: 'Desktop',
+    color: 'hsl(var(--chart-1))',
   },
   mobile: {
-    label: "Mobile",
-    color: "hsl(var(--chart-2))",
+    label: 'Mobile',
+    color: 'hsl(var(--chart-2))',
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 export function IntegrationChart({ className }: { className?: string }) {
-  const totalVisitors = chartData[0].desktop + chartData[0].mobile
+  const totalVisitors = chartData[0].desktop + chartData[0].mobile;
 
   return (
-    <Card className={cn(className, "flex flex-col")}>
+    <Card className={cn(className, 'flex flex-col')}>
       <CardHeader className="items-center pb-0">
         <CardTitle>Radial Chart - Stacked</CardTitle>
         <CardDescription>January - June 2024</CardDescription>
@@ -58,7 +58,7 @@ export function IntegrationChart({ className }: { className?: string }) {
             <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
               <Label
                 content={({ viewBox }) => {
-                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                  if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
                     return (
                       <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle">
                         <tspan
@@ -76,7 +76,7 @@ export function IntegrationChart({ className }: { className?: string }) {
                           Visitors
                         </tspan>
                       </text>
-                    )
+                    );
                   }
                 }}
               />
@@ -107,5 +107,5 @@ export function IntegrationChart({ className }: { className?: string }) {
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }

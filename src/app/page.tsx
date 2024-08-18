@@ -6,7 +6,7 @@ import Gallery from './gallery/gallery';
 
 export default function Home() {
   return (
-    <Tabs defaultValue="gallery" className={styles.tabs}>
+    <Tabs defaultValue="log" className={styles.tabs}>
       <TabsList className={styles.tabList}>
         <TabsTrigger value="log">Log</TabsTrigger>
         <TabsTrigger value="gallery">Gallery</TabsTrigger>

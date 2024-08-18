@@ -1,23 +1,23 @@
 .component {
-    height: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .header {
     display: flex;
-    flex-direction: column;
+    margin-bottom: var(--padding);
 
-    .header {
-        display: flex;
-        margin-bottom: var(--padding);
-
-        .searchField {
-            width: 100%;
-            max-width: 20rem;
-            margin-right: var(--padding);
-        }
+    .searchField {
+      width: 100%;
+      max-width: 20rem;
+      margin-right: var(--padding);
     }
+  }
 
-    .tableWrapper {
-        border-radius: var(--radius);
-        border: 1px solid hsl(var(--border));
-        display: flex;
-        flex-grow: 1;
-    }
+  .tableWrapper {
+    border-radius: var(--radius);
+    border: 1px solid hsl(var(--border));
+    display: flex;
+    flex-grow: 1;
+  }
 }

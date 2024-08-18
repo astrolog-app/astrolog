@@ -1,20 +1,20 @@
 .title {
-    margin-bottom: 0.5rem;
-    font-weight: 500;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
 }
 
 .content {
-    font-weight: 700;
-    font-size: 2rem;
-    line-height: 2rem;
+  font-weight: 700;
+  font-size: 2rem;
+  line-height: 2rem;
 }
 
 .subtitle {
-    display: flex;
-    color: hsl(var(--muted-foreground));
+  display: flex;
+  color: hsl(var(--muted-foreground));
 
-    .arrow {
-        width: 1.25rem;
-        margin-left: 0.3rem;
-    }
+  .arrow {
+    width: 1.25rem;
+    margin-left: 0.3rem;
+  }
 }

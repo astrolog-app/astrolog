@@ -142,5 +142,5 @@ export function savePreferences(
     return updatedState;
   });
 
-  invoke("save_preferences", { preferences: appState.preferences });
+  invoke('save_preferences', { preferences: appState.preferences });
 }
