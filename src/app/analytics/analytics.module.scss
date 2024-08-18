@@ -2,29 +2,34 @@
   margin-bottom: var(--padding);
 }
 
-.chart {
-  height: 20rem;
-}
-
 .sessionsChart {
   margin-bottom: var(--padding);
 }
 
-.middleCharts {
-  display: flex;
-
-  & > *:not(:last-child) {
-    margin-right: var(--padding);
+.lower {
+  &>*:not(:last-child) {
+    margin-bottom: var(--padding);
   }
 
-  .equipmentChart {
-    width: 70%;
-  }
+  .chartGroup {
+    display: flex;
 
-  .integrationChart {
-    flex-grow: 1;
+    &>*:not(:last-child) {
+      margin-right: var(--padding);
+    }
+
+    .equipmentChart {
+      width: 70%;
+    }
+
+    .integrationChart {
+      flex-grow: 1;
+    }
+
+    .infoCard {
+      flex-grow: 1;
+    }
   }
 }
 
-@media only screen and (max-width: 1200px) {
-}
+@media only screen and (max-width: 1200px) {}
