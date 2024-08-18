@@ -1,12 +1,17 @@
 import styles from './imageView.module.scss';
 import { Card, CardHeader } from './ui/card';
 
-export default function ImageView({ className }: { className?: string }) {
+interface ImageViewProps {
+    className?: string;
+    title: string;
+}
+
+export default function ImageView({ className, title }: ImageViewProps) {
     return (
         <Card className={className}>
             <CardHeader>
                 <div className={styles.title}>
-                    NGC 7000
+                    {title}
                 </div>
                 <div className={styles.image} />
             </CardHeader>
