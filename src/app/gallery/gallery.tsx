@@ -1,27 +1,25 @@
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import { Tab } from '@/components/ui/custom/tab';
-import styles from './calibration.module.scss';
+import styles from './gallery.module.scss';
+import ImageView from '@/components/imageView';
 
-export default function Calibration() {
+export default function Gallery() {
   return (
     <Tab>
       <Card className={styles.card}>
         <CardHeader>
-          <CardTitle>Calibration</CardTitle>
+          <CardTitle>Gallery</CardTitle>
           <CardDescription>
-            Manage the calibration frames for your astrophotos.
+            View your processed astrophotos.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <p>Card Content</p>
-        </CardContent>
       </Card>
+      <ImageView className={styles.imageView} />
     </Tab>
   );
 }
