@@ -2,6 +2,7 @@
   height: calc(100vh - var(--top-bar-height));
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 
   .tabList {
     width: fit-content;
