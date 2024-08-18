@@ -6,7 +6,7 @@ import Calibration from './calibration/calibration';
 
 export default function Home() {
   return (
-    <Tabs defaultValue="log" className={styles.tabs}>
+    <Tabs defaultValue="analytics" className={styles.tabs}>
       <TabsList className={styles.tabList}>
         <TabsTrigger value="log">Log</TabsTrigger>
         <TabsTrigger value="calibration">Gallery</TabsTrigger>

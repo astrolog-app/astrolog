@@ -17,6 +17,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+import { cn } from "@/lib/utils"
 const chartData = [{ month: "january", desktop: 20, mobile: 80 }]
 
 const chartConfig = {
@@ -30,11 +31,11 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function IntegrationChart() {
+export function IntegrationChart({ className }: { className?: string }) {
   const totalVisitors = chartData[0].desktop + chartData[0].mobile
 
   return (
-    <Card className="flex flex-col">
+    <Card className={cn(className, "flex flex-col")}>
       <CardHeader className="items-center pb-0">
         <CardTitle>Radial Chart - Stacked</CardTitle>
         <CardDescription>January - June 2024</CardDescription>

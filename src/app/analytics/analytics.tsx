@@ -22,9 +22,13 @@ export function Analytics() {
           </CardDescription>
         </CardHeader>
       </Card>
-      <SessionsChart />
-      <EquipmentChart />
-      <IntegrationChart />
+      <div>
+        <SessionsChart className={styles.sessionsChart} />
+        <div className={styles.middleCharts}>
+          <EquipmentChart className={styles.equipmentChart} />
+          <IntegrationChart className={styles.integrationChart} />
+        </div>
+      </div>
     </Tab>
   );
 }
