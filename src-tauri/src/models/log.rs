@@ -1,9 +1,11 @@
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 use crate::models::imaging_session::ImagingSession;
 use crate::models::imaging_frames;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LogTableRow {
+  id: Uuid,
   date: String,
   target: String,
   sub_length: f64,
@@ -29,6 +31,7 @@ impl LogTableRow {
     let light_frame = imaging_frames::get_light_frame(&imaging_session.light_frame_id);
 
     LogTableRow {
+      id: light_frame.id,
       date: light_frame.date,
       target: light_frame.target,
       sub_length: light_frame.sub_length,

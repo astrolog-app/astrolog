@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Input } from '../ui/input';
 import {
   DropdownMenu,
@@ -30,11 +30,12 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { Button } from '../ui/button';
-import { useAppState } from '@/context/stateProvider';
+import { Session, useAppState } from '@/context/stateProvider';
 import { columns as imagingSessionColumns } from './columns';
 import { ChevronDown } from 'lucide-react';
+import { UUID } from 'crypto';
 
-export function SessionTable<TData, TValue>() {
+export function SessionTable<TData, TValue>({ setSelectedSessionId }: { setSelectedSessionId: (id: UUID) => void }) {
   const { appState } = useAppState();
   const data: TData[] = appState.log_data as TData[];
   const columns: ColumnDef<TData, TValue>[] =
@@ -46,11 +47,7 @@ export function SessionTable<TData, TValue>() {
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
-  const [selectedRowId, setSelectedRowId] = React.useState<string | null>(null);
-
-  useEffect(() => {
-    console.log(selectedRowId)
-  }, [selectedRowId])
+  const [selectedRowId, setSelectedRowId] = React.useState<string | undefined>(undefined);
 
   const table = useReactTable({
     data,
@@ -70,6 +67,9 @@ export function SessionTable<TData, TValue>() {
 
   const handleRowClick = (rowId: string) => {
     setSelectedRowId(rowId);
+
+    const rowData = table.getRowModel().rows.find((row) => row.id === rowId)?.original as Session;
+    setSelectedSessionId(rowData.id);
   };
 
   return (
@@ -135,8 +135,8 @@ export function SessionTable<TData, TValue>() {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  onClick={() => handleRowClick(row.id)} // Set selected row on click
-                  className={selectedRowId === row.id ? styles.selectedRow : ''} // Apply selected class
+                  onClick={() => handleRowClick(row.id)}
+                  className={selectedRowId === row.id ? styles.selectedRow : ''}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

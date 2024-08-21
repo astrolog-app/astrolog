@@ -2,6 +2,7 @@
 
 import { Preferences } from '@/components/modals/preferences/preferences';
 import { invoke } from '@tauri-apps/api/tauri';
+import { UUID } from 'crypto';
 import {
   createContext,
   ReactNode,
@@ -38,6 +39,7 @@ export interface License {
 }
 
 export interface Session {
+  id: UUID;
   date: string;
   target: string;
   sub_length: number;

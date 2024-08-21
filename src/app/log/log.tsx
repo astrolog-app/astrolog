@@ -11,11 +11,13 @@ import { Tab } from '@/components/ui/custom/tab';
 import styles from './log.module.scss';
 import { SessionTable } from '@/components/sessionTable/sessionTable';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import NewImagingSession from '@/components/modals/newImagingSession/newImagingSession';
+import { UUID } from 'crypto';
 
 export default function Log() {
   const [isModalOpen, setisModalOpen] = useState(false);
+  const [selectedSessionId, setSelectedSessionId] = useState<UUID | undefined>(undefined);
 
   function toggleModal() {
     setisModalOpen(!isModalOpen);
@@ -43,7 +45,7 @@ export default function Log() {
       <div className={styles.content}>
         <Card className={styles.tableCard}>
           <CardHeader className={styles.tableWrapper}>
-            <SessionTable />
+            <SessionTable setSelectedSessionId={setSelectedSessionId} />
           </CardHeader>
         </Card>
         <Card className={styles.imagePreviewCard}>
