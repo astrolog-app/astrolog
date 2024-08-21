@@ -2,6 +2,7 @@
 
 import {
   Card,
+  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -10,6 +11,7 @@ import { Tab } from '@/components/ui/custom/tab';
 import styles from './gallery.module.scss';
 import ImageView from '@/components/imageView';
 import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
 
 interface ImageView {
   title: string;
@@ -61,6 +63,11 @@ export default function Gallery() {
           <CardTitle>Gallery</CardTitle>
           <CardDescription>View your processed astrophotos.</CardDescription>
         </CardHeader>
+        <CardContent>
+          <Button variant="secondary" onClick={() => {}}>
+            Add Image
+          </Button>
+        </CardContent>
       </Card>
       <div
         className={styles.content}

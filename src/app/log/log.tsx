@@ -31,9 +31,12 @@ export default function Log() {
             Add imaging sessions and view your astrophotography log.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className={styles.buttons}>
           <Button variant="secondary" onClick={toggleModal}>
             Add Imaging Session
+          </Button>
+          <Button variant='ghost' onClick={toggleModal}>
+            Export CSV
           </Button>
         </CardContent>
       </Card>
