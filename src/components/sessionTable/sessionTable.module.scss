@@ -23,11 +23,12 @@
 }
 
 .selectedRow {
-  background-color: rgb(211, 211, 211);
+  background-color: hsl(var(--secondary));
   color: black;
 
   &:hover {
-    background-color: rgb(211, 211, 211);
+    background-color: hsl(var(--accent));
     color: black;
+    cursor: default;
   }
 }
