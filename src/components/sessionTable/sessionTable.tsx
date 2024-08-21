@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Input } from '../ui/input';
 import {
   DropdownMenu,
@@ -46,6 +46,11 @@ export function SessionTable<TData, TValue>() {
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
+  const [selectedRowId, setSelectedRowId] = React.useState<string | null>(null);
+
+  useEffect(() => {
+    console.log(selectedRowId)
+  }, [selectedRowId])
 
   const table = useReactTable({
     data,
@@ -62,6 +67,10 @@ export function SessionTable<TData, TValue>() {
       columnVisibility,
     },
   });
+
+  const handleRowClick = (rowId: string) => {
+    setSelectedRowId(rowId);
+  };
 
   return (
     <div className={styles.component}>
@@ -126,7 +135,8 @@ export function SessionTable<TData, TValue>() {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
+                  onClick={() => handleRowClick(row.id)} // Set selected row on click
+                  className={selectedRowId === row.id ? styles.selectedRow : ''} // Apply selected class
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
