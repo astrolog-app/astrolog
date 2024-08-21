@@ -11,9 +11,12 @@ import { Tab } from '@/components/ui/custom/tab';
 import styles from './log.module.scss';
 import { SessionTable } from '@/components/sessionTable/sessionTable';
 import { Button } from '@/components/ui/button';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import NewImagingSession from '@/components/modals/newImagingSession/newImagingSession';
 import { UUID } from 'crypto';
+import { save } from '@tauri-apps/api/dialog';
+import { toast } from '@/components/ui/use-toast';
+import { invoke } from '@tauri-apps/api/tauri';
 
 export default function Log() {
   const [isModalOpen, setisModalOpen] = useState(false);
@@ -22,6 +25,29 @@ export default function Log() {
   function toggleModal() {
     setisModalOpen(!isModalOpen);
     console.log(isModalOpen);
+  }
+
+  function exportCSV() {
+    save({
+      defaultPath:"", // TODO: define default path
+      filters: [{
+        name: '.csv',
+        extensions: ['csv']
+      }]
+    })
+      .then((selectedPath) => {
+        if (selectedPath) {
+          console.log(selectedPath)
+          invoke('export_csv', { path: selectedPath })
+        }
+      })
+      .catch((err) => {
+        toast({
+          variant: 'destructive',
+          description: 'Failed to export CSV: ' + err,
+        });
+        console.log(err);
+      });
   }
 
   return (
@@ -37,7 +63,7 @@ export default function Log() {
           <Button variant="secondary" onClick={toggleModal}>
             Add Imaging Session
           </Button>
-          <Button variant='ghost' onClick={toggleModal}>
+          <Button variant='ghost' onClick={exportCSV}>
             Export CSV
           </Button>
         </CardContent>

@@ -63,9 +63,3 @@ struct License {
     user_email: String,
     license_key: String
 }
-
-#[tauri::command]
-pub fn save_preferences(preferences: Preferences) {
-    get_app_state().preferences = preferences;
-    Preferences::save(APP_DATA_PATH.clone()).expect("TODO: panic message");
-}

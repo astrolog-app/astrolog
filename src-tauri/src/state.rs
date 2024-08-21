@@ -17,9 +17,9 @@ pub struct AppState {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct FrontendAppState {
-    preferences: Preferences,
-    log_data: Vec<LogTableRow>,
+pub struct FrontendAppState {
+    pub(crate) preferences: Preferences,
+    pub(crate) log_data: Vec<LogTableRow>,
 }
 
 impl AppState {
@@ -86,23 +86,4 @@ pub fn get_app_state() -> RwLockWriteGuard<'static, AppState> {
 // Function to get a read-only reference to the AppState using RwLock
 pub fn get_readonly_app_state() -> RwLockReadGuard<'static, AppState> {
     APP_STATE.read().unwrap()
-}
-
-#[tauri::command]
-pub fn load_frontend_app_state() -> String {
-    let app_state = get_readonly_app_state();
-    let preferences = app_state.preferences.clone();
-    let imaging_session_list = &app_state.imaging_session_list;
-    let mut log_data: Vec<LogTableRow> = vec![];
-
-    for imaging_session in imaging_session_list {
-        log_data.push(LogTableRow::new(imaging_session));
-    }
-
-    let data = FrontendAppState {
-        preferences,
-        log_data,
-    };
-
-    serde_json::to_string(&data).unwrap()
 }
