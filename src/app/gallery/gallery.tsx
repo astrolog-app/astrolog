@@ -12,6 +12,9 @@ import styles from './gallery.module.scss';
 import ImageView from '@/components/imageView';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import NewImage from '@/components/modals/newImage/newImage';
+import { open } from '@tauri-apps/api/dialog';
+import { toast } from '@/components/ui/use-toast';
 
 interface ImageView {
   title: string;
@@ -33,6 +36,42 @@ const data: ImageView[] = [
 export default function Gallery() {
   const [windowWidth, setWindowWidth] = useState<number>(2560);
   const [columns, setColumns] = useState<number>(3);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [newImagePath, setNewImagePath] = useState<string>('');
+
+  const dialogFilters = [{
+    name: '.png',
+    extensions: ['png']
+  },
+  {
+    name: '.jpeg',
+    extensions: ['jpeg']
+  }]
+
+  function addNewImage() {
+    open({
+      multiple: false,
+      filters: dialogFilters
+    })
+      .then((selectedPath) => {
+        if (selectedPath) {
+          setNewImagePath(selectedPath as string);
+          console.log(newImagePath)
+          toggleModal();
+        }
+      })
+      .catch((err) => {
+        toast({
+          variant: 'destructive',
+          description: 'Failed to open Image: ' + err,
+        });
+        console.log(err);
+      });
+  }
+
+  function toggleModal() {
+    setModalOpen(!modalOpen);
+  }
 
   useEffect(() => {
     // Function to update the state with the current window width
@@ -64,7 +103,7 @@ export default function Gallery() {
           <CardDescription>View your processed astrophotos.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button variant="secondary" onClick={() => {}}>
+          <Button variant="secondary" onClick={addNewImage}>
             Add Image
           </Button>
         </CardContent>
@@ -85,6 +124,7 @@ export default function Gallery() {
           />
         ))}
       </div>
+      {modalOpen && <NewImage defaultValue={newImagePath} onClose={toggleModal} dialogFilters={dialogFilters} />}
     </Tab>
   );
 }

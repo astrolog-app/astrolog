@@ -77,6 +77,7 @@ export default function StorageForm() {
                   <ChangeButton
                     path="preferences.storage.root_directory"
                     saveAction={savePreferences}
+                    directory
                   />
                 </OptionInput>
               </FormControl>
@@ -111,6 +112,7 @@ export default function StorageForm() {
                   <ChangeButton
                     path="preferences.storage.backup_directory"
                     saveAction={savePreferences}
+                    directory
                   />
                 </OptionInput>
               </FormControl>
@@ -144,6 +146,7 @@ export default function StorageForm() {
                   <ChangeButton
                     path="preferences.storage.source_directory"
                     saveAction={savePreferences}
+                    directory
                   />
                 </OptionInput>
               </FormControl>

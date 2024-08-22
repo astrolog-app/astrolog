@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Input } from './../input';
 import { Button, ButtonProps } from './../button';
 import styles from './optionInput.module.scss';
-import { open } from '@tauri-apps/api/dialog';
+import { DialogFilter, open, OpenDialogOptions } from '@tauri-apps/api/dialog';
 import {
   Tooltip,
   TooltipContent,
@@ -88,29 +88,34 @@ export function OptionInputCopy({ value }: { value: string }) {
 
 interface ChangeButtonProps extends ButtonProps {
   saveAction: (
+    value: string,
     appState: AppState,
     setAppState: React.Dispatch<React.SetStateAction<AppState>>,
-    value: string,
     path: string,
   ) => void;
   path: string;
+  directory?: boolean,
+  filters?: DialogFilter[],
 }
 
 export function ChangeButton({
   path,
   saveAction,
+  directory,
+  filters,
   ...props
 }: ChangeButtonProps) {
   const { appState, setAppState } = useAppState();
 
   function onClick() {
     open({
-      directory: true,
       multiple: false,
+      directory: directory,
+      filters: filters
     })
       .then((selectedPath) => {
         if (selectedPath) {
-          saveAction(appState, setAppState, selectedPath as string, path);
+          saveAction(selectedPath as string, appState, setAppState, path);
         }
       })
       .catch((err) => {
@@ -132,9 +137,9 @@ export function ChangeButton({
 interface DeleteButtonProps {
   value: string;
   saveAction: (
+    value: string,
     appState: AppState,
     setAppState: React.Dispatch<React.SetStateAction<AppState>>,
-    value: string,
     path: string,
   ) => void;
   path: string;
@@ -153,7 +158,7 @@ export function DeleteButton({ value, saveAction, path }: DeleteButtonProps) {
   }, [value]);
 
   function onClick() {
-    saveAction(appState, setAppState, '', path);
+    saveAction('', appState, setAppState, path);
   }
 
   return (

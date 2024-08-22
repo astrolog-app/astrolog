@@ -24,11 +24,10 @@
 
 .selectedRow {
   background-color: hsl(var(--secondary));
-  color: black;
+  color: hsl(var(--foreground));
 
   &:hover {
-    background-color: hsl(var(--accent));
-    color: black;
+    background-color: hsl(var(--secondary));
     cursor: default;
   }
 }

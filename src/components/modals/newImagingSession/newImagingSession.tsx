@@ -31,15 +31,6 @@ export default function NewImagingSession({
   );
   const [buttonEnabled, setButtonEnabled] = useState<boolean>(value !== '');
 
-  function changeValue(
-    appState: AppState,
-    setAppState: Dispatch<SetStateAction<AppState>>,
-    value: string,
-    path: string,
-  ) {
-    setValue(value);
-  }
-
   function detectImagingSessions() {
     invoke('detect_imaging_sessions', { path: value });
   }
@@ -78,8 +69,9 @@ export default function NewImagingSession({
               <FormControl>
                 <OptionInput value={value} disabled>
                   <ChangeButton
-                    saveAction={changeValue}
+                    saveAction={(value) => setValue(value)}
                     path=""
+                    directory
                     variant="secondary"
                   />
                 </OptionInput>

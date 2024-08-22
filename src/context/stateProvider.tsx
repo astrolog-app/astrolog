@@ -121,9 +121,9 @@ export function useAppState() {
 }
 
 export function savePreferences(
+  value: string,
   appState: AppState,
   setAppState: React.Dispatch<React.SetStateAction<AppState>>,
-  value: string,
   path: string,
 ) {
   const keys = path.split('.');
