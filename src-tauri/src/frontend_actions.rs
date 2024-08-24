@@ -63,6 +63,12 @@ pub fn rename_directory(origin: PathBuf, destination: PathBuf) -> bool {
 }
 
 #[tauri::command]
+pub fn check_meta_data_directory(path: String) {}
+
+#[tauri::command]
+pub fn setup_backup(path: String) {}
+
+#[tauri::command]
 pub fn save_preferences(preferences: Preferences) -> bool {
     get_app_state().preferences = preferences;
     return match Preferences::save(APP_DATA_PATH.clone()) {

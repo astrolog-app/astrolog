@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import styles from './preferences.module.scss';
 import {
@@ -8,7 +8,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from '@/components/ui/form';
 import { ToastAction } from '@/components/ui/toast';
 import { useToast } from '@/components/ui/use-toast';
@@ -18,7 +18,7 @@ import { useForm } from 'react-hook-form';
 import OptionInput, {
   ChangeButton,
   DeleteButton,
-  OptionInputCopy,
+  OptionInputCopy
 } from '@/components/ui/custom/optionInput';
 import { z } from 'zod';
 import { invoke } from '@tauri-apps/api/tauri';
@@ -26,14 +26,14 @@ import React from 'react';
 
 const formSchema = z.object({
   rootDirectory: z.string().min(2, {
-    message: 'Username must be at least 2 characters.', // change
+    message: 'Username must be at least 2 characters.' // change
   }),
   backupDirectory: z.string().min(2, {
-    message: 'Username must be at least 2 characters.', // change
+    message: 'Username must be at least 2 characters.' // change
   }),
   sourceDirectory: z.string().min(2, {
-    message: 'Username must be at least 2 characters.', // change
-  }),
+    message: 'Username must be at least 2 characters.' // change
+  })
 });
 
 export default function StorageForm() {
@@ -45,8 +45,8 @@ export default function StorageForm() {
     defaultValues: {
       rootDirectory: appState.preferences.storage.root_directory,
       backupDirectory: appState.preferences.storage.backup_directory,
-      sourceDirectory: appState.preferences.storage.source_directory,
-    },
+      sourceDirectory: appState.preferences.storage.source_directory
+    }
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -57,7 +57,7 @@ export default function StorageForm() {
         <ToastAction onClick={() => console.log('test')} altText="Undo">
           Undo
         </ToastAction>
-      ),
+      )
     });
   }
 
@@ -80,7 +80,7 @@ export default function StorageForm() {
                   />
                   <ChangeButton
                     path="preferences.storage.root_directory"
-                    saveAction={(value, appState, setAppState, path) => moveDir(value, appState, setAppState, path, appState.preferences.storage.root_directory)}
+                    saveAction={(value, appState, setAppState, path) => rootAction(value, appState, setAppState, path)}
                     directory
                   />
                 </OptionInput>
@@ -115,7 +115,7 @@ export default function StorageForm() {
                   />
                   <ChangeButton
                     path="preferences.storage.backup_directory"
-                    saveAction={(value, appState, setAppState, path) => moveDir(value, appState, setAppState, path, appState.preferences.storage.backup_directory)}
+                    saveAction={(value, appState, setAppState, path) => backupAction(value, appState, setAppState, path)}
                     directory
                   />
                 </OptionInput>
@@ -167,9 +167,37 @@ export default function StorageForm() {
   );
 }
 
-async function moveDir(value: string, appState: AppState, setAppState: React.Dispatch<React.SetStateAction<AppState>>, path: string, origin: string) {
-  if (origin != "") {
-    if (await invoke("rename_directory", { origin: origin, destination: value })) {
+async function rootAction(value: string, appState: AppState, setAppState: React.Dispatch<React.SetStateAction<AppState>>, path: string) {
+  let origin = appState.preferences.storage.root_directory;
+  if (origin != '') {
+    if (await invoke('rename_directory', { origin: origin, destination: value })) {
+      savePreferences(value, appState, setAppState, path);
+    } else {
+      // TODO: open toast
+    }
+  } else {
+    if (await invoke('check_meta_data_directory')) {
+      savePreferences(value, appState, setAppState, path);
+    } else {
+      if (await invoke("create_dir", { path: value })) {
+        savePreferences(value, appState, setAppState, path);
+      } else {
+        // TODO: open toast
+      }
+    }
+  }
+}
+
+async function backupAction(value: string, appState: AppState, setAppState: React.Dispatch<React.SetStateAction<AppState>>, path: string) {
+  let origin = appState.preferences.storage.backup_directory;
+  if (origin != '') {
+    if (await invoke('rename_directory', { origin: origin, destination: value })) {
+      savePreferences(value, appState, setAppState, path);
+    } else {
+      // TODO: open toast
+    }
+  } else {
+    if (await invoke('setup_backup', { path: value })) {
       savePreferences(value, appState, setAppState, path);
     }
   }
