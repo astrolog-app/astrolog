@@ -1,3 +1,4 @@
+use std::{fs, io};
 use std::path::PathBuf;
 use crate::models::log::LogTableRow;
 use crate::models::preferences::Preferences;
@@ -23,10 +24,56 @@ pub fn load_frontend_app_state() -> String {
     serde_json::to_string(&data).unwrap()
 }
 
+fn is_directory_empty(path: &PathBuf) -> io::Result<bool> {
+    let mut entries = fs::read_dir(path)?;
+    Ok(entries.next().is_none())
+}
+
+fn rename_folder_with_overwrite(old_path: &PathBuf, new_path: &PathBuf) -> io::Result<()> {
+    if fs::metadata(new_path).is_ok() {
+        fs::remove_dir_all(new_path)?;
+    }
+    fs::rename(old_path, new_path)
+}
+
 #[tauri::command]
-pub fn save_preferences(preferences: Preferences) {
+pub fn rename_directory(origin: PathBuf, destination: PathBuf) -> bool {
+    return match is_directory_empty(&destination) {
+        Ok(true) => {
+            return match rename_folder_with_overwrite(&origin, &destination) {
+                Ok(..) => {
+                    println!("ok");
+                    true
+                }
+                Err(e) => {
+                    println!("Error renaming folder: {}", e);
+                    false
+                }
+            }
+        }
+        Ok(false) => {
+            println!("dir not empty");
+            false
+        }
+        Err(e) => {
+            println!("error: {}", e);
+            false
+        }
+    }
+}
+
+#[tauri::command]
+pub fn save_preferences(preferences: Preferences) -> bool {
     get_app_state().preferences = preferences;
-    Preferences::save(APP_DATA_PATH.clone()).expect("TODO: panic message");
+    return match Preferences::save(APP_DATA_PATH.clone()) {
+        Ok(..) => {
+            true
+        }
+        Err(e) => {
+            // TODO: trigger modal
+            false
+        }
+    };
 }
 
 #[tauri::command]

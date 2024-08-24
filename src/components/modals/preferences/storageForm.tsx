@@ -1,3 +1,5 @@
+'use client'
+
 import styles from './preferences.module.scss';
 import {
   Form,
@@ -10,7 +12,7 @@ import {
 } from '@/components/ui/form';
 import { ToastAction } from '@/components/ui/toast';
 import { useToast } from '@/components/ui/use-toast';
-import { savePreferences, useAppState } from '@/context/stateProvider';
+import { AppState, savePreferences, useAppState } from '@/context/stateProvider';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import OptionInput, {
@@ -19,6 +21,8 @@ import OptionInput, {
   OptionInputCopy,
 } from '@/components/ui/custom/optionInput';
 import { z } from 'zod';
+import { invoke } from '@tauri-apps/api/tauri';
+import React from 'react';
 
 const formSchema = z.object({
   rootDirectory: z.string().min(2, {
@@ -76,7 +80,7 @@ export default function StorageForm() {
                   />
                   <ChangeButton
                     path="preferences.storage.root_directory"
-                    saveAction={savePreferences}
+                    saveAction={(value, appState, setAppState, path) => moveDir(value, appState, setAppState, path, appState.preferences.storage.root_directory)}
                     directory
                   />
                 </OptionInput>
@@ -111,7 +115,7 @@ export default function StorageForm() {
                   />
                   <ChangeButton
                     path="preferences.storage.backup_directory"
-                    saveAction={savePreferences}
+                    saveAction={(value, appState, setAppState, path) => moveDir(value, appState, setAppState, path, appState.preferences.storage.backup_directory)}
                     directory
                   />
                 </OptionInput>
@@ -161,4 +165,12 @@ export default function StorageForm() {
       </form>
     </Form>
   );
+}
+
+async function moveDir(value: string, appState: AppState, setAppState: React.Dispatch<React.SetStateAction<AppState>>, path: string, origin: string) {
+  if (origin != "") {
+    if (await invoke("rename_directory", { origin: origin, destination: value })) {
+      savePreferences(value, appState, setAppState, path);
+    }
+  }
 }

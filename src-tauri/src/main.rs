@@ -1,7 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use crate::frontend_actions::{export_csv, load_frontend_app_state, save_preferences};
+use crate::frontend_actions::{export_csv, load_frontend_app_state, rename_directory, save_preferences};
 
 mod models;
 mod state;
@@ -13,6 +13,7 @@ fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
       load_frontend_app_state,
+      rename_directory,
       save_preferences,
       export_csv
     ])
