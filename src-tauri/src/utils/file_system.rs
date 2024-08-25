@@ -1,4 +1,3 @@
-use std::error::Error;
 #[cfg(target_os = "windows")]
 use std::os::windows::ffi::OsStrExt;
 use std::path::PathBuf;

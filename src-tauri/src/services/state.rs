@@ -7,7 +7,7 @@ use crate::models::imaging_frames::ImagingFrameList;
 use crate::models::imaging_session::ImagingSession;
 use crate::models::preferences::Preferences;
 use crate::models::log::LogTableRow;
-use crate::paths::APP_DATA_PATH;
+use crate::utils::paths::APP_DATA_PATH;
 
 pub struct AppState {
     pub preferences: Preferences,

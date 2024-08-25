@@ -2,9 +2,8 @@ use std::error::Error;
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use serde_json::to_string_pretty;
-use crate::file_store;
-use crate::paths::{APP_DATA_PATH, ROOT_DIRECTORY_PATH};
-use crate::state::{get_app_state, get_readonly_app_state};
+use crate::services::file_store;
+use crate::services::state::get_readonly_app_state;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Preferences {

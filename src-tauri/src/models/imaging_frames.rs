@@ -2,9 +2,8 @@ use std::error::Error;
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::models::equipment::EquipmentList;
-use crate::{file_store, state};
-use crate::state::get_readonly_app_state;
+use crate::services::{file_store, state};
+use crate::services::state::get_readonly_app_state;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ImagingFrameList {

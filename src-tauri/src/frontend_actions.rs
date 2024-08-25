@@ -2,8 +2,8 @@ use std::{fs, io};
 use std::path::PathBuf;
 use crate::models::log::LogTableRow;
 use crate::models::preferences::Preferences;
-use crate::paths::APP_DATA_PATH;
-use crate::state::{get_app_state, get_readonly_app_state};
+use crate::services::state::{FrontendAppState, get_app_state, get_readonly_app_state};
+use crate::utils::paths::APP_DATA_PATH;
 
 #[tauri::command]
 pub fn load_frontend_app_state() -> String {
@@ -16,7 +16,7 @@ pub fn load_frontend_app_state() -> String {
         log_data.push(LogTableRow::new(imaging_session));
     }
 
-    let data = crate::state::FrontendAppState {
+    let data = FrontendAppState {
         preferences,
         log_data,
     };
