@@ -2,14 +2,19 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use crate::frontend_actions::{check_meta_data_directory, export_csv, load_frontend_app_state, rename_directory, save_preferences, setup_backup};
+use crate::setup::setup;
 
 mod models;
 mod state;
 mod paths;
 mod file_store;
 mod frontend_actions;
+mod file_system;
+mod setup;
 
 fn main() {
+    setup();
+
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
       load_frontend_app_state,

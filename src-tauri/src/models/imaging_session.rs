@@ -18,12 +18,14 @@ pub struct ImagingSession {
 impl ImagingSession {
     pub fn load_list(dir: PathBuf) -> Result<Vec<ImagingSession>, Box<dyn Error>> {
         let mut filename = dir;
+        filename.push(".astrolog");
         filename.push("imaging_session_list.json");
         Ok(file_store::load(filename)?)
     }
 
     pub fn save_list(dir: PathBuf) -> Result<(), Box<dyn Error>> {
         let mut filename = dir.canonicalize().unwrap();
+        filename.push(".astrolog");
         filename.push("imaging_session_list.json");
         Ok(file_store::save(dir, serde_json::to_string_pretty(&get_readonly_app_state().imaging_session_list)?)?)
     }

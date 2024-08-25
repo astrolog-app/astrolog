@@ -27,12 +27,14 @@ impl EquipmentList {
 
     pub fn load(dir: PathBuf) -> Result<EquipmentList, Box<dyn Error>> {
         let mut filename = dir;
+        filename.push(".astrolog");
         filename.push("equipment_list.json");
         Ok(file_store::load(filename)?)
     }
 
     pub fn save(dir: PathBuf) -> Result<(), Box<dyn Error>> {
         let mut filename = dir.canonicalize().unwrap();
+        filename.push(".astrolog");
         filename.push("equipment_list.json");
         Ok(file_store::save(dir, serde_json::to_string_pretty(&get_readonly_app_state().equipment_list)?)?)
     }

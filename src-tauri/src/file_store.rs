@@ -3,6 +3,7 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use serde::de::DeserializeOwned;
 use std::error::Error;
+use crate::file_system::set_folder_invisible;
 
 pub fn load<T>(filename: PathBuf) -> Result<T, Box<dyn Error>>
 where
@@ -27,10 +28,12 @@ pub fn save(filename: PathBuf, content: String) -> Result<(), Box<dyn Error>> {
     }
 
     // Open the file in write-only mode, creating it if necessary
-    let mut file = File::create(filename)?;
+    let mut file = File::create(&filename)?;
 
     // Write the JSON string to the file
     file.write_all(content.as_bytes())?;
+
+    set_folder_invisible(filename);
 
     Ok(())
 }

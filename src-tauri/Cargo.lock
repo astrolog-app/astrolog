@@ -72,6 +72,7 @@ dependencies = [
  "tauri",
  "tauri-build",
  "uuid",
+ "winapi",
 ]
 
 [[package]]
