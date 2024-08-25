@@ -14,6 +14,7 @@ import {
   MenubarTrigger,
 } from '@/components/ui/menubar';
 import { Preferences } from './modals/preferences/preferences';
+import { invoke } from '@tauri-apps/api/tauri';
 
 export function TopBar() {
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
@@ -21,6 +22,10 @@ export function TopBar() {
   const togglePreferencesModal = () => {
     setIsPreferencesOpen(!isPreferencesOpen);
   };
+
+  async function openBrowser(url: string) {
+    await invoke("open_browser", { url: url })
+  }
 
   return (
     <div className={styles.topBar}>
@@ -71,7 +76,7 @@ export function TopBar() {
         <MenubarMenu>
           <MenubarTrigger>Help</MenubarTrigger>
           <MenubarContent>
-            <MenubarItem>Community Forum</MenubarItem>
+            <MenubarItem onClick={() => openBrowser("https://www.cloudynights.com/")}>Community Forum</MenubarItem>
             <MenubarSeparator />
             <MenubarItem>Feedback</MenubarItem>
           </MenubarContent>

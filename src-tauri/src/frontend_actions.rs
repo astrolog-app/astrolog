@@ -4,6 +4,7 @@ use crate::models::log::LogTableRow;
 use crate::models::preferences::Preferences;
 use crate::services::state::{FrontendAppState, get_app_state, get_readonly_app_state};
 use crate::utils::paths::APP_DATA_PATH;
+use webbrowser;
 
 #[tauri::command]
 pub fn load_frontend_app_state() -> String {
@@ -86,3 +87,8 @@ pub fn save_preferences(preferences: Preferences) -> bool {
 pub fn export_csv(path: PathBuf) {
     println!("{}", path.display());
 } // TODO: implement
+
+#[tauri::command]
+pub fn open_browser(url: &str) -> bool {
+    webbrowser::open(url).is_ok()
+}
