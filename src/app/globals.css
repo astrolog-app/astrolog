@@ -5,6 +5,7 @@
 :root {
   --top-bar-height: 2.6rem;
   --padding: 0.75rem;
+  --form-gap: 1.5rem;
 }
 
 html {

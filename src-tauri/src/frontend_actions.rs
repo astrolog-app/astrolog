@@ -14,7 +14,6 @@ pub fn load_frontend_app_state() -> String {
     let imaging_session_list = &app_state.imaging_session_list;
     let image_list: Vec<Image> = app_state.image_list.clone();
     let mut log_data: Vec<LogTableRow> = vec![];
-    println!("{:?}", app_state.image_list.clone().into_iter().nth(0));
 
     for imaging_session in imaging_session_list {
         log_data.push(LogTableRow::new(imaging_session));
@@ -95,4 +94,9 @@ pub fn export_csv(path: PathBuf) {
 #[tauri::command]
 pub fn open_browser(url: &str) -> bool {
     webbrowser::open(url).is_ok()
+}
+
+#[tauri::command]
+pub fn add_new_image(image: Image) -> bool {
+    false
 }

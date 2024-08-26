@@ -1,0 +1,13 @@
+.modal {
+  width: 30rem;
+
+  .form {
+    & > *:not(:last-child) {
+      margin-bottom: var(--form-gap);
+    }
+
+    .button {
+      margin-top: 3rem;
+    }
+  }
+}
