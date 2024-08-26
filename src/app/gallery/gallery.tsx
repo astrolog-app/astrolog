@@ -106,7 +106,7 @@ export default function Gallery() {
           <ImageView
             key={index}
             className={styles.imageView}
-            title={image.title}
+            image={image}
           />
         ))}
       </div>

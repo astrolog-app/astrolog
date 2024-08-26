@@ -136,3 +136,8 @@ pub fn add_new_image(image: Image) -> bool {
 
     false
 }
+
+#[tauri::command]
+pub fn open_image(path: PathBuf) {
+    open::that(path);
+}
