@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from 'next-themes';
-import { TopBar } from '@/components/topBar';
 import StateProvider from '@/context/stateProvider';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -23,7 +22,6 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system">
           <StateProvider>
-            <TopBar />
             {children}
             <Toaster />
           </StateProvider>
