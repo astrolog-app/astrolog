@@ -6,9 +6,9 @@ use crate::services::state::get_readonly_app_state;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Image {
-    title: String,
-    path: String,
-    total_exposure: i32
+    pub title: String,
+    pub path: PathBuf,
+    pub total_exposure: i32
 }
 
 impl Image {
@@ -23,6 +23,6 @@ impl Image {
         let mut filename = dir.canonicalize().unwrap();
         filename.push(".astrolog");
         filename.push("image_list.json");
-        Ok(file_store::save(dir, serde_json::to_string_pretty(&get_readonly_app_state().imaging_session_list)?)?)
+        Ok(file_store::save(filename, serde_json::to_string_pretty(&get_readonly_app_state().image_list)?)?)
     }
 }

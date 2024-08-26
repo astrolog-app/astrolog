@@ -27,6 +27,6 @@ impl ImagingSession {
         let mut filename = dir.canonicalize().unwrap();
         filename.push(".astrolog");
         filename.push("imaging_session_list.json");
-        Ok(file_store::save(dir, serde_json::to_string_pretty(&get_readonly_app_state().imaging_session_list)?)?)
+        Ok(file_store::save(filename, serde_json::to_string_pretty(&get_readonly_app_state().imaging_session_list)?)?)
     }
 }
