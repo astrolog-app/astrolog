@@ -113,6 +113,43 @@ export default function StateProvider({ children }: { children: ReactNode }) {
     fetchData();
   }, []);
 
+  // disable browser ContextMenu and shortcuts
+  useEffect(() => {
+    const handleContextMenu = (event: { preventDefault: () => void; }) => {
+      event.preventDefault();
+    };
+
+    const handleKeydown = (event: { ctrlKey: any; metaKey: any; key: string; preventDefault: () => void; }) => {
+      // Check for Ctrl or Cmd key combinations
+      if (
+        (event.ctrlKey || event.metaKey) && // Ctrl on Windows/Linux or Cmd on macOS
+        (event.key === 'p' || event.key === 's' || event.key === 'r' || event.key === 'f')
+      ) {
+        event.preventDefault();
+        console.log(`Default shortcut for ${event.key.toUpperCase()} disabled`);
+      }
+
+      // prevent other default shortcuts
+      switch (event.key) {
+        case 'F5':  // Prevent refreshing the page
+          event.preventDefault();
+          break;
+        default:
+          break;
+      }
+    };
+
+    // Add event listeners
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('keydown', handleKeydown);
+
+    // Cleanup event listeners on unmount
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('keydown', handleKeydown);
+    };
+  }, []);
+
   return (
     <AppStateContext.Provider value={{ appState, setAppState }}>
       {children}

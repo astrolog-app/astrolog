@@ -34,7 +34,14 @@ import { Session, useAppState } from '@/context/stateProvider';
 import { columns as imagingSessionColumns } from './columns';
 import { ChevronDown } from 'lucide-react';
 import { UUID } from 'crypto';
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuShortcut, ContextMenuTrigger } from '../ui/context-menu';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuTrigger
+} from '../ui/context-menu';
 
 export function SessionTable<TData, TValue>({ setSelectedSessionId }: { setSelectedSessionId: (id: UUID) => void }) {
   const { appState } = useAppState();
@@ -176,10 +183,6 @@ export function SessionTable<TData, TValue>({ setSelectedSessionId }: { setSelec
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent className="w-64">
-        <ContextMenuItem inset>
-          Add new Session...
-          <ContextMenuShortcut>⌘[</ContextMenuShortcut>
-        </ContextMenuItem>
         <ContextMenuItem inset disabled={!rowSelected}>
           Edit...
           <ContextMenuShortcut>⌘]</ContextMenuShortcut>
@@ -187,6 +190,11 @@ export function SessionTable<TData, TValue>({ setSelectedSessionId }: { setSelec
         <ContextMenuItem inset disabled={!rowSelected}>
           Delete
           <ContextMenuShortcut>⌘R</ContextMenuShortcut>
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem inset>
+          Add new Session...
+          <ContextMenuShortcut>⌘[</ContextMenuShortcut>
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
