@@ -31,12 +31,17 @@ export function TopBar() {
     <div className={styles.topBar}>
       <Menubar>
         <MenubarMenu>
-          <MenubarTrigger>App</MenubarTrigger>
+          <MenubarTrigger className={styles.astrolog}>AstroLog</MenubarTrigger>
           <MenubarContent>
-            <MenubarItem onClick={togglePreferencesModal}>
-              Preferences
+            <MenubarItem>
+              About AstroLog
             </MenubarItem>
             <MenubarSeparator />
+            <MenubarItem onClick={togglePreferencesModal}>
+              Preferences...
+            </MenubarItem>
+            <MenubarSeparator />
+            <MenubarItem>Hide</MenubarItem>
             <MenubarItem>Exit</MenubarItem>
           </MenubarContent>
         </MenubarMenu>
