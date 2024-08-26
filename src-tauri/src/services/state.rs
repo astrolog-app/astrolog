@@ -3,6 +3,7 @@ use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use crate::models::equipment::EquipmentList;
+use crate::models::image::Image;
 use crate::models::imaging_frames::ImagingFrameList;
 use crate::models::imaging_session::ImagingSession;
 use crate::models::preferences::Preferences;
@@ -14,12 +15,14 @@ pub struct AppState {
     pub equipment_list: EquipmentList,
     pub imaging_frame_list: ImagingFrameList,
     pub imaging_session_list: Vec<ImagingSession>,
+    pub image_list: Vec<Image>
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FrontendAppState {
-    pub(crate) preferences: Preferences,
-    pub(crate) log_data: Vec<LogTableRow>,
+    pub preferences: Preferences,
+    pub log_data: Vec<LogTableRow>,
+    pub image_list: Vec<Image>
 }
 
 impl AppState {
@@ -28,6 +31,7 @@ impl AppState {
         let mut equipment_list = EquipmentList::new();
         let mut imaging_frame_list = ImagingFrameList::new();
         let mut imaging_session_list = vec![];
+        let mut image_list = vec![];
 
         match Preferences::load(APP_DATA_PATH.clone()) {
             Ok(data) => {
@@ -65,11 +69,21 @@ impl AppState {
             }
         }
 
+        match Image::load_list(PathBuf::from(&preferences.storage.root_directory)) {
+            Ok(data) => {
+                image_list = data;
+            }
+            Err(err) => {
+                eprintln!("Error loading image_list {}: {}", "", err);
+            }
+        }
+
         AppState {
             preferences,
             equipment_list,
             imaging_frame_list,
             imaging_session_list,
+            image_list
         }
     }
 }

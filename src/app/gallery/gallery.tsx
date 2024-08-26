@@ -15,25 +15,11 @@ import { Button } from '@/components/ui/button';
 import NewImage from '@/components/modals/newImage/newImage';
 import { open } from '@tauri-apps/api/dialog';
 import { toast } from '@/components/ui/use-toast';
-
-interface ImageView {
-  title: string;
-}
-
-const data: ImageView[] = [
-  { title: '1' },
-  { title: '2' },
-  { title: '3' },
-  { title: '4' },
-  { title: '5' },
-  { title: '6' },
-  { title: '7' },
-  { title: '8' },
-  { title: '9' },
-  { title: '10' },
-];
+import { useAppState } from '@/context/stateProvider';
 
 export default function Gallery() {
+  const { appState } = useAppState();
+
   const [windowWidth, setWindowWidth] = useState<number>(2560);
   const [columns, setColumns] = useState<number>(3);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -116,7 +102,7 @@ export default function Gallery() {
           gap: 'var(--padding)',
         }}
       >
-        {data.map((image, index) => (
+        {appState.image_list.map((image, index) => (
           <ImageView
             key={index}
             className={styles.imageView}

@@ -14,6 +14,7 @@ import {
 export interface AppState {
   preferences: Preferences;
   log_data: Session[];
+  image_list: Image[];
 }
 
 export interface Preferences {
@@ -59,6 +60,12 @@ export interface Session {
   notes: string;
 }
 
+export interface Image {
+  title: string;
+  path: string;
+  total_exposure: number;
+}
+
 const defaultAppState: AppState = {
   preferences: {
     storage: {
@@ -76,6 +83,7 @@ const defaultAppState: AppState = {
     },
   },
   log_data: [],
+  image_list: [],
 };
 
 interface AppStateContextType {
@@ -104,6 +112,10 @@ export default function StateProvider({ children }: { children: ReactNode }) {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    console.log(appState);
+  }, [appState])
 
   return (
     <AppStateContext.Provider value={{ appState, setAppState }}>
