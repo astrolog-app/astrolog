@@ -1,5 +1,8 @@
 use std::{fs, io};
+use std::fs::File;
+use std::io::Read;
 use std::path::PathBuf;
+use base64::encode;
 use crate::models::log::LogTableRow;
 use crate::models::preferences::Preferences;
 use crate::services::state::{FrontendAppState, get_app_state, get_readonly_app_state};
@@ -140,4 +143,20 @@ pub fn add_new_image(image: Image) -> bool {
 #[tauri::command]
 pub fn open_image(path: PathBuf) {
     open::that(path);
+}
+
+#[tauri::command]
+pub fn show_image(file_path: String) -> Result<String, String> {
+    // Open the image file
+    let mut file = File::open(file_path).map_err(|e| e.to_string())?;
+
+    // Read the file content into a buffer
+    let mut buffer = Vec::new();
+    file.read_to_end(&mut buffer).map_err(|e| e.to_string())?;
+
+    // Encode the image data as a Base64 string
+    let base64_string = encode(&buffer);
+
+    // Return the Base64 string
+    Ok(base64_string)
 }
