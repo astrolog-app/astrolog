@@ -2,16 +2,21 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
 
-  .content {
+  .bottom {
     height: calc(100vh - var(--top-bar-height));
-    overflow: auto;
     display: flex;
-    flex-direction: column;
 
-    .tabsContent {
-      flex-grow: 1;
+    .content {
+      display: flex;
+      flex-direction: column;
+      width: calc(100% - var(--side-nav-width));
+      height: 100%;
+      overflow: auto;
+
+      .tabsContent {
+        flex-grow: 1;
+      }
     }
   }
 }

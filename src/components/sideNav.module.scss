@@ -1,0 +1,11 @@
+.sideNav {
+  width: 3rem;
+  height: 100%;
+  border-right: 0.1rem solid hsl(var(--border));
+}
+
+.test {
+  width: 100%;
+  aspect-ratio: 1/1;
+  cursor: pointer;
+}

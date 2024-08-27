@@ -129,14 +129,7 @@ export default function StateProvider({ children }: { children: ReactNode }) {
         console.log(`Default shortcut for ${event.key.toUpperCase()} disabled`);
       }
 
-      // prevent other default shortcuts
-      switch (event.key) {
-        case 'F5':  // Prevent refreshing the page
-          event.preventDefault();
-          break;
-        default:
-          break;
-      }
+      // prevent other default shortcut
     };
 
     // Add event listeners
