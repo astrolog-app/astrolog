@@ -5,7 +5,7 @@
   backdrop-filter: blur(5px) brightness(0.5);
   left: 0;
   top: 0;
-  z-index: 9;
+  z-index: 49;
 
   .modal {
     background-color: hsl(var(--background));
@@ -13,7 +13,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 10;
+    z-index: 50;
 
     border-radius: var(--radius);
     padding: 1rem;
