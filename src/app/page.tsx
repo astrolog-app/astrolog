@@ -1,29 +1,30 @@
+'use client'
+
 import styles from './page.module.scss';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Analytics } from './analytics/analytics';
 import Log from './log/log';
 import Gallery from './gallery/gallery';
 import { TopBar } from '@/components/topBar';
 import SideNav from '@/components/sideNav';
+import React, { useState } from 'react';
 
 export default function Home() {
+  const tabs = [
+    <Log key="log" />,
+    <Gallery key="gallery" />,
+    <Analytics key="analytics" />
+  ]
+  const [selectedTab, setSelectedTab] = useState<React.ReactNode>(tabs[0]);
+
   return (
-    <Tabs defaultValue="log" className={styles.tabs}>
+    <div className={styles.tabs}>
       <TopBar />
       <div className={styles.bottom}>
-        <SideNav />
+        <SideNav tabs={tabs} selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
         <div className={styles.content}>
-          <TabsContent value="log" className={styles.tabsContent}>
-          <Log />
-        </TabsContent>
-          <TabsContent value="gallery">
-            <Gallery />
-          </TabsContent>
-          <TabsContent value="analytics">
-            <Analytics />
-          </TabsContent>
+          {selectedTab}
         </div>
       </div>
-    </Tabs>
+    </div>
   );
 }

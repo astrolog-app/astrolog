@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/menubar';
 import { Preferences } from './modals/preferences/preferences';
 import { invoke } from '@tauri-apps/api/tauri';
-import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export function TopBar() {
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
@@ -88,11 +87,6 @@ export function TopBar() {
           </MenubarContent>
         </MenubarMenu>
       </Menubar>
-      <TabsList className={styles.tabList}>
-        <TabsTrigger value="log">Log</TabsTrigger>
-        <TabsTrigger value="gallery">Gallery</TabsTrigger>
-        <TabsTrigger value="analytics">Analytics</TabsTrigger>
-      </TabsList>
       {isPreferencesOpen && <Preferences onClose={togglePreferencesModal} />}
     </div>
   );
