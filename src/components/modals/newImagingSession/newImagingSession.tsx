@@ -2,55 +2,23 @@
 
 import styles from './newImagingSession.module.scss';
 import { Modal } from '@/components/ui/custom/modal';
-import OptionInput, { ChangeButton } from '@/components/ui/custom/optionInput';
-import { AppState, useAppState } from '@/context/stateProvider';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { invoke } from '@tauri-apps/api/tauri';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
+import NewImagingSessionCalibration from '@/components/modals/newImagingSession/newImagingSessionCalibration';
+import NewImagingSessionEquipment from '@/components/modals/newImagingSession/newImagingSessionEquipment';
+import NewImagingSessionGeneral from '@/components/modals/newImagingSession/newImagingSessionGeneral';
 
 export default function NewImagingSession({
   onClose,
 }: {
   onClose: () => void;
 }) {
-  const { appState } = useAppState();
-  const [value, setValue] = useState<string>(
-    appState.preferences.storage.source_directory,
-  );
-  const [buttonEnabled, setButtonEnabled] = useState<boolean>(value !== '');
-
-  function detectImagingSessions() {
-    invoke('detect_imaging_sessions', { path: value });
-  }
-
-  const formSchema = z.object({
-    path: z.string().min(1, {
-      message: 'Path must be at least a character long.',
-    }),
-  });
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      path: value,
-    },
-  });
-
-  useEffect(() => {
-    setButtonEnabled(value !== '');
-  }, [value]);
+  const tabs: React.ReactNode[] = [
+    <NewImagingSessionGeneral key="general" />,
+    <NewImagingSessionEquipment key="equipment" />,
+    <NewImagingSessionCalibration key="calibration" />,
+  ]
+  const [selectedTab, setSelectedTab] = useState<React.ReactNode>(tabs[0]);
 
   return (
     <Modal
@@ -59,39 +27,8 @@ export default function NewImagingSession({
       separator
       className={styles.modal}
     >
-      <Form {...form}>
-        <FormField
-          control={form.control}
-          name="path"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Source Directory</FormLabel>
-              <FormControl>
-                <OptionInput value={value} disabled>
-                  <ChangeButton
-                    saveAction={(value) => setValue(value)}
-                    path=""
-                    directory
-                    variant="secondary"
-                  />
-                </OptionInput>
-              </FormControl>
-              <FormDescription>
-                The directory of your new imaging session(s).
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button
-          className={styles.submitButton}
-          disabled={!buttonEnabled}
-          onClick={detectImagingSessions}
-          type="submit"
-        >
-          Detect Imaging Sessions
-        </Button>
-      </Form>
+      {selectedTab}
+      <Button type="submit">next</Button>
     </Modal>
   );
 }
