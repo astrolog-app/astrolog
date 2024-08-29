@@ -2,7 +2,9 @@ use std::{fs, io};
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
+use std::process::Command;
 use base64::encode;
+use uuid::Uuid;
 use crate::models::log::LogTableRow;
 use crate::models::preferences::Preferences;
 use crate::services::state::{FrontendAppState, get_app_state, get_readonly_app_state};
@@ -159,4 +161,34 @@ pub fn show_image(file_path: String) -> Result<String, String> {
 
     // Return the Base64 string
     Ok(base64_string)
+}
+
+#[tauri::command]
+pub fn open_imaging_session(id: Uuid) {
+    let path = PathBuf::from(""); // TODO: finish
+
+    #[cfg(target_os = "windows")]
+    {
+        let _ = Command::new("explorer")
+            .arg(path)
+            .status()
+            .expect("Failed to open file explorer on Windows"); // TODO: error handling
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        let _ = Command::new("open")
+            .arg(path)
+            .status()
+            .expect("Failed to open file explorer on macOS");
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        let _ = Command::new("xdg-open")
+            .arg(path)
+            .status()
+            .expect("Failed to open file explorer on Linux");
+    }
+
 }

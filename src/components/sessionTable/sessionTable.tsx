@@ -42,6 +42,8 @@ import {
   ContextMenuShortcut,
   ContextMenuTrigger
 } from '../ui/context-menu';
+import { DeleteSVG } from '@/app/svgs';
+import { invoke } from '@tauri-apps/api/tauri';
 
 export function SessionTable<TData, TValue>({ setSelectedSessionId }: { setSelectedSessionId: (id: UUID) => void }) {
   const { appState } = useAppState();
@@ -183,18 +185,24 @@ export function SessionTable<TData, TValue>({ setSelectedSessionId }: { setSelec
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent className="w-64">
+        <ContextMenuItem inset disabled={!rowSelected} onClick={async () => await invoke("open_imaging_session", { id: selectedRowId })}>
+          Open...
+          <ContextMenuShortcut>⌘]</ContextMenuShortcut>
+        </ContextMenuItem>
         <ContextMenuItem inset disabled={!rowSelected}>
           Edit...
           <ContextMenuShortcut>⌘]</ContextMenuShortcut>
         </ContextMenuItem>
         <ContextMenuItem inset disabled={!rowSelected}>
+          Details...
+        </ContextMenuItem>
+        <ContextMenuItem inset disabled={!rowSelected} className={styles.delete}>
           Delete
-          <ContextMenuShortcut>⌘R</ContextMenuShortcut>
+          <ContextMenuShortcut>{DeleteSVG}</ContextMenuShortcut>
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem inset>
           Add new Session...
-          <ContextMenuShortcut>⌘[</ContextMenuShortcut>
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>

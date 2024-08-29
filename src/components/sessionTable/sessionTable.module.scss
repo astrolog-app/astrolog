@@ -21,6 +21,19 @@
   }
 }
 
+.delete {
+  color: red;
+
+  svg {
+    height: 0.9rem;
+    fill: red;
+  }
+
+  &:hover {
+    color: red;
+  }
+}
+
 .selectedRow {
   background-color: hsl(var(--secondary));
   color: hsl(var(--foreground));

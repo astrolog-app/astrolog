@@ -1,7 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use crate::frontend_actions::{add_new_image, check_meta_data_directory, export_csv, load_frontend_app_state, open_browser, open_image, rename_directory, save_preferences, setup_backup, show_image};
+use crate::frontend_actions::{add_new_image, check_meta_data_directory, export_csv, load_frontend_app_state, open_browser, open_image, open_imaging_session, rename_directory, save_preferences, setup_backup, show_image};
 use crate::services::setup::setup;
 
 mod models;
@@ -23,7 +23,8 @@ fn main() {
       open_browser,
       add_new_image,
       open_image,
-      show_image
+      show_image,
+      open_imaging_session
     ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

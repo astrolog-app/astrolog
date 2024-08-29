@@ -11,7 +11,7 @@ import { Tab } from '@/components/ui/custom/tab';
 import styles from './log.module.scss';
 import { SessionTable } from '@/components/sessionTable/sessionTable';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import NewImagingSession from '@/components/modals/newImagingSession/newImagingSession';
 import { UUID } from 'crypto';
 import { save } from '@tauri-apps/api/dialog';
