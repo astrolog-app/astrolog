@@ -11,7 +11,7 @@ import {
   MenubarSub,
   MenubarSubContent,
   MenubarSubTrigger,
-  MenubarTrigger,
+  MenubarTrigger
 } from '@/components/ui/menubar';
 import { Preferences } from './modals/preferences/preferences';
 import { invoke } from '@tauri-apps/api/tauri';
@@ -24,7 +24,7 @@ export function TopBar() {
   };
 
   async function openBrowser(url: string) {
-    await invoke("open_browser", { url: url })
+    await invoke('open_browser', { url: url });
   }
 
   return (
@@ -46,42 +46,30 @@ export function TopBar() {
           </MenubarContent>
         </MenubarMenu>
         <MenubarMenu>
-          <MenubarTrigger>Imaging Session</MenubarTrigger>
+          <MenubarTrigger>Imaging Frames</MenubarTrigger>
           <MenubarContent>
-            <MenubarItem>Create New</MenubarItem>
-          </MenubarContent>
-        </MenubarMenu>
-        <MenubarMenu>
-          <MenubarTrigger>Calibration</MenubarTrigger>
-          <MenubarContent>
+            <MenubarItem>New Imaging Session...</MenubarItem>
+            <MenubarSeparator />
             <MenubarSub>
-              <MenubarSubTrigger>Create New</MenubarSubTrigger>
+              <MenubarSubTrigger>Calibration</MenubarSubTrigger>
               <MenubarSubContent>
-                <MenubarItem>Dark Frame</MenubarItem>
-                <MenubarItem>Bias Frame</MenubarItem>
+                <MenubarItem>New Dark Frame...</MenubarItem>
+                <MenubarItem>New Bias Frame...</MenubarItem>
               </MenubarSubContent>
             </MenubarSub>
           </MenubarContent>
         </MenubarMenu>
         <MenubarMenu>
-          <MenubarTrigger>Equipment</MenubarTrigger>
+          <MenubarTrigger>Gallery</MenubarTrigger>
           <MenubarContent>
-            <MenubarSub>
-              <MenubarSubTrigger>Create New</MenubarSubTrigger>
-              <MenubarSubContent>
-                <MenubarItem>Telescope</MenubarItem>
-                <MenubarItem>Camera</MenubarItem>
-                <MenubarItem>Mount</MenubarItem>
-                <MenubarItem>Filter</MenubarItem>
-                <MenubarItem>Flattener</MenubarItem>
-              </MenubarSubContent>
-            </MenubarSub>
+            <MenubarItem>New Image...</MenubarItem>
           </MenubarContent>
         </MenubarMenu>
         <MenubarMenu>
           <MenubarTrigger>Help</MenubarTrigger>
           <MenubarContent>
-            <MenubarItem onClick={() => openBrowser("https://www.cloudynights.com/")}>Community Forum</MenubarItem>
+            <MenubarItem onClick={() => openBrowser('https://www.cloudynights.com/')}>Community Forum</MenubarItem>
+            <MenubarItem onClick={() => openBrowser('https://docs.astro-log.app/')}>Documentation</MenubarItem>
             <MenubarSeparator />
             <MenubarItem>Feedback</MenubarItem>
           </MenubarContent>
