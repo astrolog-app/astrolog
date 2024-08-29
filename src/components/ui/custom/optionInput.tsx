@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/tooltip';
 import { toast } from '../use-toast';
 import { AppState, useAppState } from '@/context/stateProvider';
-import { copySVG, deleteSVG } from '@/app/svgs';
+import { CopySVG, DeleteSVG } from '@/app/svgs';
 
 interface OptionInputProps {
   value: string;
@@ -74,7 +74,7 @@ export function OptionInputCopy({ value }: { value: string }) {
               onClick={onClick}
               svg={true}
             >
-              {copySVG}
+              {CopySVG}
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -174,7 +174,7 @@ export function DeleteButton({ value, saveAction, path }: DeleteButtonProps) {
               onClick={onClick}
               svg={true}
             >
-              {deleteSVG}
+              {DeleteSVG}
             </Button>
           </TooltipTrigger>
           <TooltipContent>

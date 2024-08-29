@@ -1,4 +1,4 @@
-import { closeSVG } from '@/app/svgs';
+import { CloseSVG } from '@/app/svgs';
 import { Separator } from '../separator';
 import styles from './modal.module.scss';
 
@@ -23,7 +23,7 @@ export function Modal({
     <div className={styles.background}>
       <div className={styles.modal}>
         <div className={styles.close} onClick={onClose}>
-          {closeSVG}
+          {CloseSVG}
         </div>
         <div className={styles.header}>
           <div className={styles.title}>{title}</div>

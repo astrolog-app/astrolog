@@ -8,17 +8,20 @@ import { TopBar } from '@/components/topBar';
 import SideNav from '@/components/sideNav';
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { LogSVG } from '@/app/svgs';
 
 export interface Tab {
   component: React.ReactNode;
   key: string;
+  tooltip: string;
+  icon: JSX.Element;
 }
 
 export default function Home() {
   const tabs: Tab[] = [
-    { component: <Log />, key: 'log' },
-    { component: <Gallery />, key: 'gallery' },
-    { component: <Analytics />, key: 'analytics' }
+    { component: <Log />, key: 'log', tooltip: 'Astrophotography Log', icon: LogSVG },
+    { component: <Gallery />, key: 'gallery', tooltip: 'Gallery', icon: LogSVG },
+    { component: <Analytics />, key: 'analytics', tooltip: 'Analytics', icon: LogSVG }
   ];
   const [selectedTab, setSelectedTab] = useState(tabs[0]);
 
@@ -33,7 +36,8 @@ export default function Home() {
             key={selectedTab.key}
             initial={{ y: -10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.4 }}
+            exit={{ y: -10, opacity: 0 }}
+            transition={{ duration: 0.2 }}
           >
             {selectedTab.component}
           </motion.div>

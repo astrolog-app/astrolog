@@ -1,11 +1,38 @@
 .sideNav {
-  width: 3rem;
+  width: var(--side-nav-width);
   height: 100%;
   border-right: 0.1rem solid hsl(var(--border));
-}
 
-.test {
-  width: 100%;
-  aspect-ratio: 1/1;
-  cursor: pointer;
+  .tabWrapper {
+    display: flex;
+    width: 100%;
+
+    &:hover {
+      background-color: hsl(var(--primary-custom));
+    }
+
+    .tab {
+      margin-left: 2px;
+      flex-grow: 1;
+      aspect-ratio: 1/1;
+      cursor: pointer;
+      padding: 0.6rem;
+
+      svg {
+        fill: hsl(var(--foreground));
+      }
+    }
+  }
+
+  .selectedWrapper {
+    background-color: hsl(var(--primary));
+
+    &:hover {
+      background-color: hsl(var(--primary));
+    }
+
+    .selected {
+      background-color: hsl(var(--primary-custom));
+    }
+  }
 }
