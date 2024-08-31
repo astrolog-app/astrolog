@@ -4,6 +4,8 @@ import { Input } from '@/components/ui/input';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { TabKey } from '@/components/modals/newImagingSession/newImagingSession';
+import { Button } from '@/components/ui/button';
 
 const formSchema = z.object({
   target: z.string().min(2, {
@@ -12,7 +14,7 @@ const formSchema = z.object({
 });
 
 
-export default function NewImagingSessionGeneral() {
+export default function NewImagingSessionGeneral({ setSelectedTab }: { setSelectedTab: React.Dispatch<React.SetStateAction<TabKey>> }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -21,7 +23,7 @@ export default function NewImagingSessionGeneral() {
   });
 
   function onSubmit() {
-
+    setSelectedTab('equipment');
   }
 
   return (
@@ -34,7 +36,7 @@ export default function NewImagingSessionGeneral() {
             <FormItem>
               <FormLabel>Root Directory</FormLabel>
               <FormControl>
-                <Input />
+                <Input {...field} />
               </FormControl>
               <FormDescription>
                 The directory in your filesystem where all of your astrophotos
@@ -45,6 +47,7 @@ export default function NewImagingSessionGeneral() {
             </FormItem>
           )}
         />
+        <Button type="submit">Next</Button>
       </form>
     </Form>
   );
