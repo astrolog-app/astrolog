@@ -14,7 +14,7 @@ const formSchema = z.object({
 });
 
 
-export default function NewImagingSessionGeneral({ setSelectedTab }: { setSelectedTab: React.Dispatch<React.SetStateAction<TabKey>> }) {
+export default function NewImagingSessionGeneral({ setSelectedTab }: { setSelectedTab: React.Dispatch<React.SetStateAction<TabKey | undefined>> }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
