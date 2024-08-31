@@ -21,23 +21,27 @@
     border: 1px hsl(var(--border)) solid;
     overflow: auto;
 
-    .row {
-      padding: 0.1rem;
-      color: hsl(var(--muted-foreground));
-      white-space: nowrap;
-      font-size: small;
+    .rowWrapper {
+      width: fit-content;
 
-      &:nth-child(2n) {
-        background-color: hsl(var(--secondary));
+      .row {
+        padding: 0.1rem;
+        color: hsl(var(--muted-foreground));
+        white-space: nowrap;
+        font-size: small;
+
+        &:nth-child(2n) {
+          background-color: hsl(var(--secondary));
+        }
       }
-    }
 
-    .selected {
-      background-color: hsl(var(--primary-custom));
-
-
-      &:nth-child(2n) {
+      .selected {
         background-color: hsl(var(--primary-custom));
+
+
+        &:nth-child(2n) {
+          background-color: hsl(var(--primary-custom));
+        }
       }
     }
 

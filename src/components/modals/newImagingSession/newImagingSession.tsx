@@ -165,15 +165,17 @@ function FileSelector({ files, setFiles }: FileSelectorProps) {
   return (
     <div className={styles.fileSelector}>
       <div className={styles.left}>
-        {Array.from(files).map((file, index) => (
-          <div
-            onClick={() => rowClick(index)}
-            className={cn(styles.row, selectedRowIndex === index ? styles.selected : '')}
-            key={index}
-          >
-            {file}
-          </div>
-        ))}
+        <div className={styles.rowWrapper}>
+          {Array.from(files).map((file, index) => (
+            <div
+              onClick={() => rowClick(index)}
+              className={cn(styles.row, selectedRowIndex === index ? styles.selected : '')}
+              key={index}
+            >
+              {file}
+            </div>
+          ))}
+        </div>
         {files.size === 0 && (
           <div className={styles.noFiles}>No Files Selected.</div>
         )}
