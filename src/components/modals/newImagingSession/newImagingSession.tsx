@@ -50,7 +50,7 @@ export default function NewImagingSession(
 }
 
 const formSchema = z.object({
-  target: z.array(z.string()).min(2, {
+  target: z.array(z.string()).min(1, {
     message: 'You must at least select one light frame.'
   })
 });
@@ -58,8 +58,6 @@ const formSchema = z.object({
 function SelectLightFrames({ setSelectedTab }: {
   setSelectedTab: React.Dispatch<React.SetStateAction<TabKey | undefined>>
 }) {
-  const [selectedFrames, setSelectedFrames] = useState<Set<string>>(new Set);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {

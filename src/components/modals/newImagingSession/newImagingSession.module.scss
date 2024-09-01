@@ -1,5 +1,6 @@
 .modal {
-  width: 30rem;
+  min-width: 30rem;
+  max-width: 50rem;
 
   .submitButton {
     margin-top: 2rem;
