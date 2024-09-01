@@ -104,18 +104,17 @@ interface FileSelectorProps {
 }
 
 function FileSelector({ files, setFiles }: FileSelectorProps) {
-  const [selectedRowIndex, setSelectedRowIndex] = useState<number | undefined>(undefined);
+  const [selectedRowIndices, setSelectedRowIndices] = useState<number[]>([]);
   const [clearDisabled, setClearEnabled] = useState<boolean>(false);
   const [removeDisabled, setRemoveEnabled] = useState<boolean>(false);
 
   useEffect(() => {
     setClearEnabled(files.size === 0);
-    setSelectedRowIndex(undefined);
   }, [files]);
 
   useEffect(() => {
-    setRemoveEnabled(selectedRowIndex === undefined);
-  }, [selectedRowIndex]);
+    setRemoveEnabled(selectedRowIndices.length === 0);
+  }, [selectedRowIndices]);
 
   function onClick() {
     open({
@@ -141,25 +140,63 @@ function FileSelector({ files, setFiles }: FileSelectorProps) {
       });
   }
 
-  function rowClick(index: number) {
-    if (index === selectedRowIndex) {
-      setSelectedRowIndex(undefined);
-    } else {
-      setSelectedRowIndex(index);
+  function rowClick(index: number, event: React.MouseEvent) {
+    const selectedRows = selectedRowIndices;
+
+    const lastSelectedIndex = selectedRowIndices[selectedRowIndices.length - 1];
+    const start = Math.min(lastSelectedIndex, index);
+    const end = Math.max(lastSelectedIndex, index);
+    const newSelectedIndices: number[] = [];
+
+    switch (true) {
+      case event.shiftKey:
+        for (let i = start; i <= end; i++) {
+          if (!selectedRowIndices.includes(i)) {
+            newSelectedIndices.push(i);
+          }
+        }
+
+        setSelectedRowIndices((prevSelectedIndices) => [
+          ...prevSelectedIndices,
+          ...newSelectedIndices
+        ]);
+        break;
+      case event.ctrlKey:
+        if (selectedRows.includes(index)) {
+          setSelectedRowIndices(selectedRows.filter((e) => e !== index));
+        } else {
+          setSelectedRowIndices((prevSelectedIndices) => [
+            ...prevSelectedIndices,
+            index
+          ]);
+        }
+        break;
+      default:
+        setSelectedRowIndices([index]);
+        if (selectedRows.includes(index) && selectedRows.length === 1) {
+          setSelectedRowIndices([]);
+        }
+        break;
     }
   }
 
-  function removeItem(index: number | undefined) {
-    if (index !== undefined) {
-      const newSet = files;
-      newSet.delete(Array.from(files)[index]);
+  function removeItems(indices: number[]) {
+    if (indices.length > 0) {
+      const newSet = new Set(files);
+      const filesArray = Array.from(files);
+
+      indices.forEach(index => {
+        newSet.delete(filesArray[index]);
+      });
 
       setFiles(new Set(Array.from(newSet)));
+      setSelectedRowIndices([]);
     }
   }
 
   function clearList() {
-    setFiles(new Set);
+    setFiles(new Set());
+    setSelectedRowIndices([]);
   }
 
   return (
@@ -168,8 +205,8 @@ function FileSelector({ files, setFiles }: FileSelectorProps) {
         <div className={styles.rowWrapper}>
           {Array.from(files).map((file, index) => (
             <div
-              onClick={() => rowClick(index)}
-              className={cn(styles.row, selectedRowIndex === index ? styles.selected : '')}
+              onClick={(event) => rowClick(index, event)}
+              className={cn(styles.row, selectedRowIndices.includes(index) ? styles.selected : '')}
               key={index}
             >
               {file}
@@ -182,7 +219,7 @@ function FileSelector({ files, setFiles }: FileSelectorProps) {
       </div>
       <div className={styles.right}>
         <Button type="button" onClick={onClick} variant="secondary">Add...</Button>
-        <Button type="button" onClick={() => removeItem(selectedRowIndex)} variant="outline"
+        <Button type="button" onClick={() => removeItems(selectedRowIndices)} variant="outline"
                 disabled={removeDisabled}>Remove</Button>
         <Button type="button" onClick={clearList} variant="outline" disabled={clearDisabled}>Clear</Button>
       </div>
