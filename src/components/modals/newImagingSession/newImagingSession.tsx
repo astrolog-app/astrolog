@@ -50,8 +50,8 @@ export default function NewImagingSession(
 }
 
 const formSchema = z.object({
-  target: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
+  target: z.array(z.string()).min(2, {
+    message: 'You must at least select one light frame.'
   })
 });
 
@@ -63,7 +63,7 @@ function SelectLightFrames({ setSelectedTab }: {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      target: ''
+      target: []
     }
   });
 
@@ -84,7 +84,7 @@ function SelectLightFrames({ setSelectedTab }: {
                 The light frames of your new imaging session.
               </FormDescription>
               <FormControl>
-                <FileListSelector files={selectedFrames} setFiles={setSelectedFrames} />
+                <FileListSelector {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -6,14 +6,20 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
 interface FileSelectorProps {
-  files: Set<string>;
-  setFiles: React.Dispatch<React.SetStateAction<Set<string>>>;
+  value: string[],
+  onChange: (files: string[]) => void
 }
 
-export default function FileListSelector({ files, setFiles }: FileSelectorProps) {
+export default function FileListSelector({ value, onChange }: FileSelectorProps) {
   const [selectedRowIndices, setSelectedRowIndices] = useState<number[]>([]);
   const [clearDisabled, setClearEnabled] = useState<boolean>(false);
   const [removeDisabled, setRemoveEnabled] = useState<boolean>(false);
+
+  const [files, setFiles] = useState<Set<string>>(new Set(value));
+  const changeFiles = (newFiles: Set<string>) => {
+    onChange(Array.from(newFiles));
+    setFiles(newFiles);
+  };
 
   useEffect(() => {
     setClearEnabled(files.size === 0);
@@ -35,7 +41,7 @@ export default function FileListSelector({ files, setFiles }: FileSelectorProps)
           } else {
             selectedFiles.forEach((file) => newFiles.add(file));
           }
-          setFiles(newFiles);
+          changeFiles(newFiles);
         }
       })
       .catch((err) => {
@@ -96,13 +102,13 @@ export default function FileListSelector({ files, setFiles }: FileSelectorProps)
         newSet.delete(filesArray[index]);
       });
 
-      setFiles(new Set(Array.from(newSet)));
+      changeFiles(new Set(Array.from(newSet)));
       setSelectedRowIndices([]);
     }
   }
 
   function clearList() {
-    setFiles(new Set());
+    changeFiles(new Set());
     setSelectedRowIndices([]);
   }
 
