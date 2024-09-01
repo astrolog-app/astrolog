@@ -1,6 +1,3 @@
-import OptionInput, {
-  OptionInputCopy,
-} from '@/components/ui/custom/optionInput';
 import styles from './preferences.module.scss';
 import {
   Form,
@@ -17,6 +14,8 @@ import { useAppState } from '@/context/stateProvider';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import FileSelector from '@/components/fileSelectors/fileSelector';
+import { CopyButton } from '@/components/ui/button';
 
 const formSchema = z.object({
   userEmail: z.string().min(2, {
@@ -61,9 +60,9 @@ export default function LicenseForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <OptionInput {...field} disabled>
-                  <OptionInputCopy {...field} />
-                </OptionInput>
+                <FileSelector {...field} disabled>
+                  <CopyButton {...field} />
+                </FileSelector>
               </FormControl>
               <FormDescription>
                 The email you purchased AstroLog with.
@@ -79,9 +78,9 @@ export default function LicenseForm() {
             <FormItem>
               <FormLabel>License Key</FormLabel>
               <FormControl>
-                <OptionInput {...field} disabled>
-                  <OptionInputCopy {...field} />
-                </OptionInput>
+                <FileSelector {...field} disabled>
+                  <CopyButton {...field} />
+                </FileSelector>
               </FormControl>
               <FormDescription>Your license key for AstroLog.</FormDescription>
               <FormMessage />

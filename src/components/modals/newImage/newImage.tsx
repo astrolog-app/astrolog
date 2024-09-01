@@ -2,7 +2,7 @@
 
 import { Modal } from '@/components/ui/custom/modal';
 import styles from './newImage.module.scss';
-import OptionInput, { ChangeButton } from '@/components/ui/custom/optionInput';
+import FileSelector, { FileSelectorChangeButton } from '@/components/fileSelectors/fileSelector';
 import { useState } from 'react';
 import { DialogFilter } from '@tauri-apps/api/dialog';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';

@@ -15,14 +15,11 @@ import { useToast } from '@/components/ui/use-toast';
 import { AppState, savePreferences, useAppState } from '@/context/stateProvider';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import OptionInput, {
-  ChangeButton,
-  DeleteButton,
-  OptionInputCopy
-} from '@/components/ui/custom/optionInput';
+import FileSelector, { FileSelectorChangeButton } from '@/components/fileSelectors/fileSelector';
 import { z } from 'zod';
 import { invoke } from '@tauri-apps/api/tauri';
 import React from 'react';
+import { CopyButton, DeleteButton } from '@/components/ui/button';
 
 const formSchema = z.object({
   rootDirectory: z.string().min(2, {
@@ -71,19 +68,19 @@ export default function StorageForm() {
             <FormItem>
               <FormLabel>Root Directory</FormLabel>
               <FormControl>
-                <OptionInput
+                <FileSelector
                   value={appState.preferences.storage.root_directory}
                   disabled
                 >
-                  <OptionInputCopy
+                  <CopyButton
                     value={appState.preferences.storage.root_directory}
                   />
-                  <ChangeButton
+                  <FileSelectorChangeButton
                     path="preferences.storage.root_directory"
                     saveAction={(value, appState, setAppState, path) => rootAction(value, appState, setAppState, path)}
                     directory
                   />
-                </OptionInput>
+                </FileSelector>
               </FormControl>
               <FormDescription>
                 The directory in your filesystem where all of your astrophotos
@@ -101,7 +98,7 @@ export default function StorageForm() {
             <FormItem>
               <FormLabel>Backup Directory (Optional)</FormLabel>
               <FormControl>
-                <OptionInput
+                <FileSelector
                   value={appState.preferences.storage.backup_directory}
                   disabled
                 >
@@ -110,15 +107,15 @@ export default function StorageForm() {
                     path="preferences.storage.backup_directory"
                     saveAction={savePreferences}
                   />
-                  <OptionInputCopy
+                  <CopyButton
                     value={appState.preferences.storage.backup_directory}
                   />
-                  <ChangeButton
+                  <FileSelectorChangeButton
                     path="preferences.storage.backup_directory"
                     saveAction={(value, appState, setAppState, path) => backupAction(value, appState, setAppState, path)}
                     directory
                   />
-                </OptionInput>
+                </FileSelector>
               </FormControl>
               <FormDescription>
                 The directory in your filesystem where all of your astrophotos
@@ -135,7 +132,7 @@ export default function StorageForm() {
             <FormItem>
               <FormLabel>Source Directory (Optional)</FormLabel>
               <FormControl>
-                <OptionInput
+                <FileSelector
                   value={appState.preferences.storage.source_directory}
                   disabled
                 >
@@ -144,15 +141,15 @@ export default function StorageForm() {
                     path="preferences.storage.source_directory"
                     saveAction={savePreferences}
                   />
-                  <OptionInputCopy
+                  <CopyButton
                     value={appState.preferences.storage.source_directory}
                   />
-                  <ChangeButton
+                  <FileSelectorChangeButton
                     path="preferences.storage.source_directory"
                     saveAction={savePreferences}
                     directory
                   />
-                </OptionInput>
+                </FileSelector>
               </FormControl>
               <FormDescription>
                 The default source directory of your new imaging sessions.

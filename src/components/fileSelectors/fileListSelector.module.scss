@@ -1,0 +1,55 @@
+.fileSelector {
+  display: flex;
+  height: 20rem;
+  width: 100%;
+
+  .left {
+    flex-grow: 1;
+    border-radius: var(--radius);
+    border: 1px hsl(var(--border)) solid;
+    overflow: auto;
+
+    .rowWrapper {
+      width: fit-content;
+      min-width: 100%;
+
+      .row {
+        padding: 0.1rem;
+        color: hsl(var(--muted-foreground));
+        white-space: nowrap;
+        font-size: small;
+
+        &:nth-child(2n) {
+          background-color: hsl(var(--secondary));
+        }
+      }
+
+      .selected {
+        background-color: hsl(var(--primary-custom));
+
+
+        &:nth-child(2n) {
+          background-color: hsl(var(--primary-custom));
+        }
+      }
+    }
+
+    .noFiles {
+      font-size: small;
+      height: 100%;
+      align-content: center;
+      text-align: center;
+      color: hsl(var(--muted-foreground));
+    }
+  }
+
+  .right {
+    margin-left: var(--padding);
+    display: flex;
+    flex-direction: column;
+
+    & > *:not(:last-child) {
+      margin-bottom: var(--padding);
+    }
+  }
+}

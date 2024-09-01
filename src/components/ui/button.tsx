@@ -3,6 +3,11 @@ import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
+import { useEffect, useState } from 'react';
+import { toast } from '@/components/ui/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { CopySVG, DeleteSVG } from '@/app/svgs';
+import { AppState, useAppState } from '@/context/stateProvider';
 
 const buttonVariants = cva(
   'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
@@ -60,3 +65,107 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = 'Button';
 
 export { Button, buttonVariants };
+
+export function CopyButton({ value }: { value: string }) {
+  const [selectable, setSelectable] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (value === '') {
+      setSelectable(true);
+    } else {
+      setSelectable(false);
+    }
+  }, [value]);
+
+  function onClick() {
+    navigator.clipboard
+      .writeText(value)
+      .then(() => {
+        toast({
+          description: 'Copied to clipboard.',
+        });
+      })
+      .catch((err) => {
+        toast({
+          variant: 'destructive',
+          description: 'Failed to copy to clipboard: ' + err,
+        });
+      });
+  }
+
+  return (
+    <TooltipProvider>
+      <div>
+        <Tooltip>
+          <TooltipTrigger type="button" asChild>
+            <Button
+              disabled={selectable}
+              type="button"
+              size={'icon'}
+              variant={'outline'}
+              onClick={onClick}
+              svg={true}
+            >
+              {CopySVG}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Copy to clipboard</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    </TooltipProvider>
+  );
+}
+
+interface DeleteButtonProps {
+  value: string;
+  saveAction: (
+    value: string,
+    appState: AppState,
+    setAppState: React.Dispatch<React.SetStateAction<AppState>>,
+    path: string,
+  ) => void;
+  path: string;
+}
+
+export function DeleteButton({ value, saveAction, path }: DeleteButtonProps) {
+  const { appState, setAppState } = useAppState();
+  const [selectable, setSelectable] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (value === '') {
+      setSelectable(true);
+    } else {
+      setSelectable(false);
+    }
+  }, [value]);
+
+  function onClick() {
+    saveAction('', appState, setAppState, path);
+  }
+
+  return (
+    <TooltipProvider>
+      <div>
+        <Tooltip>
+          <TooltipTrigger type="button" asChild>
+            <Button
+              disabled={selectable}
+              type="button"
+              size={'icon'}
+              variant={'outline'}
+              onClick={onClick}
+              svg={true}
+            >
+              {DeleteSVG}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Delete</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    </TooltipProvider>
+  );
+}
