@@ -52,6 +52,7 @@ export function SessionTable<TData, TValue>({ setSelectedSessionId }: { setSelec
     imagingSessionColumns as ColumnDef<TData, TValue>[];
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [globalFilter, setGlobalFilter] = React.useState<string>('');
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
@@ -69,11 +70,14 @@ export function SessionTable<TData, TValue>({ setSelectedSessionId }: { setSelec
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
+    onGlobalFilterChange: setGlobalFilter,
     state: {
       sorting,
+      globalFilter,
       columnFilters,
       columnVisibility,
     },
+    globalFilterFn: 'includesString',
   });
 
   useEffect(() => {
@@ -98,10 +102,8 @@ export function SessionTable<TData, TValue>({ setSelectedSessionId }: { setSelec
           <div className={styles.header}>
             <Input
               placeholder="Search..."
-              value={(table.getColumn('target')?.getFilterValue() as string) ?? ''}
-              onChange={(event) =>
-                table.getColumn('target')?.setFilterValue(event.target.value)
-              }
+              value={globalFilter}
+              onChange={(event) => setGlobalFilter(event.target.value)}
               className={styles.searchField}
             />
             <DropdownMenu>
