@@ -80,18 +80,18 @@ export default function NewImage({ onClose, defaultValue, dialogFilters }: NewIm
                   Path
                 </FormLabel>
                 <FormControl>
-                  <OptionInput
+                  <FileSelector
                     value={path}
                     disabled
                   >
-                    <ChangeButton
+                    <FileSelectorChangeButton
                       saveAction={(value) => {
                         setPath(value);
                       }}
                       path=""
                       filters={dialogFilters}
                     />
-                  </OptionInput>
+                  </FileSelector>
                 </FormControl>
                 <FormDescription>
                   The path of the new Image.
