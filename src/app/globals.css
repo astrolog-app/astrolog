@@ -7,7 +7,6 @@
   --padding: 0.75rem;
   --form-gap: 1.5rem;
   --side-nav-width: 3.25rem;
-  --primary-custom: 346.8 77.2% 92.5%;
 }
 
 html {
@@ -43,6 +42,8 @@ html {
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+
+    --primary-custom: 346.8 77.2% 95%;
   }
 
   .dark {
@@ -71,6 +72,8 @@ html {
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
+    --primary-custom: 346.8 77.2% 12.5%;
   }
 }
 

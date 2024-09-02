@@ -22,7 +22,7 @@ export default function ImageView({ className, image }: ImageViewProps) {
     <Card className={className}>
       <CardHeader>
         <div className={styles.title}>{image.title}</div>
-        <img src={imageSrc} className={styles.image} onClick={async () => {
+        <img loading="lazy" src={imageSrc} className={styles.image} onClick={async () => {
           await invoke('open_image', { path: image.path });
         }}  alt="load"/>
       </CardHeader>
