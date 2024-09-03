@@ -1,3 +1,4 @@
+use std::{fs, io};
 #[cfg(target_os = "windows")]
 use std::os::windows::ffi::OsStrExt;
 use std::path::PathBuf;
@@ -30,4 +31,16 @@ pub fn set_folder_invisible(path: PathBuf) {
             }
         }
     }
+}
+
+pub fn is_directory_empty(path: &PathBuf) -> io::Result<bool> {
+    let mut entries = fs::read_dir(path)?;
+    Ok(entries.next().is_none())
+}
+
+pub fn rename_folder_with_overwrite(old_path: &PathBuf, new_path: &PathBuf) -> io::Result<()> {
+    if fs::metadata(new_path).is_ok() {
+        fs::remove_dir_all(new_path)?;
+    }
+    fs::rename(old_path, new_path)
 }

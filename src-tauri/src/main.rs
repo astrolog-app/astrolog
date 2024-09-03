@@ -1,7 +1,11 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use crate::frontend_actions::{add_new_image, analyze_images, check_meta_data_directory, export_csv, load_frontend_app_state, open_browser, open_image, open_imaging_session, rename_directory, save_preferences, setup_backup};
+use crate::frontend_actions::gallery::{add_new_image, open_image};
+use crate::frontend_actions::imaging_sessions::{analyze_images, export_csv, open_imaging_session};
+use crate::frontend_actions::preferences::{check_meta_data_directory, save_preferences, setup_backup};
+use crate::frontend_actions::state::load_frontend_app_state;
+use crate::frontend_actions::utils::{open_browser, rename_directory};
 use crate::services::setup::setup;
 
 mod models;
