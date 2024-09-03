@@ -5,6 +5,7 @@ import { Separator } from '../separator';
 import styles from './modal.module.scss';
 import { useModal } from '@/context/modalProvider';
 import { motion } from 'framer-motion';
+import React from 'react';
 
 interface ModalProps {
   className?: string;
@@ -25,13 +26,19 @@ export function Modal(
   const { closeModal } = useModal();
 
   return (
-    <div className={styles.background}>
+    <motion.div
+      className={styles.background}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.05 }}
+    >
       <div className={styles.modalWrapper}>
         <motion.div
           className={styles.modal}
-          initial={{ scale: 0.95 }}
-          animate={{ scale: 1 }}
-          exit={{ scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
           transition={{ duration: 0.05 }}
         >
           <div className={styles.close} onClick={closeModal}>
@@ -45,6 +52,6 @@ export function Modal(
           <div className={className}>{children}</div>
         </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }
