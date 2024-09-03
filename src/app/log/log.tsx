@@ -59,7 +59,7 @@ export default function Log() {
           </CardDescription>
         </CardHeader>
         <CardContent className={styles.buttons}>
-          <Button variant="secondary" onClick={() => openModal(<NewImagingSessionEquipment />)}>
+          <Button variant="secondary" onClick={() => openModal(<NewImagingSession />)}>
             Add Imaging Session
           </Button>
           <Button variant="ghost" onClick={exportCSV}>

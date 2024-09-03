@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatePresence } from 'framer-motion';
 import React, { createContext, useContext, useState } from 'react';
 
 interface ModalContextType {
@@ -10,7 +11,7 @@ interface ModalContextType {
 const defaultValue = {
   openModal: () => {},
   closeModal: () => {}
-}
+};
 
 const ModalContext = createContext<ModalContextType>(defaultValue);
 
@@ -28,7 +29,9 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <ModalContext.Provider value={{ openModal, closeModal }}>
       {children}
-      {modalContent}
+      <AnimatePresence mode="wait">
+        {modalContent}
+      </AnimatePresence>
     </ModalContext.Provider>
   );
 };
