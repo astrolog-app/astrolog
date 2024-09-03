@@ -3,7 +3,7 @@ use crate::models::log::LogTableRow;
 use crate::services::state::{FrontendAppState, get_readonly_app_state};
 
 #[tauri::command]
-pub fn load_frontend_app_state() -> String {
+pub fn load_frontend_app_state() -> Result<String, String> {
     let app_state = get_readonly_app_state();
     let preferences = app_state.preferences.clone();
     let imaging_session_list = &app_state.imaging_session_list;
@@ -20,5 +20,5 @@ pub fn load_frontend_app_state() -> String {
         image_list,
     };
 
-    serde_json::to_string(&data).unwrap()
+    serde_json::to_string(&data).map_err(|e| e.to_string())
 }

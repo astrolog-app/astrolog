@@ -8,8 +8,9 @@ import {
   ReactNode,
   useContext,
   useEffect,
-  useState,
+  useState
 } from 'react';
+import { toast } from '@/components/ui/use-toast';
 
 export interface AppState {
   preferences: Preferences;
@@ -71,19 +72,19 @@ const defaultAppState: AppState = {
     storage: {
       root_directory: '',
       backup_directory: '',
-      source_directory: '',
+      source_directory: ''
     },
     user: {
-      weather_api_key: '',
+      weather_api_key: ''
     },
     license: {
       activated: false,
       user_email: '',
-      license_key: '',
-    },
+      license_key: ''
+    }
   },
   log_data: [],
-  image_list: [],
+  image_list: []
 };
 
 interface AppStateContextType {
@@ -92,7 +93,7 @@ interface AppStateContextType {
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(
-  undefined,
+  undefined
 );
 
 export default function StateProvider({ children }: { children: ReactNode }) {
@@ -106,7 +107,12 @@ export default function StateProvider({ children }: { children: ReactNode }) {
 
         setAppState(responseData);
       } catch (error) {
-        console.error('Error fetching or parsing data:', error);
+        const errorMsg = error as string;
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'Error: ' + errorMsg
+        });
       }
     }
 
@@ -162,7 +168,7 @@ export function savePreferences(
   value: string,
   appState: AppState,
   setAppState: React.Dispatch<React.SetStateAction<AppState>>,
-  path: string,
+  path: string
 ) {
   const keys = path.split('.');
 
@@ -182,5 +188,18 @@ export function savePreferences(
     return updatedState;
   });
 
-  invoke('save_preferences', { preferences: appState.preferences });
+  async function savePreferences() {
+    try {
+      await invoke('save_preferences', { preferences: appState.preferences });
+    } catch (error) {
+      const errorMsg = error as string;
+      toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: 'Error: ' + errorMsg
+      });
+    }
+  }
+
+  savePreferences();
 }

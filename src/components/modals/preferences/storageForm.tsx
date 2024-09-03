@@ -11,7 +11,7 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { ToastAction } from '@/components/ui/toast';
-import { useToast } from '@/components/ui/use-toast';
+import { toast, useToast } from '@/components/ui/use-toast';
 import { AppState, savePreferences, useAppState } from '@/context/stateProvider';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -167,19 +167,29 @@ export default function StorageForm() {
 async function rootAction(value: string, appState: AppState, setAppState: React.Dispatch<React.SetStateAction<AppState>>, path: string) {
   let origin = appState.preferences.storage.root_directory;
   if (origin != '') {
-    if (await invoke('rename_directory', { origin: origin, destination: value })) {
-      savePreferences(value, appState, setAppState, path);
-    } else {
-      // TODO: open toast
+    try {
+      await invoke('rename_directory', { origin: origin, destination: value });
+    } catch (error) {
+      const errorMsg = error as string;
+      toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: 'Error: ' + errorMsg
+      });
     }
   } else {
-    if (await invoke('check_meta_data_directory')) {
-      savePreferences(value, appState, setAppState, path);
-    } else {
-      if (await invoke("create_dir", { path: value })) {
-        savePreferences(value, appState, setAppState, path);
-      } else {
-        // TODO: open toast
+    try {
+      await invoke('check_meta_data_directory');
+    } catch (error) {
+      try {
+        await invoke('create_dir', { path: value });
+      } catch (error) {
+        const errorMsg = error as string;
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'Error: ' + errorMsg
+        });
       }
     }
   }

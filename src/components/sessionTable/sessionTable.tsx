@@ -44,6 +44,7 @@ import {
 } from '../ui/context-menu';
 import { DeleteSVG } from '@/app/svgs';
 import { invoke } from '@tauri-apps/api/tauri';
+import { toast } from '@/components/ui/use-toast';
 
 export function SessionTable<TData, TValue>({ setSelectedSessionId }: { setSelectedSessionId: (id: UUID) => void }) {
   const { appState } = useAppState();
@@ -94,6 +95,19 @@ export function SessionTable<TData, TValue>({ setSelectedSessionId }: { setSelec
     const rowData = table.getRowModel().rows.find((row) => row.id === rowId)?.original as Session;
     setSelectedSessionId(rowData.id);
   };
+
+  async function openImagingSession() {
+    try {
+      await invoke('open_imaging_session', { id: selectedRowId });
+    } catch (error) {
+      const errorMsg = error as string;
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "Error: " + errorMsg
+      })
+    }
+  }
 
   return (
     <ContextMenu>
@@ -187,7 +201,7 @@ export function SessionTable<TData, TValue>({ setSelectedSessionId }: { setSelec
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent className="w-64">
-        <ContextMenuItem inset disabled={!rowSelected} onClick={async () => await invoke("open_imaging_session", { id: selectedRowId })}>
+        <ContextMenuItem inset disabled={!rowSelected} onClick={openImagingSession}>
           Open...
           <ContextMenuShortcut>⌘]</ContextMenuShortcut>
         </ContextMenuItem>

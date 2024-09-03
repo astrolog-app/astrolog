@@ -11,33 +11,49 @@ pub fn export_csv(path: PathBuf) {
 } // TODO: implement
 
 #[tauri::command]
-pub fn open_imaging_session(id: Uuid) {
+pub fn open_imaging_session(id: Uuid) -> Result<(), String> {
     let path = PathBuf::from(""); // TODO: finish
 
     #[cfg(target_os = "windows")]
     {
-        let _ = Command::new("explorer")
-            .arg(path)
+        Command::new("explorer")
+            .arg(&path)
             .status()
-            .expect("Failed to open file explorer on Windows"); // TODO: error handling
+            .map_err(|e| e.to_string())
+            .and_then(|status| if status.success() {
+                Ok(())
+            } else {
+                Err("Failed to open file explorer on Windows".to_string())
+            })?;
     }
 
     #[cfg(target_os = "macos")]
     {
-        let _ = Command::new("open")
-            .arg(path)
+        Command::new("open")
+            .arg(&path)
             .status()
-            .expect("Failed to open file explorer on macOS");
+            .map_err(|e| e.to_string())
+            .and_then(|status| if status.success() {
+                Ok(())
+            } else {
+                Err("Failed to open file explorer on macOS".to_string())
+            })?;
     }
 
     #[cfg(target_os = "linux")]
     {
-        let _ = Command::new("xdg-open")
-            .arg(path)
+        Command::new("xdg-open")
+            .arg(&path)
             .status()
-            .expect("Failed to open file explorer on Linux");
+            .map_err(|e| e.to_string())
+            .and_then(|status| if status.success() {
+                Ok(())
+            } else {
+                Err("Failed to open file explorer on Linux".to_string())
+            })?;
     }
 
+    Ok(())
 }
 
 #[tauri::command]

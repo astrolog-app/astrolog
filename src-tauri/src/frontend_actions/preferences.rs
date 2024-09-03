@@ -9,15 +9,7 @@ pub fn check_meta_data_directory(path: String) {}
 pub fn setup_backup(path: String) {}
 
 #[tauri::command]
-pub fn save_preferences(preferences: Preferences) -> bool {
+pub fn save_preferences(preferences: Preferences) -> Result<(), String> {
     get_app_state().preferences = preferences;
-    return match Preferences::save(APP_DATA_PATH.clone()) {
-        Ok(..) => {
-            true
-        }
-        Err(e) => {
-            // TODO: trigger modal
-            false
-        }
-    };
+    Preferences::save(APP_DATA_PATH.clone()).map_err(|e| e.to_string())
 }

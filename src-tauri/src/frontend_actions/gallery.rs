@@ -4,6 +4,7 @@ use crate::models::image::Image;
 use crate::services::state::{get_app_state, get_readonly_app_state};
 use crate::utils::paths::ROOT_DIRECTORY_PATH;
 
+// TODO: finish
 #[tauri::command]
 pub fn add_new_image(image: Image) -> bool {
     let mut destination = ROOT_DIRECTORY_PATH.clone();
@@ -46,7 +47,6 @@ pub fn add_new_image(image: Image) -> bool {
 }
 
 #[tauri::command]
-pub fn open_image(path: PathBuf) {
-    open::that(path);
+pub fn open_image(path: PathBuf) -> Result<(), String> {
+    open::that(path).map_err(|e| e.to_string())
 }
-

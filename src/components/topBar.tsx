@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/menubar';
 import { Preferences } from './modals/preferences/preferences';
 import { invoke } from '@tauri-apps/api/tauri';
+import { toast } from '@/components/ui/use-toast';
 
 export function TopBar() {
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
@@ -24,7 +25,16 @@ export function TopBar() {
   };
 
   async function openBrowser(url: string) {
-    await invoke('open_browser', { url: url });
+    try {
+      await invoke('open_browser', { url: url });
+    } catch (error) {
+      const errorMsg = error as string;
+      toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: 'Error: ' + errorMsg
+      });
+    }
   }
 
   return (
