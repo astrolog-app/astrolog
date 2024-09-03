@@ -14,9 +14,9 @@ import { Button } from '@/components/ui/button';
 import { Image } from '@/context/stateProvider';
 import { invoke } from '@tauri-apps/api/tauri';
 import { toast } from '@/components/ui/use-toast';
+import { useModal } from '@/context/modalProvider';
 
 interface NewImageProps {
-  onClose: () => void;
   defaultValue: string;
   dialogFilters: DialogFilter[];
 }
@@ -30,7 +30,9 @@ const formSchema = z.object({
   }),
 });
 
-export default function NewImage({ onClose, defaultValue, dialogFilters }: NewImageProps) {
+export default function NewImage({ defaultValue, dialogFilters }: NewImageProps) {
+  const { closeModal } = useModal();
+
   const [path, setPath] = useState<string>(defaultValue);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -52,7 +54,7 @@ export default function NewImage({ onClose, defaultValue, dialogFilters }: NewIm
       toast({
         description: "Success"
       })
-      onClose();
+      closeModal();
     } else {
       toast({
         variant: "destructive",
@@ -64,7 +66,6 @@ export default function NewImage({ onClose, defaultValue, dialogFilters }: NewIm
 
   return (
     <Modal
-      onClose={onClose}
       title="Add Image"
       separator
       className={styles.modal}

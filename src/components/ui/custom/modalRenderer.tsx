@@ -2,7 +2,7 @@
 
 import { useModal } from '@/context/modalProvider';
 
-export default function ModalWrapper(): React.ReactNode {
+export default function ModalRenderer(): React.ReactNode {
   const { modalContent} = useModal();
 
   return modalContent;

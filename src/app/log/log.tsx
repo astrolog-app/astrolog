@@ -11,22 +11,20 @@ import { Tab } from '@/components/ui/custom/tab';
 import styles from './log.module.scss';
 import { SessionTable } from '@/components/sessionTable/sessionTable';
 import { Button } from '@/components/ui/button';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import NewImagingSession from '@/components/modals/newImagingSession/newImagingSession';
 import { UUID } from 'crypto';
 import { save } from '@tauri-apps/api/dialog';
 import { toast } from '@/components/ui/use-toast';
 import { invoke } from '@tauri-apps/api/tauri';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import { useModal } from '@/context/modalProvider';
+import NewImagingSessionEquipment from '@/components/modals/newImagingSession/newImagingSessionEquipment';
 
 export default function Log() {
-  const [isModalOpen, setisModalOpen] = useState(false);
-  const [selectedSessionId, setSelectedSessionId] = useState<UUID | undefined>(undefined);
+  const { openModal } = useModal();
 
-  function toggleModal() {
-    setisModalOpen(!isModalOpen);
-    console.log(isModalOpen);
-  }
+  const [selectedSessionId, setSelectedSessionId] = useState<UUID | undefined>(undefined);
 
   function exportCSV() {
     save({
@@ -61,7 +59,7 @@ export default function Log() {
           </CardDescription>
         </CardHeader>
         <CardContent className={styles.buttons}>
-          <Button variant="secondary" onClick={toggleModal}>
+          <Button variant="secondary" onClick={() => openModal(<NewImagingSessionEquipment />)}>
             Add Imaging Session
           </Button>
           <Button variant="ghost" onClick={exportCSV}>
@@ -90,7 +88,6 @@ export default function Log() {
           </Card>
         </ResizablePanel>
       </ResizablePanelGroup>
-      {isModalOpen && <NewImagingSession onClose={toggleModal} />}
     </Tab>
   );
 }

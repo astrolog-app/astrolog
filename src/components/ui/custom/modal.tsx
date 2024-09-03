@@ -1,13 +1,15 @@
+'use client';
+
 import { CloseSVG } from '@/app/svgs';
 import { Separator } from '../separator';
 import styles from './modal.module.scss';
+import { useModal } from '@/context/modalProvider';
 
 interface ModalProps {
   className?: string;
   title?: string;
   subtitle?: string;
   separator?: boolean;
-  onClose: () => void;
   children: React.ReactNode;
 }
 
@@ -16,13 +18,14 @@ export function Modal({
   title,
   subtitle,
   separator,
-  onClose,
   children,
 }: ModalProps) {
+  const { closeModal } = useModal();
+
   return (
     <div className={styles.background}>
       <div className={styles.modal}>
-        <div className={styles.close} onClick={onClose}>
+        <div className={styles.close} onClick={closeModal}>
           {CloseSVG}
         </div>
         <div className={styles.header}>

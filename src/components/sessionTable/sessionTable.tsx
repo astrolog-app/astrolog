@@ -45,9 +45,13 @@ import {
 import { DeleteSVG } from '@/app/svgs';
 import { invoke } from '@tauri-apps/api/tauri';
 import { toast } from '@/components/ui/use-toast';
+import { useModal } from '@/context/modalProvider';
+import NewImagingSession from '@/components/modals/newImagingSession/newImagingSession';
 
 export function SessionTable<TData, TValue>({ setSelectedSessionId }: { setSelectedSessionId: (id: UUID) => void }) {
   const { appState } = useAppState();
+  const { openModal } = useModal();
+
   const data: TData[] = appState.log_data as TData[];
   const columns: ColumnDef<TData, TValue>[] =
     imagingSessionColumns as ColumnDef<TData, TValue>[];
@@ -217,7 +221,7 @@ export function SessionTable<TData, TValue>({ setSelectedSessionId }: { setSelec
           <ContextMenuShortcut>{DeleteSVG}</ContextMenuShortcut>
         </ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem inset>
+        <ContextMenuItem inset onClick={() => openModal(<NewImagingSession />)}>
           Add new Session...
         </ContextMenuItem>
       </ContextMenuContent>

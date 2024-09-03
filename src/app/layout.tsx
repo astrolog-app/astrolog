@@ -5,7 +5,7 @@ import { ThemeProvider } from 'next-themes';
 import StateProvider from '@/context/stateProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { ModalProvider } from '@/context/modalProvider';
-import ModalWrapper from '@/components/ui/custom/modalWrapper';
+import ModalRenderer from '@/components/ui/custom/modalRenderer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -28,7 +28,7 @@ export default function RootLayout(
         <ModalProvider>
           {children}
           <Toaster />
-          <ModalWrapper />
+          <ModalRenderer />
         </ModalProvider>
       </StateProvider>
     </ThemeProvider>

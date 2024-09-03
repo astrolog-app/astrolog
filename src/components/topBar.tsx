@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import styles from './topBar.module.scss';
 import {
   Menubar,
@@ -16,13 +15,11 @@ import {
 import { Preferences } from './modals/preferences/preferences';
 import { invoke } from '@tauri-apps/api/tauri';
 import { toast } from '@/components/ui/use-toast';
+import { useModal } from '@/context/modalProvider';
+import NewImagingSession from '@/components/modals/newImagingSession/newImagingSession';
 
 export function TopBar() {
-  const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
-
-  const togglePreferencesModal = () => {
-    setIsPreferencesOpen(!isPreferencesOpen);
-  };
+  const { openModal } = useModal();
 
   async function openBrowser(url: string) {
     try {
@@ -47,7 +44,7 @@ export function TopBar() {
               About AstroLog
             </MenubarItem>
             <MenubarSeparator />
-            <MenubarItem onClick={togglePreferencesModal}>
+            <MenubarItem onClick={() => openModal(<Preferences />)}>
               Preferences...
             </MenubarItem>
             <MenubarSeparator />
@@ -58,7 +55,7 @@ export function TopBar() {
         <MenubarMenu>
           <MenubarTrigger>Imaging Frames</MenubarTrigger>
           <MenubarContent>
-            <MenubarItem>New Imaging Session...</MenubarItem>
+            <MenubarItem onClick={() => openModal(<NewImagingSession />)}>New Imaging Session...</MenubarItem>
             <MenubarSeparator />
             <MenubarSub>
               <MenubarSubTrigger>Calibration</MenubarSubTrigger>
@@ -85,7 +82,6 @@ export function TopBar() {
           </MenubarContent>
         </MenubarMenu>
       </Menubar>
-      {isPreferencesOpen && <Preferences onClose={togglePreferencesModal} />}
     </div>
   );
 }

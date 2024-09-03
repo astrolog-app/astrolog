@@ -5,7 +5,7 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from '@/components/ui/card';
 import { Tab } from '@/components/ui/custom/tab';
 import styles from './gallery.module.scss';
@@ -16,23 +16,30 @@ import NewImage from '@/components/modals/newImage/newImage';
 import { open } from '@tauri-apps/api/dialog';
 import { toast } from '@/components/ui/use-toast';
 import { useAppState } from '@/context/stateProvider';
+import { useModal } from '@/context/modalProvider';
 
 export default function Gallery() {
   const { appState } = useAppState();
+  const { openModal } = useModal();
 
   const [windowWidth, setWindowWidth] = useState<number>(2560);
   const [columns, setColumns] = useState<number>(3);
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [newImagePath, setNewImagePath] = useState<string>('');
 
-  const dialogFilters = [{
-    name: '.png',
-    extensions: ['png']
-  },
-  {
-    name: '.jpeg',
-    extensions: ['jpeg']
-  }]
+  const dialogFilters = [
+    {
+      name: 'all',
+      extensions: ['png', 'jpeg']
+    },
+    {
+      name: '.png',
+      extensions: ['png']
+    },
+    {
+      name: '.jpeg',
+      extensions: ['jpeg']
+    }
+  ];
 
   function addNewImage() {
     open({
@@ -42,21 +49,17 @@ export default function Gallery() {
       .then((selectedPath) => {
         if (selectedPath) {
           setNewImagePath(selectedPath as string);
-          console.log(newImagePath)
-          toggleModal();
+          console.log(newImagePath);
+          openModal(<NewImage defaultValue={newImagePath} dialogFilters={dialogFilters} />);
         }
       })
       .catch((err) => {
         toast({
           variant: 'destructive',
-          description: 'Failed to open Image: ' + err,
+          description: 'Failed to open Image: ' + err
         });
         console.log(err);
       });
-  }
-
-  function toggleModal() {
-    setModalOpen(!modalOpen);
   }
 
   useEffect(() => {
@@ -99,7 +102,7 @@ export default function Gallery() {
         style={{
           display: 'grid',
           gridTemplateColumns: `repeat(${columns}, 1fr)`,
-          gap: 'var(--padding)',
+          gap: 'var(--padding)'
         }}
       >
         {appState.image_list.map((image, index) => (
@@ -110,7 +113,6 @@ export default function Gallery() {
           />
         ))}
       </div>
-      {modalOpen && <NewImage defaultValue={newImagePath} onClose={toggleModal} dialogFilters={dialogFilters} />}
     </Tab>
   );
 }

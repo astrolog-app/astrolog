@@ -7,17 +7,12 @@ import StorageForm from './storageForm';
 import UserForm from './userForm';
 import LicenseForm from './licenseForm';
 
-interface PreferencesProps {
-  onClose: () => void;
-}
-
-export function Preferences({ onClose }: PreferencesProps) {
+export function Preferences() {
   return (
     <Modal
       title="Preferences"
       subtitle="Customize AstroLog"
       separator={true}
-      onClose={onClose}
     >
       <Tabs defaultValue="appearance" className={styles.preferences}>
         <TabsList className={styles.tabsList}>

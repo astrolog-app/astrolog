@@ -16,12 +16,7 @@ import FileListSelector from '@/components/fileSelectors/fileListSelector';
 const tabKeys = ['general', 'equipment', 'calibration'] as const;
 export type TabKey = typeof tabKeys[number];
 
-export default function NewImagingSession(
-  {
-    onClose
-  }: {
-    onClose: () => void;
-  }) {
+export default function NewImagingSession() {
   const [selectedTab, setSelectedTab] = useState<TabKey>();
 
   function renderTab(): React.ReactNode {
@@ -39,7 +34,6 @@ export default function NewImagingSession(
 
   return (
     <Modal
-      onClose={onClose}
       title="Add Imaging Session"
       separator
       className={styles.modal}
