@@ -3,13 +3,11 @@
 import React, { createContext, useContext, useState } from 'react';
 
 interface ModalContextType {
-  modalContent: React.ReactNode;
   openModal: (content: React.ReactNode) => void;
   closeModal: () => void;
 }
 
 const defaultValue = {
-  modalContent: <></>,
   openModal: () => {},
   closeModal: () => {}
 }
@@ -28,8 +26,9 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <ModalContext.Provider value={{ modalContent, openModal, closeModal }}>
+    <ModalContext.Provider value={{ openModal, closeModal }}>
       {children}
+      {modalContent}
     </ModalContext.Provider>
   );
 };
