@@ -118,6 +118,10 @@ export default function StateProvider({ children }: { children: ReactNode }) {
   const [appState, setAppState] = useState<AppState>(defaultAppState);
 
   useEffect(() => {
+    console.log(appState)
+  }, [appState])
+
+  useEffect(() => {
     async function fetchData() {
       try {
         const responseString = await invoke<string>('load_frontend_app_state');

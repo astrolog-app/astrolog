@@ -8,8 +8,8 @@ use crate::services::state::get_readonly_app_state;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ImagingFrameList {
     light_frames: Vec<LightFrame>,
-    dark_frames: Vec<DarkFrame>,
-    bias_frames: Vec<BiasFrame>,
+    pub dark_frames: Vec<DarkFrame>,
+    pub bias_frames: Vec<BiasFrame>,
     flat_frames: Vec<FlatFrame>
 }
 
@@ -35,6 +35,19 @@ impl ImagingFrameList {
         filename.push(".astrolog");
         filename.push("imaging_frame_list.json");
         Ok(file_store::save(filename, serde_json::to_string_pretty(&get_readonly_app_state().imaging_frame_list)?)?)
+    }
+
+    pub fn get_calibration_frames() -> impl Iterator<Item = Box<dyn CalibrationFrame>> {
+        let app_state = get_readonly_app_state();
+        let dark_frames = app_state.imaging_frame_list.dark_frames.clone();
+        let bias_frames = app_state.imaging_frame_list.bias_frames.clone();
+
+        dark_frames.into_iter()
+            .map(|frame| Box::new(frame) as Box<dyn CalibrationFrame>)
+            .chain(
+                bias_frames.into_iter()
+                    .map(|frame| Box::new(frame) as Box<dyn CalibrationFrame>)
+            )
     }
 }
 
@@ -97,7 +110,7 @@ pub fn get_light_frame(id: &Uuid) -> LightFrame {
         .expect("LightFrame not found")
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 enum CalibrationType {
     DEFAULT,
     DARK,
@@ -120,7 +133,7 @@ pub trait CalibrationFrame {
     fn path(&self) -> &str;
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct DarkFrame {
     id: Uuid,
     camera_id: Uuid,
@@ -177,7 +190,7 @@ impl CalibrationFrame for DarkFrame {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct BiasFrame {
     id: Uuid,
     camera_id: Uuid,
