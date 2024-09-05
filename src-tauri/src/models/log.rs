@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use crate::models::imaging_session::ImagingSession;
 use crate::models::imaging_frames;
+use crate::models::imaging_frames::CalibrationType;
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TableData {
   pub sessions: Vec<LogTableRow>,
@@ -63,23 +65,31 @@ impl LogTableRow {
 pub struct CalibrationTableRow {
   id: Uuid,
   camera: String,
-  calibration_type: String,
+  calibration_type: CalibrationType,
   gain: i32,
-  sub_length: f64,
-  camera_temp: f64,
+  sub_length: String,
+  camera_temp: String,
   total_subs: i32
 }
 
 impl CalibrationTableRow {
   pub fn new(calibration_frame: Box<dyn imaging_frames::CalibrationFrame>) -> Self {
+    let mut sub_length = String::from("N/A");
+    let mut camera_temp = String::from("N/A");
+
+    if let Some(dark_frame) = calibration_frame.as_any().downcast_ref::<imaging_frames::DarkFrame>() {
+      sub_length = dark_frame.sub_length.to_string();
+      camera_temp = dark_frame.camera_temp.to_string();
+    }
+
     CalibrationTableRow {
       id: *calibration_frame.id(),
-      camera: String::from("default_camera"), // Placeholder, replace with actual data
-      calibration_type: String::from("default_type"), // Placeholder, replace with actual data
-      gain: 0, // Placeholder, replace with actual data
-      sub_length: 0.0, // Placeholder, replace with actual data
-      camera_temp: 0.0, // Placeholder, replace with actual data
-      total_subs: 0, // Placeholder, replace with actual data
+      camera: String::from("default_camera"),
+      calibration_type: calibration_frame.calibration_type(),
+      gain: *calibration_frame.gain(),
+      sub_length,
+      camera_temp,
+      total_subs: *calibration_frame.total_subs()
     }
   }
 }

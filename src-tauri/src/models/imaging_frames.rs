@@ -1,3 +1,4 @@
+use std::any::Any;
 use std::error::Error;
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
@@ -111,7 +112,7 @@ pub fn get_light_frame(id: &Uuid) -> LightFrame {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-enum CalibrationType {
+pub enum CalibrationType {
     DEFAULT,
     DARK,
     BIAS,
@@ -123,7 +124,7 @@ impl Default for CalibrationType {
     }
 }
 
-pub trait CalibrationFrame {
+pub trait CalibrationFrame: Any {
     fn id(&self) -> &Uuid;
     fn camera_id(&self) -> &Uuid;
     fn total_subs(&self) -> &i32;
@@ -131,10 +132,12 @@ pub trait CalibrationFrame {
 
     fn calibration_type(&self) -> CalibrationType;
     fn path(&self) -> &str;
+
+    fn as_any(&self) -> &dyn Any;
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-struct DarkFrame {
+pub struct DarkFrame {
     id: Uuid,
     camera_id: Uuid,
     total_subs: i32,
@@ -144,8 +147,8 @@ struct DarkFrame {
     calibration_type: CalibrationType,
     path: String,
 
-    camera_temp: f64,
-    sub_length: f64
+    pub camera_temp: f64,
+    pub sub_length: f64
 }
 
 impl ImagingFrame for DarkFrame {
@@ -188,10 +191,13 @@ impl CalibrationFrame for DarkFrame {
     fn path(&self) -> &str {
         &self.path
     }
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-struct BiasFrame {
+pub struct BiasFrame {
     id: Uuid,
     camera_id: Uuid,
     total_subs: i32,
@@ -241,6 +247,9 @@ impl CalibrationFrame for BiasFrame {
     }
     fn path(&self) -> &str {
         &self.path
+    }
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 
