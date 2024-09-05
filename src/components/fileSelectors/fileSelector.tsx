@@ -3,13 +3,15 @@ import { Button, ButtonProps } from '../ui/button';
 import styles from './fileSelector.module.scss';
 import { DialogFilter, open } from '@tauri-apps/api/dialog';
 import { toast } from '../ui/use-toast';
-import { AppState, useAppState } from '@/context/stateProvider';
+import { useAppState } from '@/context/stateProvider';
+import { AppState } from '@/interfaces/state';
+import { Dispatch, ReactNode, SetStateAction } from 'react';
 
 interface OptionInputProps {
   value: string;
   placeholder?: string;
   disabled?: boolean;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export default function FileSelector({
@@ -30,7 +32,7 @@ interface FileSelectorChangeButtonProps extends ButtonProps {
   saveAction: (
     value: string,
     appState: AppState,
-    setAppState: React.Dispatch<React.SetStateAction<AppState>>,
+    setAppState: Dispatch<SetStateAction<AppState>>,
     path: string,
   ) => void;
   path: string;

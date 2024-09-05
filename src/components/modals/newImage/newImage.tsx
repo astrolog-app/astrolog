@@ -11,10 +11,10 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Image } from '@/context/stateProvider';
 import { invoke } from '@tauri-apps/api/tauri';
 import { toast } from '@/components/ui/use-toast';
 import { useModal } from '@/context/modalProvider';
+import { Image } from '@/interfaces/state';
 
 interface NewImageProps {
   defaultValue: string;
