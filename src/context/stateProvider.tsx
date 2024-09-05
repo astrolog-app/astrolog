@@ -61,6 +61,16 @@ export interface Session {
   notes: string;
 }
 
+export interface Calibration {
+  id: UUID;
+  camera: string;
+  calibration_type: string;
+  gain: number;
+  sub_length: number;
+  camera_temp: number;
+  total_subs: number;
+}
+
 export interface Image {
   title: string;
   path: string;

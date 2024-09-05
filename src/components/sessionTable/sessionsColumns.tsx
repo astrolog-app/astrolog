@@ -5,7 +5,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Button } from '../ui/button';
 import { ArrowUpDown } from 'lucide-react';
 
-export const columns: ColumnDef<Session>[] = [
+export const sessionsColumns: ColumnDef<Session>[] = [
   {
     accessorKey: 'date',
     header: ({ column }) => {

@@ -1,6 +1,6 @@
 'use client';
 
-import styles from './sessionTable.module.scss';
+import styles from './logTable.module.scss';
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Input } from '../ui/input';
 import {
   DropdownMenu,
@@ -31,7 +31,7 @@ import {
 } from '../ui/dropdown-menu';
 import { Button } from '../ui/button';
 import { Session, useAppState } from '@/context/stateProvider';
-import { columns as imagingSessionColumns } from './columns';
+import { sessionsColumns } from './sessionsColumns';
 import { ChevronDown } from 'lucide-react';
 import { UUID } from 'crypto';
 import {
@@ -47,20 +47,26 @@ import { invoke } from '@tauri-apps/api/tauri';
 import { toast } from '@/components/ui/use-toast';
 import { useModal } from '@/context/modalProvider';
 import NewImagingSession from '@/components/modals/newImagingSession/newImagingSession';
+import { calibrationColumns } from '@/components/sessionTable/calibrationColumns';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-export function SessionTable<TData, TValue>({ setSelectedSessionId }: { setSelectedSessionId: (id: UUID) => void }) {
+interface SessionTableProps {
+  setSelectedSessionId: React.Dispatch<React.SetStateAction<UUID | undefined>>
+}
+
+export function LogTable<TData, TValue>({ setSelectedSessionId }: SessionTableProps) {
+  const tabKeys = ['sessions', 'calibration'] as const;
+  type TableContent = typeof tabKeys[number];
+  
   const { appState } = useAppState();
   const { openModal } = useModal();
 
-  const data: TData[] = appState.log_data as TData[];
-  const columns: ColumnDef<TData, TValue>[] =
-    imagingSessionColumns as ColumnDef<TData, TValue>[];
-
+  const [content, setContent] = useState<TableContent>('sessions');
+  const [data, setData] = useState<TData[]>(appState.log_data as TData[]);
+  const [columns, setColumns] = useState<ColumnDef<TData, TValue>[]>(sessionsColumns as ColumnDef<TData, TValue>[]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = React.useState<string>('');
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
-  );
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [selectedRowId, setSelectedRowId] = React.useState<string | undefined>(undefined);
@@ -84,6 +90,19 @@ export function SessionTable<TData, TValue>({ setSelectedSessionId }: { setSelec
     },
     globalFilterFn: 'includesString',
   });
+  
+  useEffect(() => {
+    switch (content) {
+      case 'sessions':
+        setData(appState.log_data as TData[]);
+        setColumns(sessionsColumns as ColumnDef<TData, TValue>[]);
+        break;
+      case 'calibration':
+        setData([] as TData[]);
+        setColumns(calibrationColumns as ColumnDef<TData, TValue>[]);
+        break;
+    }
+  }, [appState.log_data, content]);
 
   useEffect(() => {
     setRowSelected(selectedRowId !== undefined);
@@ -124,6 +143,12 @@ export function SessionTable<TData, TValue>({ setSelectedSessionId }: { setSelec
               onChange={(event) => setGlobalFilter(event.target.value)}
               className={styles.searchField}
             />
+            <Tabs defaultValue='sessions'>
+              <TabsList>
+                <TabsTrigger value='sessions' onClick={() => setContent('sessions')}>Imaging  Sessions</TabsTrigger>
+                <TabsTrigger value='calibration' onClick={() => setContent('calibration')}>Calibration</TabsTrigger>
+              </TabsList>
+            </Tabs>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="ml-auto">

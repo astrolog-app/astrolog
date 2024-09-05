@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/card';
 import { Tab } from '@/components/ui/custom/tab';
 import styles from './log.module.scss';
-import { SessionTable } from '@/components/sessionTable/sessionTable';
+import { LogTable } from '@/components/sessionTable/logTable';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import NewImagingSession from '@/components/modals/newImagingSession/newImagingSession';
@@ -19,7 +19,6 @@ import { toast } from '@/components/ui/use-toast';
 import { invoke } from '@tauri-apps/api/tauri';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { useModal } from '@/context/modalProvider';
-import NewImagingSessionEquipment from '@/components/modals/newImagingSession/newImagingSessionEquipment';
 
 export default function Log() {
   const { openModal } = useModal();
@@ -71,7 +70,7 @@ export default function Log() {
         <ResizablePanel defaultSize={70}>
           <Card className={styles.tableCard}>
             <CardHeader className={styles.tableWrapper}>
-              <SessionTable setSelectedSessionId={setSelectedSessionId} />
+              <LogTable setSelectedSessionId={setSelectedSessionId} />
             </CardHeader>
           </Card>
         </ResizablePanel>

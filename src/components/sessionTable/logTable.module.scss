@@ -7,10 +7,13 @@
     display: flex;
     margin-bottom: var(--padding);
 
+    & > *:not(:last-child) {
+      margin-right: 0.25rem;
+    }
+
     .searchField {
       width: 100%;
       max-width: 20rem;
-      margin-right: var(--padding);
     }
   }
 
