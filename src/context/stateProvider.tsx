@@ -14,7 +14,7 @@ import { toast } from '@/components/ui/use-toast';
 
 export interface AppState {
   preferences: Preferences;
-  log_data: Session[];
+  table_data: TableData;
   image_list: Image[];
 }
 
@@ -38,6 +38,11 @@ export interface License {
   activated: boolean;
   user_email: string;
   license_key: string;
+}
+
+export interface TableData {
+  sessions: Session[];
+  calibration: Calibration[]
 }
 
 export interface Session {
@@ -93,7 +98,10 @@ const defaultAppState: AppState = {
       license_key: ''
     }
   },
-  log_data: [],
+  table_data: {
+    sessions: [],
+    calibration: []
+  },
   image_list: []
 };
 

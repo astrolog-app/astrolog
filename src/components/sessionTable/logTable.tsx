@@ -62,15 +62,14 @@ export function LogTable<TData, TValue>({ setSelectedSessionId }: SessionTablePr
   const { openModal } = useModal();
 
   const [content, setContent] = useState<TableContent>('sessions');
-  const [data, setData] = useState<TData[]>(appState.log_data as TData[]);
+  const [data, setData] = useState<TData[]>(appState.table_data.sessions as TData[]);
   const [columns, setColumns] = useState<ColumnDef<TData, TValue>[]>(sessionsColumns as ColumnDef<TData, TValue>[]);
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [globalFilter, setGlobalFilter] = React.useState<string>('');
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [selectedRowId, setSelectedRowId] = React.useState<string | undefined>(undefined);
-  const [rowSelected, setRowSelected] = React.useState<boolean>(false);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [globalFilter, setGlobalFilter] = useState<string>('');
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [selectedRowId, setSelectedRowId] = useState<string | undefined>(undefined);
+  const [rowSelected, setRowSelected] = useState<boolean>(false);
 
   const table = useReactTable({
     data,
@@ -94,15 +93,15 @@ export function LogTable<TData, TValue>({ setSelectedSessionId }: SessionTablePr
   useEffect(() => {
     switch (content) {
       case 'sessions':
-        setData(appState.log_data as TData[]);
+        setData(appState.table_data.sessions as TData[]);
         setColumns(sessionsColumns as ColumnDef<TData, TValue>[]);
         break;
       case 'calibration':
-        setData([] as TData[]);
+        setData(appState.table_data.calibration as TData[]);
         setColumns(calibrationColumns as ColumnDef<TData, TValue>[]);
         break;
     }
-  }, [appState.log_data, content]);
+  }, [appState.table_data, content]);
 
   useEffect(() => {
     setRowSelected(selectedRowId !== undefined);

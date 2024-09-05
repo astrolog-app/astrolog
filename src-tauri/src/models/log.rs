@@ -2,6 +2,11 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use crate::models::imaging_session::ImagingSession;
 use crate::models::imaging_frames;
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TableData {
+  pub sessions: Vec<LogTableRow>,
+  pub calibration: Vec<CalibrationTableRow>
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LogTableRow {
@@ -50,6 +55,31 @@ impl LogTableRow {
       mount: String::from("Sky-Watcher EQ6-R Pro"),
       camera: String::from("ZWO ASI1600MM Pro"),
       notes: light_frame.notes,
+    }
+  }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CalibrationTableRow {
+  id: Uuid,
+  camera: String,
+  calibration_type: String,
+  gain: i32,
+  sub_length: f64,
+  camera_temp: f64,
+  total_subs: i32
+}
+
+impl CalibrationTableRow {
+  pub fn new(calibration_frame: Box<dyn imaging_frames::CalibrationFrame>) -> Self {
+    CalibrationTableRow {
+      id: *calibration_frame.id(),
+      camera: String::from("default_camera"), // Placeholder, replace with actual data
+      calibration_type: String::from("default_type"), // Placeholder, replace with actual data
+      gain: 0, // Placeholder, replace with actual data
+      sub_length: 0.0, // Placeholder, replace with actual data
+      camera_temp: 0.0, // Placeholder, replace with actual data
+      total_subs: 0, // Placeholder, replace with actual data
     }
   }
 }

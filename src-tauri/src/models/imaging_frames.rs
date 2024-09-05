@@ -38,7 +38,7 @@ impl ImagingFrameList {
     }
 }
 
-trait ImagingFrame {
+pub trait ImagingFrame {
     fn id(&self) -> &Uuid;
     fn camera_id(&self) -> &Uuid;
     fn total_subs(&self) -> &i32;
@@ -98,11 +98,38 @@ pub fn get_light_frame(id: &Uuid) -> LightFrame {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+enum CalibrationType {
+    DEFAULT,
+    DARK,
+    BIAS,
+}
+
+impl Default for CalibrationType {
+    fn default() -> Self {
+        CalibrationType::DEFAULT
+    }
+}
+
+pub trait CalibrationFrame {
+    fn id(&self) -> &Uuid;
+    fn camera_id(&self) -> &Uuid;
+    fn total_subs(&self) -> &i32;
+    fn gain(&self) -> &i32;
+
+    fn calibration_type(&self) -> CalibrationType;
+    fn path(&self) -> &str;
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 struct DarkFrame {
     id: Uuid,
     camera_id: Uuid,
     total_subs: i32,
     gain: i32,
+
+    #[serde(skip_serializing, skip_deserializing)]
+    calibration_type: CalibrationType,
+    path: String,
 
     camera_temp: f64,
     sub_length: f64
@@ -126,12 +153,40 @@ impl ImagingFrame for DarkFrame {
     }
 }
 
+impl CalibrationFrame for DarkFrame {
+    fn id(&self) -> &Uuid {
+        &self.id
+    }
+
+    fn camera_id(&self) -> &Uuid {
+        &self.camera_id
+    }
+
+    fn total_subs(&self) -> &i32 {
+        &self.total_subs
+    }
+
+    fn gain(&self) -> &i32 {
+        &self.gain
+    }
+    fn calibration_type(&self) -> CalibrationType {
+        CalibrationType::DARK
+    }
+    fn path(&self) -> &str {
+        &self.path
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 struct BiasFrame {
     id: Uuid,
     camera_id: Uuid,
     total_subs: i32,
-    gain: i32
+    gain: i32,
+
+    #[serde(skip_serializing, skip_deserializing)]
+    calibration_type: CalibrationType,
+    path: String,
 }
 
 impl ImagingFrame for BiasFrame {
@@ -149,6 +204,30 @@ impl ImagingFrame for BiasFrame {
 
     fn gain(&self) -> &i32 {
         &self.gain
+    }
+}
+
+impl CalibrationFrame for BiasFrame {
+    fn id(&self) -> &Uuid {
+        &self.id
+    }
+
+    fn camera_id(&self) -> &Uuid {
+        &self.camera_id
+    }
+
+    fn total_subs(&self) -> &i32 {
+        &self.total_subs
+    }
+
+    fn gain(&self) -> &i32 {
+        &self.gain
+    }
+    fn calibration_type(&self) -> CalibrationType {
+        CalibrationType::BIAS
+    }
+    fn path(&self) -> &str {
+        &self.path
     }
 }
 

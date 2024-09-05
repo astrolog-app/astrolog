@@ -1,5 +1,5 @@
 use crate::models::image::Image;
-use crate::models::log::LogTableRow;
+use crate::models::log::{LogTableRow, TableData};
 use crate::services::state::{FrontendAppState, get_readonly_app_state};
 
 #[tauri::command]
@@ -14,9 +14,14 @@ pub fn load_frontend_app_state() -> Result<String, String> {
         log_data.push(LogTableRow::new(imaging_session));
     }
 
+    let table_data = TableData {
+        sessions: log_data,
+        calibration: vec![]
+    };
+
     let data = FrontendAppState {
         preferences,
-        log_data,
+        table_data,
         image_list,
     };
 
