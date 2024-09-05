@@ -1,0 +1,35 @@
+.modal {
+  width: 30rem;
+
+  .form {
+    & > *:not(:last-child) {
+      margin-bottom: var(--padding);
+    }
+
+    .row {
+      display: flex;
+
+      .label {
+        width: 30%;
+        margin-right: var(--padding);
+        display: flex;
+        justify-content: end;
+        align-self: center;
+      }
+
+      .item {
+        flex-grow: 1;
+      }
+    }
+
+    .buttons {
+      & > *:not(:last-child) {
+        margin-right: var(--padding);
+      }
+
+      margin-top: 2.5rem;
+      display: flex;
+      justify-content: end;
+    }
+  }
+}

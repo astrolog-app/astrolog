@@ -19,6 +19,8 @@ import { toast } from '@/components/ui/use-toast';
 import { invoke } from '@tauri-apps/api/tauri';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { useModal } from '@/context/modalProvider';
+import SelectImagingFrames from '@/components/modals/selectImagingFrames';
+import CalibrationRowEditor from '@/components/modals/calibrationRowEditor';
 
 export default function Log() {
   const { openModal } = useModal();
@@ -60,6 +62,9 @@ export default function Log() {
         <CardContent className={styles.buttons}>
           <Button variant="secondary" onClick={() => openModal(<NewImagingSession />)}>
             Add Imaging Session
+          </Button>
+          <Button variant="secondary" onClick={() => openModal(<CalibrationRowEditor />)}>
+            Add Calibration Frame
           </Button>
           <Button variant="ghost" onClick={exportCSV}>
             Export CSV
