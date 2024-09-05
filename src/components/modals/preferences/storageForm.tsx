@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/form';
 import { ToastAction } from '@/components/ui/toast';
 import { toast, useToast } from '@/components/ui/use-toast';
-import { AppState, savePreferences, useAppState } from '@/context/stateProvider';
+import { savePreferences, useAppState } from '@/context/stateProvider';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import FileSelector, { FileSelectorChangeButton } from '@/components/fileSelectors/fileSelector';
@@ -20,6 +20,7 @@ import { z } from 'zod';
 import { invoke } from '@tauri-apps/api/tauri';
 import React from 'react';
 import { CopyButton, DeleteButton } from '@/components/ui/button';
+import { AppState } from '@/interfaces/state';
 
 const formSchema = z.object({
   rootDirectory: z.string().min(2, {

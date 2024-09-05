@@ -1,8 +1,7 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { UUID } from 'crypto';
-import { Calibration } from '@/context/stateProvider';
+import { Calibration } from '@/interfaces/state';
 
 export const calibrationColumns: ColumnDef<Calibration>[] = [
   {

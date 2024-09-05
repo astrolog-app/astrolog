@@ -1,6 +1,6 @@
 import styles from './tab.module.scss';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/classNames';
 
 export function Tab({
   className,

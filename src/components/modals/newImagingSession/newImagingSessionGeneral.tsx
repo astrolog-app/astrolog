@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { TabKey } from '@/components/modals/newImagingSession/newImagingSession';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/classNames';
 import { CalendarIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';

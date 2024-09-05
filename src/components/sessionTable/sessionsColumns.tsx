@@ -1,9 +1,9 @@
 'use client';
 
-import { Session } from '@/context/stateProvider';
 import { ColumnDef } from '@tanstack/react-table';
 import { Button } from '../ui/button';
 import { ArrowUpDown } from 'lucide-react';
+import { Session } from '@/interfaces/state';
 
 export const sessionsColumns: ColumnDef<Session>[] = [
   {

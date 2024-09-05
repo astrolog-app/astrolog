@@ -3,7 +3,7 @@
 import styles from './sideNav.module.scss';
 import React from 'react';
 import { Tab } from '@/app/page';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/classNames';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface SideNavProps {

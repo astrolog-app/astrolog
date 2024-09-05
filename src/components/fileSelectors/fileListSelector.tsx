@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { open } from '@tauri-apps/api/dialog';
 import { toast } from '@/components/ui/use-toast';
 import styles from './fileListSelector.module.scss';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/classNames';
 import { Button } from '@/components/ui/button';
 
 interface FileSelectorProps {

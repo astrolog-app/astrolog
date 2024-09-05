@@ -2,7 +2,7 @@ import * as React from 'react';
 import styles from './themeToggle.module.scss';
 import { useTheme } from 'next-themes';
 
-import { cn } from './../../../lib/utils';
+import { cn } from '../../../utils/classNames';
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();

@@ -30,7 +30,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { Button } from '../ui/button';
-import { Session, useAppState } from '@/context/stateProvider';
+import { useAppState } from '@/context/stateProvider';
 import { sessionsColumns } from './sessionsColumns';
 import { ChevronDown } from 'lucide-react';
 import { UUID } from 'crypto';
@@ -49,6 +49,7 @@ import { useModal } from '@/context/modalProvider';
 import NewImagingSession from '@/components/modals/newImagingSession/newImagingSession';
 import { calibrationColumns } from '@/components/sessionTable/calibrationColumns';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Session } from '@/interfaces/state';
 
 interface SessionTableProps {
   setSelectedSessionId: React.Dispatch<React.SetStateAction<UUID | undefined>>

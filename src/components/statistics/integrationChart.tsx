@@ -17,7 +17,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/classNames';
 const chartData = [{ month: 'january', desktop: 20, mobile: 80 }];
 
 const chartConfig = {
