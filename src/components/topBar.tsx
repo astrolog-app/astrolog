@@ -67,6 +67,21 @@ export function TopBar() {
           </MenubarContent>
         </MenubarMenu>
         <MenubarMenu>
+          <MenubarTrigger>Equipment</MenubarTrigger>
+          <MenubarContent>
+            <MenubarSub>
+              <MenubarSubTrigger>New Equipment Item</MenubarSubTrigger>
+              <MenubarSubContent>
+                <MenubarItem>New Telescope...</MenubarItem>
+                <MenubarItem>New Camera...</MenubarItem>
+                <MenubarItem>New Mount...</MenubarItem>
+                <MenubarItem>New Filter...</MenubarItem>
+                <MenubarItem>New Flattener...</MenubarItem>
+              </MenubarSubContent>
+            </MenubarSub>
+          </MenubarContent>
+        </MenubarMenu>
+        <MenubarMenu>
           <MenubarTrigger>Gallery</MenubarTrigger>
           <MenubarContent>
             <MenubarItem>New Image...</MenubarItem>

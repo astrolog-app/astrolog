@@ -8,7 +8,8 @@ import { TopBar } from '@/components/topBar';
 import SideNav from '@/components/sideNav';
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { AnalyticsSVG, GallerySVG, LogSVG } from '@/app/svgs';
+import { AnalyticsSVG, EquipmentSVG, GallerySVG, LogSVG } from '@/app/svgs';
+import Equipment from '@/app/equipment/equipment';
 
 export interface Tab {
   component: React.ReactNode;
@@ -20,6 +21,7 @@ export interface Tab {
 export default function Home() {
   const tabs: Tab[] = [
     { component: <Log />, key: 'log', tooltip: 'Astrophotography Log', icon: LogSVG },
+    { component: <Equipment />, key: 'equipment', tooltip: 'Equipment', icon: EquipmentSVG },
     { component: <Gallery />, key: 'gallery', tooltip: 'Gallery', icon: GallerySVG },
     { component: <Analytics />, key: 'analytics', tooltip: 'Analytics', icon: AnalyticsSVG }
   ];
