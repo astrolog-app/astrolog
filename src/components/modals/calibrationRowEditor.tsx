@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Input } from '../ui/input';
 import { Label } from '@/components/ui/label';
 import { useModal } from '@/context/modalProvider';
+import ComboBox from '@/components/ui/comboBox';
 
 enum CalibrationType {
   DARK = 'DARK',
@@ -85,7 +86,7 @@ export default function CalibrationRowEditor() {
               render={({ field }) => (
                 <FormItem className={styles.item}>
                   <FormControl>
-                    <Input {...field} />
+                    <ComboBox />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
