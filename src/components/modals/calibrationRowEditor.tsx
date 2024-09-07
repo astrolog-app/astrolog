@@ -13,6 +13,7 @@ import { Input } from '../ui/input';
 import { Label } from '@/components/ui/label';
 import { useModal } from '@/context/modalProvider';
 import ComboBox from '@/components/ui/comboBox';
+import { useAppState } from '@/context/stateProvider';
 
 enum CalibrationType {
   DARK = 'DARK',
@@ -21,6 +22,7 @@ enum CalibrationType {
 
 export default function CalibrationRowEditor() {
   const { closeModal } = useModal();
+  const { appState } = useAppState();
 
   const [calibrationType, setCalibrationType] = useState<CalibrationType>(CalibrationType.DARK);
 
@@ -86,7 +88,7 @@ export default function CalibrationRowEditor() {
               render={({ field }) => (
                 <FormItem className={styles.item}>
                   <FormControl>
-                    <ComboBox />
+                    <ComboBox values={appState.equipment_list.camera_list} title="camera" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
