@@ -7,11 +7,11 @@ use crate::services::state::get_readonly_app_state;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct EquipmentList {
-    telescopes: Vec<Telescope>,
-    cameras: Vec<Camera>,
-    mounts: Vec<Mount>,
-    filters: Vec<Filter>,
-    flatteners: Vec<Flattener>,
+    pub telescopes: Vec<Telescope>,
+    pub cameras: Vec<Camera>,
+    pub mounts: Vec<Mount>,
+    pub filters: Vec<Filter>,
+    pub flatteners: Vec<Flattener>,
 }
 
 impl EquipmentList {
@@ -40,17 +40,20 @@ impl EquipmentList {
     }
 }
 
-trait EquipmentItem {
+pub trait EquipmentItem {
     fn id(&self) -> &Uuid;
     fn brand(&self) -> &str;
     fn name(&self) -> &str;
+    fn view_name(&self) -> String {
+        format!("{} {}", self.brand(), self.name())
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Telescope {
+pub struct Telescope {
     id: Uuid,
     brand: String,
-    name:String,
+    name: String,
 
     focal_length: i32,
     aperture: i32
@@ -69,7 +72,7 @@ impl EquipmentItem for Telescope {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Camera {
+pub struct Camera {
     id: Uuid,
     brand: String,
     name:String,
@@ -92,7 +95,7 @@ impl EquipmentItem for Camera {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Mount {
+pub struct Mount {
     id: Uuid,
     brand: String,
     name:String
@@ -111,7 +114,7 @@ impl EquipmentItem for Mount {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Filter {
+pub struct Filter {
     id: Uuid,
     brand: String,
     name:String,
@@ -132,7 +135,7 @@ impl EquipmentItem for Filter {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Flattener {
+pub struct Flattener {
     id: Uuid,
     brand: String,
     name:String,

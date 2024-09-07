@@ -34,6 +34,13 @@ const defaultAppState: AppState = {
     sessions: [],
     calibration: []
   },
+  equipment_list: {
+    camera_list: [],
+    mount_list: [],
+    telescope_list: [],
+    flattener_list: [],
+    filter_list: []
+  },
   image_list: []
 };
 

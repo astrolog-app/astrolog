@@ -3,6 +3,7 @@ import { UUID } from 'crypto';
 export interface AppState {
   preferences: Preferences;
   table_data: TableData;
+  equipment_list: EquipmentList;
   image_list: Image[];
 }
 
@@ -62,6 +63,14 @@ export interface Calibration {
   sub_length: number;
   camera_temp: number;
   total_subs: number;
+}
+
+interface EquipmentList {
+  camera_list: string[];
+  telescope_list: string[];
+  mount_list: string[];
+  filter_list: string[];
+  flattener_list: string[];
 }
 
 export interface Image {
