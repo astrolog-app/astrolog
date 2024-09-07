@@ -24,6 +24,7 @@ winapi = "0.3.9"
 webbrowser = "1.0.1"
 open = "5.3.0"
 chrono = "0.4.38"
+kamadak-exif = "0.5.5"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.

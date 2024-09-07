@@ -6,6 +6,7 @@ use crate::frontend_actions::imaging_sessions::{analyze_images, export_csv, open
 use crate::frontend_actions::preferences::{check_meta_data_directory, save_preferences, setup_backup};
 use crate::frontend_actions::state::load_frontend_app_state;
 use crate::frontend_actions::utils::{open_browser, rename_directory};
+use crate::frontend_actions::calibration::analyze_calibration_frames;
 use crate::services::setup::setup;
 
 mod models;
@@ -28,7 +29,8 @@ fn main() {
       add_new_image,
       open_image,
       open_imaging_session,
-      analyze_images
+      analyze_images,
+      analyze_calibration_frames
     ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

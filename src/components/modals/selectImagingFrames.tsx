@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import styles from './selectImagingFrames.module.scss';
 import { Modal } from '@/components/ui/custom/modal';
 import { useModal } from '@/context/modalProvider';
+import { invoke } from '@tauri-apps/api/tauri';
+import { toast } from '@/components/ui/use-toast';
 
 export default function SelectImagingFrames() {
   const { openModal } = useModal();
@@ -28,6 +30,14 @@ export default function SelectImagingFrames() {
   });
 
   function onSubmit() {
+    console.log('submit');
+    invoke('analyze_calibration_frames', { frames: form.getValues().target })
+      .then((result) => console.log(result))
+      .catch((error) => toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: 'Error: ' + error
+      }));
   }
 
   return (
