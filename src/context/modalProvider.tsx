@@ -18,12 +18,19 @@ const ModalContext = createContext<ModalContextType>(defaultValue);
 export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
   const [modalContent, setModalContent] = useState<React.ReactNode>(null);
 
-  const openModal = (content: React.ReactNode) => {
-    setModalContent(content);
-  };
-
   const closeModal = () => {
     setModalContent(null);
+  };
+
+  const openModal = (content: React.ReactNode) => {
+    if (modalContent !== null) {
+      closeModal();
+      setTimeout(() => {
+        setModalContent(content);
+      }, 200);
+      return;
+    }
+    setModalContent(content);
   };
 
   return (

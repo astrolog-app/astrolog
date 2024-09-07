@@ -8,16 +8,16 @@ use crate::models::imaging_frames::CalibrationType;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AnalyzedCalibrationFrames {
     calibration_type: CalibrationType,
-    gain: String,
-    sub_length: String,
+    gain: i32,
+    sub_length: f64,
     total_subs: usize,
 }
 
 #[tauri::command]
 pub fn analyze_calibration_frames(frames: Vec<PathBuf>) -> Result<AnalyzedCalibrationFrames, String> {
-    let mut sub_length = String::from("");
+    let mut sub_length = 2.0;
     let total_subs = frames.len();
-    let mut gain = String::from("");
+    let mut gain = 800;
     let calibration_type = CalibrationType::DARK;
 
     let path = frames.get(0).ok_or("No frames found")?;
@@ -26,10 +26,10 @@ pub fn analyze_calibration_frames(frames: Vec<PathBuf>) -> Result<AnalyzedCalibr
     let exif_reader = Reader::new();
     let exif = exif_reader.read_from_container(&mut BufReader::new(file)).map_err(|e| e.to_string())?;
     let field = exif.get_field(Tag::ExposureTime, In::PRIMARY).ok_or("No frames found")?;
-    sub_length = field.display_value().to_string();
+    // sub_length = field.display_value().to_string();
 
     Ok(
-        Test {
+        AnalyzedCalibrationFrames {
             calibration_type,
             gain,
             sub_length,
@@ -37,3 +37,8 @@ pub fn analyze_calibration_frames(frames: Vec<PathBuf>) -> Result<AnalyzedCalibr
         }
     )
 }
+
+#[tauri::command]
+pub fn classify_dark_frames() {}
+#[tauri::command]
+pub fn classify_bias_frames() {}

@@ -14,17 +14,24 @@ import { Label } from '@/components/ui/label';
 import { useModal } from '@/context/modalProvider';
 import ComboBox from '@/components/ui/comboBox';
 import { useAppState } from '@/context/stateProvider';
+import { AnalyzedCalibrationFrames } from '@/components/modals/selectImagingFrames';
+import { invoke } from '@tauri-apps/api/tauri';
 
-enum CalibrationType {
+export enum CalibrationType {
   DARK = 'DARK',
   BIAS = 'BIAS'
 }
 
-export default function CalibrationRowEditor() {
+interface CalibrationRowEditorProps {
+  analyzedFrames?: AnalyzedCalibrationFrames;
+  edit: boolean;
+}
+
+export default function CalibrationRowEditor({ analyzedFrames, edit }: CalibrationRowEditorProps ) {
   const { closeModal } = useModal();
   const { appState } = useAppState();
 
-  const [calibrationType, setCalibrationType] = useState<CalibrationType>(CalibrationType.DARK);
+  const [calibrationType, setCalibrationType] = useState<CalibrationType>(analyzedFrames?.calibration_type || CalibrationType.DARK);
 
   const formSchema = z.object({
     camera: z.string().min(1, {
@@ -65,12 +72,21 @@ export default function CalibrationRowEditor() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      calibrationType: calibrationType
+      calibrationType: calibrationType,
+      gain: analyzedFrames?.gain,
+      subLength: analyzedFrames?.sub_length,
+      totalSubs: analyzedFrames?.total_subs
     }
   });
 
   function onSubmit() {
-    console.log('submit');
+    if (!edit) {
+      if (calibrationType == CalibrationType.DARK) {
+        invoke("classify_dark_frames").then()
+      } else {
+        invoke("classify_bias_frames").then()
+      }
+    }
   }
 
   return (
@@ -125,7 +141,7 @@ export default function CalibrationRowEditor() {
             />
           </div>
           <div className={styles.row}>
-            <Label className={styles.label}>Gain</Label>
+            <Label className={styles.label}>ISO/Gain</Label>
             <FormField
               control={form.control}
               name="gain"
