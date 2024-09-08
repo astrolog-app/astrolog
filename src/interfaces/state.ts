@@ -32,7 +32,7 @@ interface License {
 
 interface TableData {
   sessions: Session[];
-  calibration: Calibration[]
+  calibration: CalibrationFrame[]
 }
 
 export interface Session {
@@ -56,7 +56,7 @@ export interface Session {
   notes: string;
 }
 
-export interface Calibration {
+export interface CalibrationFrame {
   id: UUID;
   camera: string;
   calibration_type: CalibrationType;

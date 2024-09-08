@@ -77,19 +77,19 @@ pub struct CalibrationTableRow {
     camera: String,
     calibration_type: CalibrationType,
     gain: i32,
-    sub_length: String,
-    camera_temp: String,
+    sub_length: Option<f64>,
+    camera_temp: Option<f64>,
     total_subs: i32
 }
 
 impl CalibrationTableRow {
     pub fn new(calibration_frame: Box<dyn imaging_frames::CalibrationFrame>) -> Self {
-        let mut sub_length = String::from("N/A");
-        let mut camera_temp = String::from("N/A");
+        let mut sub_length = None;
+        let mut camera_temp = None;
 
         if let Some(dark_frame) = calibration_frame.as_any().downcast_ref::<imaging_frames::DarkFrame>() {
-            sub_length = dark_frame.sub_length.to_string();
-            camera_temp = dark_frame.camera_temp.to_string();
+            sub_length = Option::from(dark_frame.sub_length);
+            camera_temp = Option::from(dark_frame.camera_temp);
         }
 
         CalibrationTableRow {

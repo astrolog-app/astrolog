@@ -10,7 +10,7 @@ import {
   getSortedRowModel,
   SortingState,
   useReactTable,
-  VisibilityState,
+  VisibilityState
 } from '@tanstack/react-table';
 
 import {
@@ -19,7 +19,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from '@/components/ui/table';
 import React, { useEffect, useState } from 'react';
 import { Input } from '../ui/input';
@@ -27,7 +27,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '../ui/dropdown-menu';
 import { Button } from '../ui/button';
 import { useAppState } from '@/context/stateProvider';
@@ -49,16 +49,17 @@ import { useModal } from '@/context/modalProvider';
 import NewImagingSession from '@/components/modals/newImagingSession/newImagingSession';
 import { calibrationColumns } from '@/components/sessionTable/calibrationColumns';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Session } from '@/interfaces/state';
+import { CalibrationFrame, Session } from '@/interfaces/state';
+import CalibrationRowEditor from '@/components/modals/calibrationRowEditor';
 
 interface SessionTableProps {
-  setSelectedSessionId: React.Dispatch<React.SetStateAction<UUID | undefined>>
+  setSelectedSessionId: React.Dispatch<React.SetStateAction<UUID | undefined>>;
 }
 
 export function LogTable<TData, TValue>({ setSelectedSessionId }: SessionTableProps) {
   const tabKeys = ['sessions', 'calibration'] as const;
   type TableContent = typeof tabKeys[number];
-  
+
   const { appState } = useAppState();
   const { openModal } = useModal();
 
@@ -86,11 +87,11 @@ export function LogTable<TData, TValue>({ setSelectedSessionId }: SessionTablePr
       sorting,
       globalFilter,
       columnFilters,
-      columnVisibility,
+      columnVisibility
     },
-    globalFilterFn: 'includesString',
+    globalFilterFn: 'includesString'
   });
-  
+
   useEffect(() => {
     switch (content) {
       case 'sessions':
@@ -125,16 +126,21 @@ export function LogTable<TData, TValue>({ setSelectedSessionId }: SessionTablePr
     } catch (error) {
       const errorMsg = error as string;
       toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "Error: " + errorMsg
-      })
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: 'Error: ' + errorMsg
+      });
     }
+  }
+
+  function editCalibrationFrame() {
+    const calibrationFrame = table.getRowModel().rows.find((row) => row.id === selectedRowId)?.original as CalibrationFrame;
+    openModal(<CalibrationRowEditor edit={true} calibrationFrame={calibrationFrame} />)
   }
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger className='h-full'>
+      <ContextMenuTrigger className="h-full">
         <div className={styles.component}>
           <div className={styles.header}>
             <Input
@@ -143,10 +149,10 @@ export function LogTable<TData, TValue>({ setSelectedSessionId }: SessionTablePr
               onChange={(event) => setGlobalFilter(event.target.value)}
               className={styles.searchField}
             />
-            <Tabs defaultValue='sessions'>
+            <Tabs defaultValue="sessions">
               <TabsList>
-                <TabsTrigger value='sessions' onClick={() => setContent('sessions')}>Imaging  Sessions</TabsTrigger>
-                <TabsTrigger value='calibration' onClick={() => setContent('calibration')}>Calibration</TabsTrigger>
+                <TabsTrigger value="sessions" onClick={() => setContent('sessions')}>Imaging Sessions</TabsTrigger>
+                <TabsTrigger value="calibration" onClick={() => setContent('calibration')}>Calibration</TabsTrigger>
               </TabsList>
             </Tabs>
             <DropdownMenu>
@@ -188,7 +194,7 @@ export function LogTable<TData, TValue>({ setSelectedSessionId }: SessionTablePr
                             ? null
                             : flexRender(
                               header.column.columnDef.header,
-                              header.getContext(),
+                              header.getContext()
                             )}
                         </TableHead>
                       );
@@ -196,7 +202,7 @@ export function LogTable<TData, TValue>({ setSelectedSessionId }: SessionTablePr
                   </TableRow>
                 ))}
               </TableHeader>
-              <TableBody className='cursor-pointer'>
+              <TableBody className="cursor-pointer">
                 {table.getRowModel().rows?.length ? (
                   table.getRowModel().rows.map((row) => (
                     <TableRow
@@ -208,7 +214,7 @@ export function LogTable<TData, TValue>({ setSelectedSessionId }: SessionTablePr
                         <TableCell key={cell.id}>
                           {flexRender(
                             cell.column.columnDef.cell,
-                            cell.getContext(),
+                            cell.getContext()
                           )}
                         </TableCell>
                       ))}
@@ -229,27 +235,49 @@ export function LogTable<TData, TValue>({ setSelectedSessionId }: SessionTablePr
           </div>
         </div>
       </ContextMenuTrigger>
-      <ContextMenuContent className="w-64">
-        <ContextMenuItem inset disabled={!rowSelected} onClick={openImagingSession}>
-          Open...
-          <ContextMenuShortcut>⌘]</ContextMenuShortcut>
-        </ContextMenuItem>
-        <ContextMenuItem inset disabled={!rowSelected}>
-          Edit...
-          <ContextMenuShortcut>⌘]</ContextMenuShortcut>
-        </ContextMenuItem>
-        <ContextMenuItem inset disabled={!rowSelected}>
-          Details...
-        </ContextMenuItem>
-        <ContextMenuItem inset disabled={!rowSelected} className={styles.delete}>
-          Delete
-          <ContextMenuShortcut>{DeleteSVG}</ContextMenuShortcut>
-        </ContextMenuItem>
-        <ContextMenuSeparator />
-        <ContextMenuItem inset onClick={() => openModal(<NewImagingSession />)}>
-          Add new Session...
-        </ContextMenuItem>
-      </ContextMenuContent>
+      {content === 'sessions' && (
+        <ContextMenuContent className="w-64">
+          <ContextMenuItem inset disabled={!rowSelected} onClick={openImagingSession}>
+            Open...
+            <ContextMenuShortcut>⌘]</ContextMenuShortcut>
+          </ContextMenuItem>
+          <ContextMenuItem inset disabled={!rowSelected}>
+            Edit...
+            <ContextMenuShortcut>⌘]</ContextMenuShortcut>
+          </ContextMenuItem>
+          <ContextMenuItem inset disabled={!rowSelected}>
+            Details...
+          </ContextMenuItem>
+          <ContextMenuItem inset disabled={!rowSelected} className={styles.delete}>
+            Delete
+            <ContextMenuShortcut>{DeleteSVG}</ContextMenuShortcut>
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem inset onClick={() => openModal(<NewImagingSession />)}>
+            Add new Session...
+          </ContextMenuItem>
+        </ContextMenuContent>
+      )}
+      {content === 'calibration' && (
+        <ContextMenuContent className="w-64">
+          <ContextMenuItem inset disabled={!rowSelected} onClick={openImagingSession}>
+            Open...
+            <ContextMenuShortcut>⌘]</ContextMenuShortcut>
+          </ContextMenuItem>
+          <ContextMenuItem inset disabled={!rowSelected} onClick={() => editCalibrationFrame()}>
+            Edit...
+            <ContextMenuShortcut>⌘]</ContextMenuShortcut>
+          </ContextMenuItem>
+          <ContextMenuItem inset disabled={!rowSelected} className={styles.delete}>
+            Delete
+            <ContextMenuShortcut>{DeleteSVG}</ContextMenuShortcut>
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem inset onClick={() => openModal(<NewImagingSession />)}>
+            Add new Frames...
+          </ContextMenuItem>
+        </ContextMenuContent>
+      )}
     </ContextMenu>
   );
 }

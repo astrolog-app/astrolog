@@ -1,9 +1,9 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { Calibration } from '@/interfaces/state';
+import { CalibrationFrame } from '@/interfaces/state';
 
-export const calibrationColumns: ColumnDef<Calibration>[] = [
+export const calibrationColumns: ColumnDef<CalibrationFrame>[] = [
   {
     accessorKey: 'camera',
     header: 'Camera',

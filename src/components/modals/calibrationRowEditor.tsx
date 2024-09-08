@@ -18,13 +18,15 @@ import { invoke } from '@tauri-apps/api/tauri';
 import { AnalyzedCalibrationFrames } from '@/interfaces/commands';
 import { CalibrationType } from '@/enums/calibrationType';
 import { toast } from '@/components/ui/use-toast';
+import { CalibrationFrame } from '@/interfaces/state';
 
 interface CalibrationRowEditorProps {
   analyzedFrames?: AnalyzedCalibrationFrames;
   edit: boolean;
+  calibrationFrame?: CalibrationFrame;
 }
 
-export default function CalibrationRowEditor({ analyzedFrames, edit }: CalibrationRowEditorProps) {
+export default function CalibrationRowEditor({ analyzedFrames, edit, calibrationFrame }: CalibrationRowEditorProps) {
   const { closeModal } = useModal();
   const { appState } = useAppState();
 
@@ -69,10 +71,12 @@ export default function CalibrationRowEditor({ analyzedFrames, edit }: Calibrati
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      calibrationType: calibrationType,
-      gain: analyzedFrames?.gain,
-      subLength: analyzedFrames?.sub_length,
-      totalSubs: analyzedFrames?.total_subs
+      calibrationType: calibrationFrame?.calibration_type || calibrationType,
+      gain: analyzedFrames?.gain || calibrationFrame?.gain,
+      subLength: analyzedFrames?.sub_length || calibrationFrame?.sub_length,
+      totalSubs: analyzedFrames?.total_subs || calibrationFrame?.total_subs,
+      camera: calibrationFrame?.camera,
+      cameraTemp: calibrationFrame?.camera_temp
     }
   });
 
