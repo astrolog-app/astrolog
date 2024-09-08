@@ -17,13 +17,14 @@ import { useAppState } from '@/context/stateProvider';
 import { invoke } from '@tauri-apps/api/tauri';
 import { AnalyzedCalibrationFrames } from '@/interfaces/commands';
 import { CalibrationType } from '@/enums/calibrationType';
+import { toast } from '@/components/ui/use-toast';
 
 interface CalibrationRowEditorProps {
   analyzedFrames?: AnalyzedCalibrationFrames;
   edit: boolean;
 }
 
-export default function CalibrationRowEditor({ analyzedFrames, edit }: CalibrationRowEditorProps ) {
+export default function CalibrationRowEditor({ analyzedFrames, edit }: CalibrationRowEditorProps) {
   const { closeModal } = useModal();
   const { appState } = useAppState();
 
@@ -78,9 +79,13 @@ export default function CalibrationRowEditor({ analyzedFrames, edit }: Calibrati
   function onSubmit() {
     if (!edit) {
       if (calibrationType == CalibrationType.DARK) {
-        invoke("classify_dark_frames").then()
+        invoke('classify_dark_frames').catch((error) => toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'Error: ' + error
+        }));
       } else {
-        invoke("classify_bias_frames").then()
+        invoke('classify_bias_frames').then();
       }
     }
   }

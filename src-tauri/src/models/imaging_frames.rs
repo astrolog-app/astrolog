@@ -58,6 +58,7 @@ pub trait ImagingFrame {
     fn camera_id(&self) -> &Uuid;
     fn total_subs(&self) -> &i32;
     fn gain(&self) -> &i32;
+    fn frames(&self) -> &Vec<String>;
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -66,6 +67,7 @@ pub struct LightFrame {
     pub camera_id: Uuid,
     pub total_subs: i32,
     pub gain: i32,
+    pub frames: Vec<String>,
 
     pub date: String,
     pub target: String,
@@ -100,6 +102,9 @@ impl ImagingFrame for LightFrame {
     fn gain(&self) -> &i32 {
         &self.gain
     }
+    fn frames(&self) -> &Vec<String> {
+        &self.frames
+    }
 }
 
 pub fn get_light_frame(id: &Uuid) -> LightFrame {
@@ -132,8 +137,6 @@ pub trait CalibrationFrame: Any {
     fn gain(&self) -> &i32;
 
     fn calibration_type(&self) -> CalibrationType;
-    fn path(&self) -> &str;
-
     fn as_any(&self) -> &dyn Any;
 }
 
@@ -143,10 +146,10 @@ pub struct DarkFrame {
     camera_id: Uuid,
     total_subs: i32,
     gain: i32,
+    frames: Vec<String>,
 
     #[serde(skip_serializing, skip_deserializing)]
     calibration_type: CalibrationType,
-    path: String,
 
     pub camera_temp: f64,
     pub sub_length: f64
@@ -167,6 +170,9 @@ impl ImagingFrame for DarkFrame {
 
     fn gain(&self) -> &i32 {
         &self.gain
+    }
+    fn frames(&self) -> &Vec<String> {
+        &self.frames
     }
 }
 
@@ -189,9 +195,6 @@ impl CalibrationFrame for DarkFrame {
     fn calibration_type(&self) -> CalibrationType {
         CalibrationType::DARK
     }
-    fn path(&self) -> &str {
-        &self.path
-    }
     fn as_any(&self) -> &dyn Any {
         self
     }
@@ -203,10 +206,10 @@ pub struct BiasFrame {
     camera_id: Uuid,
     total_subs: i32,
     gain: i32,
+    frames: Vec<String>,
 
     #[serde(skip_serializing, skip_deserializing)]
     calibration_type: CalibrationType,
-    path: String,
 }
 
 impl ImagingFrame for BiasFrame {
@@ -224,6 +227,9 @@ impl ImagingFrame for BiasFrame {
 
     fn gain(&self) -> &i32 {
         &self.gain
+    }
+    fn frames(&self) -> &Vec<String> {
+        &self.frames
     }
 }
 
@@ -246,9 +252,6 @@ impl CalibrationFrame for BiasFrame {
     fn calibration_type(&self) -> CalibrationType {
         CalibrationType::BIAS
     }
-    fn path(&self) -> &str {
-        &self.path
-    }
     fn as_any(&self) -> &dyn Any {
         self
     }
@@ -259,7 +262,8 @@ struct FlatFrame {
     id: Uuid,
     camera_id: Uuid,
     total_subs: i32,
-    gain: i32
+    gain: i32,
+    frames: Vec<String>,
 }
 
 impl ImagingFrame for FlatFrame {
@@ -277,5 +281,8 @@ impl ImagingFrame for FlatFrame {
 
     fn gain(&self) -> &i32 {
         &self.gain
+    }
+    fn frames(&self) -> &Vec<String> {
+        &self.frames
     }
 }

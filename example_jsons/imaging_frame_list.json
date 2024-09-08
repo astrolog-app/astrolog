@@ -2,6 +2,7 @@
   "light_frames": [
     {
       "id": "b7d68b1d-03b5-44bc-9c6c-712eb7f58400",
+      "frames": [""],
       "camera_id": "8d00c203-a73f-4a9c-ad3b-aa608aaa8f97",
       "total_subs": 10,
       "gain": 100,
@@ -23,6 +24,7 @@
     },
     {
       "id": "b7d68b1d-03b5-44bc-9c6c-712eb7f58410",
+      "frames": [""],
       "camera_id": "8d00c203-a73f-4a9c-ad3b-aa608aaa8f97",
       "total_subs": 10,
       "gain": 100,
@@ -46,19 +48,19 @@
   "dark_frames": [
     {
       "id": "1690c5d1-db74-4cb4-8c3e-84e8cefec2cc",
+      "frames": [""],
       "camera_id": "8d00c203-a73f-4a9c-ad3b-aa608aaa8f97",
       "total_subs": 0,
       "gain": 0,
-      "path": "",
       "camera_temp": 0.0,
       "sub_length": 0.2
     },
     {
       "id": "e353dce0-65c7-43c4-b2bd-b57465aa9a1d",
+      "frames": [""],
       "camera_id": "76a4468d-b33d-4285-b7ad-a936891a1291",
       "total_subs": 2,
       "gain": 0,
-      "path": "",
       "camera_temp": 17.0,
       "sub_length": 2.0
     }
@@ -66,22 +68,23 @@
   "bias_frames": [
     {
       "id": "c0c1cd39-b585-4609-af26-2978c8ca5a73",
+      "frames": [""],
       "camera_id": "8d00c203-a73f-4a9c-ad3b-aa608aaa8f97",
       "total_subs": 1,
-      "gain": 1,
-      "path": ""
+      "gain": 1
     },
     {
       "id": "3a67f76e-2cda-4363-be16-e73774283eaf",
+      "frames": [""],
       "camera_id": "76a4468d-b33d-4285-b7ad-a936891a1291",
       "total_subs": 2,
-      "gain": 2,
-      "path": ""
+      "gain": 2
     }
   ],
   "flat_frames": [
     {
       "id": "3a67f76e-2cda-4363-be16-e73774283eaf",
+      "frames": [""],
       "camera_id": "76a4468d-b33d-4285-b7ad-a936891a1291",
       "total_subs": 2,
       "gain": 2
