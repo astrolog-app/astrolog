@@ -13,6 +13,7 @@ mod models;
 mod frontend_actions;
 mod utils;
 mod services;
+mod image;
 
 fn main() {
     setup();

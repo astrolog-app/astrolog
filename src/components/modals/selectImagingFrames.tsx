@@ -19,6 +19,7 @@ export interface AnalyzedCalibrationFrames {
   gain: number;
   sub_length: number;
   total_subs: number;
+  message: string;
 }
 
 export default function SelectImagingFrames() {
@@ -39,7 +40,16 @@ export default function SelectImagingFrames() {
 
   function onSubmit() {
     invoke<AnalyzedCalibrationFrames>('analyze_calibration_frames', { frames: form.getValues().frames })
-      .then((result) => openModal(<CalibrationRowEditor analyzedFrames={result} edit={false} />))
+      .then((result) => {
+        openModal(<CalibrationRowEditor analyzedFrames={result} edit={false} />);
+        if (result.message !== null) {
+          toast({
+            variant: 'destructive',
+            title: 'Warning',
+            description: result.message
+          });
+        }
+      })
       .catch((error) => {
         toast({
           variant: 'destructive',
