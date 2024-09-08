@@ -1,5 +1,5 @@
 use crate::models::equipment::EquipmentItem;
-use crate::services::state::get_readonly_app_state;
+use crate::state::get_readonly_app_state;
 use crate::models::imaging_frames::ImagingFrameList;
 use crate::models::frontend::state::{CalibrationTableRow, EquipmentList, FrontendAppState, LogTableRow, TableData};
 

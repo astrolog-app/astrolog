@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::PathBuf;
 use crate::models::image::Image;
-use crate::services::state::{get_app_state, get_readonly_app_state};
+use crate::state::{get_app_state, get_readonly_app_state};
 use crate::utils::paths::ROOT_DIRECTORY_PATH;
 
 // TODO: finish

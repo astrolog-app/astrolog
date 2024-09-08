@@ -1,5 +1,5 @@
 use crate::models::preferences::Preferences;
-use crate::services::state::get_app_state;
+use crate::state::get_app_state;
 use crate::utils::paths::APP_DATA_PATH;
 
 #[tauri::command]

@@ -1,8 +1,8 @@
 use std::error::Error;
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
-use crate::services::file_store;
-use crate::services::state::get_readonly_app_state;
+use crate::file_store;
+use crate::state::get_readonly_app_state;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Image {

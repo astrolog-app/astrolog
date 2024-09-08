@@ -2,7 +2,7 @@ use std::env;
 use std::path::{PathBuf};
 use once_cell::sync::Lazy;
 use tauri::api::path;
-use crate::services::state::get_readonly_app_state;
+use crate::state::get_readonly_app_state;
 
 pub static PROJECT_PATH: Lazy<PathBuf> = Lazy::new(get_project_path);
 pub static CACHE_PATH: Lazy<PathBuf> = Lazy::new(get_cache_path);

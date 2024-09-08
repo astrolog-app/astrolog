@@ -1,19 +1,21 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use crate::frontend_actions::gallery::{add_new_image, open_image};
-use crate::frontend_actions::imaging_sessions::{analyze_images, export_csv, open_imaging_session};
-use crate::frontend_actions::preferences::{check_meta_data_directory, save_preferences, setup_backup};
-use crate::frontend_actions::state::load_frontend_app_state;
-use crate::frontend_actions::utils::{open_browser, rename_directory};
-use crate::frontend_actions::calibration::{analyze_calibration_frames, classify_bias_frames, classify_dark_frames};
-use crate::services::setup::setup;
+use crate::commands::gallery::{add_new_image, open_image};
+use crate::commands::imaging_sessions::{analyze_images, export_csv, open_imaging_session};
+use crate::commands::preferences::{check_meta_data_directory, save_preferences, setup_backup};
+use crate::commands::state::load_frontend_app_state;
+use crate::commands::utils::{open_browser, rename_directory};
+use crate::commands::calibration::{analyze_calibration_frames, classify_bias_frames, classify_dark_frames};
+use crate::setup::setup;
 
 mod models;
-mod frontend_actions;
+mod commands;
 mod utils;
-mod services;
 mod image;
+pub mod file_store;
+pub mod setup;
+pub mod state;
 
 fn main() {
     setup();
