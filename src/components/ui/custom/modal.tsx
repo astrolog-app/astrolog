@@ -1,6 +1,6 @@
 'use client';
 
-import { CloseSVG } from '@/app/svgs';
+import { CloseSVG } from '@/public/svgs';
 import { Separator } from '../separator';
 import styles from './modal.module.scss';
 import { useModal } from '@/context/modalProvider';
@@ -42,7 +42,7 @@ export function Modal(
           transition={{ duration: 0.05 }}
         >
           <div className={styles.close} onClick={closeModal}>
-            {CloseSVG}
+            <CloseSVG />
           </div>
           <div className={styles.header}>
             <div className={styles.title}>{title}</div>

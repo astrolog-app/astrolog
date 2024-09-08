@@ -6,7 +6,7 @@ import { cn } from '@/utils/classNames';
 import { useEffect, useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CopySVG, DeleteSVG } from '@/app/svgs';
+import { CopySVG, DeleteSVG } from '@/public/svgs';
 import { useAppState } from '@/context/stateProvider';
 import { AppState } from '@/interfaces/state';
 
@@ -107,7 +107,7 @@ export function CopyButton({ value }: { value: string }) {
               onClick={onClick}
               svg={true}
             >
-              {CopySVG}
+              <CopySVG />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -159,7 +159,7 @@ export function DeleteButton({ value, saveAction, path }: DeleteButtonProps) {
               onClick={onClick}
               svg={true}
             >
-              {DeleteSVG}
+              <DeleteSVG />
             </Button>
           </TooltipTrigger>
           <TooltipContent>

@@ -42,7 +42,7 @@ import {
   ContextMenuShortcut,
   ContextMenuTrigger
 } from '../ui/context-menu';
-import { DeleteSVG } from '@/app/svgs';
+import { DeleteSVG } from '@/public/svgs';
 import { invoke } from '@tauri-apps/api/tauri';
 import { toast } from '@/components/ui/use-toast';
 import { useModal } from '@/context/modalProvider';
@@ -250,7 +250,7 @@ export function LogTable<TData, TValue>({ setSelectedSessionId }: SessionTablePr
           </ContextMenuItem>
           <ContextMenuItem inset disabled={!rowSelected} className={styles.delete}>
             Delete
-            <ContextMenuShortcut>{DeleteSVG}</ContextMenuShortcut>
+            <ContextMenuShortcut><DeleteSVG /></ContextMenuShortcut>
           </ContextMenuItem>
           <ContextMenuSeparator />
           <ContextMenuItem inset onClick={() => openModal(<NewImagingSession />)}>
@@ -270,7 +270,7 @@ export function LogTable<TData, TValue>({ setSelectedSessionId }: SessionTablePr
           </ContextMenuItem>
           <ContextMenuItem inset disabled={!rowSelected} className={styles.delete}>
             Delete
-            <ContextMenuShortcut>{DeleteSVG}</ContextMenuShortcut>
+            <ContextMenuShortcut><DeleteSVG /></ContextMenuShortcut>
           </ContextMenuItem>
           <ContextMenuSeparator />
           <ContextMenuItem inset onClick={() => openModal(<NewImagingSession />)}>
