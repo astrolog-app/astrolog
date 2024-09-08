@@ -14,13 +14,9 @@ import { Label } from '@/components/ui/label';
 import { useModal } from '@/context/modalProvider';
 import ComboBox from '@/components/ui/comboBox';
 import { useAppState } from '@/context/stateProvider';
-import { AnalyzedCalibrationFrames } from '@/components/modals/selectImagingFrames';
 import { invoke } from '@tauri-apps/api/tauri';
-
-export enum CalibrationType {
-  DARK = 'DARK',
-  BIAS = 'BIAS'
-}
+import { AnalyzedCalibrationFrames } from '@/interfaces/commands';
+import { CalibrationType } from '@/enums/calibrationType';
 
 interface CalibrationRowEditorProps {
   analyzedFrames?: AnalyzedCalibrationFrames;

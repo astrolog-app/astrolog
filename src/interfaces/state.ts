@@ -1,4 +1,5 @@
 import { UUID } from 'crypto';
+import { CalibrationType } from '@/enums/calibrationType';
 
 export interface AppState {
   preferences: Preferences;
@@ -58,7 +59,7 @@ export interface Session {
 export interface Calibration {
   id: UUID;
   camera: string;
-  calibration_type: string;
+  calibration_type: CalibrationType;
   gain: number;
   sub_length: number;
   camera_temp: number;

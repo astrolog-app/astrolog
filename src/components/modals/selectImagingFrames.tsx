@@ -12,15 +12,8 @@ import { Modal } from '@/components/ui/custom/modal';
 import { useModal } from '@/context/modalProvider';
 import { invoke } from '@tauri-apps/api/tauri';
 import { toast } from '@/components/ui/use-toast';
-import CalibrationRowEditor, { CalibrationType } from '@/components/modals/calibrationRowEditor';
-
-export interface AnalyzedCalibrationFrames {
-  calibration_type: CalibrationType;
-  gain: number;
-  sub_length: number;
-  total_subs: number;
-  message: string;
-}
+import CalibrationRowEditor from '@/components/modals/calibrationRowEditor';
+import { AnalyzedCalibrationFrames } from '@/interfaces/commands';
 
 export default function SelectImagingFrames() {
   const { openModal } = useModal();
