@@ -61,8 +61,8 @@ export interface CalibrationFrame {
   camera: string;
   calibration_type: CalibrationType;
   gain: number;
-  sub_length: number;
-  camera_temp: number;
+  sub_length: number | undefined;
+  camera_temp: number | undefined;
   total_subs: number;
 }
 

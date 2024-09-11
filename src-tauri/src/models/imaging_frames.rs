@@ -1,5 +1,6 @@
 use std::any::Any;
 use std::error::Error;
+use std::fmt;
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -117,7 +118,7 @@ pub fn get_light_frame(id: &Uuid) -> LightFrame {
         .expect("LightFrame not found")
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub enum CalibrationType {
     DEFAULT,
     DARK,
@@ -127,6 +128,16 @@ pub enum CalibrationType {
 impl Default for CalibrationType {
     fn default() -> Self {
         CalibrationType::DEFAULT
+    }
+}
+
+impl fmt::Display for CalibrationType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            CalibrationType::DARK => write!(f, "DARK"),
+            CalibrationType::BIAS => write!(f, "BIAS"),
+            CalibrationType::DEFAULT => write!(f, "DEFAULT"),
+        }
     }
 }
 
@@ -142,14 +153,14 @@ pub trait CalibrationFrame: Any {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DarkFrame {
-    id: Uuid,
-    camera_id: Uuid,
-    total_subs: i32,
-    gain: i32,
-    frames: Vec<String>,
+    pub id: Uuid,
+    pub camera_id: Uuid,
+    pub total_subs: i32,
+    pub gain: i32,
+    pub frames: Vec<String>,
 
     #[serde(skip_serializing, skip_deserializing)]
-    calibration_type: CalibrationType,
+    pub calibration_type: CalibrationType,
 
     pub camera_temp: f64,
     pub sub_length: f64
@@ -202,14 +213,14 @@ impl CalibrationFrame for DarkFrame {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct BiasFrame {
-    id: Uuid,
-    camera_id: Uuid,
-    total_subs: i32,
-    gain: i32,
-    frames: Vec<String>,
+    pub id: Uuid,
+    pub camera_id: Uuid,
+    pub total_subs: i32,
+    pub gain: i32,
+    pub frames: Vec<String>,
 
     #[serde(skip_serializing, skip_deserializing)]
-    calibration_type: CalibrationType,
+    pub calibration_type: CalibrationType,
 }
 
 impl ImagingFrame for BiasFrame {

@@ -73,13 +73,13 @@ impl LogTableRow {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CalibrationTableRow {
-    id: Uuid,
-    camera: String,
-    calibration_type: CalibrationType,
-    gain: i32,
-    sub_length: Option<f64>,
-    camera_temp: Option<f64>,
-    total_subs: i32
+    pub(crate) id: Uuid,
+    pub camera: String,
+    pub calibration_type: CalibrationType,
+    pub gain: i32,
+    pub sub_length: Option<f64>,
+    pub camera_temp: Option<f64>,
+    pub total_subs: i32
 }
 
 impl CalibrationTableRow {

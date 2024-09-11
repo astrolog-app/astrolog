@@ -24,9 +24,10 @@ interface CalibrationRowEditorProps {
   analyzedFrames?: AnalyzedCalibrationFrames;
   edit: boolean;
   calibrationFrame?: CalibrationFrame;
+  paths?: string[]
 }
 
-export default function CalibrationRowEditor({ analyzedFrames, edit, calibrationFrame }: CalibrationRowEditorProps) {
+export default function CalibrationRowEditor({ analyzedFrames, edit, calibrationFrame, paths }: CalibrationRowEditorProps) {
   const { closeModal } = useModal();
   const { appState } = useAppState();
 
@@ -82,8 +83,18 @@ export default function CalibrationRowEditor({ analyzedFrames, edit, calibration
 
   function onSubmit() {
     if (!edit) {
+      const newCalibrationFrame: CalibrationFrame = {
+        id: calibrationFrame?.id || "69359fdc-16ed-4476-b4f9-786bf22cd299",
+        camera: form.getValues().camera,
+        calibration_type: form.getValues().calibrationType,
+        gain: Number(form.getValues().gain), // Ensure this is converted to a number
+        sub_length: form.getValues().subLength ? Number(form.getValues().subLength) : undefined, // Convert or set undefined
+        camera_temp: form.getValues().cameraTemp ? Number(form.getValues().cameraTemp) : undefined, // Convert or set undefined
+        total_subs: Number(form.getValues().totalSubs) // Ensure this is converted to a number
+      };
+
       if (calibrationType == CalibrationType.DARK) {
-        invoke('classify_dark_frames').catch((error) => toast({
+        invoke('classify_calibration_frames', { frames: newCalibrationFrame, paths: paths }).catch((error) => toast({
           variant: 'destructive',
           title: 'Uh oh! Something went wrong.',
           description: 'Error: ' + error

@@ -34,7 +34,7 @@ export default function SelectImagingFrames() {
   function onSubmit() {
     invoke<AnalyzedCalibrationFrames>('analyze_calibration_frames', { frames: form.getValues().frames })
       .then((result) => {
-        openModal(<CalibrationRowEditor analyzedFrames={result} edit={false} />);
+        openModal(<CalibrationRowEditor analyzedFrames={result} edit={false} paths={form.getValues().frames} />);
         if (result.message !== null) {
           toast({
             variant: 'destructive',

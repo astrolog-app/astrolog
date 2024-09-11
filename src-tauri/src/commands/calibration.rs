@@ -1,9 +1,12 @@
 use std::fs;
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 use crate::image::{get_exposure_time, get_gain};
-use crate::models::imaging_frames::CalibrationType;
-use crate::state::get_readonly_app_state;
+use crate::models::frontend::state::CalibrationTableRow;
+use crate::models::imaging_frames::{BiasFrame, CalibrationType, DarkFrame, ImagingFrameList};
+use crate::state::{get_app_state, get_readonly_app_state};
+use crate::utils::paths::ROOT_DIRECTORY_PATH;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AnalyzedCalibrationFrames {
@@ -59,50 +62,65 @@ pub fn analyze_calibration_frames(frames: Vec<PathBuf>) -> Result<AnalyzedCalibr
     )
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct FrontendDarkFrame {
-    frames: Vec<PathBuf>,
-    calibration_type: String,
-    camera: String,
-    gain: i32,
-    sub_length: f64,
-    camera_temp: f64
-}
-
 #[tauri::command]
-pub fn classify_dark_frames() -> Result<(), String> {
-    let dark_frame = FrontendDarkFrame {
-        frames: vec![PathBuf::from("F:\\DCIM\\111D5500\\ND5_0270.NEF"), PathBuf::from("F:\\DCIM\\111D5500\\ND5_0271.NEF")],
-        calibration_type: String::from("DARK"),
-        camera: String::from("Nikon D5500"),
-        gain: 800,
-        sub_length: 300.0,
-        camera_temp: 12.0
-    };
-
-    // TODO: Check for duplicates
-
-    let root_directory = &get_readonly_app_state().preferences.storage.root_directory;
-
+pub async fn classify_calibration_frames(frames: CalibrationTableRow, paths: Vec<PathBuf>) -> Result<(), String> {
+    let readonly_app_state = get_readonly_app_state();
+    let root_directory = &readonly_app_state.preferences.storage.root_directory;
     let mut path = PathBuf::from(root_directory);
     path.push("Calibration");
-    path.push(&dark_frame.calibration_type);
-    path.push(&dark_frame.camera);
-    path.push(dark_frame.gain.to_string());
+    path.push(&frames.calibration_type.to_string());
+    path.push(&frames.camera);
+    path.push(frames.gain.to_string());
 
-    for frame in dark_frame.frames {
-        fs::create_dir_all(&path).map_err(|e| e.to_string())?;
+    // Check if folder exists and if it's not empty
+    if path.exists() {
+        let entries = fs::read_dir(&path).map_err(|e| e.to_string())?;
+        if entries.count() > 0 {
+            return Err("Such calibration frames already exist and the folder is not empty.".to_string());
+        }
+    }
 
+    // Create the directory and copy the files
+    fs::create_dir_all(&path).map_err(|e| e.to_string())?;
+    for frame in paths {
         let mut new_path = path.clone();
-        new_path.push(&frame.file_name().ok_or("")?);
-        fs::copy(&frame, new_path)
+        new_path.push(frame.file_name().ok_or("Couldn't get file_name")?);
+        fs::copy(&frame, &new_path)
             .map_err(|e| e.to_string())?;
     }
 
-    // TODO: Save to json file
+    if frames.calibration_type == CalibrationType::DARK {
+        let mut dark_frames = readonly_app_state.imaging_frame_list.dark_frames.clone();
+        drop(readonly_app_state);
+        let new_dark_frame = DarkFrame {
+            id: frames.id,
+            camera_id: Uuid::new_v4(),
+            total_subs: frames.total_subs,
+            gain: frames.gain,
+            frames: vec![],
+            calibration_type: frames.calibration_type,
+            camera_temp: frames.camera_temp.unwrap(),
+            sub_length: frames.sub_length.unwrap()
+        };
+        dark_frames.push(new_dark_frame);
+
+        get_app_state().imaging_frame_list.dark_frames = dark_frames.clone();
+    } else {
+        let mut bias_frames = readonly_app_state.imaging_frame_list.bias_frames.clone();
+        drop(readonly_app_state);
+        let new_bias_frame = BiasFrame {
+            id: frames.id,
+            camera_id: Uuid::new_v4(),
+            total_subs: frames.total_subs,
+            gain: frames.gain,
+            frames: vec![],
+            calibration_type: frames.calibration_type,
+        };
+        bias_frames.push(new_bias_frame);
+
+        get_app_state().imaging_frame_list.bias_frames = bias_frames.clone();
+    }
+    ImagingFrameList::save(ROOT_DIRECTORY_PATH.clone()).map_err(|e| e.to_string())?;
 
     Ok(())
 }
-
-#[tauri::command]
-pub fn classify_bias_frames() {}
