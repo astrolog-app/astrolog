@@ -1,6 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use std::env;
+use dotenv::dotenv;
 use crate::commands::gallery::{add_new_image, open_image};
 use crate::commands::imaging_sessions::{analyze_images, export_csv, open_imaging_session};
 use crate::commands::preferences::{check_meta_data_directory, save_preferences, setup_backup};
@@ -19,6 +21,10 @@ pub mod state;
 
 fn main() {
     setup();
+    dotenv().ok();
+
+    let account_id = env::var("ACCOUNT_ID").expect("ACCOUNT_ID is not set");
+    let verify_key = env::var("VERIFY_KEY").expect("VERIFY_KEY is not set");
 
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
@@ -36,6 +42,13 @@ fn main() {
       analyze_calibration_frames,
       classify_calibration_frames,
     ])
+        .plugin(
+            tauri_plugin_keygen::Builder::new(
+                &account_id,
+                &verify_key,
+            )
+                .build(),
+        )
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

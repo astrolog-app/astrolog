@@ -5,7 +5,6 @@ import styles from './preferences.module.scss';
 import AppearanceForm from './appearanceForm';
 import StorageForm from './storageForm';
 import UserForm from './userForm';
-import LicenseForm from './licenseForm';
 
 export function Preferences() {
   return (
@@ -19,7 +18,6 @@ export function Preferences() {
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
           <TabsTrigger value="storage">Storage</TabsTrigger>
           <TabsTrigger value="user">User</TabsTrigger>
-          <TabsTrigger value="license">License</TabsTrigger>
         </TabsList>
         <TabsContent value="appearance" className={styles.tabsContent}>
           <Content
@@ -43,14 +41,6 @@ export function Preferences() {
             subtitle="Change or specify user specific information."
           >
             <UserForm />
-          </Content>
-        </TabsContent>
-        <TabsContent value="license" className={styles.tabsContent}>
-          <Content
-            title="License"
-            subtitle="Lookup your license key or activate AstroLog."
-          >
-            <LicenseForm />
           </Content>
         </TabsContent>
       </Tabs>

@@ -11,7 +11,6 @@ export interface AppState {
 export interface Preferences {
   storage: Storage;
   user: User;
-  license: License;
 }
 
 interface Storage {
@@ -22,12 +21,6 @@ interface Storage {
 
 interface User {
   weather_api_key: string;
-}
-
-interface License {
-  activated: boolean;
-  user_email: string;
-  license_key: string;
 }
 
 interface TableData {

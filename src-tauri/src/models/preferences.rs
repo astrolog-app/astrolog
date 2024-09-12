@@ -9,7 +9,6 @@ use crate::state::get_readonly_app_state;
 pub struct Preferences {
     pub storage: Storage,
     user: User,
-    license: License
 }
 
 impl Preferences {
@@ -22,11 +21,6 @@ impl Preferences {
             },
             user: User {
                 weather_api_key: "".to_string()
-            },
-            license: License {
-                activated: false,
-                user_email: "".to_string(),
-                license_key: "".to_string()
             }
         }
     }
