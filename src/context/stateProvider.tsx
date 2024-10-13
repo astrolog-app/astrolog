@@ -5,7 +5,7 @@ import React, {
   createContext,
   Dispatch,
   ReactNode,
-  SetStateAction, useCallback,
+  SetStateAction,
   useContext,
   useEffect,
   useState
@@ -13,9 +13,6 @@ import React, {
 import { toast } from '@/components/ui/use-toast';
 import { AppState } from '@/interfaces/state';
 import { removeContextMenu } from '@/utils/browser';
-import { KeygenLicense } from 'tauri-plugin-keygen-api';
-import { useModal } from '@/context/modalProvider';
-import License from '@/components/modals/license';
 
 const defaultAppState: AppState = {
   preferences: {
@@ -52,43 +49,6 @@ const AppStateContext = createContext<AppStateContextType | undefined>(undefined
 export default function StateProvider({ children }: { children: ReactNode }) {
   const [appState, setAppState] = useState<AppState>(defaultAppState);
 
-  const { openModal } = useModal();
-
-  const checkLicense = useCallback(async () => {
-    const { validateKey, getLicenseKey, getLicense } = await import('tauri-plugin-keygen-api');
-
-    const licenseKey: string | null = await getLicenseKey();
-
-    if (licenseKey === null) {
-      openModal(<License />);
-    } else {
-      const license: KeygenLicense | null = await getLicense();
-
-      if (license === null) {
-        validateKey({ key: licenseKey })
-          .then((newLicense) => {
-            if (!newLicense.valid) {
-              toast({
-                variant: 'destructive',
-                title: 'Uh oh! Something went wrong.',
-                description: 'Error: '
-              });
-              openModal(<License />);
-            }
-          });
-      } else {
-        if (!license.valid) {
-          toast({
-            variant: 'destructive',
-            title: 'Uh oh! Something went wrong.',
-            description: 'Error: '
-          });
-          openModal(<License />);
-        }
-      }
-    }
-  }, []);
-
   useEffect(() => {
     async function fetchData() {
       try {
@@ -106,7 +66,6 @@ export default function StateProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    checkLicense();
     fetchData();
     removeContextMenu();
   }, []);

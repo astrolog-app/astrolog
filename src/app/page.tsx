@@ -6,10 +6,14 @@ import Log from './log/log';
 import Gallery from './gallery/gallery';
 import { TopBar } from '@/components/topBar';
 import SideNav from '@/components/sideNav';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AnalyticsSVG, EquipmentSVG, GallerySVG, LogSVG } from '@/public/svgs';
 import Equipment from '@/app/equipment/equipment';
+import License from '@/components/modals/license';
+import { KeygenLicense } from 'tauri-plugin-keygen-api';
+import { toast } from '@/components/ui/use-toast';
+import { useModal } from '@/context/modalProvider';
 
 export interface Tab {
   component: React.ReactNode;
@@ -26,6 +30,46 @@ export default function Home() {
     { component: <Analytics />, key: 'analytics', tooltip: 'Analytics', icon: <AnalyticsSVG /> }
   ];
   const [selectedTab, setSelectedTab] = useState(tabs[0]);
+  const { openModal } = useModal();
+
+  const checkLicense = useCallback(async () => {
+    const { validateKey, getLicenseKey, getLicense } = await import('tauri-plugin-keygen-api');
+
+    const licenseKey: string | null = await getLicenseKey();
+
+    if (licenseKey === null) {
+      openModal(<License />);
+    } else {
+      const license: KeygenLicense | null = await getLicense();
+
+      if (license === null) {
+        validateKey({ key: licenseKey })
+          .then((newLicense) => {
+            if (!newLicense.valid) {
+              toast({
+                variant: 'destructive',
+                title: 'Uh oh! Something went wrong.',
+                description: 'Error: '
+              });
+              openModal(<License />);
+            }
+          });
+      } else {
+        if (!license.valid) {
+          toast({
+            variant: 'destructive',
+            title: 'Uh oh! Something went wrong.',
+            description: 'Error: '
+          });
+          openModal(<License />);
+        }
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    checkLicense();
+  }, [])
 
   return (
     <div className={styles.tabs}>

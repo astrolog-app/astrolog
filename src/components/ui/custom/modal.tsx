@@ -13,6 +13,7 @@ interface ModalProps {
   subtitle?: string;
   separator?: boolean;
   children: React.ReactNode;
+  notClosable?: boolean;
 }
 
 export function Modal(
@@ -21,7 +22,8 @@ export function Modal(
     title,
     subtitle,
     separator,
-    children
+    children,
+    notClosable
   }: ModalProps) {
   const { closeModal } = useModal();
 
@@ -41,9 +43,11 @@ export function Modal(
           exit={{ opacity: 0, scale: 0.9 }}
           transition={{ duration: 0.05 }}
         >
-          <div className={styles.close} onClick={closeModal}>
-            <CloseSVG />
-          </div>
+          {!notClosable && (
+            <div className={styles.close} onClick={closeModal}>
+              <CloseSVG />
+            </div>
+          )}
           <div className={styles.header}>
             <div className={styles.title}>{title}</div>
             <div className={styles.subtitle}>{subtitle}</div>
