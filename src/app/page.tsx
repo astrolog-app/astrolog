@@ -68,7 +68,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    checkLicense();
+    //checkLicense();
   }, [])
 
   return (
