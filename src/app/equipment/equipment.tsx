@@ -8,6 +8,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/componen
 import { useModal } from '@/context/modalProvider';
 import EquipmentModal from '@/components/modals/equipment/equiipment';
 import { EquipmentType } from '@/enums/equipmentType';
+import EquipmentDetails from '@/components/equipmentDetails';
 
 export default function Equipment() {
   const { openModal } = useModal();
@@ -29,12 +30,20 @@ export default function Equipment() {
         </CardContent>
       </Card>
       <ResizablePanelGroup className={styles.content} direction="horizontal">
-        <ResizablePanel defaultSize={30}>
-
+        <ResizablePanel defaultSize={30} minSize={10} maxSize={70}>
+          <Card className={styles.card}>
+            <CardHeader>
+              Telescope List
+            </CardHeader>
+          </Card>
         </ResizablePanel>
-        <ResizableHandle withHandle />
+        <ResizableHandle withHandle className={styles.handle} />
         <ResizablePanel defaultSize={70}>
-
+          <Card className={styles.card}>
+            <CardHeader>
+              <EquipmentDetails />
+            </CardHeader>
+          </Card>
         </ResizablePanel>
       </ResizablePanelGroup>
     </Tab>

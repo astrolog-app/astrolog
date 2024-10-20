@@ -5,5 +5,14 @@
   .content {
     flex-grow: 1;
     margin-top: var(--padding);
+
+    .card {
+      height: 100%;
+    }
+
+    .handle {
+      margin-left: var(--padding);
+      margin-right: var(--padding);
+    }
   }
 }
