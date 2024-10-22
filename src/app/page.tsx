@@ -14,6 +14,8 @@ import License from '@/components/modals/license';
 import { KeygenLicense } from 'tauri-plugin-keygen-api';
 import { toast } from '@/components/ui/use-toast';
 import { useModal } from '@/context/modalProvider';
+import { useAppState } from '@/context/stateProvider';
+import RootDirectory from '@/components/modals/rootDirectory';
 
 export interface Tab {
   component: React.ReactNode;
@@ -31,6 +33,7 @@ export default function Home() {
   ];
   const [selectedTab, setSelectedTab] = useState(tabs[0]);
   const { openModal } = useModal();
+  const { appState } = useAppState();
 
   const checkLicense = useCallback(async () => {
     const { validateKey, getLicenseKey, getLicense } = await import('tauri-plugin-keygen-api');
@@ -68,7 +71,10 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    checkLicense();
+    // checkLicense();
+    if (appState.preferences.storage.root_directory == "") {
+      openModal(<RootDirectory />);
+    }
   }, [])
 
   return (

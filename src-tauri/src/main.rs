@@ -5,11 +5,10 @@ use std::env;
 use dotenv::dotenv;
 use crate::commands::gallery::{add_new_image, open_image};
 use crate::commands::imaging_sessions::{analyze_images, export_csv, open_imaging_session};
-use crate::commands::preferences::{check_meta_data_directory, save_preferences, setup_backup};
+use crate::commands::preferences::{check_meta_data_directory, save_preferences, set_root_directory, setup_backup};
 use crate::commands::state::load_frontend_app_state;
 use crate::commands::utils::{open_browser, rename_directory};
 use crate::commands::calibration::{analyze_calibration_frames, classify_calibration_frames};
-use crate::commands::image::get_date;
 use crate::setup::setup;
 
 mod models;
@@ -42,7 +41,7 @@ fn main() {
       analyze_images,
       analyze_calibration_frames,
       classify_calibration_frames,
-      get_date
+      set_root_directory
     ])
         .plugin(
             tauri_plugin_keygen::Builder::new(
