@@ -9,6 +9,7 @@ use crate::commands::preferences::{check_meta_data_directory, save_preferences, 
 use crate::commands::state::load_frontend_app_state;
 use crate::commands::utils::{open_browser, rename_directory};
 use crate::commands::calibration::{analyze_calibration_frames, classify_calibration_frames};
+use crate::commands::image::get_date;
 use crate::setup::setup;
 
 mod models;
@@ -41,6 +42,7 @@ fn main() {
       analyze_images,
       analyze_calibration_frames,
       classify_calibration_frames,
+      get_date
     ])
         .plugin(
             tauri_plugin_keygen::Builder::new(

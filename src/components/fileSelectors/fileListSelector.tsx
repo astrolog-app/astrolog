@@ -6,8 +6,8 @@ import { cn } from '@/utils/classNames';
 import { Button } from '@/components/ui/button';
 
 interface FileSelectorProps {
-  value: string[],
-  onChange: (files: string[]) => void
+  value: string[];
+  onChange: (files: string[]) => void;
 }
 
 export default function FileListSelector({ value, onChange }: FileSelectorProps) {
@@ -132,8 +132,13 @@ export default function FileListSelector({ value, onChange }: FileSelectorProps)
       </div>
       <div className={styles.right}>
         <Button type="button" onClick={onClick} variant="secondary">Add...</Button>
-        <Button type="button" onClick={() => removeItems(selectedRowIndices)} variant="outline"
-                disabled={removeDisabled}>Remove</Button>
+        <Button type="button"
+                onClick={() => removeItems(selectedRowIndices)}
+                variant="outline"
+                disabled={removeDisabled}
+        >
+          Remove
+        </Button>
         <Button type="button" onClick={clearList} variant="outline" disabled={clearDisabled}>Clear</Button>
       </div>
     </div>

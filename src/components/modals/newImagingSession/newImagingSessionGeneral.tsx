@@ -1,6 +1,8 @@
+'use client';
+
 import styles from './newImagingSessionGeneral.module.scss';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -12,16 +14,17 @@ import { cn } from '@/utils/classNames';
 import { CalendarIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
+import { invoke } from '@tauri-apps/api/tauri';
+import { useModal } from '@/context/modalProvider';
 
 const formSchema = z.object({
-  date: z.date({
-    required_error: 'A date of birth is required.'
+  date: z.coerce.date({
+    required_error: 'Acquisition date must be set.'
   }),
   target: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
+    message: 'Target must be set.'
   })
 });
-
 
 export default function NewImagingSessionGeneral({ setSelectedTab }: {
   setSelectedTab: React.Dispatch<React.SetStateAction<TabKey | undefined>>
@@ -33,9 +36,16 @@ export default function NewImagingSessionGeneral({ setSelectedTab }: {
     }
   });
 
+  const { closeModal } = useModal();
+
   function onSubmit() {
     setSelectedTab('equipment');
   }
+
+  useEffect(() => {
+    invoke('get_date', { image: 'E:\\Astrof\\DATA\\2022\\M 42\\Orion UK 200 mm\\27.12\\2\\Light\\L_m42_0164_ISO800_10s__NA.NEF' })
+      .then((date) => form.setValue('date', new Date(date as Date)));
+  }, [form]);
 
   return (
     <Form {...form}>
@@ -46,7 +56,7 @@ export default function NewImagingSessionGeneral({ setSelectedTab }: {
             name="date"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Date of birth</FormLabel>
+                <FormLabel>Acquisition Date</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -78,8 +88,8 @@ export default function NewImagingSessionGeneral({ setSelectedTab }: {
                     />
                   </PopoverContent>
                 </Popover>
-                <FormDescription>
-                  Your date of birth is used to calculate your age.
+                <FormDescription className='w-[240px]'>
+                  The date you took your imaging frames.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -89,22 +99,28 @@ export default function NewImagingSessionGeneral({ setSelectedTab }: {
             control={form.control}
             name="target"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Root Directory</FormLabel>
+              <FormItem className="flex flex-col">
+                <FormLabel>Target</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} placeholder='NGC 9999' />
                 </FormControl>
                 <FormDescription>
-                  The directory in your filesystem where all of your astrophotos
-                  are stored. For a better user experience, this data should be
-                  available fast (e.g. on your computer).
+                  The name of the target (e.g. NGC 7000).
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
-        <Button type="submit">Next</Button>
+        <div className={styles.buttons}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={closeModal}
+            className={styles.cancelButton}
+          >Cancel</Button>
+          <Button type="submit">Next</Button>
+        </div>
       </form>
     </Form>
   );

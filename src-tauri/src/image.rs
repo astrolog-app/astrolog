@@ -45,3 +45,13 @@ pub fn get_exposure_time(image: &PathBuf) -> Result<f64, Box<dyn Error>> {
 
     Ok(exposure_time)
 }
+
+pub fn get_date(image: &PathBuf) -> Result<String, Box<dyn Error>> {
+    let exif = get_exif_data(image)?;
+
+    let date_str = exif.get_field(Tag::DateTime, In::PRIMARY)
+        .ok_or("DateTime tag not found in exif data.")?
+        .display_value().to_string();
+
+    Ok(date_str)
+}
