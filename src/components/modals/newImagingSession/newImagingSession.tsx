@@ -24,7 +24,7 @@ export default function NewImagingSession() {
       case 'general':
         return <NewImagingSessionGeneral setSelectedTab={setSelectedTab} />;
       case 'equipment':
-        return <NewImagingSessionEquipment />;
+        return <NewImagingSessionEquipment setSelectedTab={setSelectedTab} />;
       case 'calibration':
         return <NewImagingSessionCalibration />;
       default:
@@ -35,7 +35,6 @@ export default function NewImagingSession() {
   return (
     <Modal
       title="Add Imaging Session"
-      separator
       className={styles.modal}
     >
       {renderTab()}

@@ -4,6 +4,9 @@ import { Input } from '@/components/ui/input';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import styles from './newImagingSessionCalibration.module.scss';
+import { Button } from '@/components/ui/button';
+import { useModal } from '@/context/modalProvider';
 
 const formSchema = z.object({
   target: z.string().min(2, {
@@ -18,6 +21,8 @@ export default function NewImagingSessionCalibration() {
       target: ""
     }
   });
+
+  const { closeModal } = useModal();
 
   return (
     <Form {...form}>
@@ -39,6 +44,15 @@ export default function NewImagingSessionCalibration() {
             </FormItem>
           )}
         />
+        <div className={styles.buttons}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={closeModal}
+            className={styles.cancelButton}
+          >Cancel</Button>
+          <Button type="submit">Next</Button>
+        </div>
       </form>
     </Form>
   );

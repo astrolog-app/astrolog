@@ -1,0 +1,9 @@
+.buttons {
+  margin-top: var(--padding);
+  display: flex;
+  justify-content: end;
+
+  .cancelButton {
+    margin-right: 0.25rem;
+  }
+}
