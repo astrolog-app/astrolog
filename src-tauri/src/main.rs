@@ -4,7 +4,7 @@
 use std::env;
 use dotenv::dotenv;
 use crate::commands::gallery::{add_new_image, open_image};
-use crate::commands::imaging_sessions::{analyze_images, export_csv, open_imaging_session};
+use crate::commands::imaging_sessions::{export_csv, open_imaging_session};
 use crate::commands::preferences::{check_meta_data_directory, save_preferences, setup_backup};
 use crate::commands::state::load_frontend_app_state;
 use crate::commands::utils::{open_browser, rename_directory};
@@ -39,7 +39,6 @@ fn main() {
       add_new_image,
       open_image,
       open_imaging_session,
-      analyze_images,
       analyze_calibration_frames,
       classify_calibration_frames,
       get_date
