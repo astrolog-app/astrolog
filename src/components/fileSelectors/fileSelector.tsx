@@ -1,3 +1,5 @@
+'use client';
+
 import { Input } from '../ui/input';
 import { Button, ButtonProps } from '../ui/button';
 import styles from './fileSelector.module.scss';
@@ -6,6 +8,7 @@ import { toast } from '../ui/use-toast';
 import { useAppState } from '@/context/stateProvider';
 import { AppState } from '@/interfaces/state';
 import { Dispatch, ReactNode, SetStateAction } from 'react';
+import { ask } from '@tauri-apps/api/dialog';
 
 interface OptionInputProps {
   value: string;
@@ -38,6 +41,9 @@ interface FileSelectorChangeButtonProps extends ButtonProps {
   path: string;
   directory?: boolean,
   filters?: DialogFilter[],
+  name?: string;
+  confirmDialog?: boolean;
+  confirmMessage?: string;
 }
 
 export function   FileSelectorChangeButton({
@@ -45,6 +51,9 @@ export function   FileSelectorChangeButton({
   saveAction,
   directory,
   filters,
+  name = "Change",
+  confirmDialog = false,
+  confirmMessage = "Are you sure you want to continue?",
   ...props
 }: FileSelectorChangeButtonProps) {
   const { appState, setAppState } = useAppState();
@@ -55,9 +64,12 @@ export function   FileSelectorChangeButton({
       directory: directory,
       filters: filters
     })
-      .then((selectedPath) => {
+      .then(async (selectedPath) => {
         if (selectedPath) {
-          saveAction(selectedPath as string, appState, setAppState, path);
+          const confirmed = !confirmDialog || await ask('Are you sure?', 'Tauri');
+          if (confirmed) {
+            saveAction(selectedPath as string, appState, setAppState, path);
+          }
         }
       })
       .catch((err) => {
@@ -70,8 +82,8 @@ export function   FileSelectorChangeButton({
   }
 
   return (
-    <Button {...props} type="button" onClick={onClick}>
-      Change
+    <Button {...props} type="button" onClick={onClick} className="w-28">
+      {name}
     </Button>
   );
 }

@@ -8,14 +8,16 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from '@/components/ui/form';
 import { ToastAction } from '@/components/ui/toast';
 import { toast, useToast } from '@/components/ui/use-toast';
 import { savePreferences, useAppState } from '@/context/stateProvider';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import FileSelector, { FileSelectorChangeButton } from '@/components/fileSelectors/fileSelector';
+import FileSelector, {
+  FileSelectorChangeButton,
+} from '@/components/fileSelectors/fileSelector';
 import { z } from 'zod';
 import { invoke } from '@tauri-apps/api/tauri';
 import React from 'react';
@@ -24,14 +26,14 @@ import { AppState } from '@/interfaces/state';
 
 const formSchema = z.object({
   rootDirectory: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
+    message: 'Username must be at least 2 characters.', // change
   }),
   backupDirectory: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
+    message: 'Username must be at least 2 characters.', // change
   }),
   sourceDirectory: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
-  })
+    message: 'Username must be at least 2 characters.', // change
+  }),
 });
 
 export default function StorageForm() {
@@ -43,8 +45,8 @@ export default function StorageForm() {
     defaultValues: {
       rootDirectory: appState.preferences.storage.root_directory,
       backupDirectory: appState.preferences.storage.backup_directory,
-      sourceDirectory: appState.preferences.storage.source_directory
-    }
+      sourceDirectory: appState.preferences.storage.source_directory,
+    },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -55,7 +57,7 @@ export default function StorageForm() {
         <ToastAction onClick={() => console.log('test')} altText="Undo">
           Undo
         </ToastAction>
-      )
+      ),
     });
   }
 
@@ -78,7 +80,11 @@ export default function StorageForm() {
                   />
                   <FileSelectorChangeButton
                     path="preferences.storage.root_directory"
-                    saveAction={(value, appState, setAppState, path) => rootAction(value, appState, setAppState, path)}
+                    saveAction={(value, appState, setAppState, path) =>
+                      rootAction(value, appState, setAppState, path)
+                    }
+                    name="Move"
+                    confirmDialog
                     directory
                   />
                 </FileSelector>
@@ -113,7 +119,10 @@ export default function StorageForm() {
                   />
                   <FileSelectorChangeButton
                     path="preferences.storage.backup_directory"
-                    saveAction={(value, appState, setAppState, path) => backupAction(value, appState, setAppState, path)}
+                    saveAction={(value, appState, setAppState, path) =>
+                      backupAction(value, appState, setAppState, path)
+                    }
+                    name="Move"
                     directory
                   />
                 </FileSelector>
@@ -165,41 +174,36 @@ export default function StorageForm() {
   );
 }
 
-async function rootAction(value: string, appState: AppState, setAppState: React.Dispatch<React.SetStateAction<AppState>>, path: string) {
+async function rootAction(
+  value: string,
+  appState: AppState,
+  setAppState: React.Dispatch<React.SetStateAction<AppState>>,
+  path: string,
+) {
   let origin = appState.preferences.storage.root_directory;
-  if (origin != '') {
-    try {
-      await invoke('rename_directory', { origin: origin, destination: value });
-    } catch (error) {
-      const errorMsg = error as string;
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'Error: ' + errorMsg
-      });
-    }
-  } else {
-    try {
-      await invoke('check_meta_data_directory');
-    } catch (error) {
-      try {
-        await invoke('create_dir', { path: value });
-      } catch (error) {
-        const errorMsg = error as string;
-        toast({
-          variant: 'destructive',
-          title: 'Uh oh! Something went wrong.',
-          description: 'Error: ' + errorMsg
-        });
-      }
-    }
+  try {
+    await invoke('rename_directory', { origin: origin, destination: value });
+  } catch (error) {
+    const errorMsg = error as string;
+    toast({
+      variant: 'destructive',
+      title: 'Uh oh! Something went wrong.',
+      description: 'Error: ' + errorMsg,
+    });
   }
 }
 
-async function backupAction(value: string, appState: AppState, setAppState: React.Dispatch<React.SetStateAction<AppState>>, path: string) {
+async function backupAction(
+  value: string,
+  appState: AppState,
+  setAppState: React.Dispatch<React.SetStateAction<AppState>>,
+  path: string,
+) {
   let origin = appState.preferences.storage.backup_directory;
   if (origin != '') {
-    if (await invoke('rename_directory', { origin: origin, destination: value })) {
+    if (
+      await invoke('rename_directory', { origin: origin, destination: value })
+    ) {
       savePreferences(value, appState, setAppState, path);
     } else {
       // TODO: open toast
