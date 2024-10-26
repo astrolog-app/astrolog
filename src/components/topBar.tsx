@@ -34,6 +34,18 @@ export function TopBar() {
     }
   }
 
+  async function minimize() {
+    const { appWindow } = await import('@tauri-apps/api/window');
+
+    await appWindow.minimize();
+  }
+
+  async function close() {
+    const { appWindow } = await import('@tauri-apps/api/window');
+
+    await appWindow.close();
+  }
+
   return (
     <div className={styles.topBar}>
       <Menubar>
@@ -48,8 +60,8 @@ export function TopBar() {
               Preferences...
             </MenubarItem>
             <MenubarSeparator />
-            <MenubarItem>Hide</MenubarItem>
-            <MenubarItem>Exit</MenubarItem>
+            <MenubarItem onClick={() => minimize()}>Hide</MenubarItem>
+            <MenubarItem onClick={() => close()}>Exit</MenubarItem>
           </MenubarContent>
         </MenubarMenu>
         <MenubarMenu>
