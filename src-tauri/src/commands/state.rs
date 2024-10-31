@@ -69,3 +69,9 @@ pub fn load_frontend_app_state() -> Result<String, String> {
 
     serde_json::to_string(&data).map_err(|e| e.to_string())
 }
+
+#[tauri::command]
+pub fn update_app_state_from_json() -> Result<(), String> {
+    //
+    Ok(())
+}

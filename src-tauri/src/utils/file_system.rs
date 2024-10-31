@@ -38,6 +38,19 @@ pub fn is_directory_empty(path: &PathBuf) -> io::Result<bool> {
     Ok(entries.next().is_none())
 }
 
+// returns true if the path contains the .astrolog folder
+pub fn dir_contains_metadata(path: &PathBuf) -> io::Result<bool> {
+    let mut entries = fs::read_dir(path)?;
+
+    for entry in entries {
+        let entry = entry?;
+        if entry.file_name() == ".astrolog" {
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
 pub fn rename_folder_with_overwrite(old_path: &PathBuf, new_path: &PathBuf) -> io::Result<()> {
     if fs::metadata(new_path).is_ok() {
         fs::remove_dir_all(new_path)?;

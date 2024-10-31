@@ -13,6 +13,7 @@ import React, {
 import { toast } from '@/components/ui/use-toast';
 import { AppState } from '@/interfaces/state';
 import { removeContextMenu } from '@/utils/browser';
+import { boolean } from 'zod';
 
 const defaultAppState: AppState = {
   preferences: {
@@ -46,27 +47,28 @@ interface AppStateContextType {
 
 const AppStateContext = createContext<AppStateContextType | undefined>(undefined);
 
+export async function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): Promise<void> {
+  try {
+    const responseString = await invoke<string>('load_frontend_app_state');
+    const responseData: AppState = JSON.parse(responseString);
+
+    setAppState(responseData);
+  } catch (error) {
+    const errorMsg = error as string;
+    toast({
+      variant: 'destructive',
+      title: 'Uh oh! Something went wrong.',
+      description: 'Error: ' + errorMsg
+    });
+  }
+}
+
 export default function StateProvider({ children }: { children: ReactNode }) {
   const [appState, setAppState] = useState<AppState>(defaultAppState);
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const responseString = await invoke<string>('load_frontend_app_state');
-        const responseData: AppState = JSON.parse(responseString);
 
-        setAppState(responseData);
-      } catch (error) {
-        const errorMsg = error as string;
-        toast({
-          variant: 'destructive',
-          title: 'Uh oh! Something went wrong.',
-          description: 'Error: ' + errorMsg
-        });
-      }
-    }
-
-    fetchData();
+    fetchAppState(setAppState);
     removeContextMenu();
   }, []);
 

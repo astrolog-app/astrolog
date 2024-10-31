@@ -6,12 +6,38 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import FileSelector, { FileSelectorChangeButton } from '@/components/fileSelectors/fileSelector';
 import { useState } from 'react';
+import { useModal } from '@/context/modalProvider';
+import { fetchAppState, useAppState } from '@/context/stateProvider';
 
 export default function RootDirectory() {
   const [value, setValue] = useState<string>('');
 
-  function onClick() {
-    invoke("set_root_directory", { rootDirectory: value })
+  const { closeModal } = useModal();
+  const { setAppState } = useAppState();
+
+  function updateAppState(): void {
+    invoke('update_app_state_from_json')
+      .then(() => {
+        fetchAppState(setAppState);
+      })
+      .catch((e) => toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: 'Error: ' + e
+      }));
+  }
+
+  function onSubmit(): void {
+    invoke('set_root_directory', { rootDirectory: value })
+      .then(() => {
+        toast({
+          title: 'Success!',
+          description: 'Your root directory has been saved.'
+        });
+
+        updateAppState();
+        closeModal();
+      })
       .catch((e) => toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
@@ -23,8 +49,7 @@ export default function RootDirectory() {
     <Modal
       title="Set Root Directory"
       notClosable
-      separator
-      className='w-96'
+      className="w-96"
     >
       <FileSelector
         value={value}
@@ -36,7 +61,7 @@ export default function RootDirectory() {
           directory
         />
       </FileSelector>
-      <Button onClick={onClick}>xxx</Button>
+      <Button onClick={onSubmit}>xxx</Button>
     </Modal>
   );
 }

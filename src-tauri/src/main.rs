@@ -5,8 +5,8 @@ use std::env;
 use dotenv::dotenv;
 use crate::commands::gallery::{add_new_image, open_image};
 use crate::commands::imaging_sessions::{export_csv, open_imaging_session};
-use crate::commands::preferences::{check_meta_data_directory, save_preferences, setup_backup};
-use crate::commands::state::load_frontend_app_state;
+use crate::commands::preferences::{save_preferences, set_root_directory, setup_backup};
+use crate::commands::state::{load_frontend_app_state, update_app_state_from_json};
 use crate::commands::utils::{open_browser, rename_directory};
 use crate::commands::calibration::{analyze_calibration_frames, classify_calibration_frames};
 use crate::commands::image::get_date;
@@ -32,7 +32,6 @@ fn main() {
       load_frontend_app_state,
       rename_directory,
       save_preferences,
-      check_meta_data_directory,
       setup_backup,
       export_csv,
       open_browser,
@@ -41,6 +40,8 @@ fn main() {
       open_imaging_session,
       analyze_calibration_frames,
       classify_calibration_frames,
+      set_root_directory,
+      update_app_state_from_json,
       get_date
     ])
         .plugin(
