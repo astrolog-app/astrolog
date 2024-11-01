@@ -43,25 +43,25 @@ export default function NewImage({ defaultValue, dialogFilters }: NewImageProps)
     }
   });
 
-  async function onSubmit() {
+  function onSubmit(): void {
     const newImage: Image = {
       path: form.getValues().path,
       title: form.getValues().title,
       total_exposure: 0
     }
 
-    if (await invoke("add_new_image", { image: newImage })) {
-      toast({
-        description: "Success"
+    invoke("add_new_image", { image: newImage })
+      .then(() => {
+        toast({
+          description: "Success!"
+        })
+        closeModal();
       })
-      closeModal();
-    } else {
-      toast({
+      .catch((error) => toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
-        description: "There was a problem with your request.",
-      })
-    }
+        description: "Error: " + error,
+      }));
   }
 
   return (

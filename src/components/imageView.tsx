@@ -19,24 +19,22 @@ export default function ImageView({ className, image }: ImageViewProps) {
     setImageSrc(convertFileSrc(image.path));
   }), [image]);
 
-  async function onClick() {
-    try {
-      await invoke('open_image', { path: image.path });
-    } catch (error) {
-      const errorMsg = error as string;
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "Error: " + errorMsg
-      })
-    }
+  function onClick() {
+    invoke('open_image', { path: image.path })
+      .catch((error) => {
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'Error: ' + error
+        });
+      });
   }
 
   return (
     <Card className={className}>
       <CardHeader>
         <div className={styles.title}>{image.title}</div>
-        <img loading="lazy" src={imageSrc} className={styles.image} onClick={onClick}  alt="load"/>
+        <img loading="lazy" src={imageSrc} className={styles.image} onClick={onClick} alt="load" />
       </CardHeader>
     </Card>
   );

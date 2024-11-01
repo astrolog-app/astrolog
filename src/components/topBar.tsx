@@ -21,17 +21,16 @@ import NewImagingSession from '@/components/modals/newImagingSession/newImagingS
 export function TopBar() {
   const { openModal } = useModal();
 
-  async function openBrowser(url: string) {
-    try {
-      await invoke('open_browser', { url: url });
-    } catch (error) {
-      const errorMsg = error as string;
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'Error: ' + errorMsg
+  function openBrowser(url: string): void {
+    invoke('open_browser', { url: url })
+      .catch((error) => {
+        const errorMsg = error as string;
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'Error: ' + errorMsg
+        });
       });
-    }
   }
 
   async function minimize() {

@@ -120,22 +120,20 @@ export function LogTable<TData, TValue>({ setSelectedSessionId }: SessionTablePr
     setSelectedSessionId(rowData.id);
   };
 
-  async function openImagingSession() {
-    try {
-      await invoke('open_imaging_session', { id: selectedRowId });
-    } catch (error) {
-      const errorMsg = error as string;
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'Error: ' + errorMsg
+  function openImagingSession(): void {
+    invoke('open_imaging_session', { id: selectedRowId })
+      .catch((error) => {
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'Error: ' + error
+        });
       });
-    }
   }
 
   function editCalibrationFrame() {
     const calibrationFrame = table.getRowModel().rows.find((row) => row.id === selectedRowId)?.original as CalibrationFrame;
-    openModal(<CalibrationRowEditor edit={true} calibrationFrame={calibrationFrame} />)
+    openModal(<CalibrationRowEditor edit={true} calibrationFrame={calibrationFrame} />);
   }
 
   return (
@@ -213,7 +211,7 @@ export function LogTable<TData, TValue>({ setSelectedSessionId }: SessionTablePr
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>
                           {cell.getValue() === null ? (
-                            "N/A"
+                            'N/A'
                           ) : (
                             flexRender(cell.column.columnDef.cell, cell.getContext())
                           )}

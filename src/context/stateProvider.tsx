@@ -47,27 +47,27 @@ interface AppStateContextType {
 
 const AppStateContext = createContext<AppStateContextType | undefined>(undefined);
 
-export async function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): Promise<void> {
-  try {
-    const responseString = await invoke<string>('load_frontend_app_state');
-    const responseData: AppState = JSON.parse(responseString);
+export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): void {
+  invoke<string>('load_frontend_app_state')
+    .then((payload) => {
 
-    setAppState(responseData);
-  } catch (error) {
-    const errorMsg = error as string;
-    toast({
-      variant: 'destructive',
-      title: 'Uh oh! Something went wrong.',
-      description: 'Error: ' + errorMsg
+      const responseData: AppState = JSON.parse(payload);
+
+      setAppState(responseData);
+    })
+    .catch((error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: 'Error: ' + error
+      });
     });
-  }
 }
 
 export default function StateProvider({ children }: { children: ReactNode }) {
   const [appState, setAppState] = useState<AppState>(defaultAppState);
 
   useEffect(() => {
-
     fetchAppState(setAppState);
     removeContextMenu();
   }, []);
@@ -111,17 +111,16 @@ export function savePreferences(
     return updatedState;
   });
 
-  async function savePreferences() {
-    try {
-      await invoke('save_preferences', { preferences: appState.preferences });
-    } catch (error) {
-      const errorMsg = error as string;
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'Error: ' + errorMsg
+  function savePreferences() {
+    invoke('save_preferences', { preferences: appState.preferences })
+      .catch((error) => {
+        const errorMsg = error as string;
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'Error: ' + errorMsg
+        });
       });
-    }
   }
 
   savePreferences();
