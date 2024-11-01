@@ -1,4 +1,7 @@
 export enum EquipmentType {
   TELESCOPE = 'Telescope',
-  CAMERA = 'Camera'
+  CAMERA = 'Camera',
+  MOUNT = 'Mount',
+  FILTER = 'Filter',
+  FLATTENER = 'Flattener',
 }

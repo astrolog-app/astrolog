@@ -12,13 +12,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Input } from '../ui/input';
 import { Label } from '@/components/ui/label';
 import { useModal } from '@/context/modalProvider';
-import ComboBox from '@/components/ui/comboBox';
-import { useAppState } from '@/context/stateProvider';
+import EquipmentComboBox from '@/components/ui/equipmentComboBox';
 import { invoke } from '@tauri-apps/api/tauri';
 import { AnalyzedCalibrationFrames } from '@/interfaces/commands';
 import { CalibrationType } from '@/enums/calibrationType';
 import { toast } from '@/components/ui/use-toast';
 import { CalibrationFrame } from '@/interfaces/state';
+import { EquipmentType } from '@/enums/equipmentType';
 
 interface CalibrationRowEditorProps {
   analyzedFrames?: AnalyzedCalibrationFrames;
@@ -29,7 +29,6 @@ interface CalibrationRowEditorProps {
 
 export default function CalibrationRowEditor({ analyzedFrames, edit, calibrationFrame, paths }: CalibrationRowEditorProps) {
   const { closeModal } = useModal();
-  const { appState } = useAppState();
 
   const [calibrationType, setCalibrationType] = useState<CalibrationType>(analyzedFrames?.calibration_type || CalibrationType.DARK);
 
@@ -120,7 +119,7 @@ export default function CalibrationRowEditor({ analyzedFrames, edit, calibration
               render={({ field }) => (
                 <FormItem className={styles.item}>
                   <FormControl>
-                    <ComboBox values={appState.equipment_list.camera_list} title="camera" {...field} />
+                    <EquipmentComboBox type={EquipmentType.CAMERA} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

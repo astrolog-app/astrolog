@@ -1,33 +1,48 @@
 "use client";
 
-import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import { Check, ChevronsUpDown } from 'lucide-react';
 
-import { Button } from "@/components/ui/button"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { Button } from '@/components/ui/button';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/utils/classNames';
+import { EquipmentType } from '@/enums/equipmentType';
+import { useAppState } from '@/context/stateProvider';
 
 interface ComboBoxProps {
-  values: string[],
-  title: string,
+  type: EquipmentType,
   value: string,
   onChange: (value: string) => void
 }
 
-export default function ComboBox({ values, title, value, onChange }: ComboBoxProps) {
-  const [open, setOpen] = React.useState(false)
+export default function EquipmentComboBox({ type, value, onChange }: ComboBoxProps) {
+  const [open, setOpen] = React.useState(false);
+  const [values, setValues] = useState<string[]>([]);
+
+  const title: string = type.toString();
+  const { appState } = useAppState();
+
+  useEffect(() => {
+    switch (type) {
+      case EquipmentType.CAMERA:
+        setValues(appState.equipment_list.camera_list);
+        break;
+      case EquipmentType.TELESCOPE:
+        setValues(appState.equipment_list.telescope_list);
+        break;
+      case EquipmentType.MOUNT:
+        setValues(appState.equipment_list.mount_list);
+        break;
+      case EquipmentType.FILTER:
+        setValues(appState.equipment_list.filter_list);
+        break;
+      case EquipmentType.FLATTENER:
+        setValues(appState.equipment_list.flattener_list);
+        break;
+    }
+  }, [])
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

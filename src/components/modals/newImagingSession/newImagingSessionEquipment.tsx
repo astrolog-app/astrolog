@@ -6,11 +6,11 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import styles from './newImagingSessionEquipment.module.scss';
-import ComboBox from '@/components/ui/comboBox';
-import { useAppState } from '@/context/stateProvider';
+import EquipmentComboBox from '@/components/ui/equipmentComboBox';
 import { Button } from '@/components/ui/button';
 import { useModal } from '@/context/modalProvider';
 import { TabKey } from '@/components/modals/newImagingSession/newImagingSession';
+import { EquipmentType } from '@/enums/equipmentType';
 
 const formSchema = z.object({
   telescope: z.string().min(2, {
@@ -37,7 +37,6 @@ export default function NewImagingSessionEquipment({ setSelectedTab }: {
     resolver: zodResolver(formSchema)
   });
 
-  const { appState } = useAppState();
   const { closeModal } = useModal();
 
   function onSubmit() {
@@ -53,7 +52,7 @@ export default function NewImagingSessionEquipment({ setSelectedTab }: {
           render={({ field }) => (
             <FormItem className={styles.item}>
               <FormControl>
-                <ComboBox values={appState.equipment_list.telescope_list} title="telescope" {...field} />
+                <EquipmentComboBox type={EquipmentType.TELESCOPE} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -65,7 +64,7 @@ export default function NewImagingSessionEquipment({ setSelectedTab }: {
           render={({ field }) => (
             <FormItem className={styles.item}>
               <FormControl>
-                <ComboBox values={appState.equipment_list.camera_list} title="camera" {...field} />
+                <EquipmentComboBox type={EquipmentType.CAMERA} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -77,7 +76,7 @@ export default function NewImagingSessionEquipment({ setSelectedTab }: {
           render={({ field }) => (
             <FormItem className={styles.item}>
               <FormControl>
-                <ComboBox values={appState.equipment_list.mount_list} title="mount" {...field} />
+                <EquipmentComboBox type={EquipmentType.MOUNT} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -89,7 +88,7 @@ export default function NewImagingSessionEquipment({ setSelectedTab }: {
           render={({ field }) => (
             <FormItem className={styles.item}>
               <FormControl>
-                <ComboBox values={appState.equipment_list.filter_list} title="filter" {...field} />
+                <EquipmentComboBox type={EquipmentType.FILTER} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -101,7 +100,7 @@ export default function NewImagingSessionEquipment({ setSelectedTab }: {
           render={({ field }) => (
             <FormItem className={styles.item}>
               <FormControl>
-                <ComboBox values={appState.equipment_list.flattener_list} title="flattener" {...field} />
+                <EquipmentComboBox type={EquipmentType.FLATTENER} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
