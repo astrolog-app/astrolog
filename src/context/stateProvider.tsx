@@ -50,7 +50,6 @@ const AppStateContext = createContext<AppStateContextType | undefined>(undefined
 export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): void {
   invoke<string>('load_frontend_app_state')
     .then((payload) => {
-
       const responseData: AppState = JSON.parse(payload);
 
       setAppState(responseData);

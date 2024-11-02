@@ -38,6 +38,50 @@ impl EquipmentList {
         filename.push("equipment_list.json");
         Ok(file_store::save(filename, serde_json::to_string_pretty(&get_readonly_app_state().equipment_list)?)?)
     }
+
+    pub fn get_telescope(view_name: &str) -> Result<Telescope, Box<dyn Error>> {
+        let telescopes = &get_readonly_app_state().equipment_list.telescopes;
+
+        telescopes.iter()
+            .find(|&telescope| &telescope.view_name() == view_name)
+            .cloned()
+            .ok_or_else(|| "Telescope not found".into())
+    }
+
+    pub fn get_camera(view_name: &str) -> Result<Camera, Box<dyn Error>> {
+        let telescopes = &get_readonly_app_state().equipment_list.cameras;
+
+        telescopes.iter()
+            .find(|&camera| &camera.view_name() == view_name)
+            .cloned()
+            .ok_or_else(|| "Telescope not found".into())
+    }
+
+    pub fn get_mount(view_name: &str) -> Result<Mount, Box<dyn Error>> {
+        let telescopes = &get_readonly_app_state().equipment_list.mounts;
+
+        telescopes.iter()
+            .find(|&mount| &mount.view_name() == view_name)
+            .cloned()
+            .ok_or_else(|| "Telescope not found".into())
+    }
+
+    pub fn get_filter(view_name: &str) -> Result<Filter, Box<dyn Error>> {
+        let telescopes = &get_readonly_app_state().equipment_list.filters;
+
+        telescopes.iter()
+            .find(|&filter| &filter.view_name() == view_name)
+            .cloned()
+            .ok_or_else(|| "Telescope not found".into())
+    }
+    pub fn get_flattener(view_name: &str) -> Result<Flattener, Box<dyn Error>> {
+        let telescopes = &get_readonly_app_state().equipment_list.flatteners;
+
+        telescopes.iter()
+            .find(|&flattener| &flattener.view_name() == view_name)
+            .cloned()
+            .ok_or_else(|| "Telescope not found".into())
+    }
 }
 
 pub trait EquipmentItem {
@@ -49,7 +93,7 @@ pub trait EquipmentItem {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Telescope {
     id: Uuid,
     brand: String,
@@ -71,7 +115,7 @@ impl EquipmentItem for Telescope {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Camera {
     id: Uuid,
     brand: String,
@@ -94,7 +138,7 @@ impl EquipmentItem for Camera {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Mount {
     id: Uuid,
     brand: String,
@@ -113,7 +157,7 @@ impl EquipmentItem for Mount {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Filter {
     id: Uuid,
     brand: String,
@@ -134,7 +178,7 @@ impl EquipmentItem for Filter {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Flattener {
     id: Uuid,
     brand: String,

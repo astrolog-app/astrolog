@@ -9,9 +9,14 @@ import { useModal } from '@/context/modalProvider';
 import EquipmentModal from '@/components/modals/equipment/equiipment';
 import { EquipmentType } from '@/enums/equipmentType';
 import EquipmentDetails from '@/components/equipmentDetails';
+import EquipmentListView from '@/components/EquipmentListView';
+import { useState } from 'react';
 
 export default function Equipment() {
   const { openModal } = useModal();
+
+  const [selectedItem, setSelectedItem] = useState<string | undefined>(undefined);
+  const [selectedType, setSelectedType] = useState<EquipmentType | undefined>(undefined);
 
   return (
     <Tab className={styles.page}>
@@ -33,7 +38,11 @@ export default function Equipment() {
         <ResizablePanel defaultSize={30} minSize={10} maxSize={70}>
           <Card className={styles.card}>
             <CardHeader>
-              Telescope List
+              <EquipmentListView
+                selectedItem={selectedItem}
+                setSelectedItem={setSelectedItem}
+                setSelectedType={setSelectedType}
+              />
             </CardHeader>
           </Card>
         </ResizablePanel>
@@ -41,7 +50,10 @@ export default function Equipment() {
         <ResizablePanel defaultSize={70}>
           <Card className={styles.card}>
             <CardHeader>
-              <EquipmentDetails />
+              <EquipmentDetails
+                selectedItem={selectedItem}
+                selectedType={selectedType}
+              />
             </CardHeader>
           </Card>
         </ResizablePanel>
