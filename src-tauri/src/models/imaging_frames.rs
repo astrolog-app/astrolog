@@ -1,28 +1,80 @@
 use std::any::Any;
+use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
 use std::path::PathBuf;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use uuid::Uuid;
 use crate::file_store;
-use crate::state;
 use crate::state::get_readonly_app_state;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize)]
 pub struct ImagingFrameList {
-    light_frames: Vec<LightFrame>,
-    pub dark_frames: Vec<DarkFrame>,
-    pub bias_frames: Vec<BiasFrame>,
-    flat_frames: Vec<FlatFrame>
+    pub light_frames: HashMap<Uuid, LightFrame>,
+    pub dark_frames: HashMap<Uuid, DarkFrame>,
+    pub bias_frames: HashMap<Uuid, BiasFrame>,
+    flat_frames: HashMap<Uuid, FlatFrame>,
+}
+
+impl<'de> Deserialize<'de> for ImagingFrameList {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        // Helper struct to match the JSON structure exactly
+        #[derive(Deserialize)]
+        struct TempImagingFrameList {
+            light_frames: Vec<LightFrame>,
+            dark_frames: Vec<DarkFrame>,
+            bias_frames: Vec<BiasFrame>,
+            flat_frames: Vec<FlatFrame>,
+        }
+
+        // Deserialize JSON to TempImagingFrameList
+        let TempImagingFrameList {
+            light_frames,
+            dark_frames,
+            bias_frames,
+            flat_frames,
+        } = TempImagingFrameList::deserialize(deserializer)?;
+
+        // Transform the `light_frames` vector to a HashMap by mapping each `LightFrame`'s `id`
+        let light_frames_map: HashMap<Uuid, LightFrame> = light_frames
+            .into_iter()
+            .map(|frame| (frame.id, frame))
+            .collect();
+
+        let dark_frames_map: HashMap<Uuid, DarkFrame> = dark_frames
+            .into_iter()
+            .map(|frame| (frame.id, frame))
+            .collect();
+
+        let bias_frames_map: HashMap<Uuid, BiasFrame> = bias_frames
+            .into_iter()
+            .map(|frame| (frame.id, frame))
+            .collect();
+
+        let flat_frames_map: HashMap<Uuid, FlatFrame> = flat_frames
+            .into_iter()
+            .map(|frame| (frame.id, frame))
+            .collect();
+
+        Ok(ImagingFrameList {
+            light_frames: light_frames_map,
+            dark_frames: dark_frames_map,
+            bias_frames: bias_frames_map,
+            flat_frames: flat_frames_map,
+        })
+    }
 }
 
 impl ImagingFrameList {
     pub fn new() -> Self {
         ImagingFrameList {
-            light_frames: vec![],
-            dark_frames: vec![],
-            bias_frames: vec![],
-            flat_frames: vec![],
+            light_frames: HashMap::new(),
+            dark_frames: HashMap::new(),
+            bias_frames: HashMap::new(),
+            flat_frames: HashMap::new(),
         }
     }
 
@@ -40,17 +92,19 @@ impl ImagingFrameList {
         Ok(file_store::save(filename, serde_json::to_string_pretty(&get_readonly_app_state().imaging_frame_list)?)?)
     }
 
-    pub fn get_calibration_frames() -> impl Iterator<Item = Box<dyn CalibrationFrame>> {
+    pub fn get_calibration_frames() -> Vec<Box<dyn CalibrationFrame>> {
         let app_state = get_readonly_app_state();
-        let dark_frames = app_state.imaging_frame_list.dark_frames.clone();
-        let bias_frames = app_state.imaging_frame_list.bias_frames.clone();
 
-        dark_frames.into_iter()
+        // Clone the frames into vectors to own the data and avoid lifetime issues
+        let dark_frames: Vec<_> = app_state.imaging_frame_list.dark_frames.values().cloned().collect();
+        let bias_frames: Vec<_> = app_state.imaging_frame_list.bias_frames.values().cloned().collect();
+
+        // Now process the cloned data
+        dark_frames
+            .into_iter()
             .map(|frame| Box::new(frame) as Box<dyn CalibrationFrame>)
-            .chain(
-                bias_frames.into_iter()
-                    .map(|frame| Box::new(frame) as Box<dyn CalibrationFrame>)
-            )
+            .chain(bias_frames.into_iter().map(|frame| Box::new(frame) as Box<dyn CalibrationFrame>))
+            .collect()
     }
 }
 
@@ -106,16 +160,6 @@ impl ImagingFrame for LightFrame {
     fn frames(&self) -> &Vec<String> {
         &self.frames
     }
-}
-
-pub fn get_light_frame(id: &Uuid) -> LightFrame {
-    let app_state = state::get_readonly_app_state();
-    let light_frame_list = &app_state.imaging_frame_list.light_frames;
-
-    light_frame_list.iter()
-        .find(|&light_frame| &light_frame.id == id)
-        .cloned()
-        .expect("LightFrame not found")
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]

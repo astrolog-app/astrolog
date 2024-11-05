@@ -102,7 +102,7 @@ pub async fn classify_calibration_frames(frames: CalibrationTableRow, paths: Vec
             camera_temp: frames.camera_temp.unwrap(),
             sub_length: frames.sub_length.unwrap()
         };
-        dark_frames.push(new_dark_frame);
+        dark_frames.insert(new_dark_frame.id, new_dark_frame);
 
         get_app_state().imaging_frame_list.dark_frames = dark_frames.clone();
     } else {
@@ -116,7 +116,7 @@ pub async fn classify_calibration_frames(frames: CalibrationTableRow, paths: Vec
             frames: vec![],
             calibration_type: frames.calibration_type,
         };
-        bias_frames.push(new_bias_frame);
+        bias_frames.insert(new_bias_frame.id, new_bias_frame);
 
         get_app_state().imaging_frame_list.bias_frames = bias_frames.clone();
     }

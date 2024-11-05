@@ -19,7 +19,7 @@ pub fn load_frontend_app_state() -> Result<String, String> {
     let sessions_data: Vec<LogTableRow> = app_state
         .imaging_session_list
         .iter()
-        .map(LogTableRow::new)
+        .filter_map(LogTableRow::new)
         .collect();
 
     let table_data = TableData {
