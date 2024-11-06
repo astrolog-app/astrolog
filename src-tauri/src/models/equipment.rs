@@ -1,27 +1,107 @@
+use std::collections::HashMap;
 use std::error::Error;
 use std::path::PathBuf;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::ser::SerializeStruct;
 use uuid::Uuid;
 use crate::file_store;
 use crate::state::get_readonly_app_state;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug)]
 pub struct EquipmentList {
-    pub telescopes: Vec<Telescope>,
-    pub cameras: Vec<Camera>,
-    pub mounts: Vec<Mount>,
-    pub filters: Vec<Filter>,
-    pub flatteners: Vec<Flattener>,
+    pub telescopes: HashMap<Uuid,Telescope>,
+    pub cameras: HashMap<Uuid, Camera>,
+    pub mounts: HashMap<Uuid, Mount>,
+    pub filters: HashMap<Uuid, Filter>,
+    pub flatteners: HashMap<Uuid, Flattener>,
+}
+
+impl<'de> Deserialize<'de> for EquipmentList {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        struct TempEquipmentList {
+            pub telescopes: Vec<Telescope>,
+            pub cameras: Vec<Camera>,
+            pub mounts: Vec<Mount>,
+            pub filters: Vec<Filter>,
+            pub flatteners: Vec<Flattener>,
+        }
+
+        let TempEquipmentList {
+            telescopes,
+            cameras,
+            mounts,
+            filters,
+            flatteners
+        } = TempEquipmentList::deserialize(deserializer)?;
+
+        let telescopes_map: HashMap<Uuid, Telescope> = telescopes
+            .into_iter()
+            .map(|frame| (frame.id, frame))
+            .collect();
+
+        let cameras_map: HashMap<Uuid, Camera> = cameras
+            .into_iter()
+            .map(|frame| (frame.id, frame))
+            .collect();
+
+        let mounts_map: HashMap<Uuid, Mount> = mounts
+            .into_iter()
+            .map(|frame| (frame.id, frame))
+            .collect();
+
+        let filters_map: HashMap<Uuid, Filter> = filters
+            .into_iter()
+            .map(|frame| (frame.id, frame))
+            .collect();
+
+        let flatteners_map: HashMap<Uuid, Flattener> = flatteners
+            .into_iter()
+            .map(|frame| (frame.id, frame))
+            .collect();
+
+        Ok(EquipmentList {
+            telescopes: telescopes_map,
+            cameras: cameras_map,
+            mounts: mounts_map,
+            filters: filters_map,
+            flatteners: flatteners_map
+        })
+    }
+}
+
+impl Serialize for EquipmentList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let telescopes: Vec<&Telescope> = self.telescopes.values().collect();
+        let cameras: Vec<&Camera> = self.cameras.values().collect();
+        let mounts: Vec<&Mount> = self.mounts.values().collect();
+        let filters: Vec<&Filter> = self.filters.values().collect();
+        let flatteners: Vec<&Flattener> = self.flatteners.values().collect();
+
+        let mut state = serializer.serialize_struct("EquipmentList", 4)?;
+        state.serialize_field("telescopes", &telescopes)?;
+        state.serialize_field("cameras", &cameras)?;
+        state.serialize_field("mounts", &mounts)?;
+        state.serialize_field("filters", &filters)?;
+        state.serialize_field("flatteners", &flatteners)?;
+        state.end()
+    }
 }
 
 impl EquipmentList {
     pub fn new() -> Self {
         EquipmentList {
-            telescopes: vec![],
-            cameras: vec![],
-            mounts: vec![],
-            filters: vec![],
-            flatteners: vec![],
+            telescopes: HashMap::new(),
+            cameras: HashMap::new(),
+            mounts: HashMap::new(),
+            filters: HashMap::new(),
+            flatteners: HashMap::new(),
         }
     }
 
@@ -37,50 +117,6 @@ impl EquipmentList {
         filename.push(".astrolog");
         filename.push("equipment_list.json");
         Ok(file_store::save(filename, serde_json::to_string_pretty(&get_readonly_app_state().equipment_list)?)?)
-    }
-
-    pub fn get_telescope(view_name: &str) -> Result<Telescope, Box<dyn Error>> {
-        let telescopes = &get_readonly_app_state().equipment_list.telescopes;
-
-        telescopes.iter()
-            .find(|&telescope| &telescope.view_name() == view_name)
-            .cloned()
-            .ok_or_else(|| "Telescope not found".into())
-    }
-
-    pub fn get_camera(view_name: &str) -> Result<Camera, Box<dyn Error>> {
-        let telescopes = &get_readonly_app_state().equipment_list.cameras;
-
-        telescopes.iter()
-            .find(|&camera| &camera.view_name() == view_name)
-            .cloned()
-            .ok_or_else(|| "Telescope not found".into())
-    }
-
-    pub fn get_mount(view_name: &str) -> Result<Mount, Box<dyn Error>> {
-        let telescopes = &get_readonly_app_state().equipment_list.mounts;
-
-        telescopes.iter()
-            .find(|&mount| &mount.view_name() == view_name)
-            .cloned()
-            .ok_or_else(|| "Telescope not found".into())
-    }
-
-    pub fn get_filter(view_name: &str) -> Result<Filter, Box<dyn Error>> {
-        let telescopes = &get_readonly_app_state().equipment_list.filters;
-
-        telescopes.iter()
-            .find(|&filter| &filter.view_name() == view_name)
-            .cloned()
-            .ok_or_else(|| "Telescope not found".into())
-    }
-    pub fn get_flattener(view_name: &str) -> Result<Flattener, Box<dyn Error>> {
-        let telescopes = &get_readonly_app_state().equipment_list.flatteners;
-
-        telescopes.iter()
-            .find(|&flattener| &flattener.view_name() == view_name)
-            .cloned()
-            .ok_or_else(|| "Telescope not found".into())
     }
 }
 

@@ -27,30 +27,15 @@ pub fn load_frontend_app_state() -> Result<String, String> {
         calibration: calibration_data,
     };
 
-    let camera_list: Vec<String> = app_state.equipment_list.cameras.iter()
-        .map(|e| e.view_name())
-        .rev()
-        .collect();
+    let camera_list: Vec<String> = vec![];
 
-    let telescope_list: Vec<String> = app_state.equipment_list.telescopes.iter()
-        .map(|e| e.view_name())
-        .rev()
-        .collect();
+    let telescope_list: Vec<String> = vec![];
 
-    let filter_list: Vec<String> = app_state.equipment_list.filters.iter()
-        .map(|e| e.view_name())
-        .rev()
-        .collect();
+    let filter_list: Vec<String> = vec![];
 
-    let flattener_list: Vec<String> = app_state.equipment_list.flatteners.iter()
-        .map(|e| e.view_name())
-        .rev()
-        .collect();
+    let flattener_list: Vec<String> = vec![];
 
-    let mount_list: Vec<String> = app_state.equipment_list.mounts.iter()
-        .map(|e| e.view_name())
-        .rev()
-        .collect();
+    let mount_list: Vec<String> = vec![];
 
     let equipment_list = EquipmentList {
         camera_list,
