@@ -9,7 +9,6 @@ use crate::commands::preferences::{save_preferences, set_root_directory, setup_b
 use crate::commands::state::{load_frontend_app_state, update_app_state_from_json};
 use crate::commands::utils::{open_browser, rename_directory};
 use crate::commands::calibration::{analyze_calibration_frames, classify_calibration_frames};
-use crate::commands::equipment::{get_camera_details, get_filter_details, get_flattener_details, get_mount_details, get_telescope_details};
 use crate::commands::image::get_date;
 use crate::setup::setup;
 
@@ -44,11 +43,6 @@ fn main() {
       set_root_directory,
       update_app_state_from_json,
       get_date,
-      get_telescope_details,
-      get_camera_details,
-      get_mount_details,
-      get_filter_details,
-      get_flattener_details
     ])
         .plugin(
             tauri_plugin_keygen::Builder::new(

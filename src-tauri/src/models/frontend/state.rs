@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use crate::models::equipment::{Camera, EquipmentItem, Filter, Flattener, Mount, Telescope};
 use crate::models::image::Image;
 use crate::models::imaging_frames;
 use crate::models::imaging_frames::CalibrationType;
@@ -12,13 +13,13 @@ pub struct FrontendAppState {
     pub preferences: Preferences,
     pub table_data: TableData,
     pub equipment_list: EquipmentList,
-    pub image_list: Vec<Image>
+    pub image_list: Vec<Image>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TableData {
     pub sessions: Vec<LogTableRow>,
-    pub calibration: Vec<CalibrationTableRow>
+    pub calibration: Vec<CalibrationTableRow>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -41,7 +42,7 @@ pub struct LogTableRow {
     flattener: String,
     mount: String,
     camera: String,
-    notes: String
+    notes: String,
 }
 
 impl LogTableRow {
@@ -53,27 +54,59 @@ impl LogTableRow {
             .get(&imaging_session.light_frame_id);
 
         match light_frame {
-            Some(light_frame) => Some(LogTableRow {
-                id: light_frame.id,
-                date: light_frame.date.clone(),
-                target: light_frame.target.clone(),
-                sub_length: light_frame.sub_length,
-                total_subs: light_frame.total_subs,
-                integrated_subs: light_frame.integrated_subs,
-                filter: String::from("L"),
-                gain: light_frame.gain,
-                offset: light_frame.offset,
-                camera_temp: light_frame.camera_temp,
-                outside_temp: light_frame.outside_temp,
-                average_seeing: light_frame.average_seeing,
-                average_cloud_cover: light_frame.average_cloud_cover,
-                average_moon: light_frame.average_moon,
-                telescope: String::from("Sky-Watcher Esprit 100ED"),
-                flattener: String::from("Sky-Watcher 1.0x"),
-                mount: String::from("Sky-Watcher EQ6-R Pro"),
-                camera: String::from("ZWO ASI1600MM Pro"),
-                notes: light_frame.notes.clone(),
-            }),
+            Some(light_frame) => {
+                let filter_name = app_state
+                    .equipment_list
+                    .filters
+                    .get(&light_frame.filter_id)
+                    .map_or("N/A".to_string(), |filter| filter.view_name().clone());
+
+                let telescope_name = app_state
+                    .equipment_list
+                    .telescopes
+                    .get(&light_frame.telescope_id)
+                    .map_or("N/A".to_string(), |telescope| telescope.view_name().clone());
+
+                let flattener_name = app_state
+                    .equipment_list
+                    .flatteners
+                    .get(&light_frame.flattener_id)
+                    .map_or("N/A".to_string(), |flattener| flattener.view_name().clone());
+
+                let mount_name = app_state
+                    .equipment_list
+                    .mounts
+                    .get(&light_frame.mount_id)
+                    .map_or("N/A".to_string(), |mount| mount.view_name().clone());
+
+                let camera_name = app_state
+                    .equipment_list
+                    .cameras
+                    .get(&light_frame.camera_id)
+                    .map_or("N/A".to_string(), |camera| camera.view_name().clone());
+
+                Some(LogTableRow {
+                    id: light_frame.id,
+                    date: light_frame.date.clone(),
+                    target: light_frame.target.clone(),
+                    sub_length: light_frame.sub_length,
+                    total_subs: light_frame.total_subs,
+                    integrated_subs: light_frame.integrated_subs,
+                    filter: filter_name,
+                    gain: light_frame.gain,
+                    offset: light_frame.offset,
+                    camera_temp: light_frame.camera_temp,
+                    outside_temp: light_frame.outside_temp,
+                    average_seeing: light_frame.average_seeing,
+                    average_cloud_cover: light_frame.average_cloud_cover,
+                    average_moon: light_frame.average_moon,
+                    telescope: telescope_name,
+                    flattener: flattener_name,
+                    mount: mount_name,
+                    camera: camera_name,
+                    notes: light_frame.notes.clone(),
+                })
+            }
             None => {
                 eprintln!("LightFrame with id {:?} not found", imaging_session.id);
                 None
@@ -90,7 +123,7 @@ pub struct CalibrationTableRow {
     pub gain: i32,
     pub sub_length: Option<f64>,
     pub camera_temp: Option<f64>,
-    pub total_subs: i32
+    pub total_subs: i32,
 }
 
 impl CalibrationTableRow {
@@ -103,23 +136,29 @@ impl CalibrationTableRow {
             camera_temp = Option::from(dark_frame.camera_temp);
         }
 
+        let camera_name = get_readonly_app_state()
+            .equipment_list
+            .cameras
+            .get(&calibration_frame.camera_id())
+            .map_or("N/A".to_string(), |camera| camera.view_name().clone());
+
         CalibrationTableRow {
             id: *calibration_frame.id(),
-            camera: String::from("default_camera"),
+            camera: camera_name,
             calibration_type: calibration_frame.calibration_type(),
             gain: *calibration_frame.gain(),
             sub_length,
             camera_temp,
-            total_subs: *calibration_frame.total_subs()
+            total_subs: *calibration_frame.total_subs(),
         }
     }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct EquipmentList {
-    pub camera_list: Vec<String>,
-    pub telescope_list: Vec<String>,
-    pub mount_list: Vec<String>,
-    pub filter_list: Vec<String>,
-    pub flattener_list: Vec<String>,
+    pub telescope_list: Vec<Telescope>,
+    pub camera_list: Vec<Camera>,
+    pub mount_list: Vec<Mount>,
+    pub filter_list: Vec<Filter>,
+    pub flattener_list: Vec<Flattener>,
 }

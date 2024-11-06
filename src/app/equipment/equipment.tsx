@@ -11,12 +11,12 @@ import { EquipmentType } from '@/enums/equipmentType';
 import EquipmentDetails from '@/components/equipmentDetails';
 import EquipmentListView from '@/components/EquipmentListView';
 import { useState } from 'react';
+import { EquipmentItem } from '@/interfaces/equipment';
 
 export default function Equipment() {
   const { openModal } = useModal();
 
-  const [selectedItem, setSelectedItem] = useState<string | undefined>(undefined);
-  const [selectedType, setSelectedType] = useState<EquipmentType | undefined>(undefined);
+  const [selectedItem, setSelectedItem] = useState<EquipmentItem | undefined>(undefined);
 
   return (
     <Tab className={styles.page}>
@@ -41,7 +41,6 @@ export default function Equipment() {
               <EquipmentListView
                 selectedItem={selectedItem}
                 setSelectedItem={setSelectedItem}
-                setSelectedType={setSelectedType}
               />
             </CardHeader>
           </Card>
@@ -52,7 +51,6 @@ export default function Equipment() {
             <CardHeader>
               <EquipmentDetails
                 selectedItem={selectedItem}
-                selectedType={selectedType}
               />
             </CardHeader>
           </Card>

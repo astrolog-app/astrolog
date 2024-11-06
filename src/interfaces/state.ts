@@ -1,5 +1,6 @@
 import { UUID } from 'crypto';
 import { CalibrationType } from '@/enums/calibrationType';
+import { Camera, Filter, Flattener, Mount, Telescope } from '@/interfaces/equipment';
 
 export interface AppState {
   preferences: Preferences;
@@ -60,11 +61,11 @@ export interface CalibrationFrame {
 }
 
 interface EquipmentList {
-  camera_list: string[];
-  telescope_list: string[];
-  mount_list: string[];
-  filter_list: string[];
-  flattener_list: string[];
+  camera_list: Camera[];
+  telescope_list: Telescope[];
+  mount_list: Mount[];
+  filter_list: Filter[];
+  flattener_list: Flattener[];
 }
 
 export interface Image {

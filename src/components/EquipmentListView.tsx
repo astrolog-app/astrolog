@@ -3,15 +3,15 @@
 import styles from './EquipmentListView.module.scss';
 import { Dispatch, SetStateAction } from 'react';
 import { useAppState } from '@/context/stateProvider';
-import { EquipmentType } from '@/enums/equipmentType';
+import { EquipmentItem } from '@/interfaces/equipment';
+import { getViewName } from '@/utils/equipment';
 
 interface EquipmentListViewProps {
-  selectedItem: string | undefined;
-  setSelectedItem: Dispatch<SetStateAction<string | undefined>>;
-  setSelectedType: Dispatch<SetStateAction<EquipmentType | undefined>>;
+  selectedItem: EquipmentItem | undefined;
+  setSelectedItem: Dispatch<SetStateAction<EquipmentItem | undefined>>;
 }
 
-export default function EquipmentListView({ selectedItem, setSelectedItem, setSelectedType }: EquipmentListViewProps) {
+export default function EquipmentListView({ selectedItem, setSelectedItem }: EquipmentListViewProps) {
   const { appState } = useAppState();
 
   return (
@@ -21,21 +21,9 @@ export default function EquipmentListView({ selectedItem, setSelectedItem, setSe
           key={index}
           onClick={() => {
             setSelectedItem(t);
-            setSelectedType(EquipmentType.TELESCOPE);
           }}
         >
-          {t}
-        </div>
-      ))}
-      {appState.equipment_list.camera_list.map((c, index) => (
-        <div
-          key={index}
-          onClick={() => {
-            setSelectedItem(c);
-            setSelectedType(EquipmentType.CAMERA);
-          }}
-        >
-          {c}
+          {getViewName(t)}
         </div>
       ))}
     </div>

@@ -1,4 +1,4 @@
-use crate::models::equipment::EquipmentItem;
+use crate::models::equipment::Camera;
 use crate::state::get_readonly_app_state;
 use crate::models::imaging_frames::ImagingFrameList;
 use crate::models::frontend::state::{CalibrationTableRow, EquipmentList, FrontendAppState, LogTableRow, TableData};
@@ -27,22 +27,18 @@ pub fn load_frontend_app_state() -> Result<String, String> {
         calibration: calibration_data,
     };
 
-    let camera_list: Vec<String> = vec![];
-
-    let telescope_list: Vec<String> = vec![];
-
-    let filter_list: Vec<String> = vec![];
-
-    let flattener_list: Vec<String> = vec![];
-
-    let mount_list: Vec<String> = vec![];
+    let telescope_list = app_state.equipment_list.telescopes.values().cloned().collect();
+    let camera_list = app_state.equipment_list.cameras.values().cloned().collect();
+    let filter_list= app_state.equipment_list.filters.values().cloned().collect();
+    let flattener_list = app_state.equipment_list.flatteners.values().cloned().collect();
+    let mount_list = app_state.equipment_list.mounts.values().cloned().collect();
 
     let equipment_list = EquipmentList {
-        camera_list,
         telescope_list,
+        camera_list,
+        mount_list,
         filter_list,
         flattener_list,
-        mount_list,
     };
 
     let data = FrontendAppState {
