@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use crate::models::equipment::{Camera, EquipmentItem, Filter, Flattener, Mount, Telescope};
+use crate::models::frontend::analytics::Analytics;
 use crate::models::image::Image;
 use crate::models::imaging_frames;
 use crate::models::imaging_frames::CalibrationType;
@@ -14,6 +15,7 @@ pub struct FrontendAppState {
     pub table_data: TableData,
     pub equipment_list: EquipmentList,
     pub image_list: Vec<Image>,
+    pub analytics: Analytics
 }
 
 #[derive(Debug, Serialize, Deserialize)]

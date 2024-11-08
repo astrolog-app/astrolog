@@ -37,7 +37,10 @@ const defaultAppState: AppState = {
     flattener_list: [],
     filter_list: []
   },
-  image_list: []
+  image_list: [],
+  analytics: {
+    total_imaging_sessions: 0,
+  }
 };
 
 interface AppStateContextType {

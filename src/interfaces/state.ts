@@ -1,12 +1,14 @@
 import { UUID } from 'crypto';
 import { CalibrationType } from '@/enums/calibrationType';
 import { Camera, Filter, Flattener, Mount, Telescope } from '@/interfaces/equipment';
+import { Analytics } from '@/interfaces/analytics';
 
 export interface AppState {
   preferences: Preferences;
   table_data: TableData;
   equipment_list: EquipmentList;
   image_list: Image[];
+  analytics: Analytics;
 }
 
 export interface Preferences {

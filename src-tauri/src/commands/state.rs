@@ -1,4 +1,5 @@
 use crate::models::equipment::Camera;
+use crate::models::frontend::analytics::Analytics;
 use crate::state::get_readonly_app_state;
 use crate::models::imaging_frames::ImagingFrameList;
 use crate::models::frontend::state::{CalibrationTableRow, EquipmentList, FrontendAppState, LogTableRow, TableData};
@@ -41,11 +42,14 @@ pub fn load_frontend_app_state() -> Result<String, String> {
         flattener_list,
     };
 
+    let analytics = Analytics::new();
+
     let data = FrontendAppState {
         preferences,
         table_data,
         equipment_list,
         image_list,
+        analytics
     };
 
     serde_json::to_string(&data).map_err(|e| e.to_string())
