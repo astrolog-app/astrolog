@@ -19,6 +19,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
+import { CameraSVG, MountSVG, TelescopeSVG } from '@/public/svgs';
 const chartData = [
   { browser: 'chrome', visitors: 275, fill: 'var(--color-chrome)' },
   { browser: 'safari', visitors: 200, fill: 'var(--color-safari)' },
@@ -54,10 +55,6 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function EquipmentChart({ className }: { className?: string }) {
-  const totalVisitors = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.visitors, 0);
-  }, []);
-
   return (
     <Card className={className}>
       <CardHeader className="items-center pb-0">
@@ -94,16 +91,16 @@ export function EquipmentChart({ className }: { className?: string }) {
                         <tspan
                           x={viewBox.cx}
                           y={viewBox.cy}
-                          className="fill-foreground text-3xl font-bold"
+                          className={styles.svg}
                         >
-                          Telescopes
+                          <TelescopeSVG />
                         </tspan>
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 24}
                           className="fill-muted-foreground"
                         >
-                          Visitors
+                          Telescopes
                         </tspan>
                       </text>
                     );
@@ -144,14 +141,14 @@ export function EquipmentChart({ className }: { className?: string }) {
                           y={viewBox.cy}
                           className="fill-foreground text-3xl font-bold"
                         >
-                          Telescopes
+                          <CameraSVG />
                         </tspan>
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 24}
                           className="fill-muted-foreground"
                         >
-                          Visitors
+                          Cameras
                         </tspan>
                       </text>
                     );
@@ -192,14 +189,14 @@ export function EquipmentChart({ className }: { className?: string }) {
                           y={viewBox.cy}
                           className="fill-foreground text-3xl font-bold"
                         >
-                          Telescopes
+                          <MountSVG />
                         </tspan>
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 24}
                           className="fill-muted-foreground"
                         >
-                          Visitors
+                          Mounts
                         </tspan>
                       </text>
                     );
