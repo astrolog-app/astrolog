@@ -1,8 +1,8 @@
-use std::path::PathBuf;
 use crate::models::preferences::Preferences;
 use crate::state::get_app_state;
 use crate::utils::file_system::{dir_contains_metadata, is_directory_empty};
 use crate::utils::paths::APP_DATA_PATH;
+use std::path::PathBuf;
 
 #[tauri::command]
 pub fn setup_backup(path: String) {}
@@ -21,8 +21,10 @@ pub fn set_root_directory(root_directory: String) -> Result<(), String> {
     let dir_contains_metadata: bool = dir_contains_metadata(&path).map_err(|e| e.to_string())?;
 
     if !dir_is_empty && !dir_contains_metadata {
-        return Err("Your selected folder has to be either empty or contain the .astrolog folder."
-            .to_owned());
+        return Err(
+            "Your selected folder has to be either empty or contain the .astrolog folder."
+                .to_owned(),
+        );
     }
 
     get_app_state().preferences.storage.root_directory = root_directory;

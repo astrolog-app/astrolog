@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { open } from '@tauri-apps/api/dialog';
+import { open } from '@tauri-apps/plugin-dialog';
 import { toast } from '@/components/ui/use-toast';
 import styles from './fileListSelector.module.scss';
 import { cn } from '@/utils/classNames';

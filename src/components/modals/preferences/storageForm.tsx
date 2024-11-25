@@ -19,7 +19,7 @@ import FileSelector, {
   FileSelectorChangeButton
 } from '@/components/fileSelectors/fileSelector';
 import { z } from 'zod';
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 import React from 'react';
 import { CopyButton, DeleteButton } from '@/components/ui/button';
 import { AppState } from '@/interfaces/state';

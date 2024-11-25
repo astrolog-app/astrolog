@@ -1,5 +1,3 @@
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use crate::models::equipment::{Camera, EquipmentItem, Filter, Flattener, Mount, Telescope};
 use crate::models::frontend::analytics::Analytics;
 use crate::models::image::Image;
@@ -8,6 +6,8 @@ use crate::models::imaging_frames::CalibrationType;
 use crate::models::imaging_session::ImagingSession;
 use crate::models::preferences::Preferences;
 use crate::state::get_readonly_app_state;
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FrontendAppState {
@@ -15,7 +15,7 @@ pub struct FrontendAppState {
     pub table_data: TableData,
     pub equipment_list: EquipmentList,
     pub image_list: Vec<Image>,
-    pub analytics: Analytics
+    pub analytics: Analytics,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -133,7 +133,10 @@ impl CalibrationTableRow {
         let mut sub_length = None;
         let mut camera_temp = None;
 
-        if let Some(dark_frame) = calibration_frame.as_any().downcast_ref::<imaging_frames::DarkFrame>() {
+        if let Some(dark_frame) = calibration_frame
+            .as_any()
+            .downcast_ref::<imaging_frames::DarkFrame>()
+        {
             sub_length = Option::from(dark_frame.sub_length);
             camera_temp = Option::from(dark_frame.camera_temp);
         }

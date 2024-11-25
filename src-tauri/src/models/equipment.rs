@@ -1,15 +1,15 @@
+use crate::file_store;
+use crate::state::get_readonly_app_state;
+use serde::ser::SerializeStruct;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::collections::HashMap;
 use std::error::Error;
 use std::path::PathBuf;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde::ser::SerializeStruct;
 use uuid::Uuid;
-use crate::file_store;
-use crate::state::get_readonly_app_state;
 
 #[derive(Debug)]
 pub struct EquipmentList {
-    pub telescopes: HashMap<Uuid,Telescope>,
+    pub telescopes: HashMap<Uuid, Telescope>,
     pub cameras: HashMap<Uuid, Camera>,
     pub mounts: HashMap<Uuid, Mount>,
     pub filters: HashMap<Uuid, Filter>,
@@ -35,7 +35,7 @@ impl<'de> Deserialize<'de> for EquipmentList {
             cameras,
             mounts,
             filters,
-            flatteners
+            flatteners,
         } = TempEquipmentList::deserialize(deserializer)?;
 
         let telescopes_map: HashMap<Uuid, Telescope> = telescopes
@@ -43,20 +43,14 @@ impl<'de> Deserialize<'de> for EquipmentList {
             .map(|frame| (frame.id, frame))
             .collect();
 
-        let cameras_map: HashMap<Uuid, Camera> = cameras
-            .into_iter()
-            .map(|frame| (frame.id, frame))
-            .collect();
+        let cameras_map: HashMap<Uuid, Camera> =
+            cameras.into_iter().map(|frame| (frame.id, frame)).collect();
 
-        let mounts_map: HashMap<Uuid, Mount> = mounts
-            .into_iter()
-            .map(|frame| (frame.id, frame))
-            .collect();
+        let mounts_map: HashMap<Uuid, Mount> =
+            mounts.into_iter().map(|frame| (frame.id, frame)).collect();
 
-        let filters_map: HashMap<Uuid, Filter> = filters
-            .into_iter()
-            .map(|frame| (frame.id, frame))
-            .collect();
+        let filters_map: HashMap<Uuid, Filter> =
+            filters.into_iter().map(|frame| (frame.id, frame)).collect();
 
         let flatteners_map: HashMap<Uuid, Flattener> = flatteners
             .into_iter()
@@ -68,7 +62,7 @@ impl<'de> Deserialize<'de> for EquipmentList {
             cameras: cameras_map,
             mounts: mounts_map,
             filters: filters_map,
-            flatteners: flatteners_map
+            flatteners: flatteners_map,
         })
     }
 }
@@ -116,7 +110,10 @@ impl EquipmentList {
         let mut filename = dir.canonicalize().unwrap();
         filename.push(".astrolog");
         filename.push("equipment_list.json");
-        Ok(file_store::save(filename, serde_json::to_string_pretty(&get_readonly_app_state().equipment_list)?)?)
+        Ok(file_store::save(
+            filename,
+            serde_json::to_string_pretty(&get_readonly_app_state().equipment_list)?,
+        )?)
     }
 }
 
@@ -136,7 +133,7 @@ pub struct Telescope {
     name: String,
 
     focal_length: i32,
-    aperture: i32
+    aperture: i32,
 }
 
 impl EquipmentItem for Telescope {
@@ -155,11 +152,11 @@ impl EquipmentItem for Telescope {
 pub struct Camera {
     id: Uuid,
     brand: String,
-    name:String,
+    name: String,
 
     chip_size: String,
     mega_pixel: f64,
-    rgb: bool
+    rgb: bool,
 }
 
 impl EquipmentItem for Camera {
@@ -178,7 +175,7 @@ impl EquipmentItem for Camera {
 pub struct Mount {
     id: Uuid,
     brand: String,
-    name:String
+    name: String,
 }
 
 impl EquipmentItem for Mount {
@@ -197,9 +194,9 @@ impl EquipmentItem for Mount {
 pub struct Filter {
     id: Uuid,
     brand: String,
-    name:String,
+    name: String,
 
-    filter_type: String
+    filter_type: String,
 }
 
 impl EquipmentItem for Filter {
@@ -218,9 +215,9 @@ impl EquipmentItem for Filter {
 pub struct Flattener {
     id: Uuid,
     brand: String,
-    name:String,
+    name: String,
 
-    factor: f64
+    factor: f64,
 }
 
 impl EquipmentItem for Flattener {

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import styles from './selectImagingFrames.module.scss';
 import { Modal } from '@/components/ui/custom/modal';
 import { useModal } from '@/context/modalProvider';
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 import { toast } from '@/components/ui/use-toast';
 import CalibrationRowEditor from '@/components/modals/calibrationRowEditor';
 import { AnalyzedCalibrationFrames } from '@/interfaces/commands';

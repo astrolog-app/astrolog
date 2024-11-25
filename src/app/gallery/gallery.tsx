@@ -13,7 +13,7 @@ import ImageView from '@/components/imageView';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import NewImage from '@/components/modals/newImage/newImage';
-import { open } from '@tauri-apps/api/dialog';
+import { open } from '@tauri-apps/plugin-dialog';
 import { toast } from '@/components/ui/use-toast';
 import { useAppState } from '@/context/stateProvider';
 import { useModal } from '@/context/modalProvider';

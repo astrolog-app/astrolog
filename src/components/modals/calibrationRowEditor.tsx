@@ -13,7 +13,7 @@ import { Input } from '../ui/input';
 import { Label } from '@/components/ui/label';
 import { useModal } from '@/context/modalProvider';
 import EquipmentComboBox from '@/components/ui/equipmentComboBox';
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 import { AnalyzedCalibrationFrames } from '@/interfaces/commands';
 import { CalibrationType } from '@/enums/calibrationType';
 import { toast } from '@/components/ui/use-toast';

@@ -16,18 +16,16 @@ impl Analytics {
 
         let pie_chart_data = PieChartData {};
         let equipment_chart = EquipmentChart {
-            mounts: pie_chart_data
+            mounts: pie_chart_data,
         };
 
-        let integration_chart = IntegrationChart {
-            integrated_subs: 0
-        };
+        let integration_chart = IntegrationChart { integrated_subs: 0 };
 
         Analytics {
             sessions_chart,
             info_cards,
             equipment_chart,
-            integration_chart
+            integration_chart,
         }
     }
 }
@@ -38,12 +36,12 @@ struct SessionsChart {}
 #[derive(Serialize, Deserialize, Debug)]
 struct InfoCard {
     title: String,
-    data: String
+    data: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 struct EquipmentChart {
-    mounts: PieChartData
+    mounts: PieChartData,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

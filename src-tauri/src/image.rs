@@ -1,8 +1,8 @@
+use exif::{Exif, In, Reader, Tag};
 use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::PathBuf;
-use exif::{Exif, In, Reader, Tag};
 
 fn get_exif_data(image: &PathBuf) -> Result<Exif, Box<dyn Error>> {
     let file = File::open(image)?;
@@ -15,9 +15,12 @@ fn get_exif_data(image: &PathBuf) -> Result<Exif, Box<dyn Error>> {
 pub fn get_gain(image: &PathBuf) -> Result<i32, Box<dyn Error>> {
     let exif = get_exif_data(image)?;
 
-    let gain = exif.get_field(Tag::PhotographicSensitivity, In::PRIMARY)
+    let gain = exif
+        .get_field(Tag::PhotographicSensitivity, In::PRIMARY)
         .ok_or("PhotographicSensitivity tag not found in exif data.")?
-        .display_value().to_string().parse()?;
+        .display_value()
+        .to_string()
+        .parse()?;
 
     Ok(gain)
 }
@@ -26,9 +29,11 @@ pub fn get_exposure_time(image: &PathBuf) -> Result<f64, Box<dyn Error>> {
     let exif = get_exif_data(image)?;
     let mut exposure_time = 0.0;
 
-    let exposure_time_string = exif.get_field(Tag::ExposureTime, In::PRIMARY)
+    let exposure_time_string = exif
+        .get_field(Tag::ExposureTime, In::PRIMARY)
         .ok_or("ExposureTime tag not found in exif data.")?
-        .display_value().to_string();
+        .display_value()
+        .to_string();
 
     if exposure_time_string.contains("/") {
         // Split the string by '/'
@@ -49,9 +54,11 @@ pub fn get_exposure_time(image: &PathBuf) -> Result<f64, Box<dyn Error>> {
 pub fn get_date(image: &PathBuf) -> Result<String, Box<dyn Error>> {
     let exif = get_exif_data(image)?;
 
-    let date_str = exif.get_field(Tag::DateTime, In::PRIMARY)
+    let date_str = exif
+        .get_field(Tag::DateTime, In::PRIMARY)
         .ok_or("DateTime tag not found in exif data.")?
-        .display_value().to_string();
+        .display_value()
+        .to_string();
 
     Ok(date_str)
 }

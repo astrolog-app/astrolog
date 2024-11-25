@@ -1,9 +1,9 @@
-use std::error::Error;
-use std::path::PathBuf;
-use serde::{Deserialize, Serialize};
-use serde_json::to_string_pretty;
 use crate::file_store;
 use crate::state::get_readonly_app_state;
+use serde::{Deserialize, Serialize};
+use serde_json::to_string_pretty;
+use std::error::Error;
+use std::path::PathBuf;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Preferences {
@@ -17,11 +17,11 @@ impl Preferences {
             storage: Storage {
                 root_directory: "".to_string(),
                 backup_directory: "".to_string(),
-                source_directory: "".to_string()
+                source_directory: "".to_string(),
             },
             user: User {
-                weather_api_key: "".to_string()
-            }
+                weather_api_key: "".to_string(),
+            },
         }
     }
 
@@ -34,7 +34,10 @@ impl Preferences {
     pub fn save(dir: PathBuf) -> Result<(), Box<dyn Error>> {
         let mut filename = dir;
         filename.push("preferences.json");
-        Ok(file_store::save(filename, to_string_pretty(&get_readonly_app_state().preferences)?)?)
+        Ok(file_store::save(
+            filename,
+            to_string_pretty(&get_readonly_app_state().preferences)?,
+        )?)
     }
 }
 
@@ -42,17 +45,17 @@ impl Preferences {
 pub struct Storage {
     pub root_directory: String,
     backup_directory: String,
-    source_directory: String
+    source_directory: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct User {
-    weather_api_key: String
+    weather_api_key: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct License {
     activated: bool,
     user_email: String,
-    license_key: String
+    license_key: String,
 }

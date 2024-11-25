@@ -1,12 +1,12 @@
-use std::fs;
-use std::path::PathBuf;
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use crate::image::{get_exposure_time, get_gain};
 use crate::models::frontend::state::CalibrationTableRow;
 use crate::models::imaging_frames::{BiasFrame, CalibrationType, DarkFrame, ImagingFrameList};
 use crate::state::{get_app_state, get_readonly_app_state};
 use crate::utils::paths::ROOT_DIRECTORY_PATH;
+use serde::{Deserialize, Serialize};
+use std::fs;
+use std::path::PathBuf;
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AnalyzedCalibrationFrames {
@@ -14,11 +14,13 @@ pub struct AnalyzedCalibrationFrames {
     gain: Option<i32>,
     sub_length: Option<f64>,
     total_subs: usize,
-    message: Option<String>
+    message: Option<String>,
 }
 
 #[tauri::command]
-pub fn analyze_calibration_frames(frames: Vec<PathBuf>) -> Result<AnalyzedCalibrationFrames, String> {
+pub fn analyze_calibration_frames(
+    frames: Vec<PathBuf>,
+) -> Result<AnalyzedCalibrationFrames, String> {
     let mut sub_length: Option<f64> = None;
     let mut message = None;
     let mut gain: Option<i32> = None;
@@ -37,7 +39,11 @@ pub fn analyze_calibration_frames(frames: Vec<PathBuf>) -> Result<AnalyzedCalibr
         }
         Err(e) => {
             let error = e.to_string();
-            message = Some(format!("{} Couldn't get sub length: {}", message.unwrap_or_default(), error));
+            message = Some(format!(
+                "{} Couldn't get sub length: {}",
+                message.unwrap_or_default(),
+                error
+            ));
         }
     }
 
@@ -47,23 +53,28 @@ pub fn analyze_calibration_frames(frames: Vec<PathBuf>) -> Result<AnalyzedCalibr
         }
         Err(e) => {
             let error = e.to_string();
-            message = Some(format!("{} Couldn't get gain: {}", message.unwrap_or_default(), error));
+            message = Some(format!(
+                "{} Couldn't get gain: {}",
+                message.unwrap_or_default(),
+                error
+            ));
         }
     }
 
-    Ok(
-        AnalyzedCalibrationFrames {
-            calibration_type,
-            gain,
-            sub_length,
-            total_subs,
-            message
-        }
-    )
+    Ok(AnalyzedCalibrationFrames {
+        calibration_type,
+        gain,
+        sub_length,
+        total_subs,
+        message,
+    })
 }
 
 #[tauri::command]
-pub async fn classify_calibration_frames(frames: CalibrationTableRow, paths: Vec<PathBuf>) -> Result<(), String> {
+pub async fn classify_calibration_frames(
+    frames: CalibrationTableRow,
+    paths: Vec<PathBuf>,
+) -> Result<(), String> {
     let readonly_app_state = get_readonly_app_state();
     let root_directory = &readonly_app_state.preferences.storage.root_directory;
     let mut path = PathBuf::from(root_directory);
@@ -76,7 +87,9 @@ pub async fn classify_calibration_frames(frames: CalibrationTableRow, paths: Vec
     if path.exists() {
         let entries = fs::read_dir(&path).map_err(|e| e.to_string())?;
         if entries.count() > 0 {
-            return Err("Such calibration frames already exist and the folder is not empty.".to_string());
+            return Err(
+                "Such calibration frames already exist and the folder is not empty.".to_string(),
+            );
         }
     }
 
@@ -85,8 +98,7 @@ pub async fn classify_calibration_frames(frames: CalibrationTableRow, paths: Vec
     for frame in paths {
         let mut new_path = path.clone();
         new_path.push(frame.file_name().ok_or("Couldn't get file_name")?);
-        fs::copy(&frame, &new_path)
-            .map_err(|e| e.to_string())?;
+        fs::copy(&frame, &new_path).map_err(|e| e.to_string())?;
     }
 
     if frames.calibration_type == CalibrationType::DARK {
@@ -100,7 +112,7 @@ pub async fn classify_calibration_frames(frames: CalibrationTableRow, paths: Vec
             frames: vec![],
             calibration_type: frames.calibration_type,
             camera_temp: frames.camera_temp.unwrap(),
-            sub_length: frames.sub_length.unwrap()
+            sub_length: frames.sub_length.unwrap(),
         };
         dark_frames.insert(new_dark_frame.id, new_dark_frame);
 

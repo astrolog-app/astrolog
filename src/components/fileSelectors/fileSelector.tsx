@@ -3,12 +3,12 @@
 import { Input } from '../ui/input';
 import { Button, ButtonProps } from '../ui/button';
 import styles from './fileSelector.module.scss';
-import { DialogFilter, open } from '@tauri-apps/api/dialog';
+import { DialogFilter, open } from '@tauri-apps/plugin-dialog';
 import { toast } from '../ui/use-toast';
 import { useAppState } from '@/context/stateProvider';
 import { AppState } from '@/interfaces/state';
 import { Dispatch, ReactNode, SetStateAction } from 'react';
-import { ask } from '@tauri-apps/api/dialog';
+import { ask } from '@tauri-apps/plugin-dialog';
 
 interface OptionInputProps {
   value: string;

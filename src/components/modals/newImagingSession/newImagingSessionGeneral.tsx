@@ -14,7 +14,7 @@ import { cn } from '@/utils/classNames';
 import { CalendarIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 import { useModal } from '@/context/modalProvider';
 
 const formSchema = z.object({

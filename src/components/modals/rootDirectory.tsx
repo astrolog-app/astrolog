@@ -1,7 +1,7 @@
 'use client';
 
 import { Modal } from '@/components/ui/custom/modal';
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import FileSelector, { FileSelectorChangeButton } from '@/components/fileSelectors/fileSelector';

@@ -1,13 +1,13 @@
+use crate::file_store;
+use crate::state::get_readonly_app_state;
+use serde::ser::SerializeStruct;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::any::Any;
 use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
 use std::path::PathBuf;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde::ser::SerializeStruct;
 use uuid::Uuid;
-use crate::file_store;
-use crate::state::get_readonly_app_state;
 
 #[derive(Debug)]
 pub struct ImagingFrameList {
@@ -106,21 +106,38 @@ impl ImagingFrameList {
         let mut filename = dir.canonicalize().unwrap();
         filename.push(".astrolog");
         filename.push("imaging_frame_list.json");
-        Ok(file_store::save(filename, serde_json::to_string_pretty(&get_readonly_app_state().imaging_frame_list)?)?)
+        Ok(file_store::save(
+            filename,
+            serde_json::to_string_pretty(&get_readonly_app_state().imaging_frame_list)?,
+        )?)
     }
 
     pub fn get_calibration_frames() -> Vec<Box<dyn CalibrationFrame>> {
         let app_state = get_readonly_app_state();
 
         // Clone the frames into vectors to own the data and avoid lifetime issues
-        let dark_frames: Vec<_> = app_state.imaging_frame_list.dark_frames.values().cloned().collect();
-        let bias_frames: Vec<_> = app_state.imaging_frame_list.bias_frames.values().cloned().collect();
+        let dark_frames: Vec<_> = app_state
+            .imaging_frame_list
+            .dark_frames
+            .values()
+            .cloned()
+            .collect();
+        let bias_frames: Vec<_> = app_state
+            .imaging_frame_list
+            .bias_frames
+            .values()
+            .cloned()
+            .collect();
 
         // Now process the cloned data
         dark_frames
             .into_iter()
             .map(|frame| Box::new(frame) as Box<dyn CalibrationFrame>)
-            .chain(bias_frames.into_iter().map(|frame| Box::new(frame) as Box<dyn CalibrationFrame>))
+            .chain(
+                bias_frames
+                    .into_iter()
+                    .map(|frame| Box::new(frame) as Box<dyn CalibrationFrame>),
+            )
             .collect()
     }
 }
@@ -155,7 +172,7 @@ pub struct LightFrame {
     pub flattener_id: Uuid,
     pub mount_id: Uuid,
     pub notes: String,
-    pub sub_length: f64
+    pub sub_length: f64,
 }
 
 impl ImagingFrame for LightFrame {
@@ -224,7 +241,7 @@ pub struct DarkFrame {
     pub calibration_type: CalibrationType,
 
     pub camera_temp: f64,
-    pub sub_length: f64
+    pub sub_length: f64,
 }
 
 impl ImagingFrame for DarkFrame {

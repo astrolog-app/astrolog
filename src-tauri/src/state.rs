@@ -1,19 +1,19 @@
-use std::path::PathBuf;
-use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
-use once_cell::sync::Lazy;
 use crate::models::equipment::EquipmentList;
 use crate::models::image::Image;
 use crate::models::imaging_frames::ImagingFrameList;
 use crate::models::imaging_session::ImagingSession;
 use crate::models::preferences::Preferences;
 use crate::utils::paths::APP_DATA_PATH;
+use once_cell::sync::Lazy;
+use std::path::PathBuf;
+use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 pub struct AppState {
     pub preferences: Preferences,
     pub equipment_list: EquipmentList,
     pub imaging_frame_list: ImagingFrameList,
     pub imaging_session_list: Vec<ImagingSession>,
-    pub image_list: Vec<Image>
+    pub image_list: Vec<Image>,
 }
 
 impl AppState {
@@ -74,14 +74,12 @@ impl AppState {
             equipment_list,
             imaging_frame_list,
             imaging_session_list,
-            image_list
+            image_list,
         }
     }
 }
 
-static APP_STATE: Lazy<RwLock<AppState>> = Lazy::new(|| {
-    RwLock::new(AppState::new())
-});
+static APP_STATE: Lazy<RwLock<AppState>> = Lazy::new(|| RwLock::new(AppState::new()));
 
 // Function to get a mutable reference to the AppState using RwLock
 pub fn get_app_state() -> RwLockWriteGuard<'static, AppState> {

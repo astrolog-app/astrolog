@@ -1,8 +1,10 @@
 use crate::models::equipment::Camera;
 use crate::models::frontend::analytics::Analytics;
-use crate::state::get_readonly_app_state;
+use crate::models::frontend::state::{
+    CalibrationTableRow, EquipmentList, FrontendAppState, LogTableRow, TableData,
+};
 use crate::models::imaging_frames::ImagingFrameList;
-use crate::models::frontend::state::{CalibrationTableRow, EquipmentList, FrontendAppState, LogTableRow, TableData};
+use crate::state::get_readonly_app_state;
 
 #[tauri::command]
 pub fn load_frontend_app_state() -> Result<String, String> {
@@ -28,10 +30,20 @@ pub fn load_frontend_app_state() -> Result<String, String> {
         calibration: calibration_data,
     };
 
-    let telescope_list = app_state.equipment_list.telescopes.values().cloned().collect();
+    let telescope_list = app_state
+        .equipment_list
+        .telescopes
+        .values()
+        .cloned()
+        .collect();
     let camera_list = app_state.equipment_list.cameras.values().cloned().collect();
-    let filter_list= app_state.equipment_list.filters.values().cloned().collect();
-    let flattener_list = app_state.equipment_list.flatteners.values().cloned().collect();
+    let filter_list = app_state.equipment_list.filters.values().cloned().collect();
+    let flattener_list = app_state
+        .equipment_list
+        .flatteners
+        .values()
+        .cloned()
+        .collect();
     let mount_list = app_state.equipment_list.mounts.values().cloned().collect();
 
     let equipment_list = EquipmentList {
@@ -49,7 +61,7 @@ pub fn load_frontend_app_state() -> Result<String, String> {
         table_data,
         equipment_list,
         image_list,
-        analytics
+        analytics,
     };
 
     serde_json::to_string(&data).map_err(|e| e.to_string())

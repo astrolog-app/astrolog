@@ -1,7 +1,7 @@
-use std::{fs, io};
 #[cfg(target_os = "windows")]
 use std::os::windows::ffi::OsStrExt;
 use std::path::PathBuf;
+use std::{fs, io};
 
 #[cfg(target_os = "windows")]
 use winapi::um::fileapi::SetFileAttributesW;
@@ -17,11 +17,8 @@ pub fn set_folder_invisible(path: PathBuf) {
                 #[cfg(target_os = "windows")]
                 {
                     // Convert the directory path directly to a wide string for Windows API
-                    let wide_path: Vec<u16> = component
-                        .as_os_str()
-                        .encode_wide()
-                        .chain(Some(0))
-                        .collect();
+                    let wide_path: Vec<u16> =
+                        component.as_os_str().encode_wide().chain(Some(0)).collect();
 
                     unsafe {
                         // Set the hidden attribute on the directory itself

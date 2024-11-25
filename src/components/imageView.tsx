@@ -2,7 +2,7 @@
 
 import styles from './imageView.module.scss';
 import { Card, CardHeader } from './ui/card';
-import { convertFileSrc, invoke } from '@tauri-apps/api/tauri';
+import { convertFileSrc, invoke } from '@tauri-apps/api/core';
 import { useEffect, useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { Image } from '@/interfaces/state';

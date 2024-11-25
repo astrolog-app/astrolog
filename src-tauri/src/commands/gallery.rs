@@ -1,8 +1,8 @@
-use std::fs;
-use std::path::PathBuf;
 use crate::models::image::Image;
 use crate::state::{get_app_state, get_readonly_app_state};
 use crate::utils::paths::ROOT_DIRECTORY_PATH;
+use std::fs;
+use std::path::PathBuf;
 
 // TODO: finish
 #[tauri::command]
@@ -34,7 +34,9 @@ pub fn add_new_image(image: Image) -> bool {
 
     get_app_state().image_list = image_list.clone();
 
-    match Image::save_list(PathBuf::from(&get_readonly_app_state().preferences.storage.root_directory)) {
+    match Image::save_list(PathBuf::from(
+        &get_readonly_app_state().preferences.storage.root_directory,
+    )) {
         Ok(..) => {
             println!("saved")
         }

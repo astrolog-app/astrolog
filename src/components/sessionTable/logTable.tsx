@@ -43,7 +43,7 @@ import {
   ContextMenuTrigger
 } from '../ui/context-menu';
 import { DeleteSVG } from '@/public/svgs';
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 import { toast } from '@/components/ui/use-toast';
 import { useModal } from '@/context/modalProvider';
 import NewImagingSession from '@/components/modals/newImagingSession/newImagingSession';

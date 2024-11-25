@@ -1,9 +1,9 @@
-use std::error::Error;
-use std::path::PathBuf;
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use crate::file_store;
 use crate::state::get_readonly_app_state;
+use serde::{Deserialize, Serialize};
+use std::error::Error;
+use std::path::PathBuf;
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ImagingSession {
@@ -27,6 +27,9 @@ impl ImagingSession {
         let mut filename = dir.canonicalize().unwrap();
         filename.push(".astrolog");
         filename.push("imaging_session_list.json");
-        Ok(file_store::save(filename, serde_json::to_string_pretty(&get_readonly_app_state().imaging_session_list)?)?)
+        Ok(file_store::save(
+            filename,
+            serde_json::to_string_pretty(&get_readonly_app_state().imaging_session_list)?,
+        )?)
     }
 }
