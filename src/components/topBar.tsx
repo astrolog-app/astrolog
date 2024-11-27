@@ -34,15 +34,15 @@ export function TopBar() {
   }
 
   async function minimize() {
-    const { appWindow } = await import('@tauri-apps/api/window');
+    const { getCurrentWindow } = await import('@tauri-apps/api/window');
 
-    await appWindow.minimize();
+    await getCurrentWindow().minimize();
   }
 
   async function close() {
-    const { appWindow } = await import('@tauri-apps/api/window');
+    const { getCurrentWindow } = await import('@tauri-apps/api/window');
 
-    await appWindow.close();
+    await getCurrentWindow().close();
   }
 
   return (

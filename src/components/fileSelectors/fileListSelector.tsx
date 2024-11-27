@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
 import { toast } from '@/components/ui/use-toast';
