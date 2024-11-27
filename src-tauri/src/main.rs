@@ -21,13 +21,16 @@ pub mod state;
 mod utils;
 
 fn main() {
-    setup();
     dotenv().ok();
 
     let account_id = env::var("ACCOUNT_ID").expect("ACCOUNT_ID is not set");
     let verify_key = env::var("VERIFY_KEY").expect("VERIFY_KEY is not set");
 
     tauri::Builder::default()
+        .setup(|app| {
+            setup();
+            Ok(())
+        })
         .plugin(tauri_plugin_window_state::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_keygen::Builder::new(&account_id, &verify_key).build())
