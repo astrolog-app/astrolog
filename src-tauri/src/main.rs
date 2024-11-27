@@ -28,7 +28,9 @@ fn main() {
     let verify_key = env::var("VERIFY_KEY").expect("VERIFY_KEY is not set");
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_window_state::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_keygen::Builder::new(&account_id, &verify_key).build())
         .invoke_handler(tauri::generate_handler![
             load_frontend_app_state,
             rename_directory,
@@ -45,7 +47,6 @@ fn main() {
             update_app_state_from_json,
             get_date,
         ])
-        .plugin(tauri_plugin_keygen::Builder::new(&account_id, &verify_key).build())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -7,7 +7,6 @@ use tauri::path;
 pub static ROOT_DIRECTORY_PATH: Lazy<PathBuf> = Lazy::new(get_root_directory_path);
 pub static APP_DATA_PATH: Lazy<PathBuf> = Lazy::new(get_app_data_path);
 
-
 fn get_root_directory_path() -> PathBuf {
     PathBuf::from(&get_readonly_app_state().preferences.storage.root_directory)
 }
