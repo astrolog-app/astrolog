@@ -1,5 +1,4 @@
 use crate::file_store;
-use crate::state::get_readonly_app_state;
 use serde::{Deserialize, Serialize};
 use serde_json::to_string_pretty;
 use std::error::Error;
@@ -15,9 +14,9 @@ impl Preferences {
     pub fn new() -> Preferences {
         Preferences {
             storage: Storage {
-                root_directory: "".to_string(),
-                backup_directory: "".to_string(),
-                source_directory: "".to_string(),
+                root_directory: PathBuf::from(""),
+                backup_directory: PathBuf::from(""),
+                source_directory: PathBuf::from(""),
             },
             user: User {
                 weather_api_key: "".to_string(),
@@ -31,21 +30,21 @@ impl Preferences {
         Ok(file_store::load(filename)?)
     }
 
-    pub fn save(dir: PathBuf) -> Result<(), Box<dyn Error>> {
+    pub fn save(dir: PathBuf, preferences: &Preferences) -> Result<(), Box<dyn Error>> {
         let mut filename = dir;
         filename.push("preferences.json");
         Ok(file_store::save(
             filename,
-            to_string_pretty(&get_readonly_app_state().preferences)?,
+            to_string_pretty(preferences)?,
         )?)
     }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Storage {
-    pub root_directory: String,
-    backup_directory: String,
-    source_directory: String,
+    pub root_directory: PathBuf,
+    backup_directory: PathBuf,
+    source_directory: PathBuf,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

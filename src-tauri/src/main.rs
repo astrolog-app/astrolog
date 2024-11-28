@@ -11,13 +11,15 @@ use crate::commands::utils::{open_browser, rename_directory};
 use crate::setup::setup;
 use dotenv::dotenv;
 use std::env;
+use std::sync::Mutex;
+use tauri::Manager;
+use models::state::AppState;
 
 mod commands;
 pub mod file_store;
 mod image;
 mod models;
 pub mod setup;
-pub mod state;
 mod utils;
 
 fn main() {
@@ -28,7 +30,9 @@ fn main() {
 
     tauri::Builder::default()
         .setup(|app| {
-            setup();
+            app.manage(Mutex::new(AppState::new()));
+            // TODO: add setup() method
+
             Ok(())
         })
         .plugin(tauri_plugin_window_state::Builder::new().build())

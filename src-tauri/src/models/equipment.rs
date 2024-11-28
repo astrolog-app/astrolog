@@ -1,5 +1,4 @@
 use crate::file_store;
-use crate::state::get_readonly_app_state;
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::collections::HashMap;
@@ -106,13 +105,13 @@ impl EquipmentList {
         Ok(file_store::load(filename)?)
     }
 
-    pub fn save(dir: PathBuf) -> Result<(), Box<dyn Error>> {
+    pub fn save(dir: PathBuf, equipment_list: &EquipmentList) -> Result<(), Box<dyn Error>> {
         let mut filename = dir.canonicalize().unwrap();
         filename.push(".astrolog");
         filename.push("equipment_list.json");
         Ok(file_store::save(
             filename,
-            serde_json::to_string_pretty(&get_readonly_app_state().equipment_list)?,
+            serde_json::to_string_pretty(equipment_list)?,
         )?)
     }
 }

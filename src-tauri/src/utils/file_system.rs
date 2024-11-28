@@ -8,7 +8,7 @@ use winapi::um::fileapi::SetFileAttributesW;
 #[cfg(target_os = "windows")]
 use winapi::um::winnt::FILE_ATTRIBUTE_HIDDEN;
 
-pub fn set_folder_invisible(path: PathBuf) {
+pub fn set_folder_invisible(path: &PathBuf) {
     for component in path.ancestors() {
         let dir_name = component.file_name().and_then(|os_str| os_str.to_str());
 
@@ -37,7 +37,7 @@ pub fn is_directory_empty(path: &PathBuf) -> io::Result<bool> {
 
 // returns true if the path contains the .astrolog folder
 pub fn dir_contains_metadata(path: &PathBuf) -> io::Result<bool> {
-    let mut entries = fs::read_dir(path)?;
+    let entries = fs::read_dir(path)?;
 
     for entry in entries {
         let entry = entry?;

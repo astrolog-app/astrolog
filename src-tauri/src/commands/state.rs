@@ -1,28 +1,29 @@
-use crate::models::equipment::Camera;
+use std::sync::Mutex;
+use tauri::State;
 use crate::models::frontend::analytics::Analytics;
 use crate::models::frontend::state::{
     CalibrationTableRow, EquipmentList, FrontendAppState, LogTableRow, TableData,
 };
 use crate::models::imaging_frames::ImagingFrameList;
-use crate::state::get_readonly_app_state;
+use crate::models::state::AppState;
 
 #[tauri::command]
-pub fn load_frontend_app_state() -> Result<String, String> {
-    let app_state = get_readonly_app_state();
+pub fn load_frontend_app_state(state: State<Mutex<AppState>>) -> Result<String, String> {
+    let app_state = state.lock().unwrap();
 
     let preferences = app_state.preferences.clone();
     let image_list = app_state.image_list.clone();
 
-    let calibration_frames = ImagingFrameList::get_calibration_frames();
+    let calibration_frames = ImagingFrameList::get_calibration_frames(&app_state);
     let calibration_data: Vec<CalibrationTableRow> = calibration_frames
         .into_iter()
-        .map(CalibrationTableRow::new)
+        .map(|c| CalibrationTableRow::new(c, &app_state))
         .collect();
 
     let sessions_data: Vec<LogTableRow> = app_state
         .imaging_session_list
         .iter()
-        .filter_map(LogTableRow::new)
+        .filter_map(|i| LogTableRow::new(i, &app_state))
         .collect();
 
     let table_data = TableData {

@@ -5,9 +5,9 @@ use crate::models::imaging_frames;
 use crate::models::imaging_frames::CalibrationType;
 use crate::models::imaging_session::ImagingSession;
 use crate::models::preferences::Preferences;
-use crate::state::get_readonly_app_state;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use crate::models::state::AppState;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FrontendAppState {
@@ -48,8 +48,7 @@ pub struct LogTableRow {
 }
 
 impl LogTableRow {
-    pub fn new(imaging_session: &ImagingSession) -> Option<Self> {
-        let app_state = get_readonly_app_state();
+    pub fn new(imaging_session: &ImagingSession, app_state: &AppState) -> Option<Self> {
         let light_frame = app_state
             .imaging_frame_list
             .light_frames
@@ -129,7 +128,7 @@ pub struct CalibrationTableRow {
 }
 
 impl CalibrationTableRow {
-    pub fn new(calibration_frame: Box<dyn imaging_frames::CalibrationFrame>) -> Self {
+    pub fn new(calibration_frame: Box<dyn imaging_frames::CalibrationFrame>, app_state: &AppState) -> Self {
         let mut sub_length = None;
         let mut camera_temp = None;
 
@@ -141,7 +140,7 @@ impl CalibrationTableRow {
             camera_temp = Option::from(dark_frame.camera_temp);
         }
 
-        let camera_name = get_readonly_app_state()
+        let camera_name = app_state
             .equipment_list
             .cameras
             .get(&calibration_frame.camera_id())

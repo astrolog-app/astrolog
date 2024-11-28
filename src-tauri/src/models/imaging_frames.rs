@@ -1,5 +1,5 @@
 use crate::file_store;
-use crate::state::get_readonly_app_state;
+use crate::models::state::AppState;
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::any::Any;
@@ -7,6 +7,8 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
 use std::path::PathBuf;
+use std::sync::{Mutex, MutexGuard};
+use tauri::State;
 use uuid::Uuid;
 
 #[derive(Debug)]
@@ -102,19 +104,17 @@ impl ImagingFrameList {
         Ok(file_store::load(filename)?)
     }
 
-    pub fn save(dir: PathBuf) -> Result<(), Box<dyn Error>> {
+    pub fn save(dir: PathBuf, imaging_frame_list: &ImagingFrameList) -> Result<(), Box<dyn Error>> {
         let mut filename = dir.canonicalize().unwrap();
         filename.push(".astrolog");
         filename.push("imaging_frame_list.json");
         Ok(file_store::save(
             filename,
-            serde_json::to_string_pretty(&get_readonly_app_state().imaging_frame_list)?,
+            serde_json::to_string_pretty(imaging_frame_list)?,
         )?)
     }
 
-    pub fn get_calibration_frames() -> Vec<Box<dyn CalibrationFrame>> {
-        let app_state = get_readonly_app_state();
-
+    pub fn get_calibration_frames(app_state: &AppState) -> Vec<Box<dyn CalibrationFrame>> {
         // Clone the frames into vectors to own the data and avoid lifetime issues
         let dark_frames: Vec<_> = app_state
             .imaging_frame_list

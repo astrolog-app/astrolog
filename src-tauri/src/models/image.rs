@@ -1,5 +1,4 @@
 use crate::file_store;
-use crate::state::get_readonly_app_state;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::path::PathBuf;
@@ -19,13 +18,13 @@ impl Image {
         Ok(file_store::load(filename)?)
     }
 
-    pub fn save_list(dir: PathBuf) -> Result<(), Box<dyn Error>> {
+    pub fn save_list(dir: PathBuf, image_list: &Vec<Image>) -> Result<(), Box<dyn Error>> {
         let mut filename = dir.canonicalize().unwrap();
         filename.push(".astrolog");
         filename.push("image_list.json");
         Ok(file_store::save(
             filename,
-            serde_json::to_string_pretty(&get_readonly_app_state().image_list)?,
+            serde_json::to_string_pretty(image_list)?,
         )?)
     }
 }

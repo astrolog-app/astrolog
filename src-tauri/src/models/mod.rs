@@ -4,3 +4,4 @@ pub mod image;
 pub mod imaging_frames;
 pub mod imaging_session;
 pub mod preferences;
+pub mod state;

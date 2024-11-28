@@ -33,7 +33,7 @@ pub fn save(filename: PathBuf, content: String) -> Result<(), Box<dyn Error>> {
     // Write the JSON string to the file
     file.write_all(content.as_bytes())?;
 
-    set_folder_invisible(filename);
+    set_folder_invisible(&filename);
 
     Ok(())
 }

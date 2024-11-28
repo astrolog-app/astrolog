@@ -4,9 +4,7 @@ use crate::models::imaging_frames::ImagingFrameList;
 use crate::models::imaging_session::ImagingSession;
 use crate::models::preferences::Preferences;
 use crate::utils::paths::APP_DATA_PATH;
-use once_cell::sync::Lazy;
 use std::path::PathBuf;
-use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 pub struct AppState {
     pub preferences: Preferences,
@@ -17,7 +15,7 @@ pub struct AppState {
 }
 
 impl AppState {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let mut preferences = Preferences::new();
         let mut equipment_list = EquipmentList::new();
         let mut imaging_frame_list = ImagingFrameList::new();
@@ -77,16 +75,4 @@ impl AppState {
             image_list,
         }
     }
-}
-
-static APP_STATE: Lazy<RwLock<AppState>> = Lazy::new(|| RwLock::new(AppState::new()));
-
-// Function to get a mutable reference to the AppState using RwLock
-pub fn get_app_state() -> RwLockWriteGuard<'static, AppState> {
-    APP_STATE.write().unwrap()
-}
-
-// Function to get a read-only reference to the AppState using RwLock
-pub fn get_readonly_app_state() -> RwLockReadGuard<'static, AppState> {
-    APP_STATE.read().unwrap()
 }

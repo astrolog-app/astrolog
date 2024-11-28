@@ -1,13 +1,15 @@
 use crate::models::image::Image;
-use crate::state::{get_app_state, get_readonly_app_state};
-use crate::utils::paths::ROOT_DIRECTORY_PATH;
 use std::fs;
 use std::path::PathBuf;
+use std::sync::Mutex;
+use tauri::State;
+use crate::models::state::AppState;
 
 // TODO: finish
 #[tauri::command]
-pub fn add_new_image(image: Image) -> bool {
-    let mut destination = ROOT_DIRECTORY_PATH.clone();
+pub fn add_new_image(image: Image, state: State<Mutex<AppState>>) -> bool {
+    let mut app_state = state.lock().unwrap();
+    let mut destination = app_state.preferences.storage.root_directory.clone();
     destination.push("Gallery");
     destination.push(String::from(&image.title) + ".png");
     if let Some(parent) = destination.parent() {
@@ -29,14 +31,13 @@ pub fn add_new_image(image: Image) -> bool {
         total_exposure: 300,
     };
 
-    let mut image_list = get_readonly_app_state().image_list.clone();
+
+    let mut image_list = app_state.image_list.clone();
     image_list.push(new_image);
 
-    get_app_state().image_list = image_list.clone();
+    app_state.image_list = image_list.clone();
 
-    match Image::save_list(PathBuf::from(
-        &get_readonly_app_state().preferences.storage.root_directory,
-    )) {
+    match Image::save_list(PathBuf::from(&app_state.preferences.storage.root_directory), &app_state.image_list) {
         Ok(..) => {
             println!("saved")
         }
