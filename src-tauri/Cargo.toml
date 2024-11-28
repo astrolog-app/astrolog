@@ -1,12 +1,12 @@
 [package]
-name = "app"
-version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
-license = ""
-repository = ""
-default-run = "app"
-edition = "2021"
+name = "AstroLog"
+version = "0.2.0"
+description = "AstroLog is an astrophotography application that lets you log and classify all your imaging sessions - by its own or manually."
+authors = ["Rouven Spaar"]
+license = "Grayjay Core License 1.0"
+repository = "https://github.com/astrolog-app/astrolog"
+default-run = "AstroLog"
+edition = "2024"
 rust-version = "1.82.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

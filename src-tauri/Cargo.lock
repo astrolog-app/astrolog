@@ -3,6 +3,26 @@
 version = 3
 
 [[package]]
+name = "AstroLog"
+version = "0.2.0"
+dependencies = [
+ "dotenv",
+ "kamadak-exif",
+ "once_cell",
+ "open",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-dialog",
+ "tauri-plugin-keygen",
+ "tauri-plugin-window-state",
+ "uuid",
+ "webbrowser",
+ "winapi",
+]
+
+[[package]]
 name = "addr2line"
 version = "0.24.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -96,26 +116,6 @@ name = "anyhow"
 version = "1.0.93"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4c95c10ba0b00a02636238b814946408b1322d5ac4760326e6fb8ec956d85775"
-
-[[package]]
-name = "app"
-version = "0.1.0"
-dependencies = [
- "dotenv",
- "kamadak-exif",
- "once_cell",
- "open",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-dialog",
- "tauri-plugin-keygen",
- "tauri-plugin-window-state",
- "uuid",
- "webbrowser",
- "winapi",
-]
 
 [[package]]
 name = "ashpd"
