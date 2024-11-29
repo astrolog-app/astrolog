@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/utils/classNames';
 import { EquipmentType } from '@/enums/equipmentType';
 import { useAppState } from '@/context/stateProvider';
+import { getViewName } from '@/utils/equipment';
 
 interface ComboBoxProps {
   type: EquipmentType,
@@ -27,19 +28,19 @@ export default function EquipmentComboBox({ type, value, onChange }: ComboBoxPro
   useEffect(() => {
     switch (type) {
       case EquipmentType.CAMERA:
-        setValues(appState.equipment_list.camera_list);
+        setValues(appState.equipment_list.camera_list.map(c => getViewName(c)));
         break;
       case EquipmentType.TELESCOPE:
-        setValues(appState.equipment_list.telescope_list);
+        setValues(appState.equipment_list.telescope_list.map(c => getViewName(c)));
         break;
       case EquipmentType.MOUNT:
-        setValues(appState.equipment_list.mount_list);
+        setValues(appState.equipment_list.mount_list.map(c => getViewName(c)));
         break;
       case EquipmentType.FILTER:
-        setValues(appState.equipment_list.filter_list);
+        setValues(appState.equipment_list.filter_list.map(c => getViewName(c)));
         break;
       case EquipmentType.FLATTENER:
-        setValues(appState.equipment_list.flattener_list);
+        setValues(appState.equipment_list.flattener_list.map(c => getViewName(c)));
         break;
     }
   }, [])

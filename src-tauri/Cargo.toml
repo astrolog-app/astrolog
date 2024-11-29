@@ -6,7 +6,7 @@ authors = ["Rouven Spaar"]
 license = "Grayjay Core License 1.0"
 repository = "https://github.com/astrolog-app/astrolog"
 default-run = "AstroLog"
-edition = "2024"
+edition = "2021"
 rust-version = "1.82.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
