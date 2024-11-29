@@ -8,8 +8,6 @@ use crate::commands::imaging_sessions::{export_csv, open_imaging_session};
 use crate::commands::preferences::{save_preferences, set_root_directory, setup_backup};
 use crate::commands::state::{load_frontend_app_state, update_app_state_from_json};
 use crate::commands::utils::{open_browser, rename_directory};
-use crate::setup::setup;
-use dotenv::dotenv;
 use std::env;
 use std::sync::Mutex;
 use tauri::Manager;
@@ -23,10 +21,12 @@ pub mod setup;
 mod utils;
 
 fn main() {
-    dotenv().ok();
-
-    let account_id = env::var("ACCOUNT_ID").expect("ACCOUNT_ID is not set");
-    let verify_key = env::var("VERIFY_KEY").expect("VERIFY_KEY is not set");
+    let account_id = option_env!("ACCOUNT_ID")
+        .expect("ACCOUNT_ID is not embedded in the binary")
+        .to_string();
+    let verify_key = option_env!("VERIFY_KEY")
+        .expect("VERIFY_KEY is not embedded in the binary")
+        .to_string();
 
     tauri::Builder::default()
         .setup(|app| {
