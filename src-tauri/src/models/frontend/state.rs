@@ -3,7 +3,7 @@ use crate::models::frontend::analytics::Analytics;
 use crate::models::image::Image;
 use crate::models::imaging_frames;
 use crate::models::imaging_frames::CalibrationType;
-use crate::models::imaging_session::ImagingSession;
+use crate::models::imaging_session_list::ImagingSession;
 use crate::models::preferences::Preferences;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

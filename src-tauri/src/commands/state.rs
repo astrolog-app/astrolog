@@ -21,9 +21,9 @@ pub fn load_frontend_app_state(state: State<Mutex<AppState>>) -> Result<String, 
         .collect();
 
     let sessions_data: Vec<LogTableRow> = app_state
-        .imaging_session_list
+        .imaging_sessions
         .iter()
-        .filter_map(|i| LogTableRow::new(i, &app_state))
+        .filter_map(|i| LogTableRow::new(i.1, &app_state))
         .collect();
 
     let table_data = TableData {
