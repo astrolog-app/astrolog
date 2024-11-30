@@ -117,7 +117,7 @@ impl EquipmentList {
 }
 
 pub trait EquipmentItem {
-    fn id(&self) -> &Uuid;
+    // fn id(&self) -> &Uuid;
     fn brand(&self) -> &str;
     fn name(&self) -> &str;
     fn view_name(&self) -> String {
@@ -136,9 +136,9 @@ pub struct Telescope {
 }
 
 impl EquipmentItem for Telescope {
-    fn id(&self) -> &Uuid {
-        &self.id
-    }
+    // fn id(&self) -> &Uuid {
+    //     &self.id
+    // }
     fn brand(&self) -> &str {
         &self.brand
     }
@@ -159,9 +159,9 @@ pub struct Camera {
 }
 
 impl EquipmentItem for Camera {
-    fn id(&self) -> &Uuid {
-        &self.id
-    }
+    // fn id(&self) -> &Uuid {
+    //     &self.id
+    // }
     fn brand(&self) -> &str {
         &self.brand
     }
@@ -178,9 +178,9 @@ pub struct Mount {
 }
 
 impl EquipmentItem for Mount {
-    fn id(&self) -> &Uuid {
-        &self.id
-    }
+    // fn id(&self) -> &Uuid {
+    //     &self.id
+    // }
     fn brand(&self) -> &str {
         &self.brand
     }
@@ -199,9 +199,9 @@ pub struct Filter {
 }
 
 impl EquipmentItem for Filter {
-    fn id(&self) -> &Uuid {
-        &self.id
-    }
+    // fn id(&self) -> &Uuid {
+    //     &self.id
+    // }
     fn brand(&self) -> &str {
         &self.brand
     }
@@ -220,9 +220,9 @@ pub struct Flattener {
 }
 
 impl EquipmentItem for Flattener {
-    fn id(&self) -> &Uuid {
-        &self.id
-    }
+    // fn id(&self) -> &Uuid {
+    //     &self.id
+    // }
     fn brand(&self) -> &str {
         &self.brand
     }

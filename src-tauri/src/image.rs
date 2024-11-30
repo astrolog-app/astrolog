@@ -27,7 +27,6 @@ pub fn get_gain(image: &PathBuf) -> Result<i32, Box<dyn Error>> {
 
 pub fn get_exposure_time(image: &PathBuf) -> Result<f64, Box<dyn Error>> {
     let exif = get_exif_data(image)?;
-    let mut exposure_time = 0.0;
 
     let exposure_time_string = exif
         .get_field(Tag::ExposureTime, In::PRIMARY)
@@ -40,15 +39,13 @@ pub fn get_exposure_time(image: &PathBuf) -> Result<f64, Box<dyn Error>> {
         let parts: Vec<&str> = exposure_time_string.split('/').collect();
 
         // Parse the numerator and denominator to f64
-        let numerator: f64 = parts[0].parse().unwrap();
-        let denominator: f64 = parts[1].parse().unwrap();
+        let numerator: f64 = parts[0].parse()?;
+        let denominator: f64 = parts[1].parse()?;
 
-        exposure_time = numerator / denominator;
+        Ok(numerator / denominator)
     } else {
-        exposure_time = exposure_time_string.parse()?;
+        Ok(exposure_time_string.parse()?)
     }
-
-    Ok(exposure_time)
 }
 
 pub fn get_date(image: &PathBuf) -> Result<String, Box<dyn Error>> {

@@ -7,8 +7,6 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
 use std::path::PathBuf;
-use std::sync::{Mutex, MutexGuard};
-use tauri::State;
 use uuid::Uuid;
 
 #[derive(Debug)]
@@ -142,14 +140,6 @@ impl ImagingFrameList {
     }
 }
 
-pub trait ImagingFrame {
-    fn id(&self) -> &Uuid;
-    fn camera_id(&self) -> &Uuid;
-    fn total_subs(&self) -> &i32;
-    fn gain(&self) -> &i32;
-    fn frames(&self) -> &Vec<String>;
-}
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LightFrame {
     pub id: Uuid,
@@ -173,27 +163,6 @@ pub struct LightFrame {
     pub mount_id: Uuid,
     pub notes: String,
     pub sub_length: f64,
-}
-
-impl ImagingFrame for LightFrame {
-    fn id(&self) -> &Uuid {
-        &self.id
-    }
-
-    fn camera_id(&self) -> &Uuid {
-        &self.camera_id
-    }
-
-    fn total_subs(&self) -> &i32 {
-        &self.total_subs
-    }
-
-    fn gain(&self) -> &i32 {
-        &self.gain
-    }
-    fn frames(&self) -> &Vec<String> {
-        &self.frames
-    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
@@ -244,27 +213,6 @@ pub struct DarkFrame {
     pub sub_length: f64,
 }
 
-impl ImagingFrame for DarkFrame {
-    fn id(&self) -> &Uuid {
-        &self.id
-    }
-
-    fn camera_id(&self) -> &Uuid {
-        &self.camera_id
-    }
-
-    fn total_subs(&self) -> &i32 {
-        &self.total_subs
-    }
-
-    fn gain(&self) -> &i32 {
-        &self.gain
-    }
-    fn frames(&self) -> &Vec<String> {
-        &self.frames
-    }
-}
-
 impl CalibrationFrame for DarkFrame {
     fn id(&self) -> &Uuid {
         &self.id
@@ -301,27 +249,6 @@ pub struct BiasFrame {
     pub calibration_type: CalibrationType,
 }
 
-impl ImagingFrame for BiasFrame {
-    fn id(&self) -> &Uuid {
-        &self.id
-    }
-
-    fn camera_id(&self) -> &Uuid {
-        &self.camera_id
-    }
-
-    fn total_subs(&self) -> &i32 {
-        &self.total_subs
-    }
-
-    fn gain(&self) -> &i32 {
-        &self.gain
-    }
-    fn frames(&self) -> &Vec<String> {
-        &self.frames
-    }
-}
-
 impl CalibrationFrame for BiasFrame {
     fn id(&self) -> &Uuid {
         &self.id
@@ -353,25 +280,4 @@ struct FlatFrame {
     total_subs: i32,
     gain: i32,
     frames: Vec<String>,
-}
-
-impl ImagingFrame for FlatFrame {
-    fn id(&self) -> &Uuid {
-        &self.id
-    }
-
-    fn camera_id(&self) -> &Uuid {
-        &self.camera_id
-    }
-
-    fn total_subs(&self) -> &i32 {
-        &self.total_subs
-    }
-
-    fn gain(&self) -> &i32 {
-        &self.gain
-    }
-    fn frames(&self) -> &Vec<String> {
-        &self.frames
-    }
 }

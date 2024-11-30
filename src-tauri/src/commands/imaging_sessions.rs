@@ -8,7 +8,7 @@ pub fn export_csv(path: PathBuf) {
 } // TODO: implement
 
 #[tauri::command]
-pub fn open_imaging_session(id: Uuid) -> Result<(), String> {
+pub fn open_imaging_session(_id: Uuid) -> Result<(), String> {
     let path = PathBuf::from(""); // TODO: finish
 
     #[cfg(target_os = "windows")]

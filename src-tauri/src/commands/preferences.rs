@@ -7,7 +7,7 @@ use tauri::State;
 use crate::models::state::AppState;
 
 #[tauri::command]
-pub fn setup_backup(path: String) {}
+pub fn setup_backup(_path: String) {}
 
 #[tauri::command]
 pub fn save_preferences(preferences: Preferences, state: State<Mutex<AppState>>) -> Result<(), String> {

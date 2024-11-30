@@ -11,10 +11,9 @@ pub fn add_new_image(image: Image, state: State<Mutex<AppState>>) -> bool {
     let mut app_state = state.lock().unwrap();
     let mut destination = app_state.preferences.storage.root_directory.clone();
     destination.push("Gallery");
+    fs::create_dir_all(&destination).ok();
+
     destination.push(String::from(&image.title) + ".png");
-    if let Some(parent) = destination.parent() {
-        fs::create_dir_all(parent);
-    }
 
     match fs::copy(image.path, &destination) {
         Ok(..) => {

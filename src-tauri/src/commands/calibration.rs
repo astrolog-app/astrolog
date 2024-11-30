@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
-use tauri::{Manager, State};
+use tauri::State;
 use uuid::Uuid;
 use crate::models::state::AppState;
 
