@@ -1,0 +1,29 @@
+.component {
+  z-index: 100;
+  background-color: hsl(var(--background));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 0.1rem solid hsl(var(--border));
+  height: var(--bottom-bar-height);
+  padding-left: var(--padding);
+  padding-right: var(--padding);
+
+  .left {
+    font-size: 0.7rem;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .right {
+    display: flex;
+    align-items: center;
+    font-size: 0.8rem;
+
+    .progressBar {
+      height: 0.2rem;
+      width: 10rem;
+      margin-left: var(--padding);
+      margin-right: var(--padding);
+    }
+  }
+}

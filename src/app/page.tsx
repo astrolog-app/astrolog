@@ -15,7 +15,7 @@ import { KeygenLicense } from 'tauri-plugin-keygen-api';
 import { toast } from '@/components/ui/use-toast';
 import { useModal } from '@/context/modalProvider';
 import { useAppState } from '@/context/stateProvider';
-import RootDirectory from '@/components/modals/rootDirectory';
+import BottomBar from '@/components/bottomBar';
 
 export interface Tab {
   component: React.ReactNode;
@@ -95,6 +95,7 @@ export default function Home() {
           </motion.div>
         </AnimatePresence>
       </div>
+      <BottomBar />
     </div>
   );
 }

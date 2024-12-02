@@ -4,7 +4,7 @@
   flex-direction: column;
 
   .bottom {
-    height: calc(100vh - var(--top-bar-height));
+    height: calc(100vh - var(--top-bar-height) - var(--bottom-bar-height));
     display: flex;
 
     .content {
