@@ -13,7 +13,6 @@ import React, {
 import { toast } from '@/components/ui/use-toast';
 import { AppState } from '@/interfaces/state';
 import { removeContextMenu } from '@/utils/browser';
-import { boolean } from 'zod';
 
 const defaultAppState: AppState = {
   preferences: {

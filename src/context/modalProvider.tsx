@@ -4,6 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import React, { createContext, useContext, useState } from 'react';
 
 interface ModalContextType {
+  // eslint-disable-next-line no-unused-vars
   openModal: (content: React.ReactNode) => void;
   closeModal: () => void;
 }
@@ -43,4 +44,10 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export const useModal = () => useContext(ModalContext);
+export function useModal() {
+  const context = useContext(ModalContext);
+  if (!context) {
+    throw new Error('useModal must be used within a StateProvider');
+  }
+  return context;
+}
