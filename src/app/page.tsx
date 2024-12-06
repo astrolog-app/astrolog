@@ -16,8 +16,6 @@ import { toast } from '@/components/ui/use-toast';
 import { useModal } from '@/context/modalProvider';
 import { useAppState } from '@/context/stateProvider';
 import BottomBar from '@/components/bottomBar';
-import { invoke } from '@tauri-apps/api/core';
-import { Button } from '@/components/ui/button';
 
 export interface Tab {
   component: React.ReactNode;
@@ -84,7 +82,6 @@ export default function Home() {
       <TopBar />
       <div className={styles.bottom}>
         <SideNav tabs={tabs} selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
-        <Button onClick={() => invoke("start_process")}>Test</Button>
         <AnimatePresence mode="wait">
           <motion.div
             className={styles.content}

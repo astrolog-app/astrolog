@@ -6,18 +6,17 @@ import { Process } from '@/interfaces/process';
 import { UUID } from 'crypto';
 import { toast } from '@/components/ui/use-toast';
 import { invoke } from '@tauri-apps/api/core';
+import { message } from '@tauri-apps/plugin-dialog';
 
 type ProcessContextType = {
   processes: Map<UUID, Process>;
-  // eslint-disable-next-line no-unused-vars
-  startProcess: (invoke: () => Promise<unknown>) => Promise<unknown>;
 };
 
 const ProcessContext = createContext<ProcessContextType | undefined>(undefined);
 
 export const ProcessProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [processes, setProcesses] = useState<Map<UUID, Process>>(new Map());
-  const [appLock, setAppLock] = useState<boolean>(false);
+  const [closeLock, setCloseLock] = useState<boolean>(false);
 
   useEffect(() => {
     const unlisten = listen<Process>(
@@ -49,31 +48,46 @@ export const ProcessProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   useEffect(() => {
-    void listen("close-blocked", (event) => {
-      console.log(event.payload);
+    void listen('close_lock', () => {
+      message('Can\'t close AstroLog: There are still ongoing processes!')
+        .catch((error) => {
+          toast({
+            variant: 'destructive',
+            title: 'Uh oh! Something went wrong.',
+            description: 'Error: ' + error
+          });
+        });
     });
   }, []);
 
   useEffect(() => {
-    if (processes.size > 0 && !appLock) {
-      invoke("add_close_lock")
-        .then(() => setAppLock(true))
-        .catch((e) => console.log(e)); // TODO
+    if (processes.size > 0 && !closeLock) {
+      invoke('add_close_lock')
+        .then(() => setCloseLock(true))
+        .catch((error) => {
+          toast({
+            variant: 'destructive',
+            title: 'Uh oh! Something went wrong.',
+            description: 'Error: ' + error
+          });
+        });
     }
 
     if (processes.size == 0) {
-      invoke("remove_close_lock")
-        .then(() => setAppLock(false))
-        .catch((e) => console.log(e)); // TODO
+      invoke('remove_close_lock')
+        .then(() => setCloseLock(false))
+        .catch((error) => {
+          toast({
+            variant: 'destructive',
+            title: 'Uh oh! Something went wrong.',
+            description: 'Error: ' + error
+          });
+        });
     }
-  }, [processes]);
-
-  const startProcess = async (invoke: () => Promise<unknown>): Promise<unknown> => {
-    return await invoke();
-  };
+  }, [closeLock, processes]);
 
   return (
-    <ProcessContext.Provider value={{ processes, startProcess }}>
+    <ProcessContext.Provider value={{ processes }}>
       {children}
     </ProcessContext.Provider>
   );
