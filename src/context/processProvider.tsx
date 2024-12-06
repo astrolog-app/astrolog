@@ -5,6 +5,7 @@ import { listen } from '@tauri-apps/api/event';
 import { Process } from '@/interfaces/process';
 import { UUID } from 'crypto';
 import { toast } from '@/components/ui/use-toast';
+import { invoke } from '@tauri-apps/api/core';
 
 type ProcessContextType = {
   processes: Map<UUID, Process>;
@@ -16,6 +17,7 @@ const ProcessContext = createContext<ProcessContextType | undefined>(undefined);
 
 export const ProcessProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [processes, setProcesses] = useState<Map<UUID, Process>>(new Map());
+  const [appLock, setAppLock] = useState<boolean>(false);
 
   useEffect(() => {
     const unlisten = listen<Process>(
@@ -45,6 +47,26 @@ export const ProcessProvider: React.FC<{ children: React.ReactNode }> = ({ child
       unlisten.then((dispose) => dispose());
     };
   }, []);
+
+  useEffect(() => {
+    void listen("close-blocked", (event) => {
+      console.log(event.payload);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (processes.size > 0 && !appLock) {
+      invoke("add_close_lock")
+        .then(() => setAppLock(true))
+        .catch((e) => console.log(e)); // TODO
+    }
+
+    if (processes.size == 0) {
+      invoke("remove_close_lock")
+        .then(() => setAppLock(false))
+        .catch((e) => console.log(e)); // TODO
+    }
+  }, [processes]);
 
   const startProcess = async (invoke: () => Promise<unknown>): Promise<unknown> => {
     return await invoke();

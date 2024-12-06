@@ -73,3 +73,22 @@ pub fn update_app_state_from_json() -> Result<(), String> {
     //
     Ok(())
 }
+
+#[tauri::command]
+pub fn add_close_lock(state: State<Mutex<AppState>>) -> Result<(), String> {
+    let mut app_state = state.lock().unwrap();
+
+    app_state.close_lock = true;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub fn remove_close_lock(state: State<Mutex<AppState>>) -> Result<(), String> {
+    let mut app_state = state.lock().unwrap();
+
+    app_state.close_lock = false;
+
+    Ok(())
+}
+

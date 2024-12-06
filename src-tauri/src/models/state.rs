@@ -14,6 +14,7 @@ pub struct AppState {
     pub imaging_frame_list: ImagingFrameList,
     pub imaging_sessions: HashMap<Uuid, ImagingSession>,
     pub image_list: Vec<Image>,
+    pub close_lock: bool,
 }
 
 impl AppState {
@@ -75,6 +76,7 @@ impl AppState {
             imaging_frame_list,
             imaging_sessions,
             image_list,
+            close_lock: false,
         }
     }
 }
