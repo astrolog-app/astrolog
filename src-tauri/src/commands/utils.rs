@@ -1,4 +1,4 @@
-use crate::utils::file_system::{is_directory_empty, rename_folder_with_overwrite};
+use crate::file_system::{is_directory_empty, rename_folder_with_overwrite};
 use std::path::PathBuf;
 
 #[tauri::command]

@@ -4,8 +4,8 @@ use crate::models::image::Image;
 use crate::models::imaging_frames::ImagingFrameList;
 use crate::models::imaging_session_list::{ImagingSession, ImagingSessionList};
 use crate::models::preferences::Preferences;
-use crate::utils::paths::APP_DATA_PATH;
 use std::path::PathBuf;
+use tauri::{AppHandle, Manager};
 use uuid::Uuid;
 
 pub struct AppState {
@@ -18,14 +18,14 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub fn new() -> Self {
+    pub fn new(app_handle: &AppHandle) -> Self {
         let mut preferences = Preferences::new();
         let mut equipment_list = EquipmentList::new();
         let mut imaging_frame_list = ImagingFrameList::new();
         let mut imaging_sessions: HashMap<Uuid, ImagingSession> = HashMap::new();
         let mut image_list = vec![];
 
-        match Preferences::load(APP_DATA_PATH.clone()) {
+        match Preferences::load(app_handle.path().app_data_dir().unwrap()) {
             Ok(data) => {
                 preferences = data;
             }

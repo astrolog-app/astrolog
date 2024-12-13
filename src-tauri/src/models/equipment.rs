@@ -102,7 +102,7 @@ impl EquipmentList {
         let mut filename = dir;
         filename.push(".astrolog");
         filename.push("equipment_list.json");
-        Ok(file_store::load(filename)?)
+        Ok(file_store::load(&filename)?)
     }
 
     pub fn save(dir: PathBuf, equipment_list: &EquipmentList) -> Result<(), Box<dyn Error>> {
@@ -110,8 +110,8 @@ impl EquipmentList {
         filename.push(".astrolog");
         filename.push("equipment_list.json");
         Ok(file_store::save(
-            filename,
-            serde_json::to_string_pretty(equipment_list)?,
+            &filename,
+            &serde_json::to_string_pretty(equipment_list)?,
         )?)
     }
 }

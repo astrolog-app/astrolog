@@ -1,11 +1,11 @@
-use crate::utils::file_system::set_folder_invisible;
+use crate::file_system::set_folder_invisible;
 use serde::de::DeserializeOwned;
 use std::error::Error;
 use std::fs::{create_dir_all, File};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 
-pub fn load<T>(filename: PathBuf) -> Result<T, Box<dyn Error>>
+pub fn load<T>(filename: &PathBuf) -> Result<T, Box<dyn Error>>
 where
     T: DeserializeOwned,
 {
@@ -22,7 +22,7 @@ where
     Ok(data)
 }
 
-pub fn save(filename: PathBuf, content: String) -> Result<(), Box<dyn Error>> {
+pub fn save(filename: &PathBuf, content: &String) -> Result<(), Box<dyn Error>> {
     if let Some(parent) = Path::new(&filename).parent() {
         create_dir_all(parent)?;
     }

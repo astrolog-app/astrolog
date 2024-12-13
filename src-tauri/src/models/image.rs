@@ -15,7 +15,7 @@ impl Image {
         let mut filename = dir;
         filename.push(".astrolog");
         filename.push("image_list.json");
-        Ok(file_store::load(filename)?)
+        Ok(file_store::load(&filename)?)
     }
 
     pub fn save_list(dir: PathBuf, image_list: &Vec<Image>) -> Result<(), Box<dyn Error>> {
@@ -23,8 +23,8 @@ impl Image {
         filename.push(".astrolog");
         filename.push("image_list.json");
         Ok(file_store::save(
-            filename,
-            serde_json::to_string_pretty(image_list)?,
+            &filename,
+            &serde_json::to_string_pretty(image_list)?,
         )?)
     }
 }

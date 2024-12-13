@@ -7,7 +7,6 @@ name = "AstroLog"
 version = "0.2.0"
 dependencies = [
  "kamadak-exif",
- "once_cell",
  "open",
  "serde",
  "serde_json",

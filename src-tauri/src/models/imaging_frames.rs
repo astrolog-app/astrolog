@@ -99,7 +99,7 @@ impl ImagingFrameList {
         let mut filename = dir;
         filename.push(".astrolog");
         filename.push("imaging_frame_list.json");
-        Ok(file_store::load(filename)?)
+        Ok(file_store::load(&filename)?)
     }
 
     pub fn save(dir: PathBuf, imaging_frame_list: &ImagingFrameList) -> Result<(), Box<dyn Error>> {
@@ -107,8 +107,8 @@ impl ImagingFrameList {
         filename.push(".astrolog");
         filename.push("imaging_frame_list.json");
         Ok(file_store::save(
-            filename,
-            serde_json::to_string_pretty(imaging_frame_list)?,
+            &filename,
+            &serde_json::to_string_pretty(imaging_frame_list)?,
         )?)
     }
 

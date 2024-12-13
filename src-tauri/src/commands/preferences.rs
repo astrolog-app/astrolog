@@ -1,23 +1,22 @@
 use crate::models::preferences::Preferences;
-use crate::utils::file_system::{dir_contains_metadata, is_directory_empty};
-use crate::utils::paths::APP_DATA_PATH;
+use crate::file_system::{dir_contains_metadata, is_directory_empty};
 use std::path::PathBuf;
 use std::sync::Mutex;
-use tauri::State;
+use tauri::{AppHandle, Manager, State};
 use crate::models::state::AppState;
 
 #[tauri::command]
 pub fn setup_backup(_path: String) {}
 
 #[tauri::command]
-pub fn save_preferences(preferences: Preferences, state: State<Mutex<AppState>>) -> Result<(), String> {
+pub fn save_preferences(preferences: Preferences, state: State<Mutex<AppState>>, app_handle: AppHandle) -> Result<(), String> {
     let mut app_state = state.lock().unwrap();
     app_state.preferences = preferences;
-    Preferences::save(APP_DATA_PATH.clone(), &app_state.preferences).map_err(|e| e.to_string())
+    Preferences::save(app_handle.path().app_data_dir().unwrap(), &app_state.preferences).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub fn set_root_directory(root_directory: PathBuf, state: State<Mutex<AppState>>) -> Result<(), String> {
+pub fn set_root_directory(app_handle: AppHandle, root_directory: PathBuf, state: State<Mutex<AppState>>) -> Result<(), String> {
     let mut app_state = state.lock().unwrap();
     let path = PathBuf::from(&root_directory);
 
@@ -32,5 +31,5 @@ pub fn set_root_directory(root_directory: PathBuf, state: State<Mutex<AppState>>
     }
 
     app_state.preferences.storage.root_directory = root_directory;
-    Preferences::save(APP_DATA_PATH.clone(), &app_state.preferences).map_err(|e| e.to_string())
+    Preferences::save(app_handle.path().app_data_dir().unwrap(), &app_state.preferences).map_err(|e| e.to_string())
 }

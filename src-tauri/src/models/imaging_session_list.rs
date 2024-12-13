@@ -43,7 +43,7 @@ impl ImagingSessionList {
         let mut filename = dir;
         filename.push(".astrolog");
         filename.push("imaging_session_list.json");
-        Ok(file_store::load(filename)?)
+        Ok(file_store::load(&filename)?)
     }
 
     pub fn save(dir: PathBuf, imaging_session_list: &ImagingSessionList) -> Result<(), Box<dyn Error>> {
@@ -51,8 +51,8 @@ impl ImagingSessionList {
         filename.push(".astrolog");
         filename.push("imaging_session_list.json");
         Ok(file_store::save(
-            filename,
-            serde_json::to_string_pretty(imaging_session_list)?,
+            &filename,
+            &serde_json::to_string_pretty(imaging_session_list)?,
         )?)
     }
 }

@@ -13,13 +13,13 @@ use models::state::AppState;
 use std::env;
 use std::sync::Mutex;
 use tauri::{Emitter, Manager};
+use crate::file_system::set_folder_invisible;
 
 mod commands;
 mod file_store;
 mod image;
 mod models;
-mod setup;
-mod utils;
+pub mod file_system;
 
 fn main() {
     let account_id = option_env!("ACCOUNT_ID")
@@ -31,8 +31,16 @@ fn main() {
 
     tauri::Builder::default()
         .setup(|app| {
-            app.manage(Mutex::new(AppState::new()));
-            // TODO: add setup() method
+            // init app_state
+            let app_state = Mutex::new(AppState::new(app.handle()));
+
+            // set .astrolog folder invisible on windows
+            let mut dir = app_state.lock().unwrap().preferences.storage.root_directory.clone();
+            dir.push(".astrolog");
+            set_folder_invisible(&dir);
+
+            // state management
+            app.manage(app_state);
 
             Ok(())
         })

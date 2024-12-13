@@ -27,15 +27,15 @@ impl Preferences {
     pub fn load(dir: PathBuf) -> Result<Preferences, Box<dyn Error>> {
         let mut filename = dir;
         filename.push("preferences.json");
-        Ok(file_store::load(filename)?)
+        Ok(file_store::load(&filename)?)
     }
 
     pub fn save(dir: PathBuf, preferences: &Preferences) -> Result<(), Box<dyn Error>> {
         let mut filename = dir;
         filename.push("preferences.json");
         Ok(file_store::save(
-            filename,
-            to_string_pretty(preferences)?,
+            &filename,
+            &to_string_pretty(preferences)?,
         )?)
     }
 }
