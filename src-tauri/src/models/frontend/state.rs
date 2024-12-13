@@ -1,6 +1,6 @@
 use crate::models::equipment::{Camera, EquipmentItem, Filter, Flattener, Mount, Telescope};
 use crate::models::frontend::analytics::Analytics;
-use crate::models::image::Image;
+use crate::models::image_list::Image;
 use crate::models::imaging_frames;
 use crate::models::imaging_frames::CalibrationType;
 use crate::models::imaging_session_list::ImagingSession;

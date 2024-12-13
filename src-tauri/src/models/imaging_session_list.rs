@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 #[derive(Debug)]
 pub struct ImagingSessionList {
-    pub imaging_sessions: HashMap<Uuid, ImagingSession>
+    pub imaging_session_list: HashMap<Uuid, ImagingSession>
 }
 
 impl<'de> Deserialize<'de> for ImagingSessionList {
@@ -23,7 +23,7 @@ impl<'de> Deserialize<'de> for ImagingSessionList {
             .collect();
 
         Ok(ImagingSessionList {
-            imaging_sessions: imaging_session_map,
+            imaging_session_list: imaging_session_map,
         })
     }
 }
@@ -33,7 +33,7 @@ impl Serialize for ImagingSessionList {
     where
         S: Serializer,
     {
-        let imaging_sessions: Vec<&ImagingSession> = self.imaging_sessions.values().collect();
+        let imaging_sessions: Vec<&ImagingSession> = self.imaging_session_list.values().collect();
         imaging_sessions.serialize(serializer)
     }
 }

@@ -1,4 +1,4 @@
-use crate::models::image::Image;
+use crate::models::image_list::Image;
 use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
