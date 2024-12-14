@@ -12,6 +12,7 @@
 
 html {
   user-select: none;
+  overscroll-behavior: none;
 }
 
 /* shadcn theme */

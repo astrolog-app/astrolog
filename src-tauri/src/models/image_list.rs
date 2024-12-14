@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 #[derive(Debug)]
 pub struct ImageList {
-    pub image_list: HashMap<Uuid, Image>
+    pub image_list: HashMap<Uuid, Image>,
 }
 
 impl<'de> Deserialize<'de> for ImageList {
@@ -38,14 +38,6 @@ impl Serialize for ImageList {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Image {
-    pub id: Uuid,
-    pub title: String,
-    pub path: PathBuf,
-    pub total_exposure: i32,
-}
-
 impl ImageList {
     pub fn load(dir: PathBuf) -> Result<ImageList, Box<dyn Error>> {
         let mut filename = dir;
@@ -54,13 +46,26 @@ impl ImageList {
         Ok(file_store::load(&filename)?)
     }
 
-    pub fn save(dir: PathBuf, image_list: &Vec<Image>) -> Result<(), Box<dyn Error>> {
+    pub fn save(dir: PathBuf, image_list_map: &HashMap<Uuid, Image>) -> Result<(), Box<dyn Error>> {
         let mut filename = dir.canonicalize().unwrap();
         filename.push(".astrolog");
         filename.push("image_list.json");
+
+        let image_list = ImageList {
+            image_list: image_list_map.clone(),
+        };
+
         Ok(file_store::save(
             &filename,
-            &serde_json::to_string_pretty(image_list)?,
+            &serde_json::to_string_pretty(&image_list)?,
         )?)
     }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Image {
+    pub id: Uuid,
+    pub title: String,
+    pub path: PathBuf,
+    pub total_exposure: i32,
 }

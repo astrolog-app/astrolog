@@ -46,18 +46,23 @@ impl ImagingSessionList {
         Ok(file_store::load(&filename)?)
     }
 
-    pub fn save(dir: PathBuf, imaging_session_list: &ImagingSessionList) -> Result<(), Box<dyn Error>> {
+    pub fn save(dir: PathBuf, imaging_session_list_map: &HashMap<Uuid, ImagingSession>) -> Result<(), Box<dyn Error>> {
         let mut filename = dir.canonicalize().unwrap();
         filename.push(".astrolog");
         filename.push("imaging_session_list.json");
+
+        let imaging_session_list = ImagingSessionList {
+            imaging_session_list: imaging_session_list_map.clone(),
+        };
+
         Ok(file_store::save(
             &filename,
-            &serde_json::to_string_pretty(imaging_session_list)?,
+            &serde_json::to_string_pretty(&imaging_session_list)?,
         )?)
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ImagingSession {
     pub id: Uuid,
     pub folder_dir: String,

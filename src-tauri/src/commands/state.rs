@@ -12,7 +12,7 @@ pub fn load_frontend_app_state(state: State<Mutex<AppState>>) -> Result<String, 
     let app_state = state.lock().unwrap();
 
     let preferences = app_state.preferences.clone();
-    let image_list = app_state.image_list.clone();
+    let image_list = app_state.image_list.values().cloned().collect();
 
     let calibration_frames = ImagingFrameList::get_calibration_frames(&app_state);
     let calibration_data: Vec<CalibrationTableRow> = calibration_frames
@@ -91,4 +91,3 @@ pub fn remove_close_lock(state: State<Mutex<AppState>>) -> Result<(), String> {
 
     Ok(())
 }
-

@@ -1,51 +1,39 @@
-use crate::models::image_list::Image;
+use crate::models::image_list::{Image, ImageList};
 use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::State;
+use uuid::Uuid;
 use crate::models::state::AppState;
 
 // TODO: finish
 #[tauri::command]
-pub fn add_new_image(image: Image, state: State<Mutex<AppState>>) -> bool {
-    let mut app_state = state.lock().unwrap();
-    let mut destination = app_state.preferences.storage.root_directory.clone();
-    destination.push("Gallery");
-    fs::create_dir_all(&destination).ok();
+pub fn add_new_image(image: Image, state: State<Mutex<AppState>>) -> Result<(), String> {
+    let app_state = state.lock().unwrap();
 
+    let mut destination = app_state.preferences.storage.root_directory.clone();
+    drop(app_state);
+    destination.push("Gallery");
+    fs::create_dir_all(&destination).ok(); // TODO: log
     destination.push(String::from(&image.title) + ".png");
 
-    match fs::copy(image.path, &destination) {
-        Ok(..) => {
-            println!("ok");
-        }
-        Err(e) => {
-            println!("Error: {}", e);
-        }
-    }
+    fs::copy(image.path, &destination).map_err(|e| e.to_string())?;
 
     let new_image = Image {
+        id: Uuid::new_v4(),
         title: image.title,
         path: destination,
         total_exposure: 300,
     };
 
+    let mut app_state = state.lock().unwrap();
+    app_state.image_list.insert(image.id, new_image);
 
-    let mut image_list = app_state.image_list.clone();
-    image_list.push(new_image);
+    ImageList::save(
+        PathBuf::from(&app_state.preferences.storage.root_directory), &app_state.image_list
+    ).map_err(|e| e.to_string())?;
 
-    app_state.image_list = image_list.clone();
-
-    match Image::save_list(PathBuf::from(&app_state.preferences.storage.root_directory), &app_state.image_list) {
-        Ok(..) => {
-            println!("saved")
-        }
-        Err(e) => {
-            println!("Error: {}", e)
-        }
-    }
-
-    true
+    Ok(())
 }
 
 #[tauri::command]

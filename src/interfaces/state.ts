@@ -71,6 +71,7 @@ interface EquipmentList {
 }
 
 export interface Image {
+  id: UUID;
   title: string;
   path: string;
   total_exposure: number;
