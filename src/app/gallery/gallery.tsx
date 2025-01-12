@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/card';
 import { Tab } from '@/components/ui/custom/tab';
 import styles from './gallery.module.scss';
-import ImageView from '@/components/imageView';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import NewImage from '@/components/modals/newImage/newImage';
@@ -17,6 +16,7 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { toast } from '@/components/ui/use-toast';
 import { useAppState } from '@/context/stateProvider';
 import { useModal } from '@/context/modalProvider';
+import ImageGallery from '@/components/images/imageGallery';
 
 export default function Gallery() {
   const { appState } = useAppState();
@@ -97,22 +97,7 @@ export default function Gallery() {
           </Button>
         </CardContent>
       </Card>
-      <div
-        className={styles.content}
-        style={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${columns}, 1fr)`,
-          gap: 'var(--padding)'
-        }}
-      >
-        {appState.image_list.map((image, index) => (
-          <ImageView
-            key={index}
-            className={styles.imageView}
-            image={image}
-          />
-        ))}
-      </div>
+      <ImageGallery columns={columns} />
     </Tab>
   );
 }
