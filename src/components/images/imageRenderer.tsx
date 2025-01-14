@@ -42,20 +42,19 @@ export default function ImageRenderer({ className, path, onClick }: ImageRendere
 
   // TODO: finish
   return (
-    <div className={`image-container ${className || ''}`}>
-      {!isLoaded && <div className="placeholder">Loading...</div>}
+    <>
+      {!isLoaded && <div>Loading...</div>}
       {imageSrc && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           ref={imgRef}
           src={imageSrc}
-          className={cn(className, `image ${isLoaded ? 'loaded' : 'loading'}`)}
+          className={className}
           onClick={onClick}
           alt="load"
           onLoad={handleImageLoad}
-          style={{ display: isLoaded ? 'block' : 'none' }}
         />
       )}
-    </div>
+    </>
   );
 }
