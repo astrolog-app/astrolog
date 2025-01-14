@@ -4,7 +4,9 @@ import { Modal } from '@/components/ui/custom/modal';
 import { invoke } from '@tauri-apps/api/core';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
-import FileSelector, { FileSelectorChangeButton } from '@/components/fileSelectors/fileSelector';
+import FileSelector, {
+  FileSelectorChangeButton,
+} from '@/components/fileSelectors/fileSelector';
 import { useState } from 'react';
 import { useModal } from '@/context/modalProvider';
 import { fetchAppState, useAppState } from '@/context/stateProvider';
@@ -20,11 +22,13 @@ export default function RootDirectory() {
       .then(() => {
         fetchAppState(setAppState);
       })
-      .catch((e) => toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'Error: ' + e
-      }));
+      .catch((e) =>
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'Error: ' + e,
+        }),
+      );
   }
 
   function onSubmit(): void {
@@ -32,29 +36,24 @@ export default function RootDirectory() {
       .then(() => {
         toast({
           title: 'Success!',
-          description: 'Your root directory has been saved.'
+          description: 'Your root directory has been saved.',
         });
 
         updateAppState();
         closeModal();
       })
-      .catch((e) => toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'Error: ' + e
-      }));
+      .catch((e) =>
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'Error: ' + e,
+        }),
+      );
   }
 
   return (
-    <Modal
-      title="Set Root Directory"
-      notClosable
-      className="w-96"
-    >
-      <FileSelector
-        value={value}
-        disabled
-      >
+    <Modal title="Set Root Directory" notClosable className="w-96">
+      <FileSelector value={value} disabled>
         <FileSelectorChangeButton
           saveAction={(path) => setValue(path)}
           path=""

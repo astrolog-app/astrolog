@@ -13,14 +13,19 @@ AstroLog is an astrophotography application that lets you log and classify all y
 
 1. Follow the [prerequisites](https://v2.tauri.app/start/prerequisites/).
 2. Install node dependencies:
+
 ```sh
 npm i
 ```
+
 3. Install tauri CLI:
+
 ```sh
 cargo install tauri-cli
 ```
+
 4. Start AstroLog in development mode:
+
 ```sh
 cargo tauri dev
 ```

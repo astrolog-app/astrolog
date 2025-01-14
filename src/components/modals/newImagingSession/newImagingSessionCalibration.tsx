@@ -1,6 +1,14 @@
 'use client';
 
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { z } from 'zod';
@@ -12,16 +20,16 @@ import { useModal } from '@/context/modalProvider';
 
 const formSchema = z.object({
   target: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
-  })
+    message: 'Username must be at least 2 characters.', // change
+  }),
 });
 
 export default function NewImagingSessionCalibration() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      target: ""
-    }
+      target: '',
+    },
   });
 
   const { closeModal } = useModal();
@@ -52,7 +60,9 @@ export default function NewImagingSessionCalibration() {
             variant="secondary"
             onClick={closeModal}
             className={styles.cancelButton}
-          >Cancel</Button>
+          >
+            Cancel
+          </Button>
           <Button type="submit">Next</Button>
         </div>
       </form>

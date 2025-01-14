@@ -9,12 +9,20 @@ import NewImagingSessionGeneral from '@/components/modals/newImagingSession/newI
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import FileListSelector from '@/components/fileSelectors/fileListSelector';
 
 const tabKeys = ['general', 'equipment', 'calibration'] as const;
-export type TabKey = typeof tabKeys[number];
+export type TabKey = (typeof tabKeys)[number];
 
 export default function NewImagingSession() {
   const [selectedTab, setSelectedTab] = useState<TabKey>();
@@ -33,10 +41,7 @@ export default function NewImagingSession() {
   }
 
   return (
-    <Modal
-      title="Add Imaging Session"
-      className={styles.modal}
-    >
+    <Modal title="Add Imaging Session" className={styles.modal}>
       {renderTab()}
     </Modal>
   );
@@ -44,18 +49,20 @@ export default function NewImagingSession() {
 
 const formSchema = z.object({
   target: z.array(z.string()).min(1, {
-    message: 'You must at least select one light frame.'
-  })
+    message: 'You must at least select one light frame.',
+  }),
 });
 
-function SelectLightFrames({ setSelectedTab }: {
-  setSelectedTab: React.Dispatch<React.SetStateAction<TabKey | undefined>>
+function SelectLightFrames({
+  setSelectedTab,
+}: {
+  setSelectedTab: React.Dispatch<React.SetStateAction<TabKey | undefined>>;
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      target: []
-    }
+      target: [],
+    },
   });
 
   function onSubmit() {
@@ -81,7 +88,9 @@ function SelectLightFrames({ setSelectedTab }: {
             </FormItem>
           )}
         />
-        <Button className={styles.nextButton} type="submit">Next</Button>
+        <Button className={styles.nextButton} type="submit">
+          Next
+        </Button>
       </form>
     </Form>
   );

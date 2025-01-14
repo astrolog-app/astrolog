@@ -27,5 +27,5 @@ export const calibrationColumns: ColumnDef<CalibrationFrame>[] = [
   {
     accessorKey: 'total_subs',
     header: 'Total Subs',
-  }
+  },
 ];

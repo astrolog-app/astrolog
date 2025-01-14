@@ -1,11 +1,16 @@
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/utils/classNames';
-import { useEffect, useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { CopySVG, DeleteSVG } from '@/public/svgs';
 import { useAppState } from '@/context/stateProvider';
 import { AppState } from '@/interfaces/state';

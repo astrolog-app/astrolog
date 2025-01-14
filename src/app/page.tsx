@@ -26,17 +26,39 @@ export interface Tab {
 
 export default function Home() {
   const tabs: Tab[] = [
-    { component: <Log />, key: 'log', tooltip: 'Astrophotography Log', icon: <LogSVG /> },
-    { component: <Equipment />, key: 'equipment', tooltip: 'Equipment', icon: <EquipmentSVG /> },
-    { component: <Gallery />, key: 'gallery', tooltip: 'Gallery', icon: <GallerySVG /> },
-    { component: <Analytics />, key: 'analytics', tooltip: 'Analytics', icon: <AnalyticsSVG /> }
+    {
+      component: <Log />,
+      key: 'log',
+      tooltip: 'Astrophotography Log',
+      icon: <LogSVG />,
+    },
+    {
+      component: <Equipment />,
+      key: 'equipment',
+      tooltip: 'Equipment',
+      icon: <EquipmentSVG />,
+    },
+    {
+      component: <Gallery />,
+      key: 'gallery',
+      tooltip: 'Gallery',
+      icon: <GallerySVG />,
+    },
+    {
+      component: <Analytics />,
+      key: 'analytics',
+      tooltip: 'Analytics',
+      icon: <AnalyticsSVG />,
+    },
   ];
   const [selectedTab, setSelectedTab] = useState(tabs[0]);
   const { openModal } = useModal();
   const { appState } = useAppState();
 
   const checkLicense = useCallback(async () => {
-    const { validateKey, getLicenseKey, getLicense } = await import('tauri-plugin-keygen-api');
+    const { validateKey, getLicenseKey, getLicense } = await import(
+      'tauri-plugin-keygen-api'
+    );
 
     const licenseKey: string | null = await getLicenseKey();
 
@@ -46,23 +68,22 @@ export default function Home() {
       const license: KeygenLicense | null = await getLicense();
 
       if (license === null) {
-        validateKey({ key: licenseKey })
-          .then((newLicense) => {
-            if (!newLicense.valid) {
-              toast({
-                variant: 'destructive',
-                title: 'Uh oh! Something went wrong.',
-                description: 'Error: '
-              });
-              openModal(<License />);
-            }
-          });
+        validateKey({ key: licenseKey }).then((newLicense) => {
+          if (!newLicense.valid) {
+            toast({
+              variant: 'destructive',
+              title: 'Uh oh! Something went wrong.',
+              description: 'Error: ',
+            });
+            openModal(<License />);
+          }
+        });
       } else {
         if (!license.valid) {
           toast({
             variant: 'destructive',
             title: 'Uh oh! Something went wrong.',
-            description: 'Error: '
+            description: 'Error: ',
           });
           openModal(<License />);
         }
@@ -72,16 +93,20 @@ export default function Home() {
 
   useEffect(() => {
     // checkLicense();
-    if (appState.preferences.storage.root_directory == "") {
+    if (appState.preferences.storage.root_directory == '') {
       //openModal(<RootDirectory />);
     }
-  }, [])
+  }, []);
 
   return (
     <div className={styles.tabs}>
       <TopBar />
       <div className={styles.bottom}>
-        <SideNav tabs={tabs} selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
+        <SideNav
+          tabs={tabs}
+          selectedTab={selectedTab}
+          setSelectedTab={setSelectedTab}
+        />
         <AnimatePresence mode="wait">
           <motion.div
             className={styles.content}

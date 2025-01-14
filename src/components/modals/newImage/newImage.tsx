@@ -2,10 +2,20 @@
 
 import { Modal } from '@/components/ui/custom/modal';
 import styles from './newImage.module.scss';
-import FileSelector, { FileSelectorChangeButton } from '@/components/fileSelectors/fileSelector';
+import FileSelector, {
+  FileSelectorChangeButton,
+} from '@/components/fileSelectors/fileSelector';
 import { useState } from 'react';
 import { DialogFilter } from '@tauri-apps/plugin-dialog';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,14 +33,17 @@ interface NewImageProps {
 
 const formSchema = z.object({
   path: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
+    message: 'Username must be at least 2 characters.', // change
   }),
   title: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
+    message: 'Username must be at least 2 characters.', // change
   }),
 });
 
-export default function NewImage({ defaultValue, dialogFilters }: NewImageProps) {
+export default function NewImage({
+  defaultValue,
+  dialogFilters,
+}: NewImageProps) {
   const { closeModal } = useModal();
 
   const [path, setPath] = useState<string>(defaultValue);
@@ -40,36 +53,34 @@ export default function NewImage({ defaultValue, dialogFilters }: NewImageProps)
     defaultValues: {
       path: defaultValue,
       title: '',
-    }
+    },
   });
 
   function onSubmit(): void {
     const newImage: Image = {
       path: form.getValues().path,
       title: form.getValues().title,
-      total_exposure: 0
-    }
+      total_exposure: 0,
+    };
 
-    invoke("add_new_image", { image: newImage })
+    invoke('add_new_image', { image: newImage })
       .then(() => {
         toast({
-          description: "Success!"
-        })
+          description: 'Success!',
+        });
         closeModal();
       })
-      .catch((error) => toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "Error: " + error,
-      }));
+      .catch((error) =>
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'Error: ' + error,
+        }),
+      );
   }
 
   return (
-    <Modal
-      title="Add Image"
-      separator
-      className={styles.modal}
-    >
+    <Modal title="Add Image" separator className={styles.modal}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className={styles.form}>
           <FormField
@@ -77,14 +88,9 @@ export default function NewImage({ defaultValue, dialogFilters }: NewImageProps)
             name="path"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Path
-                </FormLabel>
+                <FormLabel>Path</FormLabel>
                 <FormControl>
-                  <FileSelector
-                    value={path}
-                    disabled
-                  >
+                  <FileSelector value={path} disabled>
                     <FileSelectorChangeButton
                       saveAction={(value) => {
                         setPath(value);
@@ -94,9 +100,7 @@ export default function NewImage({ defaultValue, dialogFilters }: NewImageProps)
                     />
                   </FileSelector>
                 </FormControl>
-                <FormDescription>
-                  The path of the new Image.
-                </FormDescription>
+                <FormDescription>The path of the new Image.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -106,9 +110,7 @@ export default function NewImage({ defaultValue, dialogFilters }: NewImageProps)
             name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Title
-                </FormLabel>
+                <FormLabel>Title</FormLabel>
                 <FormControl>
                   <FormControl>
                     <Input {...field} />
@@ -121,7 +123,9 @@ export default function NewImage({ defaultValue, dialogFilters }: NewImageProps)
               </FormItem>
             )}
           />
-          <Button className={styles.button} type="submit">Add Image</Button>
+          <Button className={styles.button} type="submit">
+            Add Image
+          </Button>
         </form>
       </Form>
     </Modal>

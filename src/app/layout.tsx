@@ -12,29 +12,29 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'AstroLog',
-  description: 'AstroLog is an astrophotography application that lets you log and classify all your imaging sessions - by its own or manually.'
+  description:
+    'AstroLog is an astrophotography application that lets you log and classify all your imaging sessions - by its own or manually.',
 };
 
-export default function RootLayout(
-  {
-    children
-  }: Readonly<{
-    children: React.ReactNode;
-  }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="en">
-    <body className={inter.className}>
-    <ThemeProvider attribute="class" defaultTheme="system">
-      <StateProvider>
-        <ProcessProvider>
-          <ModalProvider>
-            {children}
-            <Toaster />
-          </ModalProvider>
-        </ProcessProvider>
-      </StateProvider>
-    </ThemeProvider>
-    </body>
+      <body className={inter.className}>
+        <ThemeProvider attribute="class" defaultTheme="system">
+          <StateProvider>
+            <ProcessProvider>
+              <ModalProvider>
+                {children}
+                <Toaster />
+              </ModalProvider>
+            </ProcessProvider>
+          </StateProvider>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

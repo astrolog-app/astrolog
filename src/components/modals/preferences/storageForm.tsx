@@ -8,7 +8,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from '@/components/ui/form';
 import { ToastAction } from '@/components/ui/toast';
 import { toast, useToast } from '@/components/ui/use-toast';
@@ -16,7 +16,7 @@ import { savePreferences, useAppState } from '@/context/stateProvider';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import FileSelector, {
-  FileSelectorChangeButton
+  FileSelectorChangeButton,
 } from '@/components/fileSelectors/fileSelector';
 import { z } from 'zod';
 import { invoke } from '@tauri-apps/api/core';
@@ -26,14 +26,14 @@ import { AppState } from '@/interfaces/state';
 
 const formSchema = z.object({
   rootDirectory: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
+    message: 'Username must be at least 2 characters.', // change
   }),
   backupDirectory: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
+    message: 'Username must be at least 2 characters.', // change
   }),
   sourceDirectory: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
-  })
+    message: 'Username must be at least 2 characters.', // change
+  }),
 });
 
 export default function StorageForm() {
@@ -45,8 +45,8 @@ export default function StorageForm() {
     defaultValues: {
       rootDirectory: appState.preferences.storage.root_directory,
       backupDirectory: appState.preferences.storage.backup_directory,
-      sourceDirectory: appState.preferences.storage.source_directory
-    }
+      sourceDirectory: appState.preferences.storage.source_directory,
+    },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -57,7 +57,7 @@ export default function StorageForm() {
         <ToastAction onClick={() => console.log('test')} altText="Undo">
           Undo
         </ToastAction>
-      )
+      ),
     });
   }
 
@@ -178,25 +178,26 @@ function rootAction(
   value: string,
   appState: AppState,
   setAppState: React.Dispatch<React.SetStateAction<AppState>>,
-  path: string
+  path: string,
 ): void {
   let origin = appState.preferences.storage.root_directory;
 
-  invoke('rename_directory', { origin: origin, destination: value })
-    .catch((error) => {
+  invoke('rename_directory', { origin: origin, destination: value }).catch(
+    (error) => {
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
-        description: 'Error: ' + error
+        description: 'Error: ' + error,
       });
-    });
+    },
+  );
 }
 
 function backupAction(
   value: string,
   appState: AppState,
   setAppState: React.Dispatch<React.SetStateAction<AppState>>,
-  path: string
+  path: string,
 ): void {
   const origin = appState.preferences.storage.backup_directory;
 
@@ -207,7 +208,7 @@ function backupAction(
         toast({
           variant: 'destructive',
           title: 'Uh oh! Something went wrong.',
-          description: 'Error: ' + error
+          description: 'Error: ' + error,
         });
       });
 
@@ -220,7 +221,7 @@ function backupAction(
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
-        description: 'Error: ' + error
+        description: 'Error: ' + error,
       });
     });
 }

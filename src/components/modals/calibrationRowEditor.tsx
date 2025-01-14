@@ -5,10 +5,22 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Modal } from '@/components/ui/custom/modal';
 import styles from '@/components/modals/calibrationRowEditor.module.scss';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import React, { useState } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
 import { Input } from '../ui/input';
 import { Label } from '@/components/ui/label';
 import { useModal } from '@/context/modalProvider';
@@ -24,49 +36,59 @@ interface CalibrationRowEditorProps {
   analyzedFrames?: AnalyzedCalibrationFrames;
   edit: boolean;
   calibrationFrame?: CalibrationFrame;
-  paths?: string[]
+  paths?: string[];
 }
 
-export default function CalibrationRowEditor({ analyzedFrames, edit, calibrationFrame, paths }: CalibrationRowEditorProps) {
+export default function CalibrationRowEditor({
+  analyzedFrames,
+  edit,
+  calibrationFrame,
+  paths,
+}: CalibrationRowEditorProps) {
   const { closeModal } = useModal();
 
-  const [calibrationType, setCalibrationType] = useState<CalibrationType>(analyzedFrames?.calibration_type || CalibrationType.DARK);
+  const [calibrationType, setCalibrationType] = useState<CalibrationType>(
+    analyzedFrames?.calibration_type || CalibrationType.DARK,
+  );
 
-  const formSchema = z.object({
-    camera: z.string().min(1, {
-      message: 'You must at least select one calibration frame.'
-    }),
-    calibrationType: z.enum([CalibrationType.DARK, CalibrationType.BIAS], {
-      errorMap: () => ({
-        message: 'You must select a valid calibration type (DARK or BIAS).'
-      })
-    }),
-    gain: z.coerce.number().min(1, {
-      message: 'Gain must be at least 1.'
-    }),
-    subLength: z.coerce.number().optional(),
-    cameraTemp: z.coerce.number().optional(),
-    totalSubs: z.coerce.number().min(1, {
-      message: 'Total subs must be at least 1.'
+  const formSchema = z
+    .object({
+      camera: z.string().min(1, {
+        message: 'You must at least select one calibration frame.',
+      }),
+      calibrationType: z.enum([CalibrationType.DARK, CalibrationType.BIAS], {
+        errorMap: () => ({
+          message: 'You must select a valid calibration type (DARK or BIAS).',
+        }),
+      }),
+      gain: z.coerce.number().min(1, {
+        message: 'Gain must be at least 1.',
+      }),
+      subLength: z.coerce.number().optional(),
+      cameraTemp: z.coerce.number().optional(),
+      totalSubs: z.coerce.number().min(1, {
+        message: 'Total subs must be at least 1.',
+      }),
     })
-  }).superRefine((data, ctx) => {
-    if (data.calibrationType === CalibrationType.DARK) {
-      if (data.subLength === undefined || data.subLength < 1) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Sub length must be at least 1 for BIAS calibration type',
-          path: ['subLength']
-        });
+    .superRefine((data, ctx) => {
+      if (data.calibrationType === CalibrationType.DARK) {
+        if (data.subLength === undefined || data.subLength < 1) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Sub length must be at least 1 for BIAS calibration type',
+            path: ['subLength'],
+          });
+        }
+        if (data.cameraTemp === undefined || data.cameraTemp < 1) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message:
+              'Camera temperature must be at least 1 for BIAS calibration type',
+            path: ['cameraTemp'],
+          });
+        }
       }
-      if (data.cameraTemp === undefined || data.cameraTemp < 1) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Camera temperature must be at least 1 for BIAS calibration type',
-          path: ['cameraTemp']
-        });
-      }
-    }
-  });
+    });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -76,28 +98,37 @@ export default function CalibrationRowEditor({ analyzedFrames, edit, calibration
       subLength: analyzedFrames?.sub_length || calibrationFrame?.sub_length,
       totalSubs: analyzedFrames?.total_subs || calibrationFrame?.total_subs,
       camera: calibrationFrame?.camera,
-      cameraTemp: calibrationFrame?.camera_temp
-    }
+      cameraTemp: calibrationFrame?.camera_temp,
+    },
   });
 
   function onSubmit() {
     if (!edit) {
       const newCalibrationFrame: CalibrationFrame = {
-        id: calibrationFrame?.id || "69359fdc-16ed-4476-b4f9-786bf22cd299",
+        id: calibrationFrame?.id || '69359fdc-16ed-4476-b4f9-786bf22cd299',
         camera: form.getValues().camera,
         calibration_type: form.getValues().calibrationType,
         gain: Number(form.getValues().gain), // Ensure this is converted to a number
-        sub_length: form.getValues().subLength ? Number(form.getValues().subLength) : undefined, // Convert or set undefined
-        camera_temp: form.getValues().cameraTemp ? Number(form.getValues().cameraTemp) : undefined, // Convert or set undefined
-        total_subs: Number(form.getValues().totalSubs) // Ensure this is converted to a number
+        sub_length: form.getValues().subLength
+          ? Number(form.getValues().subLength)
+          : undefined, // Convert or set undefined
+        camera_temp: form.getValues().cameraTemp
+          ? Number(form.getValues().cameraTemp)
+          : undefined, // Convert or set undefined
+        total_subs: Number(form.getValues().totalSubs), // Ensure this is converted to a number
       };
 
       if (calibrationType == CalibrationType.DARK) {
-        invoke('classify_calibration_frames', { frames: newCalibrationFrame, paths: paths }).catch((error) => toast({
-          variant: 'destructive',
-          title: 'Uh oh! Something went wrong.',
-          description: 'Error: ' + error
-        }));
+        invoke('classify_calibration_frames', {
+          frames: newCalibrationFrame,
+          paths: paths,
+        }).catch((error) =>
+          toast({
+            variant: 'destructive',
+            title: 'Uh oh! Something went wrong.',
+            description: 'Error: ' + error,
+          }),
+        );
       } else {
         invoke('classify_bias_frames').then();
       }
@@ -105,10 +136,7 @@ export default function CalibrationRowEditor({ analyzedFrames, edit, calibration
   }
 
   return (
-    <Modal
-      title="Add Calibration Frames"
-      className={styles.modal}
-    >
+    <Modal title="Add Calibration Frames" className={styles.modal}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className={styles.form}>
           <div className={styles.row}>
@@ -137,7 +165,11 @@ export default function CalibrationRowEditor({ analyzedFrames, edit, calibration
                     <Select
                       value={field.value}
                       onValueChange={(value) => {
-                        setCalibrationType(CalibrationType[value as keyof typeof CalibrationType]);
+                        setCalibrationType(
+                          CalibrationType[
+                            value as keyof typeof CalibrationType
+                          ],
+                        );
                         field.onChange(value);
                       }}
                     >
@@ -225,8 +257,12 @@ export default function CalibrationRowEditor({ analyzedFrames, edit, calibration
               type="button"
               variant="secondary"
               onClick={() => closeModal()}
-            >Cancel</Button>
-            <Button className={styles.nextButton} type="submit">Save</Button>
+            >
+              Cancel
+            </Button>
+            <Button className={styles.nextButton} type="submit">
+              Save
+            </Button>
           </div>
         </form>
       </Form>

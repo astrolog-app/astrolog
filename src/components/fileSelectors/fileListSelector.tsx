@@ -12,7 +12,10 @@ interface FileSelectorProps {
   onChange: (files: string[]) => void;
 }
 
-export default function FileListSelector({ value, onChange }: FileSelectorProps) {
+export default function FileListSelector({
+  value,
+  onChange,
+}: FileSelectorProps) {
   const [selectedRowIndices, setSelectedRowIndices] = useState<number[]>([]);
   const [clearDisabled, setClearEnabled] = useState<boolean>(false);
   const [removeDisabled, setRemoveEnabled] = useState<boolean>(false);
@@ -33,7 +36,7 @@ export default function FileListSelector({ value, onChange }: FileSelectorProps)
 
   function onClick() {
     open({
-      multiple: true
+      multiple: true,
     })
       .then((selectedFiles) => {
         if (selectedFiles) {
@@ -49,7 +52,7 @@ export default function FileListSelector({ value, onChange }: FileSelectorProps)
       .catch((err) => {
         toast({
           variant: 'destructive',
-          description: 'Failed to open files: ' + err
+          description: 'Failed to open files: ' + err,
         });
         console.error(err);
       });
@@ -73,7 +76,7 @@ export default function FileListSelector({ value, onChange }: FileSelectorProps)
 
         setSelectedRowIndices((prevSelectedIndices) => [
           ...prevSelectedIndices,
-          ...newSelectedIndices
+          ...newSelectedIndices,
         ]);
         break;
       case event.ctrlKey:
@@ -82,7 +85,7 @@ export default function FileListSelector({ value, onChange }: FileSelectorProps)
         } else {
           setSelectedRowIndices((prevSelectedIndices) => [
             ...prevSelectedIndices,
-            index
+            index,
           ]);
         }
         break;
@@ -100,7 +103,7 @@ export default function FileListSelector({ value, onChange }: FileSelectorProps)
       const newSet = new Set(files);
       const filesArray = Array.from(files);
 
-      indices.forEach(index => {
+      indices.forEach((index) => {
         newSet.delete(filesArray[index]);
       });
 
@@ -121,7 +124,10 @@ export default function FileListSelector({ value, onChange }: FileSelectorProps)
           {Array.from(files).map((file, index) => (
             <div
               onClick={(event) => rowClick(index, event)}
-              className={cn(styles.row, selectedRowIndices.includes(index) ? styles.selected : '')}
+              className={cn(
+                styles.row,
+                selectedRowIndices.includes(index) ? styles.selected : '',
+              )}
               key={index}
             >
               {file}
@@ -133,15 +139,25 @@ export default function FileListSelector({ value, onChange }: FileSelectorProps)
         )}
       </div>
       <div className={styles.right}>
-        <Button type="button" onClick={onClick} variant="secondary">Add...</Button>
-        <Button type="button"
-                onClick={() => removeItems(selectedRowIndices)}
-                variant="outline"
-                disabled={removeDisabled}
+        <Button type="button" onClick={onClick} variant="secondary">
+          Add...
+        </Button>
+        <Button
+          type="button"
+          onClick={() => removeItems(selectedRowIndices)}
+          variant="outline"
+          disabled={removeDisabled}
         >
           Remove
         </Button>
-        <Button type="button" onClick={clearList} variant="outline" disabled={clearDisabled}>Clear</Button>
+        <Button
+          type="button"
+          onClick={clearList}
+          variant="outline"
+          disabled={clearDisabled}
+        >
+          Clear
+        </Button>
       </div>
     </div>
   );

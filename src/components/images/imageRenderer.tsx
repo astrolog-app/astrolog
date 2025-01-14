@@ -1,8 +1,7 @@
 'use client';
 
 import { convertFileSrc } from '@tauri-apps/api/core';
-import { useEffect, useState, useRef } from 'react';
-import { cn } from '@/utils/classNames';
+import { useEffect, useRef, useState } from 'react';
 
 interface ImageRendererProps {
   className?: string;
@@ -10,7 +9,11 @@ interface ImageRendererProps {
   onClick?: () => void;
 }
 
-export default function ImageRenderer({ className, path, onClick }: ImageRendererProps) {
+export default function ImageRenderer({
+  className,
+  path,
+  onClick,
+}: ImageRendererProps) {
   const [imageSrc, setImageSrc] = useState('');
   const [isLoaded, setIsLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);

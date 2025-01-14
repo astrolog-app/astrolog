@@ -5,7 +5,7 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from '@/components/ui/card';
 import { Tab } from '@/components/ui/custom/tab';
 import styles from './gallery.module.scss';
@@ -14,12 +14,10 @@ import { Button } from '@/components/ui/button';
 import NewImage from '@/components/modals/newImage/newImage';
 import { open } from '@tauri-apps/plugin-dialog';
 import { toast } from '@/components/ui/use-toast';
-import { useAppState } from '@/context/stateProvider';
 import { useModal } from '@/context/modalProvider';
 import ImageGallery from '@/components/images/imageGallery';
 
 export default function Gallery() {
-  const { appState } = useAppState();
   const { openModal } = useModal();
 
   const [windowWidth, setWindowWidth] = useState<number>(2560);
@@ -29,34 +27,39 @@ export default function Gallery() {
   const dialogFilters = [
     {
       name: 'all',
-      extensions: ['png', 'jpeg']
+      extensions: ['png', 'jpeg'],
     },
     {
       name: '.png',
-      extensions: ['png']
+      extensions: ['png'],
     },
     {
       name: '.jpeg',
-      extensions: ['jpeg']
-    }
+      extensions: ['jpeg'],
+    },
   ];
 
   function addNewImage() {
     open({
       multiple: false,
-      filters: dialogFilters
+      filters: dialogFilters,
     })
       .then((selectedPath) => {
         if (selectedPath) {
           setNewImagePath(selectedPath as string);
           console.log(newImagePath);
-          openModal(<NewImage defaultValue={newImagePath} dialogFilters={dialogFilters} />);
+          openModal(
+            <NewImage
+              defaultValue={newImagePath}
+              dialogFilters={dialogFilters}
+            />,
+          );
         }
       })
       .catch((err) => {
         toast({
           variant: 'destructive',
-          description: 'Failed to open Image: ' + err
+          description: 'Failed to open Image: ' + err,
         });
         console.log(err);
       });

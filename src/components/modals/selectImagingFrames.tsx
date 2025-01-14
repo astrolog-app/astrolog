@@ -4,7 +4,15 @@ import { z } from 'zod';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import FileListSelector from '@/components/fileSelectors/fileListSelector';
 import { Button } from '@/components/ui/button';
 import styles from './selectImagingFrames.module.scss';
@@ -20,26 +28,34 @@ export default function SelectImagingFrames() {
 
   const formSchema = z.object({
     frames: z.array(z.string()).min(1, {
-      message: 'You must at least select one calibration frame.'
-    })
+      message: 'You must at least select one calibration frame.',
+    }),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      frames: []
-    }
+      frames: [],
+    },
   });
 
   function onSubmit() {
-    invoke<AnalyzedCalibrationFrames>('analyze_calibration_frames', { frames: form.getValues().frames })
+    invoke<AnalyzedCalibrationFrames>('analyze_calibration_frames', {
+      frames: form.getValues().frames,
+    })
       .then((result) => {
-        openModal(<CalibrationRowEditor analyzedFrames={result} edit={false} paths={form.getValues().frames} />);
+        openModal(
+          <CalibrationRowEditor
+            analyzedFrames={result}
+            edit={false}
+            paths={form.getValues().frames}
+          />,
+        );
         if (result.message !== null) {
           toast({
             variant: 'destructive',
             title: 'Warning',
-            description: result.message
+            description: result.message,
           });
         }
       })
@@ -47,18 +63,14 @@ export default function SelectImagingFrames() {
         toast({
           variant: 'destructive',
           title: 'Uh oh! Something went wrong.',
-          description: 'Error: ' + error
+          description: 'Error: ' + error,
         });
         openModal(<CalibrationRowEditor edit={false} />);
       });
   }
 
   return (
-    <Modal
-      title="Add Calibration Frames"
-      separator
-      className={styles.modal}
-    >
+    <Modal title="Add Calibration Frames" separator className={styles.modal}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <FormField
@@ -67,9 +79,7 @@ export default function SelectImagingFrames() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Calibration Frames</FormLabel>
-                <FormDescription>
-                  Add new dark OR bias frames.
-                </FormDescription>
+                <FormDescription>Add new dark OR bias frames.</FormDescription>
                 <FormControl>
                   <FileListSelector {...field} />
                 </FormControl>
@@ -77,7 +87,9 @@ export default function SelectImagingFrames() {
               </FormItem>
             )}
           />
-          <Button className={styles.nextButton} type="submit">Next</Button>
+          <Button className={styles.nextButton} type="submit">
+            Next
+          </Button>
         </form>
       </Form>
     </Modal>

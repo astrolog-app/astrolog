@@ -10,7 +10,7 @@ import {
   MenubarSub,
   MenubarSubContent,
   MenubarSubTrigger,
-  MenubarTrigger
+  MenubarTrigger,
 } from '@/components/ui/menubar';
 import { Preferences } from './modals/preferences/preferences';
 import { invoke } from '@tauri-apps/api/core';
@@ -22,15 +22,14 @@ export function TopBar() {
   const { openModal } = useModal();
 
   function openBrowser(url: string): void {
-    invoke('open_browser', { url: url })
-      .catch((error) => {
-        const errorMsg = error as string;
-        toast({
-          variant: 'destructive',
-          title: 'Uh oh! Something went wrong.',
-          description: 'Error: ' + errorMsg
-        });
+    invoke('open_browser', { url: url }).catch((error) => {
+      const errorMsg = error as string;
+      toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: 'Error: ' + errorMsg,
       });
+    });
   }
 
   async function minimize() {
@@ -51,9 +50,7 @@ export function TopBar() {
         <MenubarMenu>
           <MenubarTrigger className={styles.astrolog}>AstroLog</MenubarTrigger>
           <MenubarContent>
-            <MenubarItem>
-              About AstroLog
-            </MenubarItem>
+            <MenubarItem>About AstroLog</MenubarItem>
             <MenubarSeparator />
             <MenubarItem onClick={() => openModal(<Preferences />)}>
               Preferences...
@@ -66,7 +63,9 @@ export function TopBar() {
         <MenubarMenu>
           <MenubarTrigger>Imaging Frames</MenubarTrigger>
           <MenubarContent>
-            <MenubarItem onClick={() => openModal(<NewImagingSession />)}>New Imaging Session...</MenubarItem>
+            <MenubarItem onClick={() => openModal(<NewImagingSession />)}>
+              New Imaging Session...
+            </MenubarItem>
             <MenubarSeparator />
             <MenubarSub>
               <MenubarSubTrigger>Calibration</MenubarSubTrigger>
@@ -101,8 +100,16 @@ export function TopBar() {
         <MenubarMenu>
           <MenubarTrigger>Help</MenubarTrigger>
           <MenubarContent>
-            <MenubarItem onClick={() => openBrowser('https://www.cloudynights.com/')}>Community Forum</MenubarItem>
-            <MenubarItem onClick={() => openBrowser('https://docs.astro-log.app/')}>Documentation</MenubarItem>
+            <MenubarItem
+              onClick={() => openBrowser('https://www.cloudynights.com/')}
+            >
+              Community Forum
+            </MenubarItem>
+            <MenubarItem
+              onClick={() => openBrowser('https://docs.astro-log.app/')}
+            >
+              Documentation
+            </MenubarItem>
             <MenubarSeparator />
             <MenubarItem>Feedback</MenubarItem>
           </MenubarContent>

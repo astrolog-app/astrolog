@@ -1,6 +1,12 @@
 import { UUID } from 'crypto';
 import { CalibrationType } from '@/enums/calibrationType';
-import { Camera, Filter, Flattener, Mount, Telescope } from '@/interfaces/equipment';
+import {
+  Camera,
+  Filter,
+  Flattener,
+  Mount,
+  Telescope,
+} from '@/interfaces/equipment';
 import { Analytics } from '@/interfaces/analytics';
 
 export interface AppState {
@@ -28,7 +34,7 @@ interface User {
 
 interface TableData {
   sessions: Session[];
-  calibration: CalibrationFrame[]
+  calibration: CalibrationFrame[];
 }
 
 export interface Session {

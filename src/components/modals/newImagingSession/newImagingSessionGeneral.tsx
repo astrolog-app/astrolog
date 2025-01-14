@@ -1,7 +1,15 @@
 'use client';
 
 import styles from './newImagingSessionGeneral.module.scss';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import React, { useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { z } from 'zod';
@@ -9,7 +17,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { TabKey } from '@/components/modals/newImagingSession/newImagingSession';
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { cn } from '@/utils/classNames';
 import { CalendarIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
@@ -19,21 +31,23 @@ import { useModal } from '@/context/modalProvider';
 
 const formSchema = z.object({
   date: z.coerce.date({
-    required_error: 'Acquisition date must be set.'
+    required_error: 'Acquisition date must be set.',
   }),
   target: z.string().min(2, {
-    message: 'Target must be set.'
-  })
+    message: 'Target must be set.',
+  }),
 });
 
-export default function NewImagingSessionGeneral({ setSelectedTab }: {
-  setSelectedTab: React.Dispatch<React.SetStateAction<TabKey | undefined>>
+export default function NewImagingSessionGeneral({
+  setSelectedTab,
+}: {
+  setSelectedTab: React.Dispatch<React.SetStateAction<TabKey | undefined>>;
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      target: ''
-    }
+      target: '',
+    },
   });
 
   const { closeModal } = useModal();
@@ -43,8 +57,10 @@ export default function NewImagingSessionGeneral({ setSelectedTab }: {
   }
 
   useEffect(() => {
-    invoke('get_date', { image: 'E:\\Astrof\\DATA\\2022\\M 42\\Orion UK 200 mm\\27.12\\2\\Light\\L_m42_0164_ISO800_10s__NA.NEF' })
-      .then((date) => form.setValue('date', new Date(date as Date)));
+    invoke('get_date', {
+      image:
+        'E:\\Astrof\\DATA\\2022\\M 42\\Orion UK 200 mm\\27.12\\2\\Light\\L_m42_0164_ISO800_10s__NA.NEF',
+    }).then((date) => form.setValue('date', new Date(date as Date)));
   }, [form]);
 
   return (
@@ -64,7 +80,7 @@ export default function NewImagingSessionGeneral({ setSelectedTab }: {
                         variant={'outline'}
                         className={cn(
                           'w-[240px] pl-3 text-left font-normal',
-                          !field.value && 'text-muted-foreground'
+                          !field.value && 'text-muted-foreground',
                         )}
                       >
                         {field.value ? (
@@ -88,7 +104,7 @@ export default function NewImagingSessionGeneral({ setSelectedTab }: {
                     />
                   </PopoverContent>
                 </Popover>
-                <FormDescription className='w-[240px]'>
+                <FormDescription className="w-[240px]">
                   The date you took your imaging frames.
                 </FormDescription>
                 <FormMessage />
@@ -102,7 +118,7 @@ export default function NewImagingSessionGeneral({ setSelectedTab }: {
               <FormItem className="flex flex-col">
                 <FormLabel>Target</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder='NGC 9999' />
+                  <Input {...field} placeholder="NGC 9999" />
                 </FormControl>
                 <FormDescription>
                   The name of the target (e.g. NGC 7000).
@@ -118,7 +134,9 @@ export default function NewImagingSessionGeneral({ setSelectedTab }: {
             variant="secondary"
             onClick={closeModal}
             className={styles.cancelButton}
-          >Cancel</Button>
+          >
+            Cancel
+          </Button>
           <Button type="submit">Next</Button>
         </div>
       </form>

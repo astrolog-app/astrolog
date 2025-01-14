@@ -12,8 +12,12 @@ export default function BottomBar() {
   const { processes } = useProcess();
 
   const [version, setVersion] = useState('Loading...');
-  const [currentProcess, setCurrentProcess] = useState<Process | undefined>(undefined);
-  const [currentProcessId, setCurrentProcessId] = useState<UUID | undefined>(undefined);
+  const [currentProcess, setCurrentProcess] = useState<Process | undefined>(
+    undefined,
+  );
+  const [currentProcessId, setCurrentProcessId] = useState<UUID | undefined>(
+    undefined,
+  );
   const [progress, setProgress] = useState<number | undefined>(undefined);
 
   useEffect(() => {
@@ -37,7 +41,7 @@ export default function BottomBar() {
 
   useEffect(() => {
     if (currentProcess?.step != undefined && currentProcess?.max != undefined) {
-      setProgress(100 * currentProcess?.step / currentProcess?.max)
+      setProgress((100 * currentProcess?.step) / currentProcess?.max);
     }
   }, [currentProcess]);
 
@@ -61,15 +65,13 @@ export default function BottomBar() {
       {processes.size != 0 && (
         <div className={styles.right}>
           <div>{currentProcess?.name}...</div>
-          {processes.size > 1 && (
-            <div>
-              &nbsp; (+{processes.size - 1} more)
-            </div>
-          )}
+          {processes.size > 1 && <div>&nbsp; (+{processes.size - 1} more)</div>}
           {progress != undefined && (
             <>
               <Progress value={progress} className={styles.progressBar} />
-              <div>({currentProcess?.step}/{currentProcess?.max})</div>
+              <div>
+                ({currentProcess?.step}/{currentProcess?.max})
+              </div>
             </>
           )}
         </div>

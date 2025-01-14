@@ -1,54 +1,69 @@
 'use client';
 
-import styles from './EquipmentListView.module.scss';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { useAppState } from '@/context/stateProvider';
 import { EquipmentItem } from '@/interfaces/equipment';
 import { getViewName } from '@/utils/equipment';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 interface EquipmentListViewProps {
   selectedItem: EquipmentItem | undefined;
   setSelectedItem: Dispatch<SetStateAction<EquipmentItem | undefined>>;
 }
 
-export default function EquipmentListView({ selectedItem, setSelectedItem }: EquipmentListViewProps) {
+export default function EquipmentListView({
+  selectedItem,
+  setSelectedItem,
+}: EquipmentListViewProps) {
   const { appState } = useAppState();
 
   interface Tab {
-    name: string,
-    type: EquipmentItem[]
+    name: string;
+    type: EquipmentItem[];
   }
 
   const tabs: Tab[] = [
     {
       name: 'Telescopes',
-      type: appState.equipment_list.telescope_list
+      type: appState.equipment_list.telescope_list,
     },
     {
       name: 'Cameras',
-      type: appState.equipment_list.camera_list
+      type: appState.equipment_list.camera_list,
     },
     {
       name: 'Mounts',
-      type: appState.equipment_list.mount_list
+      type: appState.equipment_list.mount_list,
     },
     {
       name: 'Filters',
-      type: appState.equipment_list.filter_list
+      type: appState.equipment_list.filter_list,
     },
     {
       name: 'Flatteners',
-      type: appState.equipment_list.flattener_list
-    }
+      type: appState.equipment_list.flattener_list,
+    },
   ];
 
-  const [openItems, setOpenItems] = useState<string[]>(tabs.map(tab => tab.name));
+  const [openItems, setOpenItems] = useState<string[]>(
+    tabs.map((tab) => tab.name),
+  );
 
   return (
     <>
       {tabs.map((tab, index) => (
-        <Accordion type="multiple" className="w-full" key={index} value={openItems} onValueChange={setOpenItems}>
+        <Accordion
+          type="multiple"
+          className="w-full"
+          key={index}
+          value={openItems}
+          onValueChange={setOpenItems}
+        >
           <AccordionItem value={tab.name}>
             <AccordionTrigger className="text-lg font-semibold">
               {tab.name} ({tab.type.length})

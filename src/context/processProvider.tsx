@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { Process } from '@/interfaces/process';
 import { UUID } from 'crypto';
@@ -14,33 +14,32 @@ type ProcessContextType = {
 
 const ProcessContext = createContext<ProcessContextType | undefined>(undefined);
 
-export const ProcessProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ProcessProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [processes, setProcesses] = useState<Map<UUID, Process>>(new Map());
   const [closeLock, setCloseLock] = useState<boolean>(false);
 
   useEffect(() => {
-    const unlisten = listen<Process>(
-      'process',
-      (event) => {
-        setProcesses((prevProcesses) => {
-          const updatedProcesses = new Map(prevProcesses);
+    const unlisten = listen<Process>('process', (event) => {
+      setProcesses((prevProcesses) => {
+        const updatedProcesses = new Map(prevProcesses);
 
-          if (event.payload.max == event.payload.step) {
-            updatedProcesses.delete(event.payload.id);
+        if (event.payload.max == event.payload.step) {
+          updatedProcesses.delete(event.payload.id);
 
-            if (event.payload.modal) {
-              toast({
-                description: 'Finished Process: ' + event.payload.name
-              });
-            }
-          } else {
-            updatedProcesses.set(event.payload.id, event.payload);
+          if (event.payload.modal) {
+            toast({
+              description: 'Finished Process: ' + event.payload.name,
+            });
           }
+        } else {
+          updatedProcesses.set(event.payload.id, event.payload);
+        }
 
-          return updatedProcesses;
-        });
-      }
-    );
+        return updatedProcesses;
+      });
+    });
 
     return () => {
       unlisten.then((dispose) => dispose());
@@ -49,14 +48,15 @@ export const ProcessProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   useEffect(() => {
     void listen('close_lock', () => {
-      message('Can\'t close AstroLog: There are still ongoing processes!')
-        .catch((error) => {
+      message("Can't close AstroLog: There are still ongoing processes!").catch(
+        (error) => {
           toast({
             variant: 'destructive',
             title: 'Uh oh! Something went wrong.',
-            description: 'Error: ' + error
+            description: 'Error: ' + error,
           });
-        });
+        },
+      );
     });
   }, []);
 
@@ -68,7 +68,7 @@ export const ProcessProvider: React.FC<{ children: React.ReactNode }> = ({ child
           toast({
             variant: 'destructive',
             title: 'Uh oh! Something went wrong.',
-            description: 'Error: ' + error
+            description: 'Error: ' + error,
           });
         });
     }
@@ -80,7 +80,7 @@ export const ProcessProvider: React.FC<{ children: React.ReactNode }> = ({ child
           toast({
             variant: 'destructive',
             title: 'Uh oh! Something went wrong.',
-            description: 'Error: ' + error
+            description: 'Error: ' + error,
           });
         });
     }

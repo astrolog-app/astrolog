@@ -8,11 +8,7 @@ import UserForm from './userForm';
 
 export function Preferences() {
   return (
-    <Modal
-      title="Preferences"
-      subtitle="Customize AstroLog"
-      separator={true}
-    >
+    <Modal title="Preferences" subtitle="Customize AstroLog" separator={true}>
       <Tabs defaultValue="appearance" className={styles.preferences}>
         <TabsList className={styles.tabsList}>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>

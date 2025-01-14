@@ -16,15 +16,14 @@ interface ModalProps {
   notClosable?: boolean;
 }
 
-export function Modal(
-  {
-    className,
-    title,
-    subtitle,
-    separator,
-    children,
-    notClosable
-  }: ModalProps) {
+export function Modal({
+  className,
+  title,
+  subtitle,
+  separator,
+  children,
+  notClosable,
+}: ModalProps) {
   const { closeModal } = useModal();
 
   return (

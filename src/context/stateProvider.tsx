@@ -8,7 +8,7 @@ import React, {
   SetStateAction,
   useContext,
   useEffect,
-  useState
+  useState,
 } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { AppState } from '@/interfaces/state';
@@ -19,27 +19,27 @@ const defaultAppState: AppState = {
     storage: {
       root_directory: '',
       backup_directory: '',
-      source_directory: ''
+      source_directory: '',
     },
     user: {
-      weather_api_key: ''
-    }
+      weather_api_key: '',
+    },
   },
   table_data: {
     sessions: [],
-    calibration: []
+    calibration: [],
   },
   equipment_list: {
     camera_list: [],
     mount_list: [],
     telescope_list: [],
     flattener_list: [],
-    filter_list: []
+    filter_list: [],
   },
   image_list: [],
   analytics: {
     total_imaging_sessions: 0,
-  }
+  },
 };
 
 interface AppStateContextType {
@@ -47,9 +47,13 @@ interface AppStateContextType {
   setAppState: Dispatch<SetStateAction<AppState>>;
 }
 
-const AppStateContext = createContext<AppStateContextType | undefined>(undefined);
+const AppStateContext = createContext<AppStateContextType | undefined>(
+  undefined,
+);
 
-export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): void {
+export function fetchAppState(
+  setAppState: Dispatch<SetStateAction<AppState>>,
+): void {
   invoke<string>('load_frontend_app_state')
     .then((payload) => {
       const responseData: AppState = JSON.parse(payload);
@@ -60,7 +64,7 @@ export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): 
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
-        description: 'Error: ' + error
+        description: 'Error: ' + error,
       });
     });
 }
@@ -92,7 +96,7 @@ export function savePreferences(
   value: string,
   appState: AppState,
   setAppState: Dispatch<SetStateAction<AppState>>,
-  path: string
+  path: string,
 ) {
   const keys = path.split('.');
 
@@ -113,15 +117,16 @@ export function savePreferences(
   });
 
   function savePreferences() {
-    invoke('save_preferences', { preferences: appState.preferences })
-      .catch((error) => {
+    invoke('save_preferences', { preferences: appState.preferences }).catch(
+      (error) => {
         const errorMsg = error as string;
         toast({
           variant: 'destructive',
           title: 'Uh oh! Something went wrong.',
-          description: 'Error: ' + errorMsg
+          description: 'Error: ' + errorMsg,
         });
-      });
+      },
+    );
   }
 
   savePreferences();

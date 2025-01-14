@@ -12,23 +12,29 @@ interface ImageGalleryViewProps {
   image: Image;
 }
 
-export default function ImageGalleryView({ className, image }: ImageGalleryViewProps) {
+export default function ImageGalleryView({
+  className,
+  image,
+}: ImageGalleryViewProps) {
   function onClick() {
-    invoke('open_image', { path: image.path })
-      .catch((error) => {
-        toast({
-          variant: 'destructive',
-          title: 'Uh oh! Something went wrong.',
-          description: 'Error: ' + error
-        });
+    invoke('open_image', { path: image.path }).catch((error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: 'Error: ' + error,
       });
+    });
   }
 
   return (
     <Card className={className}>
       <CardHeader>
         <div className={styles.title}>{image.title}</div>
-        <ImageRenderer className={styles.image} path={image.path} onClick={onClick} />
+        <ImageRenderer
+          className={styles.image}
+          path={image.path}
+          onClick={onClick}
+        />
       </CardHeader>
     </Card>
   );

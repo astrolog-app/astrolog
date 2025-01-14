@@ -1,7 +1,15 @@
 'use client';
 
 import { Modal } from '@/components/ui/custom/modal';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,7 +20,7 @@ import { toast } from '@/components/ui/use-toast';
 import { useModal } from '@/context/modalProvider';
 
 const formSchema = z.object({
-  license: z.string().min(1, 'License key is required.')
+  license: z.string().min(1, 'License key is required.'),
 });
 
 export default function License() {
@@ -21,12 +29,14 @@ export default function License() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      license: ''
-    }
+      license: '',
+    },
   });
 
   const validateKey = useCallback(async () => {
-    const { validateKey, resetLicense, resetLicenseKey } = await import('tauri-plugin-keygen-api');
+    const { validateKey, resetLicense, resetLicenseKey } = await import(
+      'tauri-plugin-keygen-api'
+    );
 
     validateKey({ key: form.getValues().license })
       .then((license) => {
@@ -34,7 +44,7 @@ export default function License() {
           closeModal();
           toast({
             title: 'Success',
-            description: 'You have successfully activated AstroLog!'
+            description: 'You have successfully activated AstroLog!',
           });
         } else {
           resetLicense();
@@ -42,7 +52,7 @@ export default function License() {
           toast({
             variant: 'destructive',
             title: 'Uh oh! Something went wrong.',
-            description: 'Error:'
+            description: 'Error:',
           });
         }
       })
@@ -50,8 +60,8 @@ export default function License() {
         toast({
           variant: 'destructive',
           title: 'Uh oh! Something went wrong.',
-          description: 'Error: ' + e
-        })
+          description: 'Error: ' + e,
+        }),
       );
   }, []);
 
@@ -83,7 +93,9 @@ export default function License() {
               </FormItem>
             )}
           />
-          <Button className="mt-4" type="submit">Validate</Button>
+          <Button className="mt-4" type="submit">
+            Validate
+          </Button>
         </form>
       </Form>
     </Modal>

@@ -5,7 +5,7 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from '@/components/ui/card';
 import { Tab } from '@/components/ui/custom/tab';
 import styles from './log.module.scss';
@@ -17,22 +17,30 @@ import { UUID } from 'crypto';
 import { save } from '@tauri-apps/plugin-dialog';
 import { toast } from '@/components/ui/use-toast';
 import { invoke } from '@tauri-apps/api/core';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@/components/ui/resizable';
 import { useModal } from '@/context/modalProvider';
 import SelectImagingFrames from '@/components/modals/selectImagingFrames';
 
 export default function Log() {
   const { openModal } = useModal();
 
-  const [selectedSessionId, setSelectedSessionId] = useState<UUID | undefined>(undefined);
+  const [selectedSessionId, setSelectedSessionId] = useState<UUID | undefined>(
+    undefined,
+  );
 
   function exportCSV() {
     save({
       defaultPath: '', // TODO: define default path
-      filters: [{
-        name: '.csv',
-        extensions: ['csv']
-      }]
+      filters: [
+        {
+          name: '.csv',
+          extensions: ['csv'],
+        },
+      ],
     })
       .then((selectedPath) => {
         if (selectedPath) {
@@ -43,7 +51,7 @@ export default function Log() {
       .catch((err) => {
         toast({
           variant: 'destructive',
-          description: 'Failed to export CSV: ' + err
+          description: 'Failed to export CSV: ' + err,
         });
         console.log(err);
       });
@@ -59,10 +67,16 @@ export default function Log() {
           </CardDescription>
         </CardHeader>
         <CardContent className={styles.buttons}>
-          <Button variant="secondary" onClick={() => openModal(<NewImagingSession />)}>
+          <Button
+            variant="secondary"
+            onClick={() => openModal(<NewImagingSession />)}
+          >
             Add Imaging Session
           </Button>
-          <Button variant="secondary" onClick={() => openModal(<SelectImagingFrames />)}>
+          <Button
+            variant="secondary"
+            onClick={() => openModal(<SelectImagingFrames />)}
+          >
             Add Calibration Frame
           </Button>
           <Button variant="ghost" onClick={exportCSV}>

@@ -11,7 +11,7 @@ interface ModalContextType {
 
 const defaultValue = {
   openModal: () => {},
-  closeModal: () => {}
+  closeModal: () => {},
 };
 
 const ModalContext = createContext<ModalContextType>(defaultValue);
@@ -37,9 +37,7 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <ModalContext.Provider value={{ openModal, closeModal }}>
       {children}
-      <AnimatePresence mode="wait">
-        {modalContent}
-      </AnimatePresence>
+      <AnimatePresence mode="wait">{modalContent}</AnimatePresence>
     </ModalContext.Provider>
   );
 };

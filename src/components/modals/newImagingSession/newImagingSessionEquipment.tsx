@@ -1,6 +1,12 @@
 'use client';
 
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from '@/components/ui/form';
 import React from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -14,27 +20,29 @@ import { EquipmentType } from '@/enums/equipmentType';
 
 const formSchema = z.object({
   telescope: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
+    message: 'Username must be at least 2 characters.', // change
   }),
   camera: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
+    message: 'Username must be at least 2 characters.', // change
   }),
   mount: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
+    message: 'Username must be at least 2 characters.', // change
   }),
   filter: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
+    message: 'Username must be at least 2 characters.', // change
   }),
   flattener: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
+    message: 'Username must be at least 2 characters.', // change
   }),
 });
 
-export default function NewImagingSessionEquipment({ setSelectedTab }: {
-  setSelectedTab: React.Dispatch<React.SetStateAction<TabKey | undefined>>
+export default function NewImagingSessionEquipment({
+  setSelectedTab,
+}: {
+  setSelectedTab: React.Dispatch<React.SetStateAction<TabKey | undefined>>;
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema)
+    resolver: zodResolver(formSchema),
   });
 
   const { closeModal } = useModal();
@@ -112,7 +120,9 @@ export default function NewImagingSessionEquipment({ setSelectedTab }: {
             variant="secondary"
             onClick={closeModal}
             className={styles.cancelButton}
-          >Cancel</Button>
+          >
+            Cancel
+          </Button>
           <Button type="submit">Next</Button>
         </div>
       </form>
