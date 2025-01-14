@@ -6,7 +6,7 @@ import styles from './equipment.module.scss';
 import { Button } from '@/components/ui/button';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { useModal } from '@/context/modalProvider';
-import EquipmentModal from '@/components/modals/equipment/equiipment';
+import EquipmentModal from '@/components/modals/equipment/equipment';
 import { EquipmentType } from '@/enums/equipmentType';
 import EquipmentDetails from '@/components/equipmentDetails';
 import EquipmentListView from '@/components/EquipmentListView';
