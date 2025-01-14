@@ -28,7 +28,7 @@ export default function ImageGalleryView({ className, image }: ImageGalleryViewP
     <Card className={className}>
       <CardHeader>
         <div className={styles.title}>{image.title}</div>
-        <ImageRenderer className={styles.image} image={image} onClick={onClick} />
+        <ImageRenderer className={styles.image} path={image.path} onClick={onClick} />
       </CardHeader>
     </Card>
   );
