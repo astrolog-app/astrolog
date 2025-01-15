@@ -8,56 +8,60 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select';
 import { useForm } from 'react-hook-form';
 
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
+import { EquipmentItem } from '@/interfaces/equipment';
+import { v4 as uuidv4 } from 'uuid';
+import { invoke } from '@tauri-apps/api/core';
+import { Switch } from '@/components/ui/switch';
 
 const baseEquipmentSchema = z.object({
   brand: z.string().min(1, 'Brand is required'),
-  name: z.string().min(1, 'Name is required'),
+  name: z.string().min(1, 'Name is required')
 });
 
-const telescopeSchema = baseEquipmentSchema.extend({
+export const telescopeSchema = baseEquipmentSchema.extend({
   focal_length: z.number().positive('Focal length must be a positive number'),
-  aperture: z.number().positive('Aperture must be a positive number'),
+  aperture: z.number().positive('Aperture must be a positive number')
 });
 
-const cameraSchema = baseEquipmentSchema.extend({
+export const cameraSchema = baseEquipmentSchema.extend({
   chip_size: z.string().min(1, 'Chip size is required'),
   mega_pixel: z.number().positive('Mega pixel must be a positive number'),
-  rgb: z.boolean(),
+  rgb: z.boolean()
 });
 
-const mountSchema = baseEquipmentSchema;
+export const mountSchema = baseEquipmentSchema;
 
-const filterSchema = baseEquipmentSchema.extend({
-  filter_type: z.string().min(1, 'Filter type is required'),
+export const filterSchema = baseEquipmentSchema.extend({
+  filter_type: z.string().min(1, 'Filter type is required')
 });
 
-const flattenerSchema = baseEquipmentSchema.extend({
-  factor: z.number().positive('Factor must be a positive number'),
+export const flattenerSchema = baseEquipmentSchema.extend({
+  factor: z.number().positive('Factor must be a positive number')
 });
 
-const equipmentSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('telescope'), ...telescopeSchema.shape }),
-  z.object({ type: z.literal('camera'), ...cameraSchema.shape }),
-  z.object({ type: z.literal('mount'), ...mountSchema.shape }),
-  z.object({ type: z.literal('filter'), ...filterSchema.shape }),
-  z.object({ type: z.literal('flattener'), ...flattenerSchema.shape }),
+export const equipmentSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal(EquipmentType.TELESCOPE), ...telescopeSchema.shape }),
+  z.object({ type: z.literal(EquipmentType.CAMERA), ...cameraSchema.shape }),
+  z.object({ type: z.literal(EquipmentType.MOUNT), ...mountSchema.shape }),
+  z.object({ type: z.literal(EquipmentType.FILTER), ...filterSchema.shape }),
+  z.object({ type: z.literal(EquipmentType.FLATTENER), ...flattenerSchema.shape })
 ]);
 
-type EquipmentFormValues = z.infer<typeof equipmentSchema>;
+export type EquipmentFormValues = z.infer<typeof equipmentSchema>
 
 interface EquipmentProps {
   type: EquipmentType;
@@ -67,24 +71,48 @@ export default function EquipmentModal({ type }: EquipmentProps) {
   const form = useForm<EquipmentFormValues>({
     resolver: zodResolver(equipmentSchema),
     defaultValues: {
-      type: 'telescope',
+      type: type,
       brand: '',
       name: '',
-    },
+      rgb: false,
+    }
   });
 
   const equipmentType = form.watch('type');
 
-  function onSubmit() {}
+  function onSubmit(values: EquipmentFormValues) {
+    const item: EquipmentItem = {
+      id: uuidv4(),
+      ...values
+    } as EquipmentItem;
+
+    invoke('check_equipment_duplicate', { brand: item.brand, name: item.name })
+      .then(() => {
+          switch (equipmentType) {
+            case EquipmentType.TELESCOPE:
+              invoke('save_telescope', { telescope: item })
+                .then()
+                .catch();
+              break;
+            case EquipmentType.CAMERA:
+              break;
+            case EquipmentType.MOUNT:
+              break;
+            case EquipmentType.FILTER:
+              break;
+            case EquipmentType.FLATTENER:
+              break;
+          }
+        }
+      )
+      .catch();
+  }
 
   return (
-    <Modal title={'Add ' + type}>
+    <Modal title={'Add ' + equipmentType}>
       <div>
-        <div>Add New Equipment</div>
-        <div>
-          Enter the details of your new equipment here. Click save when you re
-          done.
-        </div>
+        Enter the details of your new equipment here. Click save when you re
+        done.
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -94,21 +122,18 @@ export default function EquipmentModal({ type }: EquipmentProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Equipment Type</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select equipment type" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="telescope">Telescope</SelectItem>
-                    <SelectItem value="camera">Camera</SelectItem>
-                    <SelectItem value="mount">Mount</SelectItem>
-                    <SelectItem value="filter">Filter</SelectItem>
-                    <SelectItem value="flattener">Flattener</SelectItem>
+                    {Object.values(EquipmentType).map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -141,7 +166,7 @@ export default function EquipmentModal({ type }: EquipmentProps) {
               </FormItem>
             )}
           />
-          {equipmentType === 'telescope' && (
+          {equipmentType === EquipmentType.TELESCOPE && (
             <>
               <FormField
                 control={form.control}
@@ -154,9 +179,7 @@ export default function EquipmentModal({ type }: EquipmentProps) {
                         type="number"
                         placeholder="Enter focal length"
                         {...field}
-                        onChange={(e) =>
-                          field.onChange(parseFloat(e.target.value))
-                        }
+                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
                       />
                     </FormControl>
                     <FormMessage />
@@ -174,9 +197,7 @@ export default function EquipmentModal({ type }: EquipmentProps) {
                         type="number"
                         placeholder="Enter aperture"
                         {...field}
-                        onChange={(e) =>
-                          field.onChange(parseFloat(e.target.value))
-                        }
+                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
                       />
                     </FormControl>
                     <FormMessage />
@@ -185,7 +206,7 @@ export default function EquipmentModal({ type }: EquipmentProps) {
               />
             </>
           )}
-          {equipmentType === 'camera' && (
+          {equipmentType === EquipmentType.CAMERA && (
             <>
               <FormField
                 control={form.control}
@@ -211,9 +232,7 @@ export default function EquipmentModal({ type }: EquipmentProps) {
                         type="number"
                         placeholder="Enter mega pixels"
                         {...field}
-                        onChange={(e) =>
-                          field.onChange(parseFloat(e.target.value))
-                        }
+                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
                       />
                     </FormControl>
                     <FormMessage />
@@ -227,15 +246,22 @@ export default function EquipmentModal({ type }: EquipmentProps) {
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
                       <FormLabel className="text-base">RGB</FormLabel>
-                      <FormDescription>Is this an RGB camera?</FormDescription>
+                      <FormDescription>
+                        Is this an RGB camera?
+                      </FormDescription>
                     </div>
-                    <FormControl></FormControl>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
                   </FormItem>
                 )}
               />
             </>
           )}
-          {equipmentType === 'filter' && (
+          {equipmentType === EquipmentType.FILTER && (
             <FormField
               control={form.control}
               name="filter_type"
@@ -250,7 +276,7 @@ export default function EquipmentModal({ type }: EquipmentProps) {
               )}
             />
           )}
-          {equipmentType === 'flattener' && (
+          {equipmentType === EquipmentType.FLATTENER && (
             <FormField
               control={form.control}
               name="factor"
@@ -262,9 +288,7 @@ export default function EquipmentModal({ type }: EquipmentProps) {
                       type="number"
                       placeholder="Enter factor"
                       {...field}
-                      onChange={(e) =>
-                        field.onChange(parseFloat(e.target.value))
-                      }
+                      onChange={(e) => field.onChange(parseFloat(e.target.value))}
                     />
                   </FormControl>
                   <FormMessage />
@@ -272,9 +296,7 @@ export default function EquipmentModal({ type }: EquipmentProps) {
               )}
             />
           )}
-          <div>
-            <Button type="submit">Save Equipment</Button>
-          </div>
+          <Button type="submit">Save Equipment</Button>
         </form>
       </Form>
     </Modal>

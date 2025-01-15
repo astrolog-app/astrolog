@@ -13,6 +13,7 @@ use models::state::AppState;
 use std::env;
 use std::sync::Mutex;
 use tauri::{Emitter, Manager};
+use crate::commands::equipment::{add_telescope, check_equipment_duplicate};
 use crate::file_system::set_folder_invisible;
 
 mod commands;
@@ -60,7 +61,9 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             add_close_lock,
             add_new_image,
+            add_telescope,
             analyze_calibration_frames,
+            check_equipment_duplicate,
             classify_calibration_frames,
             export_csv,
             get_date,
