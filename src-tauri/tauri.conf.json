@@ -48,11 +48,13 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "height": 700,
         "resizable": true,
         "title": "AstroLog",
-        "width": 800,
-        "useHttpsScheme": true
+        "width": 900,
+        "useHttpsScheme": true,
+        "minWidth": 900,
+        "minHeight": 700
       }
     ],
     "security": {
