@@ -1,3 +1,6 @@
+'use client';
+
+import styles from './equipment.module.scss';
 import { Modal } from '@/components/ui/custom/modal';
 import { EquipmentType } from '@/enums/equipmentType';
 import { Button } from '@/components/ui/button';
@@ -26,6 +29,10 @@ import { EquipmentItem } from '@/interfaces/equipment';
 import { v4 as uuidv4 } from 'uuid';
 import { invoke } from '@tauri-apps/api/core';
 import { Switch } from '@/components/ui/switch';
+import { toast } from '@/components/ui/use-toast';
+import { getViewName } from '@/utils/equipment';
+import { useAppState } from '@/context/stateProvider';
+import { useModal } from '@/context/modalProvider';
 
 const baseEquipmentSchema = z.object({
   brand: z.string().min(1, 'Brand is required'),
@@ -68,6 +75,9 @@ interface EquipmentProps {
 }
 
 export default function EquipmentModal({ type }: EquipmentProps) {
+  const { setAppState } = useAppState();
+  const { closeModal } = useModal();
+
   const form = useForm<EquipmentFormValues>({
     resolver: zodResolver(equipmentSchema),
     defaultValues: {
@@ -86,13 +96,31 @@ export default function EquipmentModal({ type }: EquipmentProps) {
       ...values
     } as EquipmentItem;
 
-    invoke('check_equipment_duplicate', { brand: item.brand, name: item.name })
+    invoke('check_equipment_duplicate', { viewName: getViewName(item) })
       .then(() => {
           switch (equipmentType) {
             case EquipmentType.TELESCOPE:
               invoke('save_telescope', { telescope: item })
-                .then()
-                .catch();
+                .then(() => {
+                  setAppState(prevState => ({
+                    ...prevState,
+                    equipmentList: {
+                      ...prevState.equipment_list,
+                      telescope_list: [...prevState.equipment_list.telescope_list, item]
+                    }
+                  }));
+                  toast({
+                    description: 'Added Telescope successfully!',
+                  });
+                  closeModal();
+                })
+                .catch((error) => {
+                  toast({
+                    variant: 'destructive',
+                    title: 'Uh oh! Something went wrong.',
+                    description: 'Error: ' + error,
+                  });
+                });
               break;
             case EquipmentType.CAMERA:
               break;
@@ -105,15 +133,22 @@ export default function EquipmentModal({ type }: EquipmentProps) {
           }
         }
       )
-      .catch();
+      .catch((error) => {
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'Error: ' + error,
+        });
+      });
   }
 
   return (
-    <Modal title={'Add ' + equipmentType}>
-      <div>
-        Enter the details of your new equipment here. Click save when you re
-        done.
-      </div>
+    <Modal
+      title={'Add ' + equipmentType}
+      subtitle={"Enter the details of your new " + equipmentType + " here."}
+      separator
+      className={styles.modal}
+    >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField

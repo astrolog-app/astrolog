@@ -6,33 +6,53 @@ use crate::models::state::AppState;
 #[tauri::command]
 pub fn check_equipment_duplicate(
     state: State<Mutex<AppState>>,
-    brand: String,
-    name: String
+    view_name: String,
 ) -> Result<(), String> {
-    // let state = state.lock().map_err(|_| "Failed to acquire state lock.")?;
-    //
-    // let equipment_items: Vec<&dyn EquipmentItem> = [
-    //     state.equipment_list.telescopes.values().collect::<Vec<_>>().as_slice(),
-    //     state.equipment_list.cameras.values().collect::<Vec<_>>().as_slice(),
-    //     state.equipment_list.mounts.values().collect::<Vec<_>>().as_slice(),
-    //     state.equipment_list.filters.values().collect::<Vec<_>>().as_slice(),
-    //     state.equipment_list.flatteners.values().collect::<Vec<_>>().as_slice(),
-    // ]
-    // .into_iter()
-    //     .flatten()
-    //     .collect();
-    //
-    // if equipment_items.iter().any(|item| item.brand() == brand && item.name() == name) {
-    //     return Err(format!("Duplicate equipment found for brand '{}' and name '{}'", brand, name));
-    // }
+    let state = state.lock().unwrap();
+
+    let mut equipment_items: Vec<&dyn EquipmentItem> = Vec::new();
+
+    equipment_items.extend(state.equipment_list.telescopes.values().map(|t| t as &dyn EquipmentItem));
+    equipment_items.extend(state.equipment_list.cameras.values().map(|c| c as &dyn EquipmentItem));
+    equipment_items.extend(state.equipment_list.mounts.values().map(|m| m as &dyn EquipmentItem));
+    equipment_items.extend(state.equipment_list.filters.values().map(|f| f as &dyn EquipmentItem));
+    equipment_items.extend(state.equipment_list.flatteners.values().map(|fl| fl as &dyn EquipmentItem));
+
+    if equipment_items.iter().any(|item| item.view_name() == view_name) {
+        return Err(format!(
+            "Duplicate equipment item found: {}",
+            view_name
+        ));
+    }
 
     Ok(())
 }
 
 #[tauri::command]
-pub fn add_telescope(
+pub fn save_telescope(
     state: State<Mutex<AppState>>,
-    telescope: Telescope
+    telescope: Telescope,
 ) -> Result<(), String> {
+    let mut state = state.lock().unwrap();
+    let path = state.preferences.storage.root_directory.clone();
+
+    let old_telescope: Option<Telescope> = state
+        .equipment_list
+        .telescopes
+        .insert(telescope.id.clone(), telescope.clone());
+
+    if let Err(err) = state.equipment_list.save(&path) {
+        // Revert the change if save fails
+        match old_telescope {
+            Some(old) => {
+                state.equipment_list.telescopes.insert(old.id, old);
+            }
+            None => {
+                state.equipment_list.telescopes.remove(&telescope.id);
+            }
+        }
+        return Err(err.to_string());
+    }
+
     Ok(())
 }

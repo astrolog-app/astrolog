@@ -6,20 +6,20 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from '@/components/ui/card';
 import styles from './equipment.module.scss';
 import { Button } from '@/components/ui/button';
 import {
   ResizableHandle,
   ResizablePanel,
-  ResizablePanelGroup,
+  ResizablePanelGroup
 } from '@/components/ui/resizable';
 import { useModal } from '@/context/modalProvider';
 import EquipmentModal from '@/components/modals/equipment/equipment';
 import { EquipmentType } from '@/enums/equipmentType';
 import EquipmentDetails from '@/components/equipmentDetails';
-import EquipmentListView from '@/components/EquipmentListView';
+import EquipmentListView from '@/components/equipmentListView';
 import { useState } from 'react';
 import { EquipmentItem } from '@/interfaces/equipment';
 
@@ -27,7 +27,7 @@ export default function Equipment() {
   const { openModal } = useModal();
 
   const [selectedItem, setSelectedItem] = useState<EquipmentItem | undefined>(
-    undefined,
+    undefined
   );
 
   return (
@@ -49,14 +49,12 @@ export default function Equipment() {
         </CardContent>
       </Card>
       <ResizablePanelGroup className={styles.content} direction="horizontal">
-        <ResizablePanel defaultSize={30} minSize={10} maxSize={70}>
+        <ResizablePanel defaultSize={30} minSize={20} maxSize={70}>
           <Card className={styles.card}>
-            <CardHeader>
-              <EquipmentListView
-                selectedItem={selectedItem}
-                setSelectedItem={setSelectedItem}
-              />
-            </CardHeader>
+            <EquipmentListView
+              selectedItem={selectedItem}
+              setSelectedItem={setSelectedItem}
+            />
           </Card>
         </ResizablePanel>
         <ResizableHandle withHandle className={styles.handle} />

@@ -105,13 +105,13 @@ impl EquipmentList {
         Ok(file_store::load(&filename)?)
     }
 
-    pub fn save(dir: PathBuf, equipment_list: &EquipmentList) -> Result<(), Box<dyn Error>> {
+    pub fn save(&self, dir: &PathBuf) -> Result<(), Box<dyn Error>> {
         let mut filename = dir.canonicalize().unwrap();
         filename.push(".astrolog");
         filename.push("equipment_list.json");
         Ok(file_store::save(
             &filename,
-            &serde_json::to_string_pretty(equipment_list)?,
+            &serde_json::to_string_pretty(self)?,
         )?)
     }
 }
@@ -127,7 +127,7 @@ pub trait EquipmentItem {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Telescope {
-    id: Uuid,
+    pub id: Uuid,
     brand: String,
     name: String,
 

@@ -13,7 +13,7 @@ use models::state::AppState;
 use std::env;
 use std::sync::Mutex;
 use tauri::{Emitter, Manager};
-use crate::commands::equipment::{add_telescope, check_equipment_duplicate};
+use crate::commands::equipment::{save_telescope, check_equipment_duplicate};
 use crate::file_system::set_folder_invisible;
 
 mod commands;
@@ -61,7 +61,6 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             add_close_lock,
             add_new_image,
-            add_telescope,
             analyze_calibration_frames,
             check_equipment_duplicate,
             classify_calibration_frames,
@@ -74,6 +73,7 @@ fn main() {
             remove_close_lock,
             rename_directory,
             save_preferences,
+            save_telescope,
             set_root_directory,
             setup_backup,
             update_app_state_from_json,
