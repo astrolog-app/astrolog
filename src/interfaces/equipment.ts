@@ -1,4 +1,5 @@
 import { UUID } from 'crypto';
+import { EquipmentType } from '@/enums/equipmentType';
 
 export interface EquipmentItem {
   id: UUID;
@@ -26,3 +27,22 @@ export interface Filter extends EquipmentItem {
 export interface Flattener extends EquipmentItem {
   factor: number;
 }
+
+export const getEquipmentType = (
+  item: EquipmentItem
+): EquipmentType => {
+  if ("focal_length" in item) {
+    return EquipmentType.TELESCOPE;
+  }
+  if ("chip_size" in item) {
+    return EquipmentType.CAMERA;
+  }
+  if ("filter_type" in item) {
+    return EquipmentType.FILTER;
+  }
+  if ("factor" in item) {
+    return EquipmentType.FLATTENER;
+  }
+
+  return EquipmentType.MOUNT;
+};

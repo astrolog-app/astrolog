@@ -60,9 +60,7 @@ export default function Equipment() {
         <ResizableHandle withHandle className={styles.handle} />
         <ResizablePanel defaultSize={70}>
           <Card className={styles.card}>
-            <CardHeader>
-              <EquipmentDetails selectedItem={selectedItem} />
-            </CardHeader>
+            <EquipmentDetails selectedItem={selectedItem} />
           </Card>
         </ResizablePanel>
       </ResizablePanelGroup>
