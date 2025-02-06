@@ -58,6 +58,7 @@ export default function NewImage({
 
   function onSubmit(): void {
     const newImage: Image = {
+      id: "1537ca0b-a6e6-4bc2-a871-be0b483c80b8", // TODO
       path: form.getValues().path,
       title: form.getValues().title,
       total_exposure: 0,

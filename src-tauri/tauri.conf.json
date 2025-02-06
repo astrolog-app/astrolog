@@ -9,6 +9,7 @@
     "active": true,
     "category": "DeveloperTool",
     "copyright": "",
+    "createUpdaterArtifacts": true,
     "targets": "all",
     "externalBin": [],
     "icon": [
@@ -41,9 +42,16 @@
   },
   "productName": "AstroLog",
   "mainBinaryName": "AstroLog",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "identifier": "astrolog",
-  "plugins": {},
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEVFMEJBRDFBQzlFNzlGM0MKUldROG4rZkpHcTBMN3B1dTJXRFBKenpqN05yVFZlcjdsa2tjU0s0UXhQelZMdnlQYkVQdHNCaXYK",
+      "endpoints": [
+        "https://github.com/astrolog-app/astrolog/releases/latest/download/latest.json"
+      ]
+    }
+  },
   "app": {
     "windows": [
       {

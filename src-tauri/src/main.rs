@@ -1,26 +1,29 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use crate::commands::equipment::{check_equipment_duplicate, save_telescope};
+use crate::file_system::set_folder_invisible;
 use commands::calibration::{analyze_calibration_frames, classify_calibration_frames};
 use commands::gallery::{add_new_image, open_image};
 use commands::image::get_date;
 use commands::imaging_sessions::{export_csv, open_imaging_session};
 use commands::preferences::{save_preferences, set_root_directory, setup_backup};
-use commands::state::{add_close_lock, load_frontend_app_state, remove_close_lock, update_app_state_from_json};
+use commands::state::{
+    add_close_lock, load_frontend_app_state, remove_close_lock, update_app_state_from_json,
+};
 use commands::utils::{open_browser, rename_directory};
 use models::frontend::process::Process;
 use models::state::AppState;
 use std::env;
 use std::sync::Mutex;
 use tauri::{Emitter, Manager};
-use crate::commands::equipment::{save_telescope, check_equipment_duplicate};
-use crate::file_system::set_folder_invisible;
+use tauri_plugin_updater::UpdaterExt;
 
 mod commands;
 mod file_store;
+pub mod file_system;
 mod image;
 mod models;
-pub mod file_system;
 
 fn main() {
     let account_id = option_env!("ACCOUNT_ID")
@@ -32,11 +35,23 @@ fn main() {
 
     tauri::Builder::default()
         .setup(|app| {
+            // update
+            let handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                update(handle).await.unwrap();
+            });
+
             // init app_state
             let app_state = Mutex::new(AppState::new(app.handle()));
 
             // set .astrolog folder invisible on windows
-            let mut dir = app_state.lock().unwrap().preferences.storage.root_directory.clone();
+            let mut dir = app_state
+                .lock()
+                .unwrap()
+                .preferences
+                .storage
+                .root_directory
+                .clone();
             dir.push(".astrolog");
             set_folder_invisible(&dir);
 
@@ -55,6 +70,7 @@ fn main() {
                 }
             }
         })
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_window_state::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_keygen::Builder::new(&account_id, &verify_key).build())
@@ -80,4 +96,27 @@ fn main() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
+    if let Some(update) = app.updater()?.check().await? {
+        let mut downloaded = 0;
+
+        update
+            .download_and_install(
+                |chunk_length, content_length| {
+                    downloaded += chunk_length;
+                    println!("downloaded {downloaded} from {content_length:?}");
+                },
+                || {
+                    println!("download finished");
+                },
+            )
+            .await?;
+
+        println!("update installed");
+        app.restart();
+    }
+
+    Ok(())
 }
