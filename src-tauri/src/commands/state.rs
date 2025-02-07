@@ -1,9 +1,7 @@
 use std::sync::Mutex;
 use tauri::State;
 use crate::models::frontend::analytics::Analytics;
-use crate::models::frontend::state::{
-    CalibrationTableRow, EquipmentList, FrontendAppState, LogTableRow, TableData,
-};
+use crate::models::frontend::state::{CalibrationTableRow, DefaultSerializeEquipmentList, FrontendAppState, LogTableRow, TableData};
 use crate::models::imaging_frames::ImagingFrameList;
 use crate::models::state::AppState;
 
@@ -31,36 +29,12 @@ pub fn load_frontend_app_state(state: State<Mutex<AppState>>) -> Result<String, 
         calibration: calibration_data,
     };
 
-    let telescope_list = app_state
-        .equipment_list
-        .telescopes
-        .values()
-        .cloned()
-        .collect();
-    let camera_list = app_state.equipment_list.cameras.values().cloned().collect();
-    let filter_list = app_state.equipment_list.filters.values().cloned().collect();
-    let flattener_list = app_state
-        .equipment_list
-        .flatteners
-        .values()
-        .cloned()
-        .collect();
-    let mount_list = app_state.equipment_list.mounts.values().cloned().collect();
-
-    let equipment_list = EquipmentList {
-        telescope_list,
-        camera_list,
-        mount_list,
-        filter_list,
-        flattener_list,
-    };
-
     let analytics = Analytics::new();
 
     let data = FrontendAppState {
         preferences,
         table_data,
-        equipment_list,
+        equipment_list: DefaultSerializeEquipmentList(app_state.equipment_list.clone()),
         image_list,
         analytics,
     };

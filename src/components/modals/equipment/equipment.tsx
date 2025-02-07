@@ -24,7 +24,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
-import { Camera, EquipmentItem, Filter, Flattener, Telescope } from '@/interfaces/equipment';
+import { Camera, EquipmentItem, Filter, Flattener, Mount, Telescope } from '@/interfaces/equipment';
 import { v4 as uuidv4 } from 'uuid';
 import { invoke } from '@tauri-apps/api/core';
 import { Switch } from '@/components/ui/switch';
@@ -97,8 +97,6 @@ export default function EquipmentModal({ type, item }: EquipmentProps) {
 
   const equipmentType = form.watch('type');
 
-  function saveItem(item: EquipmentItem) {}
-
   function onSubmit(values: EquipmentFormValues) {
     const item: EquipmentItem = {
       id: uuidv4(),
@@ -115,11 +113,11 @@ export default function EquipmentModal({ type, item }: EquipmentProps) {
                     ...prevState,
                     equipmentList: {
                       ...prevState.equipment_list,
-                      telescope_list: [...prevState.equipment_list.telescope_list, item]
+                      telescopes: new Map(prevState.equipment_list.telescopes).set(item.id, item as Telescope)
                     }
                   }));
                   toast({
-                    description: 'Added Telescope successfully!',
+                    description: 'Saved Telescope successfully!',
                   });
                   closeModal();
                 })
@@ -132,12 +130,96 @@ export default function EquipmentModal({ type, item }: EquipmentProps) {
                 });
               break;
             case EquipmentType.CAMERA:
+              invoke('save_camera', { camera: item })
+                .then(() => {
+                  setAppState(prevState => ({
+                    ...prevState,
+                    equipmentList: {
+                      ...prevState.equipment_list,
+                      cameras: new Map(prevState.equipment_list.cameras).set(item.id, item as Camera)
+                    }
+                  }));
+                  toast({
+                    description: 'Saved Camera successfully!',
+                  });
+                  closeModal();
+                })
+                .catch((error) => {
+                  toast({
+                    variant: 'destructive',
+                    title: 'Uh oh! Something went wrong.',
+                    description: 'Error: ' + error,
+                  });
+                });
               break;
             case EquipmentType.MOUNT:
+              invoke('save_mount', { mount: item })
+                .then(() => {
+                  setAppState(prevState => ({
+                    ...prevState,
+                    equipmentList: {
+                      ...prevState.equipment_list,
+                      mounts: new Map(prevState.equipment_list.mounts).set(item.id, item as Mount)
+                    }
+                  }));
+                  toast({
+                    description: 'Saved Mount successfully!',
+                  });
+                  closeModal();
+                })
+                .catch((error) => {
+                  toast({
+                    variant: 'destructive',
+                    title: 'Uh oh! Something went wrong.',
+                    description: 'Error: ' + error,
+                  });
+                });
               break;
             case EquipmentType.FILTER:
+              invoke('save_filter', { filter: item })
+                .then(() => {
+                  setAppState(prevState => ({
+                    ...prevState,
+                    equipmentList: {
+                      ...prevState.equipment_list,
+                      filters: new Map(prevState.equipment_list.filters).set(item.id, item as Filter)
+                    }
+                  }));
+                  toast({
+                    description: 'Saved Filter successfully!',
+                  });
+                  closeModal();
+                })
+                .catch((error) => {
+                  toast({
+                    variant: 'destructive',
+                    title: 'Uh oh! Something went wrong.',
+                    description: 'Error: ' + error,
+                  });
+                });
               break;
             case EquipmentType.FLATTENER:
+              invoke('save_flattener', { flattener: item })
+                .then(() => {
+                  setAppState(prevState => ({
+                    ...prevState,
+                    equipmentList: {
+                      ...prevState.equipment_list,
+                      flatteners: new Map(prevState.equipment_list.flatteners).set(item.id, item as Flattener)
+                    }
+                  }));
+                  toast({
+                    description: 'Saved Flattener successfully!',
+                  });
+                  closeModal();
+                })
+                .catch((error) => {
+                  toast({
+                    variant: 'destructive',
+                    title: 'Uh oh! Something went wrong.',
+                    description: 'Error: ' + error,
+                  });
+                });
               break;
           }
         }

@@ -1,11 +1,13 @@
-use crate::models::equipment::{Camera, EquipmentItem, Filter, Flattener, Mount, Telescope};
+use std::collections::BTreeMap;
+use crate::models::equipment::{Camera, EquipmentItem, EquipmentList, Filter, Flattener, Mount, Telescope};
 use crate::models::frontend::analytics::Analytics;
 use crate::models::image_list::Image;
 use crate::models::imaging_frames;
 use crate::models::imaging_frames::CalibrationType;
 use crate::models::imaging_session_list::ImagingSession;
 use crate::models::preferences::Preferences;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
+use serde::ser::SerializeMap;
 use uuid::Uuid;
 use crate::models::state::AppState;
 
@@ -13,7 +15,7 @@ use crate::models::state::AppState;
 pub struct FrontendAppState {
     pub preferences: Preferences,
     pub table_data: TableData,
-    pub equipment_list: EquipmentList,
+    pub equipment_list: DefaultSerializeEquipmentList,
     pub image_list: Vec<Image>,
     pub analytics: Analytics,
 }
@@ -158,11 +160,37 @@ impl CalibrationTableRow {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct EquipmentList {
-    pub telescope_list: Vec<Telescope>,
-    pub camera_list: Vec<Camera>,
-    pub mount_list: Vec<Mount>,
-    pub filter_list: Vec<Filter>,
-    pub flattener_list: Vec<Flattener>,
+#[derive(Debug, Deserialize)]
+pub struct DefaultSerializeEquipmentList(pub EquipmentList);
+
+impl Serialize for DefaultSerializeEquipmentList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        // Convert each HashMap<Uuid, T> into a BTreeMap<String, T>
+        let telescopes: BTreeMap<String, &Telescope> = self.0.telescopes.iter()
+            .map(|(k, v)| (k.to_string(), v))
+            .collect();
+        let cameras: BTreeMap<String, &Camera> = self.0.cameras.iter()
+            .map(|(k, v)| (k.to_string(), v))
+            .collect();
+        let mounts: BTreeMap<String, &Mount> = self.0.mounts.iter()
+            .map(|(k, v)| (k.to_string(), v))
+            .collect();
+        let filters: BTreeMap<String, &Filter> = self.0.filters.iter()
+            .map(|(k, v)| (k.to_string(), v))
+            .collect();
+        let flatteners: BTreeMap<String, &Flattener> = self.0.flatteners.iter()
+            .map(|(k, v)| (k.to_string(), v))
+            .collect();
+
+        let mut map = serializer.serialize_map(Some(5))?;
+        map.serialize_entry("telescopes", &telescopes)?;
+        map.serialize_entry("cameras", &cameras)?;
+        map.serialize_entry("mounts", &mounts)?;
+        map.serialize_entry("filters", &filters)?;
+        map.serialize_entry("flatteners", &flatteners)?;
+        map.end()
+    }
 }

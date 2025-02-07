@@ -69,11 +69,11 @@ export interface CalibrationFrame {
 }
 
 interface EquipmentList {
-  camera_list: Camera[];
-  telescope_list: Telescope[];
-  mount_list: Mount[];
-  filter_list: Filter[];
-  flattener_list: Flattener[];
+  cameras: Map<UUID, Camera>;
+  telescopes: Map<UUID, Telescope>;
+  mounts: Map<UUID, Mount>;
+  filters: Map<UUID, Filter>;
+  flatteners: Map<UUID, Flattener>;
 }
 
 export interface Image {

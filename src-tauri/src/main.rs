@@ -1,7 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use crate::commands::equipment::{check_equipment_duplicate, save_telescope};
+use crate::commands::equipment::{check_equipment_duplicate, save_camera, save_filter, save_flattener, save_mount, save_telescope};
 use crate::file_system::set_folder_invisible;
 use commands::calibration::{analyze_calibration_frames, classify_calibration_frames};
 use commands::gallery::{add_new_image, open_image};
@@ -88,6 +88,10 @@ fn main() {
             open_imaging_session,
             remove_close_lock,
             rename_directory,
+            save_camera,
+            save_filter,
+            save_flattener,
+            save_mount,
             save_preferences,
             save_telescope,
             set_root_directory,

@@ -31,11 +31,11 @@ export default function EquipmentListView({ selectedItem, setSelectedItem }: Equ
   }
 
   const tabs: Tab[] = [
-    { type: EquipmentType.TELESCOPE, content: appState.equipment_list.telescope_list },
-    { type: EquipmentType.CAMERA, content: appState.equipment_list.camera_list },
-    { type: EquipmentType.MOUNT, content: appState.equipment_list.mount_list },
-    { type: EquipmentType.FILTER, content: appState.equipment_list.filter_list },
-    { type: EquipmentType.FLATTENER, content: appState.equipment_list.flattener_list }
+    { type: EquipmentType.TELESCOPE, content: Array.from(appState.equipment_list.telescopes.values()) },
+    { type: EquipmentType.CAMERA, content: Array.from(appState.equipment_list.cameras.values()) },
+    { type: EquipmentType.MOUNT, content: Array.from(appState.equipment_list.mounts.values()) },
+    { type: EquipmentType.FILTER, content: Array.from(appState.equipment_list.filters.values()) },
+    { type: EquipmentType.FLATTENER, content: Array.from(appState.equipment_list.flatteners.values()) }
   ];
 
   const [openItems, setOpenItems] = useState<string[]>(

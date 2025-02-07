@@ -6,7 +6,7 @@ use std::error::Error;
 use std::path::PathBuf;
 use uuid::Uuid;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct EquipmentList {
     pub telescopes: HashMap<Uuid, Telescope>,
     pub cameras: HashMap<Uuid, Camera>,
@@ -149,7 +149,7 @@ impl EquipmentItem for Telescope {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Camera {
-    id: Uuid,
+    pub id: Uuid,
     brand: String,
     name: String,
 
@@ -172,7 +172,7 @@ impl EquipmentItem for Camera {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Mount {
-    id: Uuid,
+    pub id: Uuid,
     brand: String,
     name: String,
 }
@@ -191,7 +191,7 @@ impl EquipmentItem for Mount {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Filter {
-    id: Uuid,
+    pub id: Uuid,
     brand: String,
     name: String,
 
@@ -212,7 +212,7 @@ impl EquipmentItem for Filter {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Flattener {
-    id: Uuid,
+    pub id: Uuid,
     brand: String,
     name: String,
 

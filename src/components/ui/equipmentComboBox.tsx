@@ -45,36 +45,36 @@ export default function EquipmentComboBox({
     switch (type) {
       case EquipmentType.CAMERA:
         setValues(
-          appState.equipment_list.camera_list.map((c) => getViewName(c)),
+          appState.equipment_list.cameras.map((c) => getViewName(c)),
         );
         break;
       case EquipmentType.TELESCOPE:
         setValues(
-          appState.equipment_list.telescope_list.map((c) => getViewName(c)),
+          appState.equipment_list.telescopes.map((c) => getViewName(c)),
         );
         break;
       case EquipmentType.MOUNT:
         setValues(
-          appState.equipment_list.mount_list.map((c) => getViewName(c)),
+          appState.equipment_list.mounts.map((c) => getViewName(c)),
         );
         break;
       case EquipmentType.FILTER:
         setValues(
-          appState.equipment_list.filter_list.map((c) => getViewName(c)),
+          appState.equipment_list.filters.map((c) => getViewName(c)),
         );
         break;
       case EquipmentType.FLATTENER:
         setValues(
-          appState.equipment_list.flattener_list.map((c) => getViewName(c)),
+          appState.equipment_list.flatteners.map((c) => getViewName(c)),
         );
         break;
     }
   }, [
-    appState.equipment_list.camera_list,
-    appState.equipment_list.filter_list,
-    appState.equipment_list.flattener_list,
-    appState.equipment_list.mount_list,
-    appState.equipment_list.telescope_list,
+    appState.equipment_list.cameras,
+    appState.equipment_list.filters,
+    appState.equipment_list.flatteners,
+    appState.equipment_list.mounts,
+    appState.equipment_list.telescopes,
     type,
   ]);
 

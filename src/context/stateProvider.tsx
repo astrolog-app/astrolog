@@ -13,6 +13,8 @@ import React, {
 import { toast } from '@/components/ui/use-toast';
 import { AppState } from '@/interfaces/state';
 import { removeContextMenu } from '@/utils/browser';
+import { Camera, Filter, Flattener, Mount, Telescope } from '@/interfaces/equipment';
+import { UUID } from 'crypto';
 
 const defaultAppState: AppState = {
   preferences: {
@@ -30,11 +32,11 @@ const defaultAppState: AppState = {
     calibration: [],
   },
   equipment_list: {
-    camera_list: [],
-    mount_list: [],
-    telescope_list: [],
-    flattener_list: [],
-    filter_list: [],
+    cameras: new Map<UUID, Camera>(),
+    mounts: new Map<UUID, Mount>(),
+    telescopes: new Map<UUID, Telescope>(),
+    flatteners: new Map<UUID, Flattener>(),
+    filters: new Map<UUID, Filter>(),
   },
   image_list: [],
   analytics: {
@@ -76,6 +78,10 @@ export default function StateProvider({ children }: { children: ReactNode }) {
     fetchAppState(setAppState);
     removeContextMenu();
   }, []);
+
+  useEffect(() => {
+    console.log(appState);
+  }, [appState]);
 
   return (
     <AppStateContext.Provider value={{ appState, setAppState }}>
