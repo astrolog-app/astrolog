@@ -21,11 +21,10 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { useForm } from 'react-hook-form';
-
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
-import { EquipmentItem } from '@/interfaces/equipment';
+import { Camera, EquipmentItem, Filter, Flattener, Telescope } from '@/interfaces/equipment';
 import { v4 as uuidv4 } from 'uuid';
 import { invoke } from '@tauri-apps/api/core';
 import { Switch } from '@/components/ui/switch';
@@ -72,23 +71,33 @@ export type EquipmentFormValues = z.infer<typeof equipmentSchema>
 
 interface EquipmentProps {
   type: EquipmentType;
+  item?: EquipmentItem;
 }
 
-export default function EquipmentModal({ type }: EquipmentProps) {
+export default function EquipmentModal({ type, item }: EquipmentProps) {
   const { setAppState } = useAppState();
   const { closeModal } = useModal();
+  const isEdit = item !== undefined;
 
   const form = useForm<EquipmentFormValues>({
     resolver: zodResolver(equipmentSchema),
     defaultValues: {
       type: type,
-      brand: '',
-      name: '',
-      rgb: false,
+      brand: item?.brand,
+      name: item?.name,
+      focal_length: (item as Telescope)?.focal_length,
+      aperture: (item as Telescope)?.aperture,
+      chip_size: (item as Camera)?.chip_size,
+      mega_pixel: (item as Camera)?.mega_pixel,
+      rgb: (item as Camera)?.rgb,
+      filter_type: (item as Filter)?.filter_type,
+      factor: (item as Flattener)?.factor,
     }
   });
 
   const equipmentType = form.watch('type');
+
+  function saveItem(item: EquipmentItem) {}
 
   function onSubmit(values: EquipmentFormValues) {
     const item: EquipmentItem = {

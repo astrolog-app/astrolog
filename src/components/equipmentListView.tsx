@@ -12,6 +12,9 @@ import {
   AccordionTrigger
 } from '@/components/ui/accordion';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useModal } from '@/context/modalProvider';
+import EquipmentModal from '@/components/modals/equipment/equipment';
+import { EquipmentType } from '@/enums/equipmentType';
 
 interface EquipmentListViewProps {
   selectedItem: EquipmentItem | undefined;
@@ -20,22 +23,23 @@ interface EquipmentListViewProps {
 
 export default function EquipmentListView({ selectedItem, setSelectedItem }: EquipmentListViewProps) {
   const { appState } = useAppState();
+  const { openModal } = useModal();
 
   interface Tab {
-    name: string;
-    type: EquipmentItem[];
+    type: EquipmentType;
+    content: EquipmentItem[];
   }
 
   const tabs: Tab[] = [
-    { name: 'Telescopes', type: appState.equipment_list.telescope_list },
-    { name: 'Cameras', type: appState.equipment_list.camera_list },
-    { name: 'Mounts', type: appState.equipment_list.mount_list },
-    { name: 'Filters', type: appState.equipment_list.filter_list },
-    { name: 'Flatteners', type: appState.equipment_list.flattener_list }
+    { type: EquipmentType.TELESCOPE, content: appState.equipment_list.telescope_list },
+    { type: EquipmentType.CAMERA, content: appState.equipment_list.camera_list },
+    { type: EquipmentType.MOUNT, content: appState.equipment_list.mount_list },
+    { type: EquipmentType.FILTER, content: appState.equipment_list.filter_list },
+    { type: EquipmentType.FLATTENER, content: appState.equipment_list.flattener_list }
   ];
 
   const [openItems, setOpenItems] = useState<string[]>(
-    tabs.map((tab) => tab.name)
+    tabs.map((tab) => tab.type)
   );
 
   return (
@@ -49,13 +53,13 @@ export default function EquipmentListView({ selectedItem, setSelectedItem }: Equ
             value={openItems}
             onValueChange={setOpenItems}
           >
-            <AccordionItem value={tab.name}>
+            <AccordionItem value={tab.type}>
               <AccordionTrigger className="text-lg font-semibold">
-                {tab.name} ({tab.type.length})
+                {tab.type}s ({tab.content.length})
               </AccordionTrigger>
               <AccordionContent>
                 <ul className="py-2">
-                  {tab.type.map((item, index) => (
+                  {tab.content.map((item, index) => (
                     <li key={index} className="mb-2">
                       <button
                         onClick={() => setSelectedItem(item)}
@@ -63,6 +67,7 @@ export default function EquipmentListView({ selectedItem, setSelectedItem }: Equ
                       >
                         {getViewName(item)}
                       </button>
+                      <button onClick={() => openModal(<EquipmentModal type={tab.type} item={item} />)}>edit</button>
                     </li>
                   ))}
                 </ul>
