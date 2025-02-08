@@ -68,7 +68,7 @@ export interface CalibrationFrame {
   total_subs: number;
 }
 
-interface EquipmentList {
+export interface EquipmentList {
   cameras: Map<UUID, Camera>;
   telescopes: Map<UUID, Telescope>;
   mounts: Map<UUID, Mount>;

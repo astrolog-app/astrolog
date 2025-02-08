@@ -53,14 +53,36 @@ const AppStateContext = createContext<AppStateContextType | undefined>(
   undefined,
 );
 
-export function fetchAppState(
-  setAppState: Dispatch<SetStateAction<AppState>>,
-): void {
+export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): void {
   invoke<string>('load_frontend_app_state')
     .then((payload) => {
       const responseData: AppState = JSON.parse(payload);
 
-      setAppState(responseData);
+      const fixedAppState: AppState = {
+        preferences: responseData.preferences,
+        table_data: responseData.table_data,
+        image_list: responseData.image_list,
+        analytics: responseData.analytics,
+        equipment_list: {
+          cameras: new Map<UUID, Camera>(
+            Object.entries(responseData.equipment_list.cameras || {}) as [UUID, Camera][]
+          ),
+          mounts: new Map<UUID, Mount>(
+            Object.entries(responseData.equipment_list.mounts || {}) as [UUID, Mount][]
+          ),
+          telescopes: new Map<UUID, Telescope>(
+            Object.entries(responseData.equipment_list.telescopes || {}) as [UUID, Telescope][]
+          ),
+          flatteners: new Map<UUID, Flattener>(
+            Object.entries(responseData.equipment_list.flatteners || {}) as [UUID, Flattener][]
+          ),
+          filters: new Map<UUID, Filter>(
+            Object.entries(responseData.equipment_list.filters || {}) as [UUID, Filter][]
+          ),
+        },
+      };
+
+      setAppState(fixedAppState);
     })
     .catch((error) => {
       toast({

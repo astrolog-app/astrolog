@@ -24,7 +24,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
-import { Camera, EquipmentItem, Filter, Flattener, Mount, Telescope } from '@/interfaces/equipment';
+import { Camera, EquipmentItem, Filter, Flattener, Telescope } from '@/interfaces/equipment';
 import { v4 as uuidv4 } from 'uuid';
 import { invoke } from '@tauri-apps/api/core';
 import { Switch } from '@/components/ui/switch';
@@ -32,6 +32,7 @@ import { toast } from '@/components/ui/use-toast';
 import { getViewName } from '@/utils/equipment';
 import { useAppState } from '@/context/stateProvider';
 import { useModal } from '@/context/modalProvider';
+import { EquipmentList } from '@/interfaces/state';
 
 const baseEquipmentSchema = z.object({
   brand: z.string().min(1, 'Brand is required'),
@@ -103,127 +104,39 @@ export default function EquipmentModal({ type, item }: EquipmentProps) {
       ...values
     } as EquipmentItem;
 
+    const saveEquipment: Record<EquipmentType, { invokeFn: string; key: keyof EquipmentList }> = {
+      [EquipmentType.TELESCOPE]: { invokeFn: 'save_telescope', key: 'telescopes' },
+      [EquipmentType.CAMERA]: { invokeFn: 'save_camera', key: 'cameras' },
+      [EquipmentType.MOUNT]: { invokeFn: 'save_mount', key: 'mounts' },
+      [EquipmentType.FILTER]: { invokeFn: 'save_filter', key: 'filters' },
+      [EquipmentType.FLATTENER]: { invokeFn: 'save_flattener', key: 'flatteners' }
+    };
+
     invoke('check_equipment_duplicate', { viewName: getViewName(item) })
       .then(() => {
-          switch (equipmentType) {
-            case EquipmentType.TELESCOPE:
-              invoke('save_telescope', { telescope: item })
-                .then(() => {
-                  setAppState(prevState => ({
-                    ...prevState,
-                    equipmentList: {
-                      ...prevState.equipment_list,
-                      telescopes: new Map(prevState.equipment_list.telescopes).set(item.id, item as Telescope)
-                    }
-                  }));
-                  toast({
-                    description: 'Saved Telescope successfully!',
-                  });
-                  closeModal();
-                })
-                .catch((error) => {
-                  toast({
-                    variant: 'destructive',
-                    title: 'Uh oh! Something went wrong.',
-                    description: 'Error: ' + error,
-                  });
-                });
-              break;
-            case EquipmentType.CAMERA:
-              invoke('save_camera', { camera: item })
-                .then(() => {
-                  setAppState(prevState => ({
-                    ...prevState,
-                    equipmentList: {
-                      ...prevState.equipment_list,
-                      cameras: new Map(prevState.equipment_list.cameras).set(item.id, item as Camera)
-                    }
-                  }));
-                  toast({
-                    description: 'Saved Camera successfully!',
-                  });
-                  closeModal();
-                })
-                .catch((error) => {
-                  toast({
-                    variant: 'destructive',
-                    title: 'Uh oh! Something went wrong.',
-                    description: 'Error: ' + error,
-                  });
-                });
-              break;
-            case EquipmentType.MOUNT:
-              invoke('save_mount', { mount: item })
-                .then(() => {
-                  setAppState(prevState => ({
-                    ...prevState,
-                    equipmentList: {
-                      ...prevState.equipment_list,
-                      mounts: new Map(prevState.equipment_list.mounts).set(item.id, item as Mount)
-                    }
-                  }));
-                  toast({
-                    description: 'Saved Mount successfully!',
-                  });
-                  closeModal();
-                })
-                .catch((error) => {
-                  toast({
-                    variant: 'destructive',
-                    title: 'Uh oh! Something went wrong.',
-                    description: 'Error: ' + error,
-                  });
-                });
-              break;
-            case EquipmentType.FILTER:
-              invoke('save_filter', { filter: item })
-                .then(() => {
-                  setAppState(prevState => ({
-                    ...prevState,
-                    equipmentList: {
-                      ...prevState.equipment_list,
-                      filters: new Map(prevState.equipment_list.filters).set(item.id, item as Filter)
-                    }
-                  }));
-                  toast({
-                    description: 'Saved Filter successfully!',
-                  });
-                  closeModal();
-                })
-                .catch((error) => {
-                  toast({
-                    variant: 'destructive',
-                    title: 'Uh oh! Something went wrong.',
-                    description: 'Error: ' + error,
-                  });
-                });
-              break;
-            case EquipmentType.FLATTENER:
-              invoke('save_flattener', { flattener: item })
-                .then(() => {
-                  setAppState(prevState => ({
-                    ...prevState,
-                    equipmentList: {
-                      ...prevState.equipment_list,
-                      flatteners: new Map(prevState.equipment_list.flatteners).set(item.id, item as Flattener)
-                    }
-                  }));
-                  toast({
-                    description: 'Saved Flattener successfully!',
-                  });
-                  closeModal();
-                })
-                .catch((error) => {
-                  toast({
-                    variant: 'destructive',
-                    title: 'Uh oh! Something went wrong.',
-                    description: 'Error: ' + error,
-                  });
-                });
-              break;
-          }
-        }
-      )
+        const equipment = saveEquipment[equipmentType];
+        if (!equipment) return;
+
+        invoke(equipment.invokeFn, { [equipment.key.slice(0, -1)]: item })
+          .then(() => {
+            setAppState(prevState => ({
+              ...prevState,
+              equipmentList: {
+                ...prevState.equipment_list,
+                [equipment.key]: new Map(prevState.equipment_list[equipment.key]).set(item.id, item)
+              }
+            }));
+            toast({ description: `Saved ${equipmentType} successfully!` });
+            closeModal();
+          })
+          .catch((error) => {
+            toast({
+              variant: 'destructive',
+              title: 'Uh oh! Something went wrong.',
+              description: 'Error: ' + error,
+            });
+          });
+      })
       .catch((error) => {
         toast({
           variant: 'destructive',
