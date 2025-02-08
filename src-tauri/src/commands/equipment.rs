@@ -7,6 +7,7 @@ use crate::models::state::AppState;
 pub fn check_equipment_duplicate(
     state: State<Mutex<AppState>>,
     view_name: String,
+    is_edit: bool,
 ) -> Result<(), String> {
     let state = state.lock().unwrap();
 
@@ -18,11 +19,16 @@ pub fn check_equipment_duplicate(
     equipment_items.extend(state.equipment_list.filters.values().map(|f| f as &dyn EquipmentItem));
     equipment_items.extend(state.equipment_list.flatteners.values().map(|fl| fl as &dyn EquipmentItem));
 
-    if equipment_items.iter().any(|item| item.view_name() == view_name) {
-        return Err(format!(
-            "Duplicate equipment item found: {}",
-            view_name
-        ));
+    if equipment_items.iter().any(|item| {
+        if item.view_name() == view_name {
+            if is_edit {
+                return false;
+            }
+            return true;
+        }
+        false
+    }) {
+        return Err(format!("Duplicate equipment item found: {}", view_name));
     }
 
     Ok(())

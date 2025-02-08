@@ -98,9 +98,11 @@ export default function EquipmentModal({ type, item }: EquipmentProps) {
 
   const equipmentType = form.watch('type');
 
+  // TODO: test
   function onSubmit(values: EquipmentFormValues) {
-    const item: EquipmentItem = {
-      id: uuidv4(),
+    const id = item?.id ?? uuidv4();
+    const new_item: EquipmentItem = {
+      id: id,
       ...values
     } as EquipmentItem;
 
@@ -112,18 +114,18 @@ export default function EquipmentModal({ type, item }: EquipmentProps) {
       [EquipmentType.FLATTENER]: { invokeFn: 'save_flattener', key: 'flatteners' }
     };
 
-    invoke('check_equipment_duplicate', { viewName: getViewName(item) })
+    invoke('check_equipment_duplicate', { viewName: getViewName(new_item), isEdit: isEdit })
       .then(() => {
         const equipment = saveEquipment[equipmentType];
         if (!equipment) return;
 
-        invoke(equipment.invokeFn, { [equipment.key.slice(0, -1)]: item })
+        invoke(equipment.invokeFn, { [equipment.key.slice(0, -1)]: new_item })
           .then(() => {
             setAppState(prevState => ({
               ...prevState,
-              equipmentList: {
+              equipment_list: {
                 ...prevState.equipment_list,
-                [equipment.key]: new Map(prevState.equipment_list[equipment.key]).set(item.id, item)
+                [equipment.key]: new Map(prevState.equipment_list[equipment.key]).set(new_item.id, new_item)
               }
             }));
             toast({ description: `Saved ${equipmentType} successfully!` });
