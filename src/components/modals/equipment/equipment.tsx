@@ -1,9 +1,8 @@
 'use client';
 
 import styles from './equipment.module.scss';
-import { Modal } from '@/components/ui/custom/modal';
+import { ButtonBar, Modal } from '@/components/ui/custom/modal';
 import { EquipmentType } from '@/enums/equipmentType';
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -75,10 +74,11 @@ interface EquipmentProps {
   item?: EquipmentItem;
 }
 
+// TODO: deselects selected item when item is edited
+// TODO: add scrollbar
 export default function EquipmentModal({ type, item }: EquipmentProps) {
   const { setAppState } = useAppState();
   const { closeModal } = useModal();
-  const isEdit = item !== undefined;
 
   const form = useForm<EquipmentFormValues>({
     resolver: zodResolver(equipmentSchema),
@@ -97,6 +97,14 @@ export default function EquipmentModal({ type, item }: EquipmentProps) {
   });
 
   const equipmentType = form.watch('type');
+  const isEdit = item !== undefined;
+
+  let modalTitle = 'Add ' + equipmentType;
+  let modalSubtitle = "Enter the details of your new " + equipmentType + " here.";
+  if (isEdit) {
+    modalTitle = 'Edit ' + equipmentType;
+    modalSubtitle = "Enter the details of your " + equipmentType + " here.";
+  }
 
   // TODO: test
   function onSubmit(values: EquipmentFormValues) {
@@ -150,8 +158,8 @@ export default function EquipmentModal({ type, item }: EquipmentProps) {
 
   return (
     <Modal
-      title={'Add ' + equipmentType}
-      subtitle={"Enter the details of your new " + equipmentType + " here."}
+      title={modalTitle}
+      subtitle={modalSubtitle}
       separator
       className={styles.modal}
     >
@@ -337,7 +345,9 @@ export default function EquipmentModal({ type, item }: EquipmentProps) {
               )}
             />
           )}
-          <Button type="submit">Save Equipment</Button>
+          <ButtonBar>
+            Save {equipmentType}
+          </ButtonBar>
         </form>
       </Form>
     </Modal>

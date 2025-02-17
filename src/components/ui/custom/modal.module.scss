@@ -63,3 +63,17 @@
     }
   }
 }
+
+.buttonBar {
+  display: flex;
+  justify-content: end;
+  padding-top: 0.25rem;
+
+  button {
+    margin-right: 0.25rem;
+
+    &:last-of-type {
+      margin-right: 0;
+    }
+  }
+}

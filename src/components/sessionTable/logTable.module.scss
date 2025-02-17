@@ -38,11 +38,11 @@
 }
 
 .selectedRow {
-  background-color: hsl(var(--secondary));
+  background-color: hsl(var(--muted));
   color: hsl(var(--foreground));
 
   &:hover {
-    background-color: hsl(var(--secondary));
+    background-color: hsl(var(--muted));
     cursor: default;
   }
 }

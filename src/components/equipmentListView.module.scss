@@ -5,5 +5,41 @@
 
   .list {
     padding: var(--padding);
+
+    .select {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem;
+      border-radius: var(--radius);
+      cursor: pointer;
+      margin-bottom: 0.5rem;
+
+      .name {
+
+      }
+
+      .edit {
+        width: 1rem;
+        height: 1rem;
+        background-color: green;
+        border-radius: var(--radius);
+      }
+
+      &:hover {
+        background-color: hsl(var(--muted) / 0.5);
+      }
+
+      &:last-of-type {
+        margin-bottom: 0;
+      }
+    }
+
+    .selected {
+      background-color: hsl(var(--muted));
+
+      &:hover {
+        background-color: hsl(var(--muted));
+      }
+    }
   }
 }

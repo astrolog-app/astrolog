@@ -5,7 +5,9 @@ import { Separator } from '../separator';
 import styles from './modal.module.scss';
 import { useModal } from '@/context/modalProvider';
 import { motion } from 'framer-motion';
-import React from 'react';
+import React, { ReactNode } from 'react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/utils/classNames';
 
 interface ModalProps {
   className?: string;
@@ -17,13 +19,13 @@ interface ModalProps {
 }
 
 export function Modal({
-  className,
-  title,
-  subtitle,
-  separator,
-  children,
-  notClosable,
-}: ModalProps) {
+                        className,
+                        title,
+                        subtitle,
+                        separator,
+                        children,
+                        notClosable
+                      }: ModalProps) {
   const { closeModal } = useModal();
 
   return (
@@ -56,5 +58,34 @@ export function Modal({
         </motion.div>
       </div>
     </motion.div>
+  );
+}
+
+interface ButtonBarProps {
+  children: ReactNode;
+  classname?: string;
+  cancelButton?: boolean;
+}
+
+export function ButtonBar({ children, classname, cancelButton }: ButtonBarProps) {
+  const { closeModal } = useModal();
+
+  return (
+    <div className={cn(classname, styles.buttonBar)}>
+      {cancelButton && (
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() => closeModal()}
+        >
+          Cancel
+        </Button>
+      )}
+      <Button
+        type="submit"
+      >
+        {children}
+      </Button>
+    </div>
   );
 }

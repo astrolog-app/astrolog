@@ -15,6 +15,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useModal } from '@/context/modalProvider';
 import EquipmentModal from '@/components/modals/equipment/equipment';
 import { EquipmentType } from '@/enums/equipmentType';
+import { cn } from '@/utils/classNames';
 
 interface EquipmentListViewProps {
   selectedItem: EquipmentItem | undefined;
@@ -58,19 +59,23 @@ export default function EquipmentListView({ selectedItem, setSelectedItem }: Equ
                 {tab.type}s ({tab.content.length})
               </AccordionTrigger>
               <AccordionContent>
-                <ul className="py-2">
-                  {tab.content.map((item, index) => (
-                    <li key={index} className="mb-2">
-                      <button
-                        onClick={() => setSelectedItem(item)}
-                        className="w-full text-left px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                      >
-                        {getViewName(item)}
-                      </button>
-                      <button onClick={() => openModal(<EquipmentModal type={tab.type} item={item} />)}>edit</button>
-                    </li>
-                  ))}
-                </ul>
+                {tab.content.map((item, index) => (
+                  <div
+                    key={index}
+                    className={cn(styles.select, item === selectedItem ? styles.selected : '')}
+                    onClick={() => setSelectedItem(item)}
+                  >
+                    <div className={styles.name}>
+                      {getViewName(item)}
+                    </div>
+                    <div
+                      className={styles.edit}
+                      onClick={() => openModal(<EquipmentModal type={tab.type} item={item} />)}
+                    >
+
+                    </div>
+                  </div>
+                ))}
               </AccordionContent>
             </AccordionItem>
           </Accordion>
