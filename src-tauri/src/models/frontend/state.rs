@@ -5,10 +5,10 @@ use crate::models::imaging_frames;
 use crate::models::imaging_frames::CalibrationType;
 use crate::models::imaging_session_list::ImagingSession;
 use crate::models::preferences::Preferences;
-use serde::{Deserialize, Serialize, Serializer};
-use serde::ser::SerializeMap;
-use uuid::Uuid;
 use crate::models::state::AppState;
+use serde::ser::SerializeMap;
+use serde::{Deserialize, Serialize, Serializer};
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FrontendAppState {
@@ -129,7 +129,10 @@ pub struct CalibrationTableRow {
 }
 
 impl CalibrationTableRow {
-    pub fn new(calibration_frame: Box<dyn imaging_frames::CalibrationFrame>, app_state: &AppState) -> Self {
+    pub fn new(
+        calibration_frame: Box<dyn imaging_frames::CalibrationFrame>,
+        app_state: &AppState,
+    ) -> Self {
         let mut sub_length = None;
         let mut camera_temp = None;
 

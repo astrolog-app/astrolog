@@ -1,13 +1,13 @@
 use crate::image::{get_exposure_time, get_gain};
 use crate::models::frontend::state::CalibrationTableRow;
 use crate::models::imaging_frames::{BiasFrame, CalibrationType, DarkFrame, ImagingFrameList};
+use crate::models::state::AppState;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::State;
 use uuid::Uuid;
-use crate::models::state::AppState;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AnalyzedCalibrationFrames {
@@ -75,7 +75,7 @@ pub fn analyze_calibration_frames(
 pub async fn classify_calibration_frames(
     frames: CalibrationTableRow,
     paths: Vec<PathBuf>,
-    state: State<'_, Mutex<AppState>>
+    state: State<'_, Mutex<AppState>>,
 ) -> Result<(), String> {
     let mut app_state = state.lock().unwrap();
     let root_directory = app_state.preferences.storage.root_directory.clone();
@@ -132,7 +132,8 @@ pub async fn classify_calibration_frames(
 
         app_state.imaging_frame_list.bias_frames = bias_frames.clone();
     }
-    ImagingFrameList::save(root_directory, &app_state.imaging_frame_list).map_err(|e| e.to_string())?;
+    ImagingFrameList::save(root_directory, &app_state.imaging_frame_list)
+        .map_err(|e| e.to_string())?;
 
     Ok(())
 }

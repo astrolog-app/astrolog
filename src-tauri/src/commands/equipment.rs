@@ -1,7 +1,7 @@
-use std::sync::Mutex;
-use tauri::State;
 use crate::models::equipment::{Camera, EquipmentItem, Filter, Flattener, Mount, Telescope};
 use crate::models::state::AppState;
+use std::sync::Mutex;
+use tauri::State;
 
 #[tauri::command]
 pub fn check_equipment_duplicate(
@@ -13,11 +13,41 @@ pub fn check_equipment_duplicate(
 
     let mut equipment_items: Vec<&dyn EquipmentItem> = Vec::new();
 
-    equipment_items.extend(state.equipment_list.telescopes.values().map(|t| t as &dyn EquipmentItem));
-    equipment_items.extend(state.equipment_list.cameras.values().map(|c| c as &dyn EquipmentItem));
-    equipment_items.extend(state.equipment_list.mounts.values().map(|m| m as &dyn EquipmentItem));
-    equipment_items.extend(state.equipment_list.filters.values().map(|f| f as &dyn EquipmentItem));
-    equipment_items.extend(state.equipment_list.flatteners.values().map(|fl| fl as &dyn EquipmentItem));
+    equipment_items.extend(
+        state
+            .equipment_list
+            .telescopes
+            .values()
+            .map(|t| t as &dyn EquipmentItem),
+    );
+    equipment_items.extend(
+        state
+            .equipment_list
+            .cameras
+            .values()
+            .map(|c| c as &dyn EquipmentItem),
+    );
+    equipment_items.extend(
+        state
+            .equipment_list
+            .mounts
+            .values()
+            .map(|m| m as &dyn EquipmentItem),
+    );
+    equipment_items.extend(
+        state
+            .equipment_list
+            .filters
+            .values()
+            .map(|f| f as &dyn EquipmentItem),
+    );
+    equipment_items.extend(
+        state
+            .equipment_list
+            .flatteners
+            .values()
+            .map(|fl| fl as &dyn EquipmentItem),
+    );
 
     if equipment_items.iter().any(|item| {
         if item.view_name() == view_name {
@@ -35,10 +65,7 @@ pub fn check_equipment_duplicate(
 }
 
 #[tauri::command]
-pub fn save_telescope(
-    state: State<Mutex<AppState>>,
-    telescope: Telescope,
-) -> Result<(), String> {
+pub fn save_telescope(state: State<Mutex<AppState>>, telescope: Telescope) -> Result<(), String> {
     let mut state = state.lock().unwrap();
     let path = state.preferences.storage.root_directory.clone();
 
@@ -64,10 +91,7 @@ pub fn save_telescope(
 }
 
 #[tauri::command]
-pub fn save_camera(
-    state: State<Mutex<AppState>>,
-    camera: Camera,
-) -> Result<(), String> {
+pub fn save_camera(state: State<Mutex<AppState>>, camera: Camera) -> Result<(), String> {
     let mut state = state.lock().unwrap();
     let path = state.preferences.storage.root_directory.clone();
 
@@ -93,10 +117,7 @@ pub fn save_camera(
 }
 
 #[tauri::command]
-pub fn save_mount(
-    state: State<Mutex<AppState>>,
-    mount: Mount,
-) -> Result<(), String> {
+pub fn save_mount(state: State<Mutex<AppState>>, mount: Mount) -> Result<(), String> {
     let mut state = state.lock().unwrap();
     let path = state.preferences.storage.root_directory.clone();
 
@@ -122,10 +143,7 @@ pub fn save_mount(
 }
 
 #[tauri::command]
-pub fn save_filter(
-    state: State<Mutex<AppState>>,
-    filter: Filter,
-) -> Result<(), String> {
+pub fn save_filter(state: State<Mutex<AppState>>, filter: Filter) -> Result<(), String> {
     let mut state = state.lock().unwrap();
     let path = state.preferences.storage.root_directory.clone();
 
@@ -151,10 +169,7 @@ pub fn save_filter(
 }
 
 #[tauri::command]
-pub fn save_flattener(
-    state: State<Mutex<AppState>>,
-    flattener: Flattener,
-) -> Result<(), String> {
+pub fn save_flattener(state: State<Mutex<AppState>>, flattener: Flattener) -> Result<(), String> {
     let mut state = state.lock().unwrap();
     let path = state.preferences.storage.root_directory.clone();
 

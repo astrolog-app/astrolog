@@ -1,9 +1,9 @@
-use std::collections::HashMap;
 use crate::models::equipment::EquipmentList;
 use crate::models::gallery_image_list::{GalleryImage, GalleryImageList};
 use crate::models::imaging_frames::ImagingFrameList;
 use crate::models::imaging_session_list::{ImagingSession, ImagingSessionList};
 use crate::models::preferences::Preferences;
+use std::collections::HashMap;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
 use uuid::Uuid;
@@ -33,6 +33,9 @@ impl AppState {
                 eprintln!("Error loading preferences {}: {}", "", err);
             }
         }
+
+        log::error!("something bad happened!");
+        log::info!("Tauri is awesome!");
 
         match EquipmentList::load(PathBuf::from(&preferences.storage.root_directory)) {
             Ok(data) => {

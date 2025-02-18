@@ -1,10 +1,10 @@
 use crate::models::gallery_image_list::{GalleryImage, GalleryImageList};
+use crate::models::state::AppState;
 use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::State;
 use uuid::Uuid;
-use crate::models::state::AppState;
 
 // TODO: finish
 #[tauri::command]
@@ -30,8 +30,10 @@ pub fn add_new_image(image: GalleryImage, state: State<Mutex<AppState>>) -> Resu
     app_state.gallery_image_list.insert(image.id, new_image);
 
     GalleryImageList::save(
-        PathBuf::from(&app_state.preferences.storage.root_directory), &app_state.gallery_image_list
-    ).map_err(|e| e.to_string())?;
+        PathBuf::from(&app_state.preferences.storage.root_directory),
+        &app_state.gallery_image_list,
+    )
+    .map_err(|e| e.to_string())?;
 
     Ok(())
 }

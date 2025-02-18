@@ -34,6 +34,11 @@ fn main() {
         .to_string();
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_window_state::Builder::new().build())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_log::Builder::new().build())
+        .plugin(tauri_plugin_keygen::Builder::new(&account_id, &verify_key).build())
         .setup(|app| {
             // update
             let handle = app.handle().clone();
@@ -70,10 +75,6 @@ fn main() {
                 }
             }
         })
-        .plugin(tauri_plugin_updater::Builder::new().build())
-        .plugin(tauri_plugin_window_state::Builder::new().build())
-        .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_keygen::Builder::new(&account_id, &verify_key).build())
         .invoke_handler(tauri::generate_handler![
             add_close_lock,
             add_new_image,

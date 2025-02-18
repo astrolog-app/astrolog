@@ -1,13 +1,13 @@
-use std::collections::HashMap;
 use crate::file_store;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::collections::HashMap;
 use std::error::Error;
 use std::path::PathBuf;
 use uuid::Uuid;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ImagingSessionList {
-    pub imaging_session_list: HashMap<Uuid, ImagingSession>
+    pub imaging_session_list: HashMap<Uuid, ImagingSession>,
 }
 
 impl ImagingSessionList {
@@ -18,7 +18,10 @@ impl ImagingSessionList {
         Ok(file_store::load(&filename)?)
     }
 
-    pub fn save(dir: PathBuf, imaging_session_list_map: &HashMap<Uuid, ImagingSession>) -> Result<(), Box<dyn Error>> {
+    pub fn save(
+        dir: PathBuf,
+        imaging_session_list_map: &HashMap<Uuid, ImagingSession>,
+    ) -> Result<(), Box<dyn Error>> {
         let mut filename = dir.canonicalize().unwrap();
         filename.push(".astrolog");
         filename.push("imaging_session_list.json");

@@ -1,6 +1,6 @@
-use std::collections::HashMap;
 use crate::file_store;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::collections::HashMap;
 use std::error::Error;
 use std::path::PathBuf;
 use uuid::Uuid;
@@ -18,7 +18,10 @@ impl GalleryImageList {
         Ok(file_store::load(&filename)?)
     }
 
-    pub fn save(dir: PathBuf, image_list_map: &HashMap<Uuid, GalleryImage>) -> Result<(), Box<dyn Error>> {
+    pub fn save(
+        dir: PathBuf,
+        image_list_map: &HashMap<Uuid, GalleryImage>,
+    ) -> Result<(), Box<dyn Error>> {
         let mut filename = dir.canonicalize().unwrap();
         filename.push(".astrolog");
         filename.push("gallery_image_list.json");

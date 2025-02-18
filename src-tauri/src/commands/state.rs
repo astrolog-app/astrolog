@@ -1,9 +1,11 @@
-use std::sync::Mutex;
-use tauri::State;
 use crate::models::frontend::analytics::Analytics;
-use crate::models::frontend::state::{CalibrationTableRow, DefaultSerializeEquipmentList, FrontendAppState, LogTableRow, TableData};
+use crate::models::frontend::state::{
+    CalibrationTableRow, FrontendAppState, LogTableRow, TableData,
+};
 use crate::models::imaging_frames::ImagingFrameList;
 use crate::models::state::AppState;
+use std::sync::Mutex;
+use tauri::State;
 
 #[tauri::command]
 pub fn load_frontend_app_state(state: State<Mutex<AppState>>) -> Result<String, String> {
