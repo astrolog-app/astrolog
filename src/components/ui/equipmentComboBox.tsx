@@ -45,27 +45,27 @@ export default function EquipmentComboBox({
     switch (type) {
       case EquipmentType.CAMERA:
         setValues(
-          appState.equipment_list.cameras.map((c) => getViewName(c)),
+          Array.from(appState.equipment_list.cameras.values()).map((c) => getViewName(c))
         );
         break;
       case EquipmentType.TELESCOPE:
         setValues(
-          appState.equipment_list.telescopes.map((c) => getViewName(c)),
+          Array.from(appState.equipment_list.telescopes.values()).map((c) => getViewName(c))
         );
         break;
       case EquipmentType.MOUNT:
         setValues(
-          appState.equipment_list.mounts.map((c) => getViewName(c)),
+          Array.from(appState.equipment_list.mounts.values()).map((c) => getViewName(c))
         );
         break;
       case EquipmentType.FILTER:
         setValues(
-          appState.equipment_list.filters.map((c) => getViewName(c)),
+          Array.from(appState.equipment_list.filters.values()).map((c) => getViewName(c))
         );
         break;
       case EquipmentType.FLATTENER:
         setValues(
-          appState.equipment_list.flatteners.map((c) => getViewName(c)),
+          Array.from(appState.equipment_list.flatteners.values()).map((c) => getViewName(c))
         );
         break;
     }

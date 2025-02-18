@@ -28,23 +28,15 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { invoke } from '@tauri-apps/api/core';
 import { useModal } from '@/context/modalProvider';
-
-const formSchema = z.object({
-  date: z.coerce.date({
-    required_error: 'Acquisition date must be set.',
-  }),
-  target: z.string().min(2, {
-    message: 'Target must be set.',
-  }),
-});
+import { generalImagingSessionSchema } from '@/schemas/imagingSessionSchema';
 
 export default function NewImagingSessionGeneral({
   setSelectedTab,
 }: {
   setSelectedTab: React.Dispatch<React.SetStateAction<TabKey | undefined>>;
 }) {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof generalImagingSessionSchema>>({
+    resolver: zodResolver(generalImagingSessionSchema),
     defaultValues: {
       target: '',
     },

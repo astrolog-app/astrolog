@@ -4,8 +4,8 @@ import styles from './page.module.scss';
 import { Analytics } from './analytics/analytics';
 import Log from './log/log';
 import Gallery from './gallery/gallery';
-import { TopBar } from '@/components/topBar';
-import SideNav from '@/components/sideNav';
+import { TopBar } from '@/components/bars/topBar';
+import SideNav from '@/components/bars/sideNav';
 import React, { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AnalyticsSVG, EquipmentSVG, GallerySVG, LogSVG } from '@/public/svgs';
@@ -15,7 +15,7 @@ import { KeygenLicense } from 'tauri-plugin-keygen-api';
 import { toast } from '@/components/ui/use-toast';
 import { useModal } from '@/context/modalProvider';
 import { useAppState } from '@/context/stateProvider';
-import BottomBar from '@/components/bottomBar';
+import BottomBar from '@/components/bars/bottomBar';
 
 export interface Tab {
   component: React.ReactNode;

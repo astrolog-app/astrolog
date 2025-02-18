@@ -3,10 +3,10 @@
 import styles from './equipmentDetails.module.scss';
 import { Camera, EquipmentItem, Filter, Flattener, getEquipmentType, Telescope } from '@/interfaces/equipment';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { EquipmentType } from '@/enums/equipmentType';
 import { getViewName } from '@/utils/equipment';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 
 interface EquipmentDetailsProps {
   selectedItem: EquipmentItem | undefined;

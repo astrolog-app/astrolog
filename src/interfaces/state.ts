@@ -13,7 +13,7 @@ export interface AppState {
   preferences: Preferences;
   table_data: TableData;
   equipment_list: EquipmentList;
-  image_list: Image[];
+  image_list: GalleryImage[];
   analytics: Analytics;
 }
 
@@ -33,11 +33,11 @@ interface User {
 }
 
 interface TableData {
-  sessions: Session[];
+  sessions: ImagingSession[];
   calibration: CalibrationFrame[];
 }
 
-export interface Session {
+export interface ImagingSession {
   id: UUID;
   date: string;
   target: string;
@@ -76,7 +76,7 @@ export interface EquipmentList {
   flatteners: Map<UUID, Flattener>;
 }
 
-export interface Image {
+export interface GalleryImage {
   id: UUID;
   title: string;
   path: string;

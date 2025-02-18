@@ -17,32 +17,15 @@ import { Button } from '@/components/ui/button';
 import { useModal } from '@/context/modalProvider';
 import { TabKey } from '@/components/modals/newImagingSession/newImagingSession';
 import { EquipmentType } from '@/enums/equipmentType';
-
-const formSchema = z.object({
-  telescope: z.string().min(2, {
-    message: 'Username must be at least 2 characters.', // change
-  }),
-  camera: z.string().min(2, {
-    message: 'Username must be at least 2 characters.', // change
-  }),
-  mount: z.string().min(2, {
-    message: 'Username must be at least 2 characters.', // change
-  }),
-  filter: z.string().min(2, {
-    message: 'Username must be at least 2 characters.', // change
-  }),
-  flattener: z.string().min(2, {
-    message: 'Username must be at least 2 characters.', // change
-  }),
-});
+import { equipmentImagingSessionSchema } from '@/schemas/imagingSessionSchema';
 
 export default function NewImagingSessionEquipment({
   setSelectedTab,
 }: {
   setSelectedTab: React.Dispatch<React.SetStateAction<TabKey | undefined>>;
 }) {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof equipmentImagingSessionSchema>>({
+    resolver: zodResolver(equipmentImagingSessionSchema),
   });
 
   const { closeModal } = useModal();

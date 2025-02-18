@@ -49,7 +49,7 @@ import { useModal } from '@/context/modalProvider';
 import NewImagingSession from '@/components/modals/newImagingSession/newImagingSession';
 import { calibrationColumns } from '@/components/sessionTable/calibrationColumns';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CalibrationFrame, Session } from '@/interfaces/state';
+import { CalibrationFrame, ImagingSession } from '@/interfaces/state';
 import CalibrationRowEditor from '@/components/modals/calibrationRowEditor';
 
 interface SessionTableProps {
@@ -125,7 +125,7 @@ export function LogTable<TData, TValue>({
     }
 
     const rowData = table.getRowModel().rows.find((row) => row.id === rowId)
-      ?.original as Session;
+      ?.original as ImagingSession;
     setSelectedSessionId(rowData.id);
   };
 

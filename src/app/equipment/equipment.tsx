@@ -18,8 +18,8 @@ import {
 import { useModal } from '@/context/modalProvider';
 import EquipmentModal from '@/components/modals/equipment/equipment';
 import { EquipmentType } from '@/enums/equipmentType';
-import EquipmentDetails from '@/components/equipmentDetails';
-import EquipmentListView from '@/components/equipmentListView';
+import EquipmentDetails from '@/components/equipment/equipmentDetails';
+import EquipmentListView from '@/components/equipment/equipmentListView';
 import { useState } from 'react';
 import { EquipmentItem } from '@/interfaces/equipment';
 

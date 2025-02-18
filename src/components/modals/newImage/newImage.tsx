@@ -24,7 +24,7 @@ import { Button } from '@/components/ui/button';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from '@/components/ui/use-toast';
 import { useModal } from '@/context/modalProvider';
-import { Image } from '@/interfaces/state';
+import { GalleryImage } from '@/interfaces/state';
 
 interface NewImageProps {
   defaultValue: string;
@@ -57,7 +57,7 @@ export default function NewImage({
   });
 
   function onSubmit(): void {
-    const newImage: Image = {
+    const newImage: GalleryImage = {
       id: "1537ca0b-a6e6-4bc2-a871-be0b483c80b8", // TODO
       path: form.getValues().path,
       title: form.getValues().title,
