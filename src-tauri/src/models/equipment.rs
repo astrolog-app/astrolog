@@ -6,85 +6,13 @@ use std::error::Error;
 use std::path::PathBuf;
 use uuid::Uuid;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct EquipmentList {
     pub telescopes: HashMap<Uuid, Telescope>,
     pub cameras: HashMap<Uuid, Camera>,
     pub mounts: HashMap<Uuid, Mount>,
     pub filters: HashMap<Uuid, Filter>,
     pub flatteners: HashMap<Uuid, Flattener>,
-}
-
-impl<'de> Deserialize<'de> for EquipmentList {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        #[derive(Deserialize)]
-        struct TempEquipmentList {
-            pub telescopes: Vec<Telescope>,
-            pub cameras: Vec<Camera>,
-            pub mounts: Vec<Mount>,
-            pub filters: Vec<Filter>,
-            pub flatteners: Vec<Flattener>,
-        }
-
-        let TempEquipmentList {
-            telescopes,
-            cameras,
-            mounts,
-            filters,
-            flatteners,
-        } = TempEquipmentList::deserialize(deserializer)?;
-
-        let telescopes_map: HashMap<Uuid, Telescope> = telescopes
-            .into_iter()
-            .map(|frame| (frame.id, frame))
-            .collect();
-
-        let cameras_map: HashMap<Uuid, Camera> =
-            cameras.into_iter().map(|frame| (frame.id, frame)).collect();
-
-        let mounts_map: HashMap<Uuid, Mount> =
-            mounts.into_iter().map(|frame| (frame.id, frame)).collect();
-
-        let filters_map: HashMap<Uuid, Filter> =
-            filters.into_iter().map(|frame| (frame.id, frame)).collect();
-
-        let flatteners_map: HashMap<Uuid, Flattener> = flatteners
-            .into_iter()
-            .map(|frame| (frame.id, frame))
-            .collect();
-
-        Ok(EquipmentList {
-            telescopes: telescopes_map,
-            cameras: cameras_map,
-            mounts: mounts_map,
-            filters: filters_map,
-            flatteners: flatteners_map,
-        })
-    }
-}
-
-impl Serialize for EquipmentList {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let telescopes: Vec<&Telescope> = self.telescopes.values().collect();
-        let cameras: Vec<&Camera> = self.cameras.values().collect();
-        let mounts: Vec<&Mount> = self.mounts.values().collect();
-        let filters: Vec<&Filter> = self.filters.values().collect();
-        let flatteners: Vec<&Flattener> = self.flatteners.values().collect();
-
-        let mut state = serializer.serialize_struct("EquipmentList", 4)?;
-        state.serialize_field("telescopes", &telescopes)?;
-        state.serialize_field("cameras", &cameras)?;
-        state.serialize_field("mounts", &mounts)?;
-        state.serialize_field("filters", &filters)?;
-        state.serialize_field("flatteners", &flatteners)?;
-        state.end()
-    }
 }
 
 impl EquipmentList {

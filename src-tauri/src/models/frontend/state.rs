@@ -1,7 +1,6 @@
-use std::collections::BTreeMap;
-use crate::models::equipment::{Camera, EquipmentItem, EquipmentList, Filter, Flattener, Mount, Telescope};
+use crate::models::equipment::{EquipmentItem, EquipmentList};
 use crate::models::frontend::analytics::Analytics;
-use crate::models::image_list::Image;
+use crate::models::gallery_image_list::GalleryImage;
 use crate::models::imaging_frames;
 use crate::models::imaging_frames::CalibrationType;
 use crate::models::imaging_session_list::ImagingSession;
@@ -15,8 +14,8 @@ use crate::models::state::AppState;
 pub struct FrontendAppState {
     pub preferences: Preferences,
     pub table_data: TableData,
-    pub equipment_list: DefaultSerializeEquipmentList,
-    pub image_list: Vec<Image>,
+    pub equipment_list: EquipmentList,
+    pub image_list: Vec<GalleryImage>,
     pub analytics: Analytics,
 }
 
@@ -157,40 +156,5 @@ impl CalibrationTableRow {
             camera_temp,
             total_subs: *calibration_frame.total_subs(),
         }
-    }
-}
-
-#[derive(Debug, Deserialize)]
-pub struct DefaultSerializeEquipmentList(pub EquipmentList);
-
-impl Serialize for DefaultSerializeEquipmentList {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        // Convert each HashMap<Uuid, T> into a BTreeMap<String, T>
-        let telescopes: BTreeMap<String, &Telescope> = self.0.telescopes.iter()
-            .map(|(k, v)| (k.to_string(), v))
-            .collect();
-        let cameras: BTreeMap<String, &Camera> = self.0.cameras.iter()
-            .map(|(k, v)| (k.to_string(), v))
-            .collect();
-        let mounts: BTreeMap<String, &Mount> = self.0.mounts.iter()
-            .map(|(k, v)| (k.to_string(), v))
-            .collect();
-        let filters: BTreeMap<String, &Filter> = self.0.filters.iter()
-            .map(|(k, v)| (k.to_string(), v))
-            .collect();
-        let flatteners: BTreeMap<String, &Flattener> = self.0.flatteners.iter()
-            .map(|(k, v)| (k.to_string(), v))
-            .collect();
-
-        let mut map = serializer.serialize_map(Some(5))?;
-        map.serialize_entry("telescopes", &telescopes)?;
-        map.serialize_entry("cameras", &cameras)?;
-        map.serialize_entry("mounts", &mounts)?;
-        map.serialize_entry("filters", &filters)?;
-        map.serialize_entry("flatteners", &flatteners)?;
-        map.end()
     }
 }

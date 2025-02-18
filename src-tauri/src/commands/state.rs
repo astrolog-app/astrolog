@@ -10,7 +10,7 @@ pub fn load_frontend_app_state(state: State<Mutex<AppState>>) -> Result<String, 
     let app_state = state.lock().unwrap();
 
     let preferences = app_state.preferences.clone();
-    let image_list = app_state.image_list.values().cloned().collect();
+    let image_list = app_state.gallery_image_list.values().cloned().collect();
 
     let calibration_frames = ImagingFrameList::get_calibration_frames(&app_state);
     let calibration_data: Vec<CalibrationTableRow> = calibration_frames
@@ -34,7 +34,7 @@ pub fn load_frontend_app_state(state: State<Mutex<AppState>>) -> Result<String, 
     let data = FrontendAppState {
         preferences,
         table_data,
-        equipment_list: DefaultSerializeEquipmentList(app_state.equipment_list.clone()),
+        equipment_list: app_state.equipment_list.clone(),
         image_list,
         analytics,
     };

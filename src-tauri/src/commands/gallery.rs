@@ -1,4 +1,4 @@
-use crate::models::image_list::{Image, ImageList};
+use crate::models::gallery_image_list::{GalleryImage, GalleryImageList};
 use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
@@ -8,7 +8,7 @@ use crate::models::state::AppState;
 
 // TODO: finish
 #[tauri::command]
-pub fn add_new_image(image: Image, state: State<Mutex<AppState>>) -> Result<(), String> {
+pub fn add_new_image(image: GalleryImage, state: State<Mutex<AppState>>) -> Result<(), String> {
     let app_state = state.lock().unwrap();
 
     let mut destination = app_state.preferences.storage.root_directory.clone();
@@ -19,7 +19,7 @@ pub fn add_new_image(image: Image, state: State<Mutex<AppState>>) -> Result<(), 
 
     fs::copy(image.path, &destination).map_err(|e| e.to_string())?;
 
-    let new_image = Image {
+    let new_image = GalleryImage {
         id: Uuid::new_v4(),
         title: image.title,
         path: destination,
@@ -27,10 +27,10 @@ pub fn add_new_image(image: Image, state: State<Mutex<AppState>>) -> Result<(), 
     };
 
     let mut app_state = state.lock().unwrap();
-    app_state.image_list.insert(image.id, new_image);
+    app_state.gallery_image_list.insert(image.id, new_image);
 
-    ImageList::save(
-        PathBuf::from(&app_state.preferences.storage.root_directory), &app_state.image_list
+    GalleryImageList::save(
+        PathBuf::from(&app_state.preferences.storage.root_directory), &app_state.gallery_image_list
     ).map_err(|e| e.to_string())?;
 
     Ok(())

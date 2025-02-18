@@ -9,80 +9,12 @@ use std::fmt;
 use std::path::PathBuf;
 use uuid::Uuid;
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct ImagingFrameList {
     pub light_frames: HashMap<Uuid, LightFrame>,
     pub dark_frames: HashMap<Uuid, DarkFrame>,
     pub bias_frames: HashMap<Uuid, BiasFrame>,
     flat_frames: HashMap<Uuid, FlatFrame>,
-}
-
-impl<'de> Deserialize<'de> for ImagingFrameList {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        #[derive(Deserialize)]
-        struct TempImagingFrameList {
-            light_frames: Vec<LightFrame>,
-            dark_frames: Vec<DarkFrame>,
-            bias_frames: Vec<BiasFrame>,
-            flat_frames: Vec<FlatFrame>,
-        }
-
-        let TempImagingFrameList {
-            light_frames,
-            dark_frames,
-            bias_frames,
-            flat_frames,
-        } = TempImagingFrameList::deserialize(deserializer)?;
-
-        let light_frames_map: HashMap<Uuid, LightFrame> = light_frames
-            .into_iter()
-            .map(|frame| (frame.id, frame))
-            .collect();
-
-        let dark_frames_map: HashMap<Uuid, DarkFrame> = dark_frames
-            .into_iter()
-            .map(|frame| (frame.id, frame))
-            .collect();
-
-        let bias_frames_map: HashMap<Uuid, BiasFrame> = bias_frames
-            .into_iter()
-            .map(|frame| (frame.id, frame))
-            .collect();
-
-        let flat_frames_map: HashMap<Uuid, FlatFrame> = flat_frames
-            .into_iter()
-            .map(|frame| (frame.id, frame))
-            .collect();
-
-        Ok(ImagingFrameList {
-            light_frames: light_frames_map,
-            dark_frames: dark_frames_map,
-            bias_frames: bias_frames_map,
-            flat_frames: flat_frames_map,
-        })
-    }
-}
-
-impl Serialize for ImagingFrameList {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let light_frames: Vec<&LightFrame> = self.light_frames.values().collect();
-        let dark_frames: Vec<&DarkFrame> = self.dark_frames.values().collect();
-        let bias_frames: Vec<&BiasFrame> = self.bias_frames.values().collect();
-        let flat_frames: Vec<&FlatFrame> = self.flat_frames.values().collect();
-
-        let mut state = serializer.serialize_struct("ImagingFrameList", 4)?;
-        state.serialize_field("light_frames", &light_frames)?;
-        state.serialize_field("dark_frames", &dark_frames)?;
-        state.serialize_field("bias_frames", &bias_frames)?;
-        state.serialize_field("flat_frames", &flat_frames)?;
-        state.end()
-    }
 }
 
 impl ImagingFrameList {

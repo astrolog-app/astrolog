@@ -5,37 +5,9 @@ use std::error::Error;
 use std::path::PathBuf;
 use uuid::Uuid;
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct ImagingSessionList {
     pub imaging_session_list: HashMap<Uuid, ImagingSession>
-}
-
-impl<'de> Deserialize<'de> for ImagingSessionList {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let imaging_sessions: Vec<ImagingSession> = Vec::deserialize(deserializer)?;
-
-        let imaging_session_map: HashMap<Uuid, ImagingSession> = imaging_sessions
-            .into_iter()
-            .map(|session| (session.id, session))
-            .collect();
-
-        Ok(ImagingSessionList {
-            imaging_session_list: imaging_session_map,
-        })
-    }
-}
-
-impl Serialize for ImagingSessionList {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let imaging_sessions: Vec<&ImagingSession> = self.imaging_session_list.values().collect();
-        imaging_sessions.serialize(serializer)
-    }
 }
 
 impl ImagingSessionList {
