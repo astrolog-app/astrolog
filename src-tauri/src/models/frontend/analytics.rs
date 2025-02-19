@@ -12,14 +12,26 @@ impl Analytics {
     pub fn new() -> Analytics {
         let sessions_chart = SessionsChart {};
 
-        let info_cards: Vec<InfoCard> = vec![];
+        let info_card = InfoCard {
+            title: "Test".to_string(),
+            data: "test".to_string(),
+        };
+        let info_cards: Vec<InfoCard> = vec![
+            info_card.clone(),
+            info_card.clone(),
+            info_card.clone(),
+            info_card.clone(),
+            info_card.clone(),
+            info_card.clone(),
+            info_card.clone(),
+        ];
 
         let pie_chart_data = PieChartData {};
         let equipment_chart = EquipmentChart {
             mounts: pie_chart_data,
         };
 
-        let integration_chart = IntegrationChart { integrated_subs: 0 };
+        let integration_chart = IntegrationChart { integrated_subs: 83.2 };
 
         Analytics {
             sessions_chart,
@@ -31,9 +43,17 @@ impl Analytics {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct SessionsChart {}
+struct SessionsChart {
+    data: Vec<SessionsChartData>,
+}
 
 #[derive(Serialize, Deserialize, Debug)]
+struct SessionsChartData {
+    date: String,
+    seconds: i32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)] // TODO: remove clone
 struct InfoCard {
     title: String,
     data: String,
@@ -49,5 +69,5 @@ struct PieChartData {}
 
 #[derive(Serialize, Deserialize, Debug)]
 struct IntegrationChart {
-    integrated_subs: i32,
+    integrated_subs: f64,
 }

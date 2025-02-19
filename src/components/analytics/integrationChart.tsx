@@ -18,22 +18,24 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import { cn } from '@/utils/classNames';
-
-const chartData = [{ month: 'january', desktop: 20, mobile: 80 }];
+import { useAppState } from '@/context/stateProvider';
 
 const chartConfig = {
-  desktop: {
-    label: 'Desktop',
+  integrated: {
+    label: 'Integrated',
     color: 'hsl(var(--chart-1))',
   },
-  mobile: {
-    label: 'Mobile',
+  notIntegrated: {
+    label: 'Not Integrated',
     color: 'hsl(var(--chart-2))',
   },
 } satisfies ChartConfig;
 
 export function IntegrationChart({ className }: { className?: string }) {
-  const totalVisitors = chartData[0].desktop + chartData[0].mobile;
+  const { appState } = useAppState();
+
+  const integratedSubs = appState.analytics.integration_chart.integrated_subs;
+  const chartData = [{ integrated: integratedSubs, notIntegrated: 100 - integratedSubs }];
 
   return (
     <Card className={cn(className, 'flex flex-col')}>
@@ -67,14 +69,14 @@ export function IntegrationChart({ className }: { className?: string }) {
                           y={(viewBox.cy || 0) - 16}
                           className="fill-foreground text-2xl font-bold"
                         >
-                          {totalVisitors.toLocaleString()}
+                          {integratedSubs.toLocaleString()}%
                         </tspan>
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 4}
                           className="fill-muted-foreground"
                         >
-                          Visitors
+                          Integrated
                         </tspan>
                       </text>
                     );
@@ -83,15 +85,15 @@ export function IntegrationChart({ className }: { className?: string }) {
               />
             </PolarRadiusAxis>
             <RadialBar
-              dataKey="desktop"
+              dataKey="integrated"
               stackId="a"
               cornerRadius={5}
-              fill="var(--color-desktop)"
+              fill="var(--color-integrated)"
               className="stroke-transparent stroke-2"
             />
             <RadialBar
-              dataKey="mobile"
-              fill="var(--color-mobile)"
+              dataKey="notIntegrated"
+              fill="var(--color-notIntegrated)"
               stackId="a"
               cornerRadius={5}
               className="stroke-transparent stroke-2"

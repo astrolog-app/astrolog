@@ -6,10 +6,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import SessionsChart from '@/components/statistics/sessionsChart';
-import { EquipmentChart } from '@/components/statistics/equipmentChart';
-import { IntegrationChart } from '@/components/statistics/integrationChart';
-import InfoCard from '@/components/statistics/infoCard';
+import SessionsChart from '@/components/analytics/sessionsChart';
+import { EquipmentChart } from '@/components/analytics/equipmentChart';
+import { IntegrationChart } from '@/components/analytics/integrationChart';
+import InfoCard from '@/components/analytics/infoCard';
 
 export function Analytics() {
   return (
@@ -25,19 +25,19 @@ export function Analytics() {
       <div className={styles.lower}>
         <SessionsChart className={styles.sessionsChart} />
         <div className={styles.chartGroup}>
-          <InfoCard className={styles.infoCard} />
-          <InfoCard className={styles.infoCard} />
-          <InfoCard className={styles.infoCard} />
+          <InfoCard className={styles.infoCard} index={0} />
+          <InfoCard className={styles.infoCard} index={1} />
+          <InfoCard className={styles.infoCard} index={2} />
         </div>
         <div className={styles.chartGroup}>
           <EquipmentChart className={styles.equipmentChart} />
           <IntegrationChart className={styles.integrationChart} />
         </div>
         <div className={styles.chartGroup}>
-          <InfoCard className={styles.infoCard} />
-          <InfoCard className={styles.infoCard} />
-          <InfoCard className={styles.infoCard} />
-          <InfoCard className={styles.infoCard} />
+          <InfoCard className={styles.infoCard} index={3} />
+          <InfoCard className={styles.infoCard} index={4} />
+          <InfoCard className={styles.infoCard} index={5} />
+          <InfoCard className={styles.infoCard} index={6} />
         </div>
       </div>
     </Tab>
