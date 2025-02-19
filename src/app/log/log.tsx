@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/resizable';
 import { useModal } from '@/context/modalProvider';
 import SelectImagingFrames from '@/components/modals/selectImagingFrames';
+import ImagePreview from '@/components/images/imagePreview';
 
 export default function Log() {
   const { openModal } = useModal();
@@ -94,15 +95,7 @@ export default function Log() {
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={30}>
-          <Card className={styles.imagePreviewCard}>
-            <CardHeader>
-              <CardTitle>Image Preview</CardTitle>
-              <CardDescription>Card Description</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className={styles.imagePreview}></div>
-            </CardContent>
-          </Card>
+          <ImagePreview selectedSessionId={selectedSessionId} />
         </ResizablePanel>
       </ResizablePanelGroup>
     </Tab>

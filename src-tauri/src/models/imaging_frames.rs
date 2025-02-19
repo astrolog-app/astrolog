@@ -78,7 +78,7 @@ pub struct LightFrame {
     pub camera_id: Uuid,
     pub total_subs: i32,
     pub gain: i32,
-    pub frames: Vec<String>,
+    pub frames: Vec<PathBuf>,
 
     pub date: String,
     pub target: String,
@@ -136,7 +136,7 @@ pub struct DarkFrame {
     pub camera_id: Uuid,
     pub total_subs: i32,
     pub gain: i32,
-    pub frames: Vec<String>,
+    pub frames: Vec<PathBuf>,
 
     #[serde(skip_serializing, skip_deserializing)]
     pub calibration_type: CalibrationType,
@@ -175,7 +175,7 @@ pub struct BiasFrame {
     pub camera_id: Uuid,
     pub total_subs: i32,
     pub gain: i32,
-    pub frames: Vec<String>,
+    pub frames: Vec<PathBuf>,
 
     #[serde(skip_serializing, skip_deserializing)]
     pub calibration_type: CalibrationType,
@@ -211,5 +211,5 @@ struct FlatFrame {
     camera_id: Uuid,
     total_subs: i32,
     gain: i32,
-    frames: Vec<String>,
+    frames: Vec<PathBuf>,
 }

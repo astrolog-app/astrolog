@@ -1,6 +1,9 @@
 use std::path::PathBuf;
 use std::process::Command;
+use std::sync::Mutex;
+use tauri::State;
 use uuid::Uuid;
+use crate::models::state::AppState;
 
 #[tauri::command]
 pub fn export_csv(path: PathBuf) {
@@ -57,4 +60,22 @@ pub fn open_imaging_session(_id: Uuid) -> Result<(), String> {
     }
 
     Ok(())
+}
+
+#[tauri::command]
+pub fn get_image_frames_path(state: State<Mutex<AppState>>, id: Uuid) -> Result<Vec<PathBuf>, String> {
+    let app_state = state.lock().map_err(|_| "Failed to acquire lock".to_string())?;
+    let base_path = &app_state.preferences.storage.root_directory;
+
+    let session = app_state.imaging_sessions.get(&id)
+        .ok_or_else(|| format!("Session with ID {} not found", id))?;
+
+    let light_frames = app_state.imaging_frame_list.light_frames.get(&session.light_frame_id)
+        .ok_or_else(|| format!("No light frames found for session ID {}", session.light_frame_id))?;
+
+    let full_paths: Vec<PathBuf> = light_frames.frames.iter()
+        .map(|path| base_path.join(path))
+        .collect();
+
+    Ok(full_paths)
 }

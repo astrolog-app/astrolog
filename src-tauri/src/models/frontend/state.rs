@@ -88,7 +88,7 @@ impl LogTableRow {
                     .map_or("N/A".to_string(), |camera| camera.view_name().clone());
 
                 Some(LogTableRow {
-                    id: light_frame.id,
+                    id: imaging_session.id,
                     date: light_frame.date.clone(),
                     target: light_frame.target.clone(),
                     sub_length: light_frame.sub_length,

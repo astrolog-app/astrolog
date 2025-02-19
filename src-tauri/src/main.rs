@@ -6,7 +6,7 @@ use crate::file_system::set_folder_invisible;
 use commands::calibration::{analyze_calibration_frames, classify_calibration_frames};
 use commands::gallery::{add_new_image, open_image};
 use commands::image::get_date;
-use commands::imaging_sessions::{export_csv, open_imaging_session};
+use commands::imaging_sessions::{export_csv, open_imaging_session, get_image_frames_path};
 use commands::preferences::{save_preferences, set_root_directory, setup_backup};
 use commands::state::{
     add_close_lock, load_frontend_app_state, remove_close_lock, update_app_state_from_json,
@@ -83,6 +83,7 @@ fn main() {
             classify_calibration_frames,
             export_csv,
             get_date,
+            get_image_frames_path,
             load_frontend_app_state,
             open_browser,
             open_image,
