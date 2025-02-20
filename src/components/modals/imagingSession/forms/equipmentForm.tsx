@@ -11,18 +11,18 @@ import React from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import styles from './newImagingSessionEquipment.module.scss';
+import styles from './equipmentForm.module.scss';
 import EquipmentComboBox from '@/components/ui/equipmentComboBox';
 import { Button } from '@/components/ui/button';
 import { useModal } from '@/context/modalProvider';
-import { TabKey } from '@/components/modals/newImagingSession/newImagingSession';
 import { EquipmentType } from '@/enums/equipmentType';
 import { equipmentImagingSessionSchema } from '@/schemas/imagingSessionSchema';
+import { TabKey } from '@/components/modals/imagingSession/imagingSessionEditor';
 
-export default function NewImagingSessionEquipment({
-  setSelectedTab,
+export default function EquipmentForm({
+  setTab,
 }: {
-  setSelectedTab: React.Dispatch<React.SetStateAction<TabKey | undefined>>;
+  setTab: React.Dispatch<React.SetStateAction<TabKey>>;
 }) {
   const form = useForm<z.infer<typeof equipmentImagingSessionSchema>>({
     resolver: zodResolver(equipmentImagingSessionSchema),
@@ -31,7 +31,7 @@ export default function NewImagingSessionEquipment({
   const { closeModal } = useModal();
 
   function onSubmit() {
-    setSelectedTab('calibration');
+    setTab('weather');
   }
 
   return (

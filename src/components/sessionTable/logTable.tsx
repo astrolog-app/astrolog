@@ -46,7 +46,7 @@ import { DeleteSVG } from '@/public/svgs';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from '@/components/ui/use-toast';
 import { useModal } from '@/context/modalProvider';
-import NewImagingSession from '@/components/modals/newImagingSession/newImagingSession';
+import NewImagingSession from '@/components/modals/imagingSession/newImagingSession';
 import { calibrationColumns } from '@/components/sessionTable/calibrationColumns';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CalibrationFrame, ImagingSession } from '@/interfaces/state';

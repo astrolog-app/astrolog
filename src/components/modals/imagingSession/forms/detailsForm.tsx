@@ -1,5 +1,3 @@
-'use client';
-
 import {
   Form,
   FormControl,
@@ -14,9 +12,7 @@ import { Input } from '@/components/ui/input';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import styles from './newImagingSessionCalibration.module.scss';
-import { Button } from '@/components/ui/button';
-import { useModal } from '@/context/modalProvider';
+import { TabKey } from '@/components/modals/imagingSession/imagingSessionEditor';
 
 const formSchema = z.object({
   target: z.string().min(2, {
@@ -24,7 +20,11 @@ const formSchema = z.object({
   }),
 });
 
-export default function NewImagingSessionCalibration() {
+export default function DetailsForm({
+                                      setTab,
+                                    }: {
+  setTab: React.Dispatch<React.SetStateAction<TabKey>>;
+}) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -32,11 +32,13 @@ export default function NewImagingSessionCalibration() {
     },
   });
 
-  const { closeModal } = useModal();
+  function onSubmit() {
+    setTab('equipment');
+  }
 
   return (
     <Form {...form}>
-      <form>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
         <FormField
           control={form.control}
           name="target"
@@ -54,17 +56,6 @@ export default function NewImagingSessionCalibration() {
             </FormItem>
           )}
         />
-        <div className={styles.buttons}>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={closeModal}
-            className={styles.cancelButton}
-          >
-            Cancel
-          </Button>
-          <Button type="submit">Next</Button>
-        </div>
       </form>
     </Form>
   );

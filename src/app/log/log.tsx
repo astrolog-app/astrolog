@@ -12,7 +12,7 @@ import styles from './log.module.scss';
 import { LogTable } from '@/components/sessionTable/logTable';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import NewImagingSession from '@/components/modals/newImagingSession/newImagingSession';
+import NewImagingSession from '@/components/modals/imagingSession/newImagingSession';
 import { UUID } from 'crypto';
 import { save } from '@tauri-apps/plugin-dialog';
 import { toast } from '@/components/ui/use-toast';

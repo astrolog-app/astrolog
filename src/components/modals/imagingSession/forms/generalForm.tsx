@@ -1,6 +1,6 @@
 'use client';
 
-import styles from './newImagingSessionGeneral.module.scss';
+import styles from './generalForm.module.scss';
 import {
   Form,
   FormControl,
@@ -15,7 +15,6 @@ import { Input } from '@/components/ui/input';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { TabKey } from '@/components/modals/newImagingSession/newImagingSession';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -29,11 +28,12 @@ import { format } from 'date-fns';
 import { invoke } from '@tauri-apps/api/core';
 import { useModal } from '@/context/modalProvider';
 import { generalImagingSessionSchema } from '@/schemas/imagingSessionSchema';
+import { TabKey } from '@/components/modals/imagingSession/imagingSessionEditor';
 
-export default function NewImagingSessionGeneral({
-  setSelectedTab,
+export default function GeneralForm({
+  setTab,
 }: {
-  setSelectedTab: React.Dispatch<React.SetStateAction<TabKey | undefined>>;
+  setTab: React.Dispatch<React.SetStateAction<TabKey>>;
 }) {
   const form = useForm<z.infer<typeof generalImagingSessionSchema>>({
     resolver: zodResolver(generalImagingSessionSchema),
@@ -45,7 +45,7 @@ export default function NewImagingSessionGeneral({
   const { closeModal } = useModal();
 
   function onSubmit() {
-    setSelectedTab('equipment');
+    setTab('details');
   }
 
   useEffect(() => {
