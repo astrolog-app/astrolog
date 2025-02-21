@@ -1,12 +1,8 @@
 export interface Analytics {
-  sessions_chart: SessionsChart,
-  info_cards: InfoCard[],
+  sessions_chart: SessionsChartData[],
+  info_cards: InfoCardData[],
   equipment_chart: EquipmentChart,
-  integration_chart: IntegrationChart,
-}
-
-interface SessionsChart {
-  data: SessionsChartData[]
+  integration_chart: IntegrationChartData,
 }
 
 interface SessionsChartData {
@@ -14,13 +10,30 @@ interface SessionsChartData {
   seconds: number,
 }
 
-interface InfoCard {
+interface InfoCardData {
   title: string,
   data: string,
 }
 
-interface EquipmentChart {}
+interface EquipmentChart {
+  mounts: EquipmentChartData,
+  telescopes: EquipmentChartData,
+  cameras: EquipmentChartData,
+}
 
-interface IntegrationChart {
+interface EquipmentChartData {
+  one: PieChartData,
+  two: PieChartData,
+  three: PieChartData,
+  four: PieChartData,
+  five: PieChartData,
+}
+
+interface PieChartData {
+  name: string,
+  value: number,
+}
+
+interface IntegrationChartData {
   integrated_subs: number,
 }
