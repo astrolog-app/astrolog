@@ -16,6 +16,7 @@ import { useModal } from '@/context/modalProvider';
 import EquipmentModal from '@/components/modals/equipment/equipment';
 import { EquipmentType } from '@/enums/equipmentType';
 import { cn } from '@/utils/classNames';
+import { Button } from '@/components/ui/button';
 
 interface EquipmentListViewProps {
   selectedItem: EquipmentItem | undefined;
@@ -62,18 +63,23 @@ export default function EquipmentListView({ selectedItem, setSelectedItem }: Equ
                 {tab.content.map((item, index) => (
                   <div
                     key={index}
-                    className={cn(styles.select, item === selectedItem ? styles.selected : '')}
-                    onClick={() => setSelectedItem(item)}
+                    className={styles.wrapper}
                   >
-                    <div className={styles.name}>
-                      {getViewName(item)}
-                    </div>
                     <div
-                      className={styles.edit}
-                      onClick={() => openModal(<EquipmentModal type={tab.type} item={item} />)}
+                      className={cn(styles.select, item === selectedItem ? styles.selected : '')}
+                      onClick={() => setSelectedItem(item)}
                     >
-
+                        {getViewName(item)}
                     </div>
+                    {item === selectedItem && (
+                      <Button
+                        className={styles.edit}
+                        variant='secondary'
+                        onClick={() => openModal(<EquipmentModal type={tab.type} item={item} />)}
+                      >
+                        Edit
+                      </Button>
+                    )}
                   </div>
                 ))}
               </AccordionContent>

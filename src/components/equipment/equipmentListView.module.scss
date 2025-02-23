@@ -6,39 +6,36 @@
   .list {
     padding: var(--padding);
 
-    .select {
+    .wrapper {
       display: flex;
-      justify-content: space-between;
-      padding: 0.5rem;
-      border-radius: var(--radius);
-      cursor: pointer;
       margin-bottom: 0.5rem;
 
-      .name {
-
-      }
-
-      .edit {
-        width: 1rem;
-        height: 1rem;
-        background-color: green;
+      .select {
+        flex-grow: 1;
+        padding: 0.5rem;
         border-radius: var(--radius);
-      }
+        cursor: pointer;
 
-      &:hover {
-        background-color: hsl(var(--muted) / 0.5);
+        &:hover {
+          background-color: hsl(var(--muted) / 0.5);
+        }
       }
 
       &:last-of-type {
         margin-bottom: 0;
       }
-    }
 
-    .selected {
-      background-color: hsl(var(--muted));
-
-      &:hover {
+      .selected {
         background-color: hsl(var(--muted));
+
+        &:hover {
+          background-color: hsl(var(--muted));
+        }
+      }
+
+      .edit {
+        margin-left: 0.25rem;
+        height: fit-content;
       }
     }
   }
