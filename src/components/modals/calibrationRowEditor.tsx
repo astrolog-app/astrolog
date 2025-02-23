@@ -10,7 +10,7 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormMessage,
+  FormMessage
 } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import React, { useState } from 'react';
@@ -19,7 +19,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '../ui/select';
 import { Input } from '../ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,6 +31,7 @@ import { CalibrationType } from '@/enums/calibrationType';
 import { toast } from '@/components/ui/use-toast';
 import { CalibrationFrame } from '@/interfaces/state';
 import { EquipmentType } from '@/enums/equipmentType';
+import { UUID } from 'crypto';
 
 interface CalibrationRowEditorProps {
   analyzedFrames?: AnalyzedCalibrationFrames;
@@ -40,35 +41,35 @@ interface CalibrationRowEditorProps {
 }
 
 export default function CalibrationRowEditor({
-  analyzedFrames,
-  edit,
-  calibrationFrame,
-  paths,
-}: CalibrationRowEditorProps) {
+                                               analyzedFrames,
+                                               edit,
+                                               calibrationFrame,
+                                               paths
+                                             }: CalibrationRowEditorProps) {
   const { closeModal } = useModal();
 
   const [calibrationType, setCalibrationType] = useState<CalibrationType>(
-    analyzedFrames?.calibration_type || CalibrationType.DARK,
+    analyzedFrames?.calibration_type || CalibrationType.DARK
   );
 
   const formSchema = z
     .object({
       camera: z.string().min(1, {
-        message: 'You must at least select one calibration frame.',
+        message: 'You must at least select one calibration frame.'
       }),
       calibrationType: z.enum([CalibrationType.DARK, CalibrationType.BIAS], {
         errorMap: () => ({
-          message: 'You must select a valid calibration type (DARK or BIAS).',
-        }),
+          message: 'You must select a valid calibration type (DARK or BIAS).'
+        })
       }),
       gain: z.coerce.number().min(1, {
-        message: 'Gain must be at least 1.',
+        message: 'Gain must be at least 1.'
       }),
       subLength: z.coerce.number().optional(),
       cameraTemp: z.coerce.number().optional(),
       totalSubs: z.coerce.number().min(1, {
-        message: 'Total subs must be at least 1.',
-      }),
+        message: 'Total subs must be at least 1.'
+      })
     })
     .superRefine((data, ctx) => {
       if (data.calibrationType === CalibrationType.DARK) {
@@ -76,7 +77,7 @@ export default function CalibrationRowEditor({
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: 'Sub length must be at least 1 for BIAS calibration type',
-            path: ['subLength'],
+            path: ['subLength']
           });
         }
         if (data.cameraTemp === undefined || data.cameraTemp < 1) {
@@ -84,7 +85,7 @@ export default function CalibrationRowEditor({
             code: z.ZodIssueCode.custom,
             message:
               'Camera temperature must be at least 1 for BIAS calibration type',
-            path: ['cameraTemp'],
+            path: ['cameraTemp']
           });
         }
       }
@@ -98,8 +99,8 @@ export default function CalibrationRowEditor({
       subLength: analyzedFrames?.sub_length || calibrationFrame?.sub_length,
       totalSubs: analyzedFrames?.total_subs || calibrationFrame?.total_subs,
       camera: calibrationFrame?.camera,
-      cameraTemp: calibrationFrame?.camera_temp,
-    },
+      cameraTemp: calibrationFrame?.camera_temp
+    }
   });
 
   function onSubmit() {
@@ -115,19 +116,19 @@ export default function CalibrationRowEditor({
         camera_temp: form.getValues().cameraTemp
           ? Number(form.getValues().cameraTemp)
           : undefined, // Convert or set undefined
-        total_subs: Number(form.getValues().totalSubs), // Ensure this is converted to a number
+        total_subs: Number(form.getValues().totalSubs) // Ensure this is converted to a number
       };
 
       if (calibrationType == CalibrationType.DARK) {
         invoke('classify_calibration_frames', {
           frames: newCalibrationFrame,
-          paths: paths,
+          paths: paths
         }).catch((error) =>
           toast({
             variant: 'destructive',
             title: 'Uh oh! Something went wrong.',
-            description: 'Error: ' + error,
-          }),
+            description: 'Error: ' + error
+          })
         );
       } else {
         invoke('classify_bias_frames').then();
@@ -147,7 +148,11 @@ export default function CalibrationRowEditor({
               render={({ field }) => (
                 <FormItem className={styles.item}>
                   <FormControl>
-                    <EquipmentComboBox type={EquipmentType.CAMERA} {...field} />
+                    <EquipmentComboBox
+                      type={EquipmentType.CAMERA}
+                      value={field.value as UUID}
+                      onChange={field.onChange}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -168,7 +173,7 @@ export default function CalibrationRowEditor({
                         setCalibrationType(
                           CalibrationType[
                             value as keyof typeof CalibrationType
-                          ],
+                            ]
                         );
                         field.onChange(value);
                       }}

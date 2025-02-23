@@ -22,51 +22,42 @@ import { cn } from '@/utils/classNames';
 import { EquipmentType } from '@/enums/equipmentType';
 import { useAppState } from '@/context/stateProvider';
 import { getViewName } from '@/utils/equipment';
+import { UUID } from 'crypto';
+import { EquipmentItem } from '@/interfaces/equipment';
 
-interface ComboBoxProps {
+interface EquipmentComboBoxProps {
   type: EquipmentType;
-  value: string;
+  value: UUID;
   // eslint-disable-next-line no-unused-vars
-  onChange: (value: string) => void;
+  onChange: (value: UUID) => void;
 }
 
 export default function EquipmentComboBox({
-  type,
-  value,
-  onChange,
-}: ComboBoxProps) {
+                                            type,
+                                            value,
+                                            onChange,
+                                          }: EquipmentComboBoxProps) {
   const [open, setOpen] = React.useState(false);
-  const [values, setValues] = useState<string[]>([]);
-
-  const title: string = type.toString();
+  const [items, setItems] = useState<EquipmentItem[]>([]);
   const { appState } = useAppState();
+  const title: string = type.toString();
 
   useEffect(() => {
     switch (type) {
       case EquipmentType.CAMERA:
-        setValues(
-          Array.from(appState.equipment_list.cameras.values()).map((c) => getViewName(c))
-        );
+        setItems(Array.from(appState.equipment_list.cameras.values()));
         break;
       case EquipmentType.TELESCOPE:
-        setValues(
-          Array.from(appState.equipment_list.telescopes.values()).map((c) => getViewName(c))
-        );
+        setItems(Array.from(appState.equipment_list.telescopes.values()));
         break;
       case EquipmentType.MOUNT:
-        setValues(
-          Array.from(appState.equipment_list.mounts.values()).map((c) => getViewName(c))
-        );
+        setItems(Array.from(appState.equipment_list.mounts.values()));
         break;
       case EquipmentType.FILTER:
-        setValues(
-          Array.from(appState.equipment_list.filters.values()).map((c) => getViewName(c))
-        );
+        setItems(Array.from(appState.equipment_list.filters.values()));
         break;
       case EquipmentType.FLATTENER:
-        setValues(
-          Array.from(appState.equipment_list.flatteners.values()).map((c) => getViewName(c))
-        );
+        setItems(Array.from(appState.equipment_list.flatteners.values()));
         break;
     }
   }, [
@@ -78,6 +69,8 @@ export default function EquipmentComboBox({
     type,
   ]);
 
+  const selectedItem = items.find((item) => item.id === value);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -87,32 +80,33 @@ export default function EquipmentComboBox({
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {value ? values.find((s) => s === value) : 'Select ' + title + '...'}
+          {selectedItem ? getViewName(selectedItem) : `Select ${title}...`}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0">
         <Command>
-          <CommandInput placeholder={'Search ' + title + '...'} />
+          <CommandInput placeholder={`Search ${title}...`} />
           <CommandList>
             <CommandEmpty>No values found.</CommandEmpty>
             <CommandGroup>
-              {values.map((s) => (
+              {items.map((item) => (
                 <CommandItem
-                  key={s}
-                  value={s}
+                  key={item.id}
+                  value={item.id}
                   onSelect={(currentValue) => {
-                    onChange(currentValue === value ? '' : currentValue);
+                    onChange(currentValue as UUID);
+                    console.log(currentValue)
                     setOpen(false);
                   }}
                 >
                   <Check
                     className={cn(
                       'mr-2 h-4 w-4',
-                      value === s ? 'opacity-100' : 'opacity-0',
+                      value === item.id ? 'opacity-100' : 'opacity-0'
                     )}
                   />
-                  {s}
+                  {getViewName(item)}
                 </CommandItem>
               ))}
             </CommandGroup>

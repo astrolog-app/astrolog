@@ -26,20 +26,20 @@ export const ImagingSessionDetailsSchema = z.object({
 })
 
 export const ImagingSessionEquipmentSchema = z.object({
-  telescope: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
+  telescope: z.string().uuid({
+    message: "Telescope ID must be a valid UUID."
   }),
-  camera: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
+  camera: z.string().uuid({
+    message: "Camera ID must be a valid UUID."
   }),
-  mount: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
+  mount: z.string().uuid({
+    message: "Mount ID must be a valid UUID."
   }),
-  filter: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
+  filter: z.string().uuid({
+    message: "Filter ID must be a valid UUID."
   }),
-  flattener: z.string().min(2, {
-    message: 'Username must be at least 2 characters.' // change
+  flattener: z.string().uuid({
+    message: "Flattener ID must be a valid UUID."
   })
 });
 

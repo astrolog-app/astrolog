@@ -5,7 +5,7 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormMessage,
+  FormMessage
 } from '@/components/ui/form';
 import React, { Dispatch, SetStateAction } from 'react';
 import { z } from 'zod';
@@ -30,7 +30,7 @@ interface EquipmentFormFormProps {
 
 export default function EquipmentForm({ setTab, isEdit, setEquipment, editSession }: EquipmentFormFormProps) {
   const form = useForm<z.infer<typeof ImagingSessionEquipmentSchema>>({
-    resolver: zodResolver(ImagingSessionEquipmentSchema),
+    resolver: zodResolver(ImagingSessionEquipmentSchema)
   });
 
   function onSubmit() {
@@ -46,8 +46,8 @@ export default function EquipmentForm({ setTab, isEdit, setEquipment, editSessio
       telescope_id: uuidv4() as UUID,
       flattener_id: uuidv4() as UUID,
       mount_id: uuidv4() as UUID,
-      filter_id: uuidv4() as UUID,
-    }
+      filter_id: uuidv4() as UUID
+    };
     setEquipment(equipment);
     setTab('weather');
   }
@@ -61,7 +61,11 @@ export default function EquipmentForm({ setTab, isEdit, setEquipment, editSessio
           render={({ field }) => (
             <FormItem className={styles.item}>
               <FormControl>
-                <EquipmentComboBox type={EquipmentType.TELESCOPE} {...field} />
+                <EquipmentComboBox
+                  type={EquipmentType.TELESCOPE}
+                  value={field.value as UUID}
+                  onChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -73,7 +77,10 @@ export default function EquipmentForm({ setTab, isEdit, setEquipment, editSessio
           render={({ field }) => (
             <FormItem className={styles.item}>
               <FormControl>
-                <EquipmentComboBox type={EquipmentType.CAMERA} {...field} />
+                <EquipmentComboBox
+                  type={EquipmentType.CAMERA}
+                  value={field.value as UUID}
+                  onChange={field.onChange} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -85,7 +92,11 @@ export default function EquipmentForm({ setTab, isEdit, setEquipment, editSessio
           render={({ field }) => (
             <FormItem className={styles.item}>
               <FormControl>
-                <EquipmentComboBox type={EquipmentType.MOUNT} {...field} />
+                <EquipmentComboBox
+                  type={EquipmentType.MOUNT}
+                  value={field.value as UUID}
+                  onChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -97,7 +108,11 @@ export default function EquipmentForm({ setTab, isEdit, setEquipment, editSessio
           render={({ field }) => (
             <FormItem className={styles.item}>
               <FormControl>
-                <EquipmentComboBox type={EquipmentType.FILTER} {...field} />
+                <EquipmentComboBox
+                  type={EquipmentType.FILTER}
+                  value={field.value as UUID}
+                  onChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -109,13 +124,16 @@ export default function EquipmentForm({ setTab, isEdit, setEquipment, editSessio
           render={({ field }) => (
             <FormItem className={styles.item}>
               <FormControl>
-                <EquipmentComboBox type={EquipmentType.FLATTENER} {...field} />
+                <EquipmentComboBox
+                  type={EquipmentType.FLATTENER}
+                  value={field.value as UUID}
+                  onChange={field.onChange} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <ButtonBar>{isEdit ? "Save" : "Next"}</ButtonBar>
+        <ButtonBar>{isEdit ? 'Save' : 'Next'}</ButtonBar>
       </form>
     </Form>
   );
