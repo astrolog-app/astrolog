@@ -1,26 +1,14 @@
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+  Form
 } from '@/components/ui/form';
 import React, { Dispatch, SetStateAction } from 'react';
-import { Input } from '@/components/ui/input';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { TabKey } from '@/components/modals/imagingSession/imagingSessionEditor';
 import { ImagingSessionWeather } from '@/interfaces/imagingSessionEdit';
 import { ButtonBar } from '@/components/ui/custom/modal';
-
-const formSchema = z.object({
-  target: z.string().min(2, {
-    message: 'Username must be at least 2 characters.', // change
-  }),
-});
+import { ImagingSessionWeatherSchema } from '@/schemas/imagingSessionSchema';
 
 interface WeatherFormFormProps {
   setTab: Dispatch<SetStateAction<TabKey>>
@@ -30,11 +18,8 @@ interface WeatherFormFormProps {
 }
 
 export default function WeatherForm({ setTab, isEdit, setWeather, editSession }: WeatherFormFormProps) {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      target: '',
-    },
+  const form = useForm<z.infer<typeof ImagingSessionWeatherSchema>>({
+    resolver: zodResolver(ImagingSessionWeatherSchema),
   });
 
   function onSubmit() {
@@ -51,23 +36,7 @@ export default function WeatherForm({ setTab, isEdit, setWeather, editSession }:
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        <FormField
-          control={form.control}
-          name="target"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Root Directory</FormLabel>
-              <FormControl>
-                <Input />
-              </FormControl>
-              <FormDescription>
-                The directory in your filesystem where all of your astrophotos
-                are
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
         <ButtonBar>{isEdit ? "Save" : "Next"}</ButtonBar>
       </form>
     </Form>

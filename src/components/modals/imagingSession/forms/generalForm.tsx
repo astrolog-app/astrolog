@@ -26,7 +26,7 @@ import { CalendarIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { invoke } from '@tauri-apps/api/core';
-import { generalImagingSessionSchema } from '@/schemas/imagingSessionSchema';
+import { ImagingSessionGeneralSchema } from '@/schemas/imagingSessionSchema';
 import { TabKey } from '@/components/modals/imagingSession/imagingSessionEditor';
 import { ImagingSessionGeneral } from '@/interfaces/imagingSessionEdit';
 import { ButtonBar } from '@/components/ui/custom/modal';
@@ -39,8 +39,8 @@ interface GeneralFormFormProps {
 }
 
 export default function GeneralForm({ setTab, isEdit, setGeneral, editSession }: GeneralFormFormProps) {
-  const form = useForm<z.infer<typeof generalImagingSessionSchema>>({
-    resolver: zodResolver(generalImagingSessionSchema),
+  const form = useForm<z.infer<typeof ImagingSessionGeneralSchema>>({
+    resolver: zodResolver(ImagingSessionGeneralSchema),
     defaultValues: {
       target: '',
     },

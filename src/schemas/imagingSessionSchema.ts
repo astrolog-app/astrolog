@@ -1,12 +1,12 @@
 import * as z from 'zod';
 
-export const baseImagingSessionSchema = z.object({
+export const ImagingSessionBaseSchema = z.object({
   frames: z.array(z.string()).min(1, {
     message: 'You must at least select one light frame.',
   }),
 });
 
-export const generalImagingSessionSchema = z.object({
+export const ImagingSessionGeneralSchema = z.object({
   date: z.coerce.date({
     required_error: 'Acquisition date must be set.'
   }),
@@ -15,7 +15,7 @@ export const generalImagingSessionSchema = z.object({
   })
 });
 
-export const detailsImagingSessionSchema = z.object({
+export const ImagingSessionDetailsSchema = z.object({
   total_subs: z.number().int().positive("Total subs must be a positive integer"),
   gain: z.number().nonnegative("Gain must be a non-negative number"),
   sub_length: z.number().positive("Sub length must be a positive number"),
@@ -25,7 +25,7 @@ export const detailsImagingSessionSchema = z.object({
   camera_temp: z.number().optional(),
 })
 
-export const equipmentImagingSessionSchema = z.object({
+export const ImagingSessionEquipmentSchema = z.object({
   telescope: z.string().min(2, {
     message: 'Username must be at least 2 characters.' // change
   }),
@@ -41,4 +41,16 @@ export const equipmentImagingSessionSchema = z.object({
   flattener: z.string().min(2, {
     message: 'Username must be at least 2 characters.' // change
   })
+});
+
+export const ImagingSessionWeatherSchema = z.object({
+  outside_temp: z.number().optional(),
+  average_seeing: z.number().optional(),
+  average_cloud_cover: z.number().optional(),
+});
+
+export const ImagingSessionCalibrationSchema = z.object({
+  dark_frame_list_id: z.string().uuid().optional(),
+  bias_frame_list_id: z.string().uuid().optional(),
+  flat_frame_list_id: z.string().uuid().optional(),
 });

@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button';
 import FileListSelector from '@/components/fileSelectors/fileListSelector';
 import { useModal } from '@/context/modalProvider';
 import ImagingSessionEditor from '@/components/modals/imagingSession/imagingSessionEditor';
-import { baseImagingSessionSchema } from '@/schemas/imagingSessionSchema';
+import { ImagingSessionBaseSchema } from '@/schemas/imagingSessionSchema';
 import { ImagingSessionBase } from '@/interfaces/imagingSessionEdit';
 import { v4 as uuidv4 } from 'uuid';
 import { UUID } from 'crypto';
@@ -27,8 +27,8 @@ import { UUID } from 'crypto';
 export default function NewImagingSession() {
   const { openModal } = useModal();
 
-  const form = useForm<z.infer<typeof baseImagingSessionSchema>>({
-    resolver: zodResolver(baseImagingSessionSchema),
+  const form = useForm<z.infer<typeof ImagingSessionBaseSchema>>({
+    resolver: zodResolver(ImagingSessionBaseSchema),
     defaultValues: {
       frames: [],
     },

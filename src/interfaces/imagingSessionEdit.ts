@@ -40,11 +40,11 @@ export interface ImagingSessionCalibration {
   flat_frame_list_id: UUID | undefined,
 }
 
-export interface ImagingSessionEdit
-  extends ImagingSessionBase,
-    ImagingSessionGeneral,
-    ImagingSessionDetails,
-    ImagingSessionEquipment,
-    ImagingSessionWeather,
-    ImagingSessionCalibration {
+export interface ImagingSessionEdit {
+  base: ImagingSessionBase,
+  general: ImagingSessionGeneral,
+  details: ImagingSessionDetails,
+  equipment: ImagingSessionEquipment,
+  weather: ImagingSessionWeather,
+  calibration: ImagingSessionCalibration,
 }

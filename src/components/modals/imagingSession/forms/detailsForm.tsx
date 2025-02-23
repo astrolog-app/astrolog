@@ -16,7 +16,7 @@ import { TabKey } from '@/components/modals/imagingSession/imagingSessionEditor'
 import { ImagingSessionDetails } from '@/interfaces/imagingSessionEdit';
 import { ButtonBar } from '@/components/ui/custom/modal';
 import { Textarea } from '@/components/ui/textarea';
-import { detailsImagingSessionSchema } from '@/schemas/imagingSessionSchema';
+import { ImagingSessionDetailsSchema } from '@/schemas/imagingSessionSchema';
 
 interface DetailsFormProps {
   setTab: Dispatch<SetStateAction<TabKey>>
@@ -26,8 +26,8 @@ interface DetailsFormProps {
 }
 
 export default function DetailsForm({ setTab, isEdit, setDetails, editSession }: DetailsFormProps) {
-  const form = useForm<z.infer<typeof detailsImagingSessionSchema>>({
-    resolver: zodResolver(detailsImagingSessionSchema),
+  const form = useForm<z.infer<typeof ImagingSessionDetailsSchema>>({
+    resolver: zodResolver(ImagingSessionDetailsSchema),
     defaultValues: {
       total_subs: 0,
       gain: 0,

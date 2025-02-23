@@ -14,7 +14,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import styles from './equipmentForm.module.scss';
 import EquipmentComboBox from '@/components/ui/equipmentComboBox';
 import { EquipmentType } from '@/enums/equipmentType';
-import { equipmentImagingSessionSchema } from '@/schemas/imagingSessionSchema';
+import { ImagingSessionEquipmentSchema } from '@/schemas/imagingSessionSchema';
 import { TabKey } from '@/components/modals/imagingSession/imagingSessionEditor';
 import { ImagingSessionEquipment } from '@/interfaces/imagingSessionEdit';
 import { ButtonBar } from '@/components/ui/custom/modal';
@@ -29,8 +29,8 @@ interface EquipmentFormFormProps {
 }
 
 export default function EquipmentForm({ setTab, isEdit, setEquipment, editSession }: EquipmentFormFormProps) {
-  const form = useForm<z.infer<typeof equipmentImagingSessionSchema>>({
-    resolver: zodResolver(equipmentImagingSessionSchema),
+  const form = useForm<z.infer<typeof ImagingSessionEquipmentSchema>>({
+    resolver: zodResolver(ImagingSessionEquipmentSchema),
   });
 
   function onSubmit() {

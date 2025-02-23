@@ -66,12 +66,12 @@ export default function ImagingSessionEditor({ session, base }: ImagingSessionEd
     }
 
     return {
-      ...base,
-      ...general,
-      ...equipment,
-      ...details,
-      ...weather,
-      ...calibration
+      base: base,
+      general: general,
+      equipment: equipment,
+      details: details,
+      weather: weather,
+      calibration: calibration,
     };
   }
 
