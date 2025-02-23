@@ -1,7 +1,7 @@
 'use client';
 
+import styles from  './imagingSessionEditor.module.scss';
 import { Modal } from '@/components/ui/custom/modal';
-import { ImagingSession } from '@/interfaces/state';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useState } from 'react';
 import GeneralForm from '@/components/modals/imagingSession/forms/generalForm';
@@ -9,23 +9,112 @@ import EquipmentForm from '@/components/modals/imagingSession/forms/equipmentFor
 import CalibrationForm from '@/components/modals/imagingSession/forms/calibrationForm';
 import WeatherForm from '@/components/modals/imagingSession/forms/weatherForm';
 import DetailsForm from '@/components/modals/imagingSession/forms/detailsForm';
+import { invoke } from '@tauri-apps/api/core';
+import { toast } from '@/components/ui/use-toast';
+import {
+  ImagingSessionBase,
+  ImagingSessionCalibration,
+  ImagingSessionDetails,
+  ImagingSessionEdit,
+  ImagingSessionEquipment,
+  ImagingSessionGeneral,
+  ImagingSessionWeather
+} from '@/interfaces/imagingSessionEdit';
 
 const tabKeys = ['general', 'details', 'equipment', 'weather', 'calibration'] as const;
 export type TabKey = (typeof tabKeys)[number];
 
+const defaultWeather: ImagingSessionWeather = {
+  outside_temp: undefined,
+  average_seeing: undefined,
+  average_cloud_cover: undefined,
+};
+
+const defaultCalibration: ImagingSessionCalibration = {
+  dark_frame_list_id: undefined,
+    bias_frame_list_id: undefined,
+    flat_frame_list_id: undefined,
+};
+
 interface ImagingSessionEditorProps {
-  session: ImagingSession | undefined;
+  session?: ImagingSessionEdit,
+  base: ImagingSessionBase,
 }
 
-export default function ImagingSessionEditor({ session }: ImagingSessionEditorProps) {
+export default function ImagingSessionEditor({ session, base }: ImagingSessionEditorProps) {
   const isEdit = session !== undefined;
-  const [tab, setTab] = useState<TabKey>("general");
+  const [tab, setTab] = useState<TabKey>('general');
+
+  const [general, setGeneral] = useState<ImagingSessionGeneral | undefined>(undefined);
+  const [equipment, setEquipment] = useState<ImagingSessionEquipment | undefined>(undefined);
+  const [details, setDetails] = useState<ImagingSessionDetails | undefined>(undefined);
+  const [weather, setWeather] = useState<ImagingSessionWeather>(defaultWeather);
+  const [calibration, setCalibration] = useState<ImagingSessionCalibration>(defaultCalibration);
+
+  function buildSession(): ImagingSessionEdit | undefined {
+    if (
+      base === undefined ||
+      general === undefined ||
+      equipment === undefined ||
+      details === undefined
+    ) {
+      toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+      });
+      return undefined;
+    }
+
+    return {
+      ...base,
+      ...general,
+      ...equipment,
+      ...details,
+      ...weather,
+      ...calibration
+    };
+  }
+
+  function editSession() {
+    const newSession: ImagingSessionEdit | undefined = buildSession();
+
+    if (newSession === undefined) {
+      return;
+    }
+
+    invoke('edit_imaging_session', { session: newSession })
+      .catch((error) => {
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'Error: ' + error
+        });
+      });
+  }
+
+  function classifySession() {
+    const newSession: ImagingSessionEdit | undefined = buildSession();
+
+    if (newSession === undefined) {
+      return;
+    }
+
+    invoke('classify_imaging_session', { session: newSession })
+      .catch((error) => {
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'Error: ' + error
+        });
+      });
+  }
 
   return (
     <Modal
       title="test"
       subtitle="subtitle"
       separator
+      className={styles.modal}
     >
       <Tabs value={tab} onValueChange={(value: string) => setTab(value as TabKey)}>
         {isEdit && (
@@ -38,19 +127,44 @@ export default function ImagingSessionEditor({ session }: ImagingSessionEditorPr
           </TabsList>
         )}
         <TabsContent value="general">
-          <GeneralForm setTab={setTab} />
+          <GeneralForm
+            setTab={setTab}
+            isEdit={isEdit}
+            setGeneral={setGeneral}
+            editSession={editSession}
+          />
         </TabsContent>
         <TabsContent value="details">
-          <DetailsForm setTab={setTab} />
+          <DetailsForm
+            setTab={setTab}
+            isEdit={isEdit}
+            setDetails={setDetails}
+            editSession={editSession}
+          />
         </TabsContent>
         <TabsContent value="equipment">
-          <EquipmentForm setTab={setTab} />
+          <EquipmentForm
+            setTab={setTab}
+            isEdit={isEdit}
+            setEquipment={setEquipment}
+            editSession={editSession}
+          />
         </TabsContent>
         <TabsContent value="weather">
-          <WeatherForm setTab={setTab} />
+          <WeatherForm
+            setTab={setTab}
+            isEdit={isEdit}
+            setWeather={setWeather}
+            editSession={editSession}
+          />
         </TabsContent>
         <TabsContent value="calibration">
-          <CalibrationForm />
+          <CalibrationForm
+            isEdit={isEdit}
+            setCalibration={setCalibration}
+            editSession={editSession}
+            classifySession={classifySession}
+          />
         </TabsContent>
       </Tabs>
     </Modal>

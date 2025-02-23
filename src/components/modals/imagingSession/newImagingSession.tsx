@@ -19,25 +19,28 @@ import { Button } from '@/components/ui/button';
 import FileListSelector from '@/components/fileSelectors/fileListSelector';
 import { useModal } from '@/context/modalProvider';
 import ImagingSessionEditor from '@/components/modals/imagingSession/imagingSessionEditor';
-
-const formSchema = z.object({
-  target: z.array(z.string()).min(1, {
-    message: 'You must at least select one light frame.',
-  }),
-});
+import { baseImagingSessionSchema } from '@/schemas/imagingSessionSchema';
+import { ImagingSessionBase } from '@/interfaces/imagingSessionEdit';
+import { v4 as uuidv4 } from 'uuid';
+import { UUID } from 'crypto';
 
 export default function NewImagingSession() {
   const { openModal } = useModal();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof baseImagingSessionSchema>>({
+    resolver: zodResolver(baseImagingSessionSchema),
     defaultValues: {
-      target: [],
+      frames: [],
     },
   });
 
   function onSubmit() {
-    openModal(<ImagingSessionEditor session={undefined} />);
+    const base: ImagingSessionBase = {
+      id: uuidv4() as UUID,
+      frames: form.getValues().frames
+    }
+
+    openModal(<ImagingSessionEditor base={base} />);
   }
 
   return (
@@ -50,7 +53,7 @@ export default function NewImagingSession() {
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <FormField
             control={form.control}
-            name="target"
+            name="frames"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Light Frames</FormLabel>

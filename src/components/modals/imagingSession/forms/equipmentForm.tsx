@@ -7,30 +7,48 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import styles from './equipmentForm.module.scss';
 import EquipmentComboBox from '@/components/ui/equipmentComboBox';
-import { Button } from '@/components/ui/button';
-import { useModal } from '@/context/modalProvider';
 import { EquipmentType } from '@/enums/equipmentType';
 import { equipmentImagingSessionSchema } from '@/schemas/imagingSessionSchema';
 import { TabKey } from '@/components/modals/imagingSession/imagingSessionEditor';
+import { ImagingSessionEquipment } from '@/interfaces/imagingSessionEdit';
+import { ButtonBar } from '@/components/ui/custom/modal';
+import { v4 as uuidv4 } from 'uuid';
+import { UUID } from 'crypto';
 
-export default function EquipmentForm({
-  setTab,
-}: {
-  setTab: React.Dispatch<React.SetStateAction<TabKey>>;
-}) {
+interface EquipmentFormFormProps {
+  setTab: Dispatch<SetStateAction<TabKey>>
+  isEdit: boolean,
+  setEquipment: Dispatch<SetStateAction<ImagingSessionEquipment | undefined>>,
+  editSession: () => void,
+}
+
+export default function EquipmentForm({ setTab, isEdit, setEquipment, editSession }: EquipmentFormFormProps) {
   const form = useForm<z.infer<typeof equipmentImagingSessionSchema>>({
     resolver: zodResolver(equipmentImagingSessionSchema),
   });
 
-  const { closeModal } = useModal();
-
   function onSubmit() {
+    if (isEdit) {
+      // TODO
+      editSession();
+      return;
+    }
+
+    const values = form.getValues();
+    const equipment: ImagingSessionEquipment = {
+      camera_id: uuidv4() as UUID,
+      telescope_id: uuidv4() as UUID,
+      flattener_id: uuidv4() as UUID,
+      mount_id: uuidv4() as UUID,
+      filter_id: uuidv4() as UUID,
+    }
+    setEquipment(equipment);
     setTab('weather');
   }
 
@@ -97,17 +115,7 @@ export default function EquipmentForm({
             </FormItem>
           )}
         />
-        <div className={styles.buttons}>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={closeModal}
-            className={styles.cancelButton}
-          >
-            Cancel
-          </Button>
-          <Button type="submit">Next</Button>
-        </div>
+        <ButtonBar>{isEdit ? "Save" : "Next"}</ButtonBar>
       </form>
     </Form>
   );

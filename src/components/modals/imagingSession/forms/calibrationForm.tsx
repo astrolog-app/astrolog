@@ -9,14 +9,14 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import { Input } from '@/components/ui/input';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import styles from './calibrationForm.module.scss';
-import { Button } from '@/components/ui/button';
-import { useModal } from '@/context/modalProvider';
+import { ButtonBar } from '@/components/ui/custom/modal';
+import { ImagingSessionCalibration } from '@/interfaces/imagingSessionEdit';
 
 const formSchema = z.object({
   target: z.string().min(2, {
@@ -24,7 +24,14 @@ const formSchema = z.object({
   }),
 });
 
-export default function CalibrationForm() {
+interface CalibrationFormProps {
+  isEdit: boolean,
+  setCalibration: Dispatch<SetStateAction<ImagingSessionCalibration>>,
+  editSession: () => void,
+  classifySession: () => void,
+}
+
+export default function CalibrationForm({ isEdit, setCalibration, editSession, classifySession }: CalibrationFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -32,11 +39,19 @@ export default function CalibrationForm() {
     },
   });
 
-  const { closeModal } = useModal();
+  function onSubmit() {
+    if (isEdit) {
+      // TODO
+      editSession();
+      return;
+    }
+
+    classifySession();
+  }
 
   return (
     <Form {...form}>
-      <form>
+      <form onSubmit={form.handleSubmit(onSubmit)} className={styles.form}>
         <FormField
           control={form.control}
           name="target"
@@ -54,17 +69,7 @@ export default function CalibrationForm() {
             </FormItem>
           )}
         />
-        <div className={styles.buttons}>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={closeModal}
-            className={styles.cancelButton}
-          >
-            Cancel
-          </Button>
-          <Button type="submit">Next</Button>
-        </div>
+        <ButtonBar>{isEdit ? "Save" : "Classify"}</ButtonBar>
       </form>
     </Form>
   );

@@ -7,12 +7,14 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import { Input } from '@/components/ui/input';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { TabKey } from '@/components/modals/imagingSession/imagingSessionEditor';
+import { ImagingSessionWeather } from '@/interfaces/imagingSessionEdit';
+import { ButtonBar } from '@/components/ui/custom/modal';
 
 const formSchema = z.object({
   target: z.string().min(2, {
@@ -20,11 +22,14 @@ const formSchema = z.object({
   }),
 });
 
-export default function WeatherForm({
-                                      setTab,
-                                    }: {
-  setTab: React.Dispatch<React.SetStateAction<TabKey>>;
-}) {
+interface WeatherFormFormProps {
+  setTab: Dispatch<SetStateAction<TabKey>>
+  isEdit: boolean,
+  setWeather: Dispatch<SetStateAction<ImagingSessionWeather>>,
+  editSession: () => void,
+}
+
+export default function WeatherForm({ setTab, isEdit, setWeather, editSession }: WeatherFormFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -33,6 +38,13 @@ export default function WeatherForm({
   });
 
   function onSubmit() {
+    if (isEdit) {
+      // TODO
+      editSession();
+      return;
+    }
+
+    // TODO
     setTab('calibration');
   }
 
@@ -56,6 +68,7 @@ export default function WeatherForm({
             </FormItem>
           )}
         />
+        <ButtonBar>{isEdit ? "Save" : "Next"}</ButtonBar>
       </form>
     </Form>
   );

@@ -10,7 +10,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import React, { useEffect } from 'react';
+import React, { Dispatch, SetStateAction, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -26,15 +26,19 @@ import { CalendarIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { invoke } from '@tauri-apps/api/core';
-import { useModal } from '@/context/modalProvider';
 import { generalImagingSessionSchema } from '@/schemas/imagingSessionSchema';
 import { TabKey } from '@/components/modals/imagingSession/imagingSessionEditor';
+import { ImagingSessionGeneral } from '@/interfaces/imagingSessionEdit';
+import { ButtonBar } from '@/components/ui/custom/modal';
 
-export default function GeneralForm({
-  setTab,
-}: {
-  setTab: React.Dispatch<React.SetStateAction<TabKey>>;
-}) {
+interface GeneralFormFormProps {
+  setTab: Dispatch<SetStateAction<TabKey>>
+  isEdit: boolean,
+  setGeneral: Dispatch<SetStateAction<ImagingSessionGeneral | undefined>>,
+  editSession: () => void,
+}
+
+export default function GeneralForm({ setTab, isEdit, setGeneral, editSession }: GeneralFormFormProps) {
   const form = useForm<z.infer<typeof generalImagingSessionSchema>>({
     resolver: zodResolver(generalImagingSessionSchema),
     defaultValues: {
@@ -42,9 +46,19 @@ export default function GeneralForm({
     },
   });
 
-  const { closeModal } = useModal();
-
   function onSubmit() {
+    if (isEdit) {
+      // TODO
+      editSession();
+      return;
+    }
+
+    const values = form.getValues();
+    const general: ImagingSessionGeneral = {
+      date: values.date.toString(), // TODO
+      target: values.target
+    }
+    setGeneral(general);
     setTab('details');
   }
 
@@ -120,17 +134,7 @@ export default function GeneralForm({
             )}
           />
         </div>
-        <div className={styles.buttons}>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={closeModal}
-            className={styles.cancelButton}
-          >
-            Cancel
-          </Button>
-          <Button type="submit">Next</Button>
-        </div>
+        <ButtonBar>{isEdit ? "Save" : "Next"}</ButtonBar>
       </form>
     </Form>
   );
