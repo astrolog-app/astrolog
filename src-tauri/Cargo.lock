@@ -9,6 +9,7 @@ dependencies = [
  "kamadak-exif",
  "log",
  "open",
+ "regex",
  "serde",
  "serde_json",
  "tauri",

@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use tauri::{State, Window};
 use uuid::Uuid;
 use crate::models::imaging_frames::LightFrame;
-use crate::models::imaging_session_list::ImagingSessionList;
+use crate::models::imaging_session_list::{ImagingSession, ImagingSessionList};
 use crate::models::state::AppState;
 
 #[tauri::command]
@@ -135,7 +135,7 @@ pub fn classify_imaging_session(
     let mut light_frame = LightFrame::from(&session);
 
     // check for duplicates
-    let path = light_frame.build_path(&root_directory);
+    let path = ImagingSession::build_path(&light_frame);
     if path.exists() {
         return Err("Such an ImagingSession already exists.".to_string());
     }

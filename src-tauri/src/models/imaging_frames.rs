@@ -12,6 +12,7 @@ use tauri::{Emitter, State, Window};
 use uuid::Uuid;
 use crate::commands::imaging_sessions::ImagingSessionEdit;
 use crate::models::frontend::process::Process;
+use crate::models::imaging_session_list::{ImagingSession, ImagingSessionList};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ImagingFrameList {
@@ -103,11 +104,10 @@ pub struct LightFrame {
 }
 
 impl LightFrame {
-    pub fn build_path(&self, root_directory: &PathBuf) -> PathBuf {
-        // TODO: what if path is invalid
-        let mut path = root_directory.clone();
-        path.push(PathBuf::from("Data"));
-        path.push(PathBuf::from("Test"));
+    pub fn build_path(&self) -> PathBuf {
+        let mut path = ImagingSession::build_path(self);
+
+        path.push(PathBuf::from("Light"));
 
         path
     }
@@ -165,20 +165,33 @@ impl LightFrame {
 
         let mut errors = Vec::new();
 
-        let mut destination = self.build_path(root_directory);
+        let base = self.build_path();
 
-        for frame in &self.frames_to_classify {
-            let mut extension = PathBuf::from("Light");
-            let file_name = frame.file_name().unwrap(); // TODO
-            extension.push(&file_name);
-            destination.push(PathBuf::from("Light"));
+        for frame in &self.frames_to_classify.clone() {
+            let mut destination = root_directory.clone();
+            destination.push(&base);
+            if !destination.exists() {
+                fs::create_dir_all(&destination)?;
+            }
 
-            fs::create_dir_all(&destination)?; // TODO
+            // extract file_name out of frame
+            let file_name = match frame.file_name() {
+                Some(name) => name,
+                None => {
+                    errors.push(format!("Couldn't extract filename out of frame: {:?}", frame));
+
+                    step += 1;
+                    process.step = Some(step.clone());
+                    window.emit("process", &process).unwrap();
+
+                    continue;
+                }
+            };
+
             destination.push(file_name);
 
             // try to copy frame
             if let Err(e) = fs::copy(frame, &destination) {
-                eprintln!("Failed to copy {:?} to {:?}: {}", frame, destination, e); // TODO: log
                 errors.push(format!("Failed to copy {:?} -> {:?}: {}", frame, destination, e));
 
                 step += 1;
@@ -190,7 +203,13 @@ impl LightFrame {
 
             // adjust self and save to .json
             let old = self.clone();
-            self.frames_classified.push(extension);
+
+            let mut classify_path = base.clone();
+            classify_path.push(file_name);
+            self.frames_classified.push(classify_path);
+
+            // remove file_to_classify
+            self.frames_to_classify.retain(|path| path != frame);
             app_state.imaging_frame_list.light_frames.insert(self.id, self.clone());
             if let Err(e) = ImagingFrameList::save(root_directory.clone(), &app_state.imaging_frame_list) {
                 // revert
