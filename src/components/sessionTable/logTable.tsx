@@ -130,7 +130,11 @@ export function LogTable<TData, TValue>({
   };
 
   function openImagingSession(): void {
-    invoke('open_imaging_session', { id: selectedRowId }).catch((error) => {
+    const session = table
+      .getRowModel()
+      .rows.find((row) => row.id === selectedRowId)
+      ?.original as ImagingSession;
+    invoke('open_imaging_session', { id: session.id }).catch((error) => {
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',

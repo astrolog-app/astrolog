@@ -103,11 +103,11 @@ pub struct LightFrame {
 }
 
 impl LightFrame {
-    pub fn build_path(&self, state: State<Mutex<AppState>>) -> PathBuf {
-        let app_state = state.lock().unwrap();
-
-        let mut path = app_state.preferences.storage.root_directory.clone();
-        path.push(PathBuf::from(&self.date));
+    pub fn build_path(&self, root_directory: &PathBuf) -> PathBuf {
+        // TODO: what if path is invalid
+        let mut path = root_directory.clone();
+        path.push(PathBuf::from("Data"));
+        path.push(PathBuf::from("Test"));
 
         path
     }
@@ -143,9 +143,16 @@ impl LightFrame {
         }
     }
 
-    pub fn classify(&self, window: Window, state: State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
-        let mut step = 0;
-        // Start process
+    pub fn classify(
+        &mut self,
+        state: State<Mutex<AppState>>,
+        window: Window,
+        root_directory: &PathBuf
+    ) -> Result<(), Box<dyn Error>> {
+        let mut app_state = state.lock().map_err(|e| e.to_string())?;
+
+        // start process
+        let mut step = self.frames_classified.len() as u32;
         let mut process = Process {
             id: Uuid::new_v4(),
             name: "Classifying Light Frames".to_string(),
@@ -158,21 +165,40 @@ impl LightFrame {
 
         let mut errors = Vec::new();
 
-        for frame in &self.frames_to_classify {
-            let mut destination = self.build_path(state.clone());
-            destination.push("Light");
-            destination.push("name"); // TODO
+        let mut destination = self.build_path(root_directory);
 
-            // Try to copy frame
+        for frame in &self.frames_to_classify {
+            let mut extension = PathBuf::from("Light");
+            let file_name = frame.file_name().unwrap(); // TODO
+            extension.push(&file_name);
+            destination.push(PathBuf::from("Light"));
+
+            fs::create_dir_all(&destination)?; // TODO
+            destination.push(file_name);
+
+            // try to copy frame
             if let Err(e) = fs::copy(frame, &destination) {
                 eprintln!("Failed to copy {:?} to {:?}: {}", frame, destination, e); // TODO: log
                 errors.push(format!("Failed to copy {:?} -> {:?}: {}", frame, destination, e));
+
+                step += 1;
+                process.step = Some(step.clone());
+                window.emit("process", &process).unwrap();
+
                 continue;
             }
 
-            // TODO: adjust self and save to .json
+            // adjust self and save to .json
+            let old = self.clone();
+            self.frames_classified.push(extension);
+            app_state.imaging_frame_list.light_frames.insert(self.id, self.clone());
+            if let Err(e) = ImagingFrameList::save(root_directory.clone(), &app_state.imaging_frame_list) {
+                // revert
+                app_state.imaging_frame_list.light_frames.insert(old.id, old);
+                fs::remove_file(&destination).ok();
+            };
 
-            // Update process
+            // update process
             step += 1;
             process.step = Some(step.clone());
             window.emit("process", &process).unwrap();
@@ -182,7 +208,7 @@ impl LightFrame {
         process.finished = true;
         window.emit("process", &process).unwrap();
 
-        // Return an error if any failures occurred
+        // return an error if any failures occurred
         if !errors.is_empty() {
             return Err(Box::new(std::io::Error::new(
                 std::io::ErrorKind::Other,

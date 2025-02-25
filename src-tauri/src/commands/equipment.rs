@@ -3,6 +3,7 @@ use crate::models::state::AppState;
 use std::sync::Mutex;
 use tauri::State;
 
+// TODO: when editing
 #[tauri::command]
 pub fn check_equipment_duplicate(
     state: State<Mutex<AppState>>,
