@@ -11,7 +11,6 @@ export interface ImagingSessionGeneral {
 }
 
 export interface ImagingSessionDetails {
-  total_subs: number,
   gain: number,
   sub_length: number,
   integrated_subs: number | undefined,

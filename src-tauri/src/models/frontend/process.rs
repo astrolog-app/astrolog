@@ -1,6 +1,7 @@
+use serde::Serialize;
 use uuid::Uuid;
 
-#[derive(serde::Serialize)]
+#[derive(Serialize, Clone)]
 pub struct Process {
     pub id: Uuid,
     pub name: String,

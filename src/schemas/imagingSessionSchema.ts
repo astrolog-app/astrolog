@@ -16,7 +16,6 @@ export const ImagingSessionGeneralSchema = z.object({
 });
 
 export const ImagingSessionDetailsSchema = z.object({
-  total_subs: z.number().int().positive("Total subs must be a positive integer"),
   gain: z.number().nonnegative("Gain must be a non-negative number"),
   sub_length: z.number().positive("Sub length must be a positive number"),
   notes: z.string().optional(),

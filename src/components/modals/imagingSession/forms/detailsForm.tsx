@@ -29,7 +29,6 @@ export default function DetailsForm({ setTab, isEdit, setDetails, editSession }:
   const form = useForm<z.infer<typeof ImagingSessionDetailsSchema>>({
     resolver: zodResolver(ImagingSessionDetailsSchema),
     defaultValues: {
-      total_subs: 0,
       gain: 0,
       sub_length: 0,
       notes: '',
@@ -48,7 +47,6 @@ export default function DetailsForm({ setTab, isEdit, setDetails, editSession }:
 
     const values = form.getValues();
     const details: ImagingSessionDetails = {
-      total_subs: values.total_subs,
       sub_length: values.sub_length,
       gain: values.gain,
       notes: values.notes,
@@ -63,24 +61,6 @@ export default function DetailsForm({ setTab, isEdit, setDetails, editSession }:
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="total_subs"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Total Subs</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  {...field}
-                  onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 0)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <FormField
           control={form.control}
           name="gain"

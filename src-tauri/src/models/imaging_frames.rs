@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
 use std::path::PathBuf;
-use tauri::{AppHandle, Window};
+use tauri::{AppHandle, Emitter, Window};
 use uuid::Uuid;
 use crate::commands::imaging_sessions::ImagingSessionEdit;
 use crate::models::frontend::process::Process;
@@ -81,7 +81,8 @@ pub struct LightFrame {
     pub camera_id: Uuid,
     pub total_subs: u32,
     pub gain: u32,
-    pub frames: Vec<PathBuf>,
+    pub frames_to_classify: Vec<PathBuf>,
+    pub frames_classified: Vec<PathBuf>,
 
     pub date: String,
     pub target: String,
@@ -104,12 +105,13 @@ impl LightFrame {
     pub fn from(session: &ImagingSessionEdit) -> LightFrame {
         LightFrame {
             id: Uuid::new_v4(),
-            frames: vec![],
+            frames_to_classify: session.base.frames.clone(),
+            frames_classified: vec![],
 
             date: session.general.date.clone(),
             target: session.general.target.clone(),
 
-            total_subs: session.details.total_subs,
+            total_subs: session.base.frames.len() as u32,
             gain: session.details.gain,
             integrated_subs: session.details.integrated_subs,
             offset: session.details.offset,
@@ -131,17 +133,28 @@ impl LightFrame {
         }
     }
 
-    pub fn classify(&self, window: Window,) -> Result<(), Box<dyn Error>> {
-        let process = Process {
+    pub fn classify(&self, window: Window) -> Result<(), Box<dyn Error>> {
+        // start process
+        let mut process = Process {
             id: Uuid::new_v4(),
-            name: "Classifying Imaging Session".to_string(),
+            name: "Classifying Light Frames".to_string(),
             modal: true,
             step: 0,
             max: self.total_subs,
         };
-        // window.emit("process", process).unwrap();
+        window.emit("process", &process).unwrap();
 
-        // TODO
+        for frame in &self.frames_to_classify {
+            // TODO: get new path
+
+            // TODO: copy frame
+
+            // TODO: adjust self and save to .json
+
+            // update process
+            process.step += 1;
+            window.emit("process", &process).unwrap();
+        }
 
         Ok(())
     }

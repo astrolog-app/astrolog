@@ -76,7 +76,7 @@ pub fn get_image_frames_path(state: State<Mutex<AppState>>, id: Uuid) -> Result<
     let light_frames = app_state.imaging_frame_list.light_frames.get(&session.light_frame_id)
         .ok_or_else(|| format!("No light frames found for session ID {}", session.light_frame_id))?;
 
-    let full_paths: Vec<PathBuf> = light_frames.frames.iter()
+    let full_paths: Vec<PathBuf> = light_frames.frames_to_classify.iter()
         .map(|path| base_path.join(path))
         .collect();
 
@@ -97,7 +97,6 @@ pub struct ImagingSessionGeneral {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ImagingSessionDetails {
-    pub total_subs: u32,
     pub gain: u32,
     pub sub_length: f64,
     pub integrated_subs: Option<u32>,
@@ -150,21 +149,36 @@ pub fn classify_imaging_session(
     let light_frames = LightFrame::from(&session);
     let imaging_session = ImagingSession::from(&light_frames, &light_frames.id);
 
-    // first TODO
-    app_state.imaging_sessions.insert(imaging_session.id, imaging_session);
-    ImagingSessionList::save(
+    // create new ImagingSession
+    // Step 1: Insert imaging session and save
+    app_state.imaging_sessions.insert(imaging_session.id, imaging_session.clone());
+    if let Err(e) = ImagingSessionList::save(
         app_state.preferences.storage.root_directory.clone(),
         &app_state.imaging_sessions
-    ).map_err(|e| e.to_string())?;
+    ) {
+        // Roll back: remove the inserted imaging session
+        app_state.imaging_sessions.remove(&imaging_session.id);
+        return Err(e.to_string());
+    }
 
-    // second
+    // Step 2: Insert light frame and save
     app_state.imaging_frame_list.light_frames.insert(light_frames.id, light_frames.clone());
-    ImagingFrameList::save(
+    if let Err(e) = ImagingFrameList::save(
         app_state.preferences.storage.root_directory.clone(),
         &app_state.imaging_frame_list
-    ).map_err(|e| e.to_string())?;
+    ) {
+        // Roll back both: remove light frame and imaging session
+        app_state.imaging_frame_list.light_frames.remove(&light_frames.id);
+        app_state.imaging_sessions.remove(&imaging_session.id);
+        // Attempt to update the saved imaging session list after rollback
+        ImagingSessionList::save(
+            app_state.preferences.storage.root_directory.clone(),
+            &app_state.imaging_sessions
+        ).map_err(|e| e.to_string())?;
+        return Err(e.to_string());
+    }
 
-    // classify
+    // classify light frames
     light_frames.classify(window).map_err(|e| e.to_string())?;
 
     Ok(())
