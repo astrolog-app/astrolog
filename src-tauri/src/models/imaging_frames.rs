@@ -5,9 +5,10 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::any::Any;
 use std::collections::HashMap;
 use std::error::Error;
-use std::fmt;
+use std::{fmt, fs};
 use std::path::PathBuf;
-use tauri::{AppHandle, Emitter, Window};
+use std::sync::Mutex;
+use tauri::{Emitter, State, Window};
 use uuid::Uuid;
 use crate::commands::imaging_sessions::ImagingSessionEdit;
 use crate::models::frontend::process::Process;
@@ -102,6 +103,15 @@ pub struct LightFrame {
 }
 
 impl LightFrame {
+    pub fn build_path(&self, state: State<Mutex<AppState>>) -> PathBuf {
+        let app_state = state.lock().unwrap();
+
+        let mut path = app_state.preferences.storage.root_directory.clone();
+        path.push(PathBuf::from(&self.date));
+
+        path
+    }
+
     pub fn from(session: &ImagingSessionEdit) -> LightFrame {
         LightFrame {
             id: Uuid::new_v4(),
@@ -133,8 +143,8 @@ impl LightFrame {
         }
     }
 
-    pub fn classify(&self, window: Window) -> Result<(), Box<dyn Error>> {
-        // start process
+    pub fn classify(&self, window: Window, state: State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
+        // Start process
         let mut process = Process {
             id: Uuid::new_v4(),
             name: "Classifying Light Frames".to_string(),
@@ -144,16 +154,33 @@ impl LightFrame {
         };
         window.emit("process", &process).unwrap();
 
-        for frame in &self.frames_to_classify {
-            // TODO: get new path
+        let mut errors = Vec::new();
 
-            // TODO: copy frame
+        for frame in &self.frames_to_classify {
+            let mut destination = self.build_path(state.clone());
+            destination.push("Light");
+            destination.push("name"); // TODO
+
+            // Try to copy frame
+            if let Err(e) = fs::copy(frame, &destination) {
+                eprintln!("Failed to copy {:?} to {:?}: {}", frame, destination, e); // TODO: log
+                errors.push(format!("Failed to copy {:?} -> {:?}: {}", frame, destination, e));
+                continue;
+            }
 
             // TODO: adjust self and save to .json
 
-            // update process
+            // Update process
             process.step += 1;
             window.emit("process", &process).unwrap();
+        }
+
+        // Return an error if any failures occurred
+        if !errors.is_empty() {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                errors.join("\n"),
+            )));
         }
 
         Ok(())

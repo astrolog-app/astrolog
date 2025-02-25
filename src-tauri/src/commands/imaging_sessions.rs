@@ -179,7 +179,7 @@ pub fn classify_imaging_session(
     }
 
     // classify light frames
-    light_frames.classify(window).map_err(|e| e.to_string())?;
+    light_frames.classify(window, state).map_err(|e| e.to_string())?;
 
     Ok(())
 }
