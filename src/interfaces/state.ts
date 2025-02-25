@@ -43,19 +43,20 @@ export interface ImagingSession {
   target: string;
   sub_length: number;
   total_subs: number;
-  integrated_subs: number;
+  integrated_subs: number | undefined;
   filter: string;
   gain: number;
-  offset: number;
-  camera_temp: number;
-  outside_temp: number;
-  average_seeing: number;
-  average_cloud_cover: number;
+  offset: number | undefined;
+  camera_temp: number | undefined;
+  outside_temp: number | undefined;
+  average_seeing: number | undefined;
+  average_cloud_cover: number | undefined;
+  average_moon: number;
   telescope: string;
   flattener: string;
   mount: string;
   camera: string;
-  notes: string;
+  notes: string | undefined;
 }
 
 export interface CalibrationFrame {

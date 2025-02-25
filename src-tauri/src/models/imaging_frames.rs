@@ -7,7 +7,10 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
 use std::path::PathBuf;
+use tauri::{AppHandle, Window};
 use uuid::Uuid;
+use crate::commands::imaging_sessions::ImagingSessionEdit;
+use crate::models::frontend::process::Process;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ImagingFrameList {
@@ -76,25 +79,72 @@ impl ImagingFrameList {
 pub struct LightFrame {
     pub id: Uuid,
     pub camera_id: Uuid,
-    pub total_subs: i32,
-    pub gain: i32,
+    pub total_subs: u32,
+    pub gain: u32,
     pub frames: Vec<PathBuf>,
 
     pub date: String,
     pub target: String,
-    pub integrated_subs: i32,
+    pub integrated_subs: Option<u32>,
     pub filter_id: Uuid,
-    pub offset: i32,
-    pub camera_temp: f64,
-    pub outside_temp: f64,
-    pub average_seeing: f64,
-    pub average_cloud_cover: f64,
+    pub offset: Option<u32>,
+    pub camera_temp: Option<f64>,
+    pub outside_temp: Option<f64>,
+    pub average_seeing: Option<f64>,
+    pub average_cloud_cover: Option<f64>,
     pub average_moon: f64,
     pub telescope_id: Uuid,
     pub flattener_id: Uuid,
     pub mount_id: Uuid,
-    pub notes: String,
+    pub notes: Option<String>,
     pub sub_length: f64,
+}
+
+impl LightFrame {
+    pub fn from(session: &ImagingSessionEdit) -> LightFrame {
+        LightFrame {
+            id: Uuid::new_v4(),
+            frames: vec![],
+
+            date: session.general.date.clone(),
+            target: session.general.target.clone(),
+
+            total_subs: session.details.total_subs,
+            gain: session.details.gain,
+            integrated_subs: session.details.integrated_subs,
+            offset: session.details.offset,
+            camera_temp: session.details.camera_temp,
+            notes: session.details.notes.clone(),
+            sub_length: session.details.sub_length,
+
+            telescope_id: session.equipment.telescope_id,
+            flattener_id: session.equipment.flattener_id,
+            mount_id: session.equipment.mount_id,
+            camera_id: session.equipment.camera_id,
+            filter_id: session.equipment.filter_id,
+
+            outside_temp: session.weather.outside_temp,
+            average_seeing: session.weather.average_seeing,
+            average_cloud_cover: session.weather.average_cloud_cover,
+
+            average_moon: 0.0, // TODO
+        }
+    }
+
+    pub fn classify(&self, window: Window,) -> Result<(), Box<dyn Error>> {
+        let process = Process {
+            id: Uuid::new_v4(),
+            name: "Classifying Imaging Session".to_string(),
+            modal: true,
+            step: 0,
+            max: self.total_subs,
+        };
+        // window.emit("process", process).unwrap();
+
+        // TODO
+
+        Ok(())
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]

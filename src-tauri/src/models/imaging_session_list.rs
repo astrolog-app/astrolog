@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::path::PathBuf;
 use uuid::Uuid;
+use crate::models::imaging_frames::LightFrame;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ImagingSessionList {
@@ -40,9 +41,22 @@ impl ImagingSessionList {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ImagingSession {
     pub id: Uuid,
-    pub folder_dir: String,
+    pub folder_dir: PathBuf,
     pub light_frame_id: Uuid,
-    pub flat_frame_id: Uuid,
-    pub dark_frame_id: Uuid,
-    pub bias_frame_id: Uuid,
+    pub flat_frame_id: Option<Uuid>,
+    pub dark_frame_id: Option<Uuid>,
+    pub bias_frame_id: Option<Uuid>,
+}
+
+impl ImagingSession {
+    pub fn from(light_frame: &LightFrame, id: &Uuid) -> ImagingSession {
+        ImagingSession {
+            id: id.clone(),
+            folder_dir: Default::default(), // TODO
+            light_frame_id: light_frame.id.clone(),
+            flat_frame_id: None,
+            dark_frame_id: None,
+            bias_frame_id: None,
+        }
+    }
 }

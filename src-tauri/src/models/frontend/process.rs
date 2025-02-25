@@ -5,6 +5,6 @@ pub struct Process {
     pub id: Uuid,
     pub name: String,
     pub modal: bool,
-    pub step: Option<u32>,
-    pub max: Option<u32>,
+    pub step: u32,
+    pub max: u32,
 }
