@@ -144,13 +144,15 @@ impl LightFrame {
     }
 
     pub fn classify(&self, window: Window, state: State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
+        let mut step = 0;
         // Start process
         let mut process = Process {
             id: Uuid::new_v4(),
             name: "Classifying Light Frames".to_string(),
             modal: true,
-            step: 0,
-            max: self.total_subs,
+            finished: false,
+            step: Some(step.clone()),
+            max: Some(self.total_subs),
         };
         window.emit("process", &process).unwrap();
 
@@ -171,9 +173,14 @@ impl LightFrame {
             // TODO: adjust self and save to .json
 
             // Update process
-            process.step += 1;
+            step += 1;
+            process.step = Some(step.clone());
             window.emit("process", &process).unwrap();
         }
+
+        // finish process
+        process.finished = true;
+        window.emit("process", &process).unwrap();
 
         // Return an error if any failures occurred
         if !errors.is_empty() {

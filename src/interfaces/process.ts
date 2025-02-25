@@ -4,6 +4,7 @@ export interface Process {
   id: UUID;
   modal: boolean;
   name: string;
-  step: number;
-  max: number;
+  finished: boolean;
+  step: number | undefined;
+  max: number | undefined;
 }

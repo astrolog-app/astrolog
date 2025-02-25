@@ -25,7 +25,7 @@ export const ProcessProvider: React.FC<{ children: React.ReactNode }> = ({
       setProcesses((prevProcesses) => {
         const updatedProcesses = new Map(prevProcesses);
 
-        if (event.payload.max == event.payload.step) {
+        if (event.payload.finished) {
           updatedProcesses.delete(event.payload.id);
 
           if (event.payload.modal) {
