@@ -39,17 +39,16 @@ impl Process {
         if let Some(step) = self.step {
             self.step = Some(step + 1);
         }
-        window.emit("process", self).unwrap();
+        window.emit("process", &self).unwrap();
     }
 
     pub fn kill(mut self, window: &Window, error_msg: String) {
-        self.finished = true;
         self.error = Some(error_msg);
-        window.emit("process", self).unwrap();
+        self.finish(window);
     }
 
     pub fn finish(mut self, window: &Window) {
         self.finished = true;
-        window.emit("process", self).unwrap();
+        window.emit("process", &self).unwrap();
     }
 }
