@@ -28,7 +28,7 @@ export const ProcessProvider: React.FC<{ children: React.ReactNode }> = ({
         if (event.payload.finished) {
           updatedProcesses.delete(event.payload.id);
 
-          if (event.payload.error !== undefined) {
+          if (event.payload.error !== null) {
             toast({
               variant: 'destructive',
               title: 'Uh oh! Something went wrong.',
