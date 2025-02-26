@@ -1,12 +1,55 @@
 use serde::Serialize;
+use tauri::{Emitter, Window};
 use uuid::Uuid;
 
 #[derive(Serialize, Clone)]
 pub struct Process {
-    pub id: Uuid,
-    pub name: String,
-    pub modal: bool,
-    pub finished: bool,
-    pub step: Option<u32>,
-    pub max: Option<u32>,
+    id: Uuid,
+    name: String,
+    modal: bool,
+    finished: bool,
+    step: Option<u32>,
+    max: Option<u32>,
+    error: Option<String>,
+}
+
+impl Process {
+    pub fn spawn(
+        window: &Window,
+        name: &str,
+        modal: bool,
+        step: Option<u32>,
+        max: Option<u32>
+    ) -> Process {
+        let process = Process {
+            id: Uuid::new_v4(),
+            name: name.to_string(),
+            modal,
+            finished: false,
+            step,
+            max,
+            error: None,
+        };
+        window.emit("process", &process).unwrap();
+
+        process
+    }
+
+    pub fn update(&mut self, window: &Window) {
+        if let Some(step) = self.step {
+            self.step = Some(step + 1);
+        }
+        window.emit("process", self).unwrap();
+    }
+
+    pub fn kill(mut self, window: &Window, error_msg: String) {
+        self.finished = true;
+        self.error = Some(error_msg);
+        window.emit("process", self).unwrap();
+    }
+
+    pub fn finish(mut self, window: &Window) {
+        self.finished = true;
+        window.emit("process", self).unwrap();
+    }
 }

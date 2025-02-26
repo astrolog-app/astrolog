@@ -7,4 +7,5 @@ export interface Process {
   finished: boolean;
   step: number | undefined;
   max: number | undefined;
+  error: string | undefined;
 }

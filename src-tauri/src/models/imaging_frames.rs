@@ -151,17 +151,14 @@ impl LightFrame {
     ) -> Result<(), Box<dyn Error>> {
         let mut app_state = state.lock().map_err(|e| e.to_string())?;
 
-        // start process
-        let mut step = self.frames_classified.len() as u32;
-        let mut process = Process {
-            id: Uuid::new_v4(),
-            name: "Classifying Light Frames".to_string(),
-            modal: true,
-            finished: false,
-            step: Some(step.clone()),
-            max: Some(self.total_subs),
-        };
-        window.emit("process", &process).unwrap();
+        // spawn process
+        let mut process = Process::spawn(
+            &window,
+            "Classifying Light Frames",
+            true,
+            Some(self.frames_classified.len() as u32),
+            Some(self.total_subs)
+        );
 
         let mut errors = Vec::new();
 
@@ -179,10 +176,7 @@ impl LightFrame {
                 Some(name) => name,
                 None => {
                     errors.push(format!("Couldn't extract filename out of frame: {:?}", frame));
-
-                    step += 1;
-                    process.step = Some(step.clone());
-                    window.emit("process", &process).unwrap();
+                    process.update(&window);
 
                     continue;
                 }
@@ -193,10 +187,7 @@ impl LightFrame {
             // try to copy frame
             if let Err(e) = fs::copy(frame, &destination) {
                 errors.push(format!("Failed to copy {:?} -> {:?}: {}", frame, destination, e));
-
-                step += 1;
-                process.step = Some(step.clone());
-                window.emit("process", &process).unwrap();
+                process.update(&window);
 
                 continue;
             }
@@ -218,14 +209,11 @@ impl LightFrame {
             };
 
             // update process
-            step += 1;
-            process.step = Some(step.clone());
-            window.emit("process", &process).unwrap();
+            process.update(&window);
         }
 
         // finish process
-        process.finished = true;
-        window.emit("process", &process).unwrap();
+        process.finish(&window);
 
         // return an error if any failures occurred
         if !errors.is_empty() {
