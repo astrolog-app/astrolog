@@ -6,36 +6,29 @@
   .list {
     padding: var(--padding);
 
-    .wrapper {
+    .select {
       display: flex;
+      justify-content: space-between;
+      padding: 0.5rem;
+      border-radius: var(--radius);
+      cursor: pointer;
       margin-bottom: 0.5rem;
 
-      .select {
-        flex-grow: 1;
-        padding: 0.5rem;
-        border-radius: var(--radius);
-        cursor: pointer;
 
-        &:hover {
-          background-color: hsl(var(--muted) / 0.5);
-        }
+      &:hover {
+        background-color: hsl(var(--muted) / 0.5);
       }
 
       &:last-of-type {
         margin-bottom: 0;
       }
+    }
 
-      .selected {
+    .selected {
+      background-color: hsl(var(--muted));
+
+      &:hover {
         background-color: hsl(var(--muted));
-
-        &:hover {
-          background-color: hsl(var(--muted));
-        }
-      }
-
-      .edit {
-        margin-left: 0.25rem;
-        height: fit-content;
       }
     }
   }

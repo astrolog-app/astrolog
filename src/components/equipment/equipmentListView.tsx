@@ -63,23 +63,10 @@ export default function EquipmentListView({ selectedItem, setSelectedItem }: Equ
                 {tab.content.map((item, index) => (
                   <div
                     key={index}
-                    className={styles.wrapper}
+                    className={cn(styles.select, item === selectedItem ? styles.selected : '')}
+                    onClick={() => setSelectedItem(item)}
                   >
-                    <div
-                      className={cn(styles.select, item === selectedItem ? styles.selected : '')}
-                      onClick={() => setSelectedItem(item)}
-                    >
-                        {getViewName(item)}
-                    </div>
-                    {item === selectedItem && (
-                      <Button
-                        className={styles.edit}
-                        variant='secondary'
-                        onClick={() => openModal(<EquipmentModal type={tab.type} item={item} />)}
-                      >
-                        Edit
-                      </Button>
-                    )}
+                    {getViewName(item)}
                   </div>
                 ))}
               </AccordionContent>
