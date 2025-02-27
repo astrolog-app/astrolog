@@ -6,7 +6,7 @@ export interface ImagingSessionBase {
 }
 
 export interface ImagingSessionGeneral {
-  date: string,
+  date: Date,
   target: string,
 }
 

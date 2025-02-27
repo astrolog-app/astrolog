@@ -55,7 +55,7 @@ export default function GeneralForm({ setTab, isEdit, setGeneral, editSession }:
 
     const values = form.getValues();
     const general: ImagingSessionGeneral = {
-      date: values.date.toString(), // TODO
+      date: values.date, // TODO
       target: values.target
     }
     setGeneral(general);

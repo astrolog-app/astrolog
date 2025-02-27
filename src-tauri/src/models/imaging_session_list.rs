@@ -107,7 +107,7 @@ impl ImagingSession {
         match field {
             "CAMERA" => light_frame.camera_id.to_string(),
             "GAIN" => light_frame.gain.to_string(),
-            "DATE" => light_frame.date.clone(),
+            "DATE" => light_frame.date.to_string(),
             "TARGET" => light_frame.target.clone(),
             _ => "".to_string(),
         }

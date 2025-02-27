@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 use std::process::Command;
 use std::sync::Mutex;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use tauri::{State, Window};
 use uuid::Uuid;
@@ -74,7 +75,7 @@ pub struct ImagingSessionBase {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ImagingSessionGeneral {
-    pub date: String,
+    pub date: DateTime<Utc>,
     pub target: String,
 }
 

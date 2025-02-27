@@ -8,6 +8,7 @@ use std::error::Error;
 use std::{fmt, fs};
 use std::path::PathBuf;
 use std::sync::Mutex;
+use chrono::{DateTime, Utc};
 use tauri::{Emitter, State, Window};
 use uuid::Uuid;
 use crate::commands::imaging_sessions::ImagingSessionEdit;
@@ -86,7 +87,7 @@ pub struct LightFrame {
     pub frames_to_classify: Vec<PathBuf>,
     pub frames_classified: Vec<PathBuf>,
 
-    pub date: String,
+    pub date: DateTime<Utc>,
     pub target: String,
     pub integrated_subs: Option<u32>,
     pub filter_id: Uuid,

@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use crate::models::equipment::{EquipmentItem, EquipmentList};
 use crate::models::frontend::analytics::Analytics;
 use crate::models::gallery_image_list::GalleryImage;
@@ -28,7 +29,7 @@ pub struct TableData {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LogTableRow {
     id: Uuid,
-    date: String,
+    date: DateTime<Utc>,
     target: String,
     sub_length: f64,
     total_subs: u32,
