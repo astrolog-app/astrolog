@@ -16,13 +16,14 @@ import { EquipmentType } from '@/enums/equipmentType';
 import { getViewName } from '@/utils/equipment';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Settings } from 'lucide-react';
+import { Clock, Settings, Star, SpaceIcon as Galaxy, Info, Pencil, Trash2 } from 'lucide-react';
 import { EquipmentMonthlyUsage } from '@/components/analytics/equipmentMonthlyUsage';
 import InfoCard from '@/components/analytics/infoCard';
 import { Button } from '@/components/ui/button';
 import { useModal } from '@/context/modalProvider';
 import EquipmentModal from '@/components/modals/equipment/equipment';
 import EquipmentNoteEditor from '@/components/modals/equipment/equipmentNoteEditor';
+import { cn } from '@/utils/classNames';
 
 interface EquipmentDetailsProps {
   selectedItem: EquipmentItem | undefined;
@@ -43,24 +44,23 @@ export default function EquipmentDetails({ selectedItem }: EquipmentDetailsProps
     <ScrollArea className={styles.component}>
       <div className={styles.top}>
         <div className={styles.left}>
-          <div>
-            <Badge className={styles.badge}>{type}</Badge>
-            <div className={styles.title}>
-              {getViewName(selectedItem)}
-            </div>
+          <Badge className={styles.badge}>{type}</Badge>
+          <div className={styles.title}>
+            {getViewName(selectedItem)}
           </div>
-          <Button
-            variant="secondary"
-            size="lg"
-            className={styles.button}
-            onClick={() => openModal(<EquipmentModal type={type} item={selectedItem} />)}
-          >
-            <Settings className="w-4 h-4 mr-2" />
-            Configure
-          </Button>
         </div>
-        <div>{ /* Card */}</div>
+        <Button
+          variant="secondary"
+          size="lg"
+          className={styles.button}
+          onClick={() => openModal(<EquipmentModal type={type} item={selectedItem} />)}
+        >
+          <Settings className="w-4 h-4 mr-2" />
+          Configure
+        </Button>
       </div>
+
+      <QuickOverview />
 
       <Tabs defaultValue="specs">
         <TabsList className={styles.tabsList}>
@@ -81,6 +81,43 @@ export default function EquipmentDetails({ selectedItem }: EquipmentDetailsProps
 
       { /* Gallery */}
     </ScrollArea>
+  );
+}
+
+function QuickOverview() {
+  return (
+    <div className={styles.overview}>
+      <h2 className="text-xl font-semibold mb-4">Quick Overview</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="flex items-center space-x-4">
+          <div className="bg-blue-500 rounded-full p-3">
+            <Clock className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-400">Total Observation Time</p>
+            <p className="text-2xl font-bold">127.5 hours</p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-4">
+          <div className="bg-green-500 rounded-full p-3">
+            <Star className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-400">Objects Observed</p>
+            <p className="text-2xl font-bold">342</p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-4">
+          <div className="bg-purple-500 rounded-full p-3">
+            <Galaxy className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-400">Last Target</p>
+            <p className="text-2xl font-bold">M31 Andromeda</p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -171,37 +208,64 @@ function EquipmentNotes({ selectedItem }: { selectedItem: EquipmentItem }) {
 
   return (
     <>
-      <Button
-        onClick={() => openModal(<EquipmentNoteEditor item={selectedItem} />)}
-      >
-        Add Note
-      </Button>
+      <div className={styles.equipmentNotes}>
+        <div className={styles.title}>Equipment Notes</div>
+        <Button
+          onClick={() => openModal(<EquipmentNoteEditor item={selectedItem} />)}
+          variant="secondary"
+        >
+          <Info className="w-4 h-4 mr-2" />
+          Add Note
+        </Button>
+      </div>
       {noteArray.map((note, index) => (
-        <Note note={note} key={index} />
+        <Note className={styles.note} note={note} key={index} item={selectedItem} />
       ))}
     </>
   );
 }
 
-function Note({ note }: { note: EquipmentNote }) {
+function Note({ className, note, item }: { className?: string, note: EquipmentNote, item: EquipmentItem }) {
+  const { openModal } = useModal();
+
   const formatDate = (dateInput: string | number | Date): string => {
     const date = new Date(dateInput); // Ensure it's a Date object
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
   };
 
+  function deleteNote() {}
+
   return (
-    <div className="bg-gray-900 p-4 rounded-lg">
+    <div
+      className={cn(className, "group relative bg-gray-900 p-4 rounded-lg hover:bg-gray-800 transition-colors")}
+    >
       <div className="flex items-center gap-2 mb-2">
         <Clock className="w-4 h-4 text-blue-400" />
-        <span className="font-medium">{formatDate(note.date)}</span>
+        <p className="font-medium text-gray-100">{formatDate(note.date)}</p>
       </div>
-      <p className="text-gray-300">
-        {note.note}
-      </p>
+      <p className="text-gray-300">{note.note}</p>
+      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 mr-1"
+          onClick={() => openModal(<EquipmentNoteEditor item={item} note={note} />)}
+        >
+          <Pencil className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-red-400 hover:text-red-300"
+          onClick={() => deleteNote()}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }

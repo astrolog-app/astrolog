@@ -5,32 +5,43 @@
 
   .top {
     display: flex;
-    margin-bottom: 4rem;
+    margin-bottom: 2rem;
 
     .left {
-      min-height: 10rem;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      margin-right: 1rem;
 
       .badge {
         margin-bottom: 0.5rem;
+        width: fit-content;
       }
 
       .title {
-        font-weight: 600;
-        font-size: 1.5rem;
+        font-weight: 700;
+        font-size: 2.25rem;
       }
+    }
 
-      .button {
-        width: fit-content;
-      }
+    .button {
+      width: fit-content;
+      margin-left: auto;
+      margin-top: auto;
+      margin-bottom: auto;
     }
   }
 
   .tabsList {
     margin-bottom: 1.5rem;
   }
+}
+
+.overview {
+  width: 100%;
+  background-color: hsl(var(--primary-custom));
+  border-radius: var(--radius);
+  margin-bottom: 2rem;
+  padding: 1.5rem;
 }
 
 .infoCards {
@@ -44,5 +55,25 @@
     &:last-of-type {
       margin-right: 0;
     }
+  }
+}
+
+.equipmentNotes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+
+  .title {
+    font-weight: 600;
+    font-size: 1.5rem;
+  }
+}
+
+.note {
+  margin-bottom: var(--padding);
+
+  &:last-of-type {
+    margin-bottom: 0;
   }
 }
