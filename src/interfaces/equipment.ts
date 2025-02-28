@@ -1,7 +1,8 @@
 import { UUID } from 'crypto';
 import { EquipmentType } from '@/enums/equipmentType';
 
-interface Note {
+export interface EquipmentNote {
+  id: UUID,
   date: Date,
   note: string,
 }
@@ -10,7 +11,7 @@ export interface EquipmentItem {
   id: UUID;
   brand: string;
   name: string;
-  notes: Note[],
+  notes: Map<UUID, EquipmentNote>,
 }
 
 export interface Telescope extends EquipmentItem {

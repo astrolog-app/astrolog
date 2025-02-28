@@ -11,10 +11,11 @@ import React, {
   useState,
 } from 'react';
 import { toast } from '@/components/ui/use-toast';
-import { AppState } from '@/interfaces/state';
+import { AppState, GalleryImage, Preferences, TableData } from '@/interfaces/state';
 import { removeContextMenu } from '@/utils/browser';
-import { Camera, Filter, Flattener, Mount, Telescope } from '@/interfaces/equipment';
+import { Camera, EquipmentItem, EquipmentNote, Filter, Flattener, Mount, Telescope } from '@/interfaces/equipment';
 import { UUID } from 'crypto';
+import { Analytics } from '@/interfaces/analytics';
 
 const defaultAppState: AppState = {
   preferences: {
@@ -39,9 +40,7 @@ const defaultAppState: AppState = {
     filters: new Map<UUID, Filter>(),
   },
   image_list: [],
-  analytics: {
-    total_imaging_sessions: 0,
-  },
+  analytics: null,
 };
 
 interface AppStateContextType {
@@ -52,11 +51,47 @@ interface AppStateContextType {
 const AppStateContext = createContext<AppStateContextType | undefined>(
   undefined,
 );
-
 export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): void {
   invoke<string>('load_frontend_app_state')
     .then((payload) => {
-      const responseData: AppState = JSON.parse(payload);
+      // Define the raw JSON shape for equipment items:
+      type RawEquipmentItem<T> = Omit<T, 'notes'> & { notes?: Record<UUID, EquipmentNote> };
+
+      const responseData = JSON.parse(payload) as {
+        preferences: Preferences;
+        table_data: TableData;
+        equipment_list: {
+          cameras?: Record<UUID, RawEquipmentItem<Camera>>;
+          telescopes?: Record<UUID, RawEquipmentItem<Telescope>>;
+          mounts?: Record<UUID, RawEquipmentItem<Mount>>;
+          filters?: Record<UUID, RawEquipmentItem<Filter>>;
+          flatteners?: Record<UUID, RawEquipmentItem<Flattener>>;
+        };
+        image_list: GalleryImage[];
+        analytics: Analytics | null;
+      };
+
+      // Convert a Record of notes to a Map
+      const convertNotes = (notes?: Record<UUID, EquipmentNote>): Map<UUID, EquipmentNote> => {
+        return new Map<UUID, EquipmentNote>(
+          Object.entries(notes || {}).map(([noteId, note]) => [noteId as UUID, note])
+        );
+      };
+
+      // Convert a Record of raw equipment items to a Map, converting notes along the way.
+      const parseEquipmentItem = <T extends EquipmentItem>(
+        items: Record<UUID, RawEquipmentItem<T>> | undefined
+      ): Map<UUID, T> => {
+        const map = new Map<UUID, T>();
+        if (!items) return map;
+        for (const [id, item] of Object.entries(items)) {
+          map.set(id as UUID, {
+            ...item,
+            notes: convertNotes(item.notes),
+          } as T);
+        }
+        return map;
+      };
 
       const fixedAppState: AppState = {
         preferences: responseData.preferences,
@@ -64,21 +99,11 @@ export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): 
         image_list: responseData.image_list,
         analytics: responseData.analytics,
         equipment_list: {
-          cameras: new Map<UUID, Camera>(
-            Object.entries(responseData.equipment_list.cameras || {}) as [UUID, Camera][]
-          ),
-          mounts: new Map<UUID, Mount>(
-            Object.entries(responseData.equipment_list.mounts || {}) as [UUID, Mount][]
-          ),
-          telescopes: new Map<UUID, Telescope>(
-            Object.entries(responseData.equipment_list.telescopes || {}) as [UUID, Telescope][]
-          ),
-          flatteners: new Map<UUID, Flattener>(
-            Object.entries(responseData.equipment_list.flatteners || {}) as [UUID, Flattener][]
-          ),
-          filters: new Map<UUID, Filter>(
-            Object.entries(responseData.equipment_list.filters || {}) as [UUID, Filter][]
-          ),
+          cameras: parseEquipmentItem<Camera>(responseData.equipment_list.cameras),
+          telescopes: parseEquipmentItem<Telescope>(responseData.equipment_list.telescopes),
+          mounts: parseEquipmentItem<Mount>(responseData.equipment_list.mounts),
+          filters: parseEquipmentItem<Filter>(responseData.equipment_list.filters),
+          flatteners: parseEquipmentItem<Flattener>(responseData.equipment_list.flatteners),
         },
       };
 

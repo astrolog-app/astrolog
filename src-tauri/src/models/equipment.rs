@@ -1,4 +1,5 @@
 use crate::file_store;
+use chrono::{DateTime, Utc};
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::collections::HashMap;
@@ -58,6 +59,7 @@ pub struct Telescope {
     pub id: Uuid,
     brand: String,
     name: String,
+    notes: HashMap<Uuid, EquipmentNote>,
 
     focal_length: i32,
     aperture: i32,
@@ -80,6 +82,7 @@ pub struct Camera {
     pub id: Uuid,
     brand: String,
     name: String,
+    notes: HashMap<Uuid, EquipmentNote>,
 
     chip_size: String,
     mega_pixel: f64,
@@ -103,6 +106,7 @@ pub struct Mount {
     pub id: Uuid,
     brand: String,
     name: String,
+    notes: HashMap<Uuid, EquipmentNote>,
 }
 
 impl EquipmentItem for Mount {
@@ -122,6 +126,7 @@ pub struct Filter {
     pub id: Uuid,
     brand: String,
     name: String,
+    notes: HashMap<Uuid, EquipmentNote>,
 
     filter_type: String,
 }
@@ -143,6 +148,7 @@ pub struct Flattener {
     pub id: Uuid,
     brand: String,
     name: String,
+    notes: HashMap<Uuid, EquipmentNote>,
 
     factor: f64,
 }
@@ -157,4 +163,11 @@ impl EquipmentItem for Flattener {
     fn name(&self) -> &str {
         &self.name
     }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+struct EquipmentNote {
+    id: Uuid,
+    date: DateTime<Utc>,
+    note: String,
 }

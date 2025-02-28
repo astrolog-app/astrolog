@@ -10,7 +10,7 @@
   --side-nav-width: 3.25rem;
 }
 
-html {
+html, body {
   user-select: none;
   overscroll-behavior: none;
 }

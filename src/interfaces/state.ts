@@ -14,7 +14,7 @@ export interface AppState {
   table_data: TableData;
   equipment_list: EquipmentList;
   image_list: GalleryImage[];
-  analytics: Analytics;
+  analytics: Analytics | null;
 }
 
 export interface Preferences {
@@ -32,7 +32,7 @@ interface User {
   weather_api_key: string;
 }
 
-interface TableData {
+export interface TableData {
   sessions: ImagingSession[];
   calibration: CalibrationFrame[];
 }

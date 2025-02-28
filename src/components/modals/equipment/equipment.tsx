@@ -20,10 +20,9 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { useForm } from 'react-hook-form';
-import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
-import { Camera, EquipmentItem, Filter, Flattener, Telescope } from '@/interfaces/equipment';
+import { Camera, EquipmentItem, EquipmentNote, Filter, Flattener, Telescope } from '@/interfaces/equipment';
 import { v4 as uuidv4 } from 'uuid';
 import { invoke } from '@tauri-apps/api/core';
 import { Switch } from '@/components/ui/switch';
@@ -33,6 +32,16 @@ import { useAppState } from '@/context/stateProvider';
 import { useModal } from '@/context/modalProvider';
 import { EquipmentList } from '@/interfaces/state';
 import { EquipmentFormValues, equipmentSchema } from '@/schemas/equipmentSchema';
+import { UUID } from 'crypto';
+
+export const saveEquipment: Record<EquipmentType, { invokeFn: string; key: keyof EquipmentList }> = {
+  [EquipmentType.TELESCOPE]: { invokeFn: 'save_telescope', key: 'telescopes' },
+  [EquipmentType.CAMERA]: { invokeFn: 'save_camera', key: 'cameras' },
+  [EquipmentType.MOUNT]: { invokeFn: 'save_mount', key: 'mounts' },
+  [EquipmentType.FILTER]: { invokeFn: 'save_filter', key: 'filters' },
+  [EquipmentType.FLATTENER]: { invokeFn: 'save_flattener', key: 'flatteners' }
+};
+
 
 interface EquipmentProps {
   type: EquipmentType;
@@ -76,16 +85,9 @@ export default function EquipmentModal({ type, item }: EquipmentProps) {
     const id = item?.id ?? uuidv4();
     const new_item: EquipmentItem = {
       id: id,
+      notes: item?.notes ?? new Map<UUID, EquipmentNote>(),
       ...values
     } as EquipmentItem;
-
-    const saveEquipment: Record<EquipmentType, { invokeFn: string; key: keyof EquipmentList }> = {
-      [EquipmentType.TELESCOPE]: { invokeFn: 'save_telescope', key: 'telescopes' },
-      [EquipmentType.CAMERA]: { invokeFn: 'save_camera', key: 'cameras' },
-      [EquipmentType.MOUNT]: { invokeFn: 'save_mount', key: 'mounts' },
-      [EquipmentType.FILTER]: { invokeFn: 'save_filter', key: 'filters' },
-      [EquipmentType.FLATTENER]: { invokeFn: 'save_flattener', key: 'flatteners' }
-    };
 
     invoke('check_equipment_duplicate', { viewName: getViewName(new_item), isEdit: isEdit })
       .then(() => {

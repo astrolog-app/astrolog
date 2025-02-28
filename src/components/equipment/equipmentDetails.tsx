@@ -1,7 +1,15 @@
 'use client';
 
 import styles from './equipmentDetails.module.scss';
-import { Camera, EquipmentItem, Filter, Flattener, getEquipmentType, Telescope } from '@/interfaces/equipment';
+import {
+  Camera,
+  EquipmentItem,
+  EquipmentNote,
+  Filter,
+  Flattener,
+  getEquipmentType,
+  Telescope
+} from '@/interfaces/equipment';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { EquipmentType } from '@/enums/equipmentType';
@@ -14,6 +22,7 @@ import InfoCard from '@/components/analytics/infoCard';
 import { Button } from '@/components/ui/button';
 import { useModal } from '@/context/modalProvider';
 import EquipmentModal from '@/components/modals/equipment/equipment';
+import EquipmentNoteEditor from '@/components/modals/equipment/equipmentNoteEditor';
 
 interface EquipmentDetailsProps {
   selectedItem: EquipmentItem | undefined;
@@ -156,29 +165,43 @@ function EquipmentAnalytics({ selectedItem }: { selectedItem: EquipmentItem }) {
 }
 
 function EquipmentNotes({ selectedItem }: { selectedItem: EquipmentItem }) {
-  return (
-    <div className="space-y-4">
-      <div className="bg-gray-900 p-4 rounded-lg">
-        <div className="flex items-center gap-2 mb-2">
-          <Clock className="w-4 h-4 text-blue-400" />
-          <span className="font-medium">April 12, 2023</span>
-        </div>
-        <p className="text-gray-300">
-          Performed collimation after noticing slight star elongation. Used the Bahtinov mask to verify proper
-          focus. The telescope is now performing exceptionally well for planetary imaging.
-        </p>
-      </div>
+  const { openModal } = useModal();
 
-      <div className="bg-gray-900 p-4 rounded-lg">
-        <div className="flex items-center gap-2 mb-2">
-          <Clock className="w-4 h-4 text-blue-400" />
-          <span className="font-medium">June 3, 2023</span>
-        </div>
-        <p className="text-gray-300">
-          Added ZWO ASI294MC Pro camera to this setup. The combination works perfectly for deep sky objects.
-          Need to adjust backfocus slightly for optimal performance.
-        </p>
+  const noteArray = Array.from(selectedItem.notes.values());
+
+  return (
+    <>
+      <Button
+        onClick={() => openModal(<EquipmentNoteEditor item={selectedItem} />)}
+      >
+        Add Note
+      </Button>
+      {noteArray.map((note, index) => (
+        <Note note={note} key={index} />
+      ))}
+    </>
+  );
+}
+
+function Note({ note }: { note: EquipmentNote }) {
+  const formatDate = (dateInput: string | number | Date): string => {
+    const date = new Date(dateInput); // Ensure it's a Date object
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  return (
+    <div className="bg-gray-900 p-4 rounded-lg">
+      <div className="flex items-center gap-2 mb-2">
+        <Clock className="w-4 h-4 text-blue-400" />
+        <span className="font-medium">{formatDate(note.date)}</span>
       </div>
+      <p className="text-gray-300">
+        {note.note}
+      </p>
     </div>
   );
 }
