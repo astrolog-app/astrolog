@@ -18,7 +18,6 @@ import { ImagingSessionEquipmentSchema } from '@/schemas/imagingSessionSchema';
 import { TabKey } from '@/components/modals/imagingSession/imagingSessionEditor';
 import { ImagingSessionEquipment } from '@/interfaces/imagingSessionEdit';
 import { ButtonBar } from '@/components/ui/custom/modal';
-import { v4 as uuidv4 } from 'uuid';
 import { UUID } from 'crypto';
 
 interface EquipmentFormFormProps {
@@ -42,11 +41,11 @@ export default function EquipmentForm({ setTab, isEdit, setEquipment, editSessio
 
     const values = form.getValues();
     const equipment: ImagingSessionEquipment = {
-      camera_id: uuidv4() as UUID,
-      telescope_id: uuidv4() as UUID,
-      flattener_id: uuidv4() as UUID,
-      mount_id: uuidv4() as UUID,
-      filter_id: uuidv4() as UUID
+      camera_id: values.camera as UUID,
+      telescope_id: values.telescope as UUID,
+      flattener_id: values.flattener as UUID,
+      mount_id: values.mount as UUID,
+      filter_id: values.filter as UUID
     };
     setEquipment(equipment);
     setTab('weather');

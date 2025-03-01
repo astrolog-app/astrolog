@@ -39,7 +39,7 @@ export interface TableData {
 
 export interface ImagingSession {
   id: UUID;
-  date: string;
+  date: Date;
   target: string;
   sub_length: number;
   total_subs: number;

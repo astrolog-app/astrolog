@@ -9,6 +9,7 @@ use crate::models::preferences::Preferences;
 use crate::models::state::AppState;
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Serialize, Serializer};
+use serde::de::Error;
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -111,7 +112,6 @@ impl LogTableRow {
                 })
             }
             None => {
-                eprintln!("LightFrame with id {:?} not found", imaging_session.id);
                 None
             }
         }

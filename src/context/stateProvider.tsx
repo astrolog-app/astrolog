@@ -11,7 +11,7 @@ import React, {
   useState,
 } from 'react';
 import { toast } from '@/components/ui/use-toast';
-import { AppState, GalleryImage, Preferences, TableData } from '@/interfaces/state';
+import { AppState, CalibrationFrame, GalleryImage, ImagingSession, Preferences } from '@/interfaces/state';
 import { removeContextMenu } from '@/utils/browser';
 import { Camera, EquipmentItem, EquipmentNote, Filter, Flattener, Mount, Telescope } from '@/interfaces/equipment';
 import { UUID } from 'crypto';
@@ -51,15 +51,20 @@ interface AppStateContextType {
 const AppStateContext = createContext<AppStateContextType | undefined>(
   undefined,
 );
+
 export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): void {
   invoke<string>('load_frontend_app_state')
     .then((payload) => {
       // Define the raw JSON shape for equipment items:
       type RawEquipmentItem<T> = Omit<T, 'notes'> & { notes?: Record<UUID, EquipmentNote> };
 
+      // Parse the payload. Note: imaging session dates come as strings.
       const responseData = JSON.parse(payload) as {
         preferences: Preferences;
-        table_data: TableData;
+        table_data: {
+          sessions: Array<Omit<ImagingSession, 'date'> & { date: string }>;
+          calibration: CalibrationFrame[];
+        };
         equipment_list: {
           cameras?: Record<UUID, RawEquipmentItem<Camera>>;
           telescopes?: Record<UUID, RawEquipmentItem<Telescope>>;
@@ -71,14 +76,19 @@ export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): 
         analytics: Analytics | null;
       };
 
-      // Convert a Record of notes to a Map
+      // Convert a Record of equipment notes to a Map,
+      // and convert the note's date string to a Date object.
       const convertNotes = (notes?: Record<UUID, EquipmentNote>): Map<UUID, EquipmentNote> => {
         return new Map<UUID, EquipmentNote>(
-          Object.entries(notes || {}).map(([noteId, note]) => [noteId as UUID, note])
+          Object.entries(notes || {}).map(([noteId, note]) => [
+            noteId as UUID,
+            { ...note, date: new Date(note.date) },
+          ])
         );
       };
 
-      // Convert a Record of raw equipment items to a Map, converting notes along the way.
+      // Convert a Record of raw equipment items to a Map,
+      // converting the nested notes using convertNotes.
       const parseEquipmentItem = <T extends EquipmentItem>(
         items: Record<UUID, RawEquipmentItem<T>> | undefined
       ): Map<UUID, T> => {
@@ -93,9 +103,18 @@ export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): 
         return map;
       };
 
+      // Convert imaging session date strings to Date objects.
+      const sessions = responseData.table_data.sessions.map((session) => ({
+        ...session,
+        date: new Date(session.date),
+      }));
+
       const fixedAppState: AppState = {
         preferences: responseData.preferences,
-        table_data: responseData.table_data,
+        table_data: {
+          sessions,
+          calibration: responseData.table_data.calibration,
+        },
         image_list: responseData.image_list,
         analytics: responseData.analytics,
         equipment_list: {

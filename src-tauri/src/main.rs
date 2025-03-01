@@ -9,7 +9,7 @@ use commands::image::get_date;
 use commands::imaging_sessions::{export_csv, open_imaging_session, get_image_frames_path, classify_imaging_session, edit_imaging_session};
 use commands::preferences::{save_preferences, set_root_directory, setup_backup};
 use commands::state::{
-    add_close_lock, load_frontend_app_state, remove_close_lock, update_app_state_from_json,
+    add_close_lock, load_frontend_app_state, remove_close_lock,
 };
 use commands::utils::{open_browser, rename_directory};
 use models::frontend::process::Process;
@@ -100,7 +100,6 @@ fn main() {
             save_telescope,
             set_root_directory,
             setup_backup,
-            update_app_state_from_json,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

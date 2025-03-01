@@ -42,7 +42,7 @@ impl ImagingSessionList {
         )?)
     }
 
-    pub fn add(state: State<Mutex<AppState>>, light_frame: &LightFrame) -> Result<(), Box<dyn Error>> {
+    pub fn add(state: State<Mutex<AppState>>, light_frame: &LightFrame) -> Result<ImagingSession, Box<dyn Error>> {
         let mut app_state = state.lock().map_err(|e| e.to_string())?;
         let imaging_session = ImagingSession::from(&light_frame, &light_frame.id);
 
@@ -74,7 +74,7 @@ impl ImagingSessionList {
             return Err(e);
         }
 
-        Ok(())
+        Ok(imaging_session)
     }
 }
 

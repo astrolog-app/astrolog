@@ -66,7 +66,7 @@ export default function EquipmentDetails({ selectedItem }: EquipmentDetailsProps
         <TabsList className={styles.tabsList}>
           <TabsTrigger value="specs">Detailed Specs</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="notes">Notes</TabsTrigger>
+          <TabsTrigger value="notes">Notes ({selectedItem.notes.size})</TabsTrigger>
         </TabsList>
         <TabsContent value="specs">
           <EquipmentDetailsTable selectedItem={selectedItem} />
@@ -204,7 +204,10 @@ function EquipmentAnalytics({ selectedItem }: { selectedItem: EquipmentItem }) {
 function EquipmentNotes({ selectedItem }: { selectedItem: EquipmentItem }) {
   const { openModal } = useModal();
 
-  const noteArray = Array.from(selectedItem.notes.values());
+  // Convert map to array and sort by date (newest first)
+  const noteArray = Array.from(selectedItem.notes.values()).sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
 
   return (
     <>
@@ -228,8 +231,7 @@ function EquipmentNotes({ selectedItem }: { selectedItem: EquipmentItem }) {
 function Note({ className, note, item }: { className?: string, note: EquipmentNote, item: EquipmentItem }) {
   const { openModal } = useModal();
 
-  const formatDate = (dateInput: string | number | Date): string => {
-    const date = new Date(dateInput); // Ensure it's a Date object
+  const formatDate = (date: Date): string => {
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',

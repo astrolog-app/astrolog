@@ -20,6 +20,9 @@ import {
   ImagingSessionGeneral,
   ImagingSessionWeather
 } from '@/interfaces/imagingSessionEdit';
+import { ImagingSession } from '@/interfaces/state';
+import { useAppState } from '@/context/stateProvider';
+import { useModal } from '@/context/modalProvider';
 
 const tabKeys = ['general', 'details', 'equipment', 'weather', 'calibration'] as const;
 export type TabKey = (typeof tabKeys)[number];
@@ -42,6 +45,9 @@ interface ImagingSessionEditorProps {
 }
 
 export default function ImagingSessionEditor({ session, base }: ImagingSessionEditorProps) {
+  const { setAppState } = useAppState();
+  const { closeModal } = useModal();
+
   const isEdit = session !== undefined;
   const [tab, setTab] = useState<TabKey>('general');
 
@@ -99,7 +105,17 @@ export default function ImagingSessionEditor({ session, base }: ImagingSessionEd
       return;
     }
 
-    invoke('classify_imaging_session', { session: newSession })
+    invoke<ImagingSession>('classify_imaging_session', { session: newSession })
+      .then((data) => {
+        setAppState(prevState => ({
+          ...prevState,
+          table_data: {
+            ...prevState.table_data,
+            sessions: [...prevState.table_data.sessions, data]
+          }
+        }));
+        closeModal();
+      })
       .catch((error) => {
         toast({
           variant: 'destructive',

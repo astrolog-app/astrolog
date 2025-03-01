@@ -45,12 +45,6 @@ pub fn load_frontend_app_state(state: State<Mutex<AppState>>) -> Result<String, 
 }
 
 #[tauri::command]
-pub fn update_app_state_from_json() -> Result<(), String> {
-    //
-    Ok(())
-}
-
-#[tauri::command]
 pub fn add_close_lock(state: State<Mutex<AppState>>) -> Result<(), String> {
     let mut app_state = state.lock().unwrap();
 

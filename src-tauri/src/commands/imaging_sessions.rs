@@ -1,3 +1,4 @@
+use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
 use std::sync::Mutex;
@@ -5,6 +6,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use tauri::{State, Window};
 use uuid::Uuid;
+use crate::models::frontend::state::LogTableRow;
 use crate::models::imaging_frames::LightFrame;
 use crate::models::imaging_session_list::{ImagingSession, ImagingSessionList};
 use crate::models::state::AppState;
@@ -41,7 +43,7 @@ pub fn open_imaging_session(state: State<Mutex<AppState>>, id: Uuid) -> Result<(
                 if status.success() {
                     Ok(())
                 } else {
-                    Err("Failed to open file explorer".to_string())
+                    Err("There was an error opening the file explorer".to_string())
                 }
             })?;
     }
@@ -127,7 +129,7 @@ pub fn classify_imaging_session(
     window: Window,
     state: State<Mutex<AppState>>,
     session: ImagingSessionEdit
-) -> Result<(), String> {
+) -> Result<LogTableRow, String> {
     let app_state = state.lock().map_err(|e| e.to_string())?;
     let root_directory = &app_state.preferences.storage.root_directory.clone();
     drop(app_state);
@@ -138,16 +140,28 @@ pub fn classify_imaging_session(
     // check for duplicates
     let path = ImagingSession::build_path(&light_frame);
     if path.exists() {
-        return Err("Such an ImagingSession already exists.".to_string());
+        let entries = fs::read_dir(&path).map_err(|e| e.to_string())?;
+        if entries.count() > 0 {
+            return Err(
+                return Err("Such an ImagingSession already exists.".to_string())
+            );
+        }
     }
 
     // create imaging_session and save it to .json
-    ImagingSessionList::add(state.clone(), &light_frame).map_err(|e| e.to_string())?;
+    let imaging_session = ImagingSessionList::add(state.clone(), &light_frame).map_err(|e| e.to_string())?;
 
     // classify the light_frames
-    light_frame.classify(state, window, root_directory).map_err(|e| e.to_string())?;
+    light_frame.classify(state.clone(), window, root_directory).map_err(|e| e.to_string())?;
 
-    Ok(())
+    // TODO: classify flat frame
+
+    // TODO: classify dark frames (if DSLR)
+
+    // create a new log_table_row
+    let log_table_row = LogTableRow::new(&imaging_session, &state.lock().unwrap()).ok_or("TODO")?;
+
+    Ok(log_table_row)
 }
 
 #[tauri::command]

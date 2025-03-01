@@ -33,7 +33,6 @@ const schema = z.object({
   note: z.string().min(1, 'A Note is required'),
 });
 
-
 export default function EquipmentNoteEditor({ item, note }: EquipmentNoteProps) {
   const { setAppState } = useAppState();
   const { closeModal } = useModal();
