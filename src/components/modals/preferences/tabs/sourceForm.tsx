@@ -1,6 +1,6 @@
 'use client';
 
-import styles from './preferences.module.scss';
+import styles from '../preferences.module.scss';
 import {
   Form,
   FormControl,
@@ -36,7 +36,7 @@ const formSchema = z.object({
   }),
 });
 
-export default function StorageForm() {
+export default function SourceForm() {
   const { toast } = useToast();
   const { appState } = useAppState();
 

@@ -1,5 +1,5 @@
 import { ThemeToggle } from '@/components/ui/custom/themeToggle';
-import styles from './preferences.module.scss';
+import styles from '../preferences.module.scss';
 import {
   Form,
   FormControl,

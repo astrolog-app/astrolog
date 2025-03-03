@@ -2,9 +2,12 @@ import { Modal } from '../../ui/custom/modal';
 import { Separator } from '../../ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import styles from './preferences.module.scss';
-import AppearanceForm from './appearanceForm';
-import StorageForm from './storageForm';
-import UserForm from './userForm';
+import AppearanceForm from './tabs/appearanceForm';
+import SourceForm from './tabs/sourceForm';
+import LocationsForm from './tabs/locationsForm';
+import BackupForm from '@/components/modals/preferences/tabs/backupForm';
+import { FolderPathBuilder, FolderPathBuilderType } from '@/components/modals/preferences/tabs/folderPathBuilder';
+import { ReactNode } from 'react';
 
 export function Preferences() {
   return (
@@ -12,8 +15,11 @@ export function Preferences() {
       <Tabs defaultValue="appearance" className={styles.preferences}>
         <TabsList className={styles.tabsList}>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
-          <TabsTrigger value="storage">Storage</TabsTrigger>
-          <TabsTrigger value="user">User</TabsTrigger>
+          <TabsTrigger value="source">Source</TabsTrigger>
+          <TabsTrigger value="backup">Backup</TabsTrigger>
+          <TabsTrigger value="imaging_sessions">Imaging Sessions</TabsTrigger>
+          <TabsTrigger value="calibration_frames">Calibration Frames</TabsTrigger>
+          <TabsTrigger value="location">Locations</TabsTrigger>
         </TabsList>
         <TabsContent value="appearance" className={styles.tabsContent}>
           <Content
@@ -23,20 +29,48 @@ export function Preferences() {
             <AppearanceForm />
           </Content>
         </TabsContent>
-        <TabsContent value="storage" className={styles.tabsContent}>
+        <TabsContent value="source" className={styles.tabsContent}>
           <Content
-            title="Storage"
-            subtitle="Manage the way AstroLog saves and loads your data."
+            title="Source"
+            subtitle="Manage the way AstroLog loads your data."
           >
-            <StorageForm />
+            <SourceForm />
           </Content>
         </TabsContent>
-        <TabsContent value="user" className={styles.tabsContent}>
+        <TabsContent value="backup" className={styles.tabsContent}>
           <Content
-            title="User"
+            title="Test"
+            subtitle="Test"
+          >
+            <BackupForm />
+          </Content>
+        </TabsContent>
+        <TabsContent value="imaging_sessions" className={styles.tabsContent}>
+          <Content
+            title="Imaging Sessions Folder Path Configuration"
+            subtitle="Define a base folder and folder path pattern for your imaging sessions. The folder path can use predefined tokens and custom strings."
+          >
+            <FolderPathBuilder
+              type={FolderPathBuilderType.IMAGING_SESSION}
+            />
+          </Content>
+        </TabsContent>
+        <TabsContent value="calibration_frames" className={styles.tabsContent}>
+          <Content
+            title="Calibration Frames Folder Path Configuration"
+            subtitle="Define a base folder and folder path pattern for your calibration frames. The folder path can use predefined tokens and custom strings."
+          >
+            <FolderPathBuilder
+              type={FolderPathBuilderType.CALIBRATION}
+            />
+          </Content>
+        </TabsContent>
+        <TabsContent value="location" className={styles.tabsContent}>
+          <Content
+            title="Location"
             subtitle="Change or specify user specific information."
           >
-            <UserForm />
+            <LocationsForm />
           </Content>
         </TabsContent>
       </Tabs>
@@ -47,7 +81,7 @@ export function Preferences() {
 interface ContentProps {
   title: string;
   subtitle: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 function Content({ title, subtitle, children }: ContentProps) {
