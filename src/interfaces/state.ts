@@ -10,26 +10,16 @@ import {
 import { Analytics } from '@/interfaces/analytics';
 
 export interface AppState {
-  preferences: Preferences;
+  local_config: LocalConfig;
   table_data: TableData;
   equipment_list: EquipmentList;
   image_list: GalleryImage[];
   analytics: Analytics | null;
 }
 
-export interface Preferences {
-  storage: Storage;
-  user: User;
-}
-
-interface Storage {
+export interface LocalConfig {
   root_directory: string;
-  backup_directory: string;
   source_directory: string;
-}
-
-interface User {
-  weather_api_key: string;
 }
 
 export interface TableData {

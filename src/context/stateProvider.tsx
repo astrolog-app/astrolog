@@ -11,22 +11,16 @@ import React, {
   useState,
 } from 'react';
 import { toast } from '@/components/ui/use-toast';
-import { AppState, CalibrationFrame, GalleryImage, ImagingSession, Preferences } from '@/interfaces/state';
+import { AppState, CalibrationFrame, GalleryImage, ImagingSession, LocalConfig } from '@/interfaces/state';
 import { removeContextMenu } from '@/utils/browser';
 import { Camera, EquipmentItem, EquipmentNote, Filter, Flattener, Mount, Telescope } from '@/interfaces/equipment';
 import { UUID } from 'crypto';
 import { Analytics } from '@/interfaces/analytics';
 
 const defaultAppState: AppState = {
-  preferences: {
-    storage: {
-      root_directory: '',
-      backup_directory: '',
-      source_directory: '',
-    },
-    user: {
-      weather_api_key: '',
-    },
+  local_config: {
+    root_directory: '',
+    source_directory: '',
   },
   table_data: {
     sessions: [],
@@ -55,12 +49,13 @@ const AppStateContext = createContext<AppStateContextType | undefined>(
 export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): void {
   invoke<string>('load_frontend_app_state')
     .then((payload) => {
+      console.log(payload)
       // Define the raw JSON shape for equipment items:
       type RawEquipmentItem<T> = Omit<T, 'notes'> & { notes?: Record<UUID, EquipmentNote> };
 
       // Parse the payload. Note: imaging session dates come as strings.
       const responseData = JSON.parse(payload) as {
-        preferences: Preferences;
+        local_config: LocalConfig;
         table_data: {
           sessions: Array<Omit<ImagingSession, 'date'> & { date: string }>;
           calibration: CalibrationFrame[];
@@ -110,7 +105,7 @@ export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): 
       }));
 
       const fixedAppState: AppState = {
-        preferences: responseData.preferences,
+        local_config: responseData.local_config,
         table_data: {
           sessions,
           calibration: responseData.table_data.calibration,
@@ -189,7 +184,7 @@ export function savePreferences(
   });
 
   function savePreferences() {
-    invoke('save_preferences', { preferences: appState.preferences }).catch(
+    invoke('save_preferences', { local_config: appState.local_config }).catch(
       (error) => {
         const errorMsg = error as string;
         toast({

@@ -54,7 +54,7 @@ pub fn open_imaging_session(state: State<Mutex<AppState>>, id: Uuid) -> Result<(
 #[tauri::command]
 pub fn get_image_frames_path(state: State<Mutex<AppState>>, id: Uuid) -> Result<Vec<PathBuf>, String> {
     let app_state = state.lock().map_err(|_| "Failed to acquire lock".to_string())?;
-    let base_path = &app_state.preferences.storage.root_directory;
+    let base_path = &app_state.local_config.root_directory;
 
     let session = app_state.imaging_sessions.get(&id)
         .ok_or_else(|| format!("Session with ID {} not found", id))?;
@@ -131,7 +131,7 @@ pub fn classify_imaging_session(
     session: ImagingSessionEdit
 ) -> Result<LogTableRow, String> {
     let app_state = state.lock().map_err(|e| e.to_string())?;
-    let root_directory = &app_state.preferences.storage.root_directory.clone();
+    let root_directory = &app_state.local_config.root_directory.clone();
     drop(app_state);
 
     // create light_frame

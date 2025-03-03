@@ -68,7 +68,7 @@ pub fn check_equipment_duplicate(
 #[tauri::command]
 pub fn save_telescope(state: State<Mutex<AppState>>, telescope: Telescope) -> Result<(), String> {
     let mut state = state.lock().unwrap();
-    let path = state.preferences.storage.root_directory.clone();
+    let path = state.local_config.root_directory.clone();
 
     let old_telescope: Option<Telescope> = state
         .equipment_list
@@ -94,7 +94,7 @@ pub fn save_telescope(state: State<Mutex<AppState>>, telescope: Telescope) -> Re
 #[tauri::command]
 pub fn save_camera(state: State<Mutex<AppState>>, camera: Camera) -> Result<(), String> {
     let mut state = state.lock().unwrap();
-    let path = state.preferences.storage.root_directory.clone();
+    let path = state.local_config.root_directory.clone();
 
     let old_camera: Option<Camera> = state
         .equipment_list
@@ -120,7 +120,7 @@ pub fn save_camera(state: State<Mutex<AppState>>, camera: Camera) -> Result<(), 
 #[tauri::command]
 pub fn save_mount(state: State<Mutex<AppState>>, mount: Mount) -> Result<(), String> {
     let mut state = state.lock().unwrap();
-    let path = state.preferences.storage.root_directory.clone();
+    let path = state.local_config.root_directory.clone();
 
     let old_mount: Option<Mount> = state
         .equipment_list
@@ -146,7 +146,7 @@ pub fn save_mount(state: State<Mutex<AppState>>, mount: Mount) -> Result<(), Str
 #[tauri::command]
 pub fn save_filter(state: State<Mutex<AppState>>, filter: Filter) -> Result<(), String> {
     let mut state = state.lock().unwrap();
-    let path = state.preferences.storage.root_directory.clone();
+    let path = state.local_config.root_directory.clone();
 
     let old_filter: Option<Filter> = state
         .equipment_list
@@ -172,7 +172,7 @@ pub fn save_filter(state: State<Mutex<AppState>>, filter: Filter) -> Result<(), 
 #[tauri::command]
 pub fn save_flattener(state: State<Mutex<AppState>>, flattener: Flattener) -> Result<(), String> {
     let mut state = state.lock().unwrap();
-    let path = state.preferences.storage.root_directory.clone();
+    let path = state.local_config.root_directory.clone();
 
     let old_flattener: Option<Flattener> = state
         .equipment_list

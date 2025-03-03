@@ -2,14 +2,14 @@ use crate::models::equipment::EquipmentList;
 use crate::models::gallery_image_list::{GalleryImage, GalleryImageList};
 use crate::models::imaging_frames::ImagingFrameList;
 use crate::models::imaging_session_list::{ImagingSession, ImagingSessionList};
-use crate::models::preferences::Preferences;
+use crate::models::preferences::LocalConfig;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
 use uuid::Uuid;
 
 pub struct AppState {
-    pub preferences: Preferences,
+    pub local_config: LocalConfig,
     pub equipment_list: EquipmentList,
     pub imaging_frame_list: ImagingFrameList,
     pub imaging_sessions: HashMap<Uuid, ImagingSession>,
@@ -19,15 +19,15 @@ pub struct AppState {
 
 impl AppState {
     pub fn new(app_handle: &AppHandle) -> Self {
-        let mut preferences = Preferences::new();
+        let mut local_config = LocalConfig::default();
         let mut equipment_list = EquipmentList::new();
         let mut imaging_frame_list = ImagingFrameList::new();
         let mut imaging_sessions: HashMap<Uuid, ImagingSession> = HashMap::new();
         let mut image_list: HashMap<Uuid, GalleryImage> = HashMap::new();
 
-        match Preferences::load(app_handle.path().app_data_dir().unwrap()) {
+        match LocalConfig::load(app_handle.path().app_data_dir().unwrap()) {
             Ok(data) => {
-                preferences = data;
+                local_config = data;
             }
             Err(err) => {
                 eprintln!("Error loading preferences {}: {}", "", err);
@@ -37,7 +37,7 @@ impl AppState {
         log::error!("something bad happened!");
         log::info!("Tauri is awesome!");
 
-        match EquipmentList::load(PathBuf::from(&preferences.storage.root_directory)) {
+        match EquipmentList::load(PathBuf::from(&local_config.root_directory)) {
             Ok(data) => {
                 equipment_list = data;
             }
@@ -46,7 +46,7 @@ impl AppState {
             }
         }
 
-        match ImagingFrameList::load(PathBuf::from(&preferences.storage.root_directory)) {
+        match ImagingFrameList::load(PathBuf::from(&local_config.root_directory)) {
             Ok(data) => {
                 imaging_frame_list = data;
             }
@@ -55,7 +55,7 @@ impl AppState {
             }
         }
 
-        match ImagingSessionList::load(PathBuf::from(&preferences.storage.root_directory)) {
+        match ImagingSessionList::load(PathBuf::from(&local_config.root_directory)) {
             Ok(data) => {
                 imaging_sessions = data.imaging_session_list;
             }
@@ -64,7 +64,7 @@ impl AppState {
             }
         }
 
-        match GalleryImageList::load(PathBuf::from(&preferences.storage.root_directory)) {
+        match GalleryImageList::load(PathBuf::from(&local_config.root_directory)) {
             Ok(data) => {
                 image_list = data.gallery_image_list;
             }
@@ -74,7 +74,7 @@ impl AppState {
         }
 
         AppState {
-            preferences,
+            local_config,
             equipment_list,
             imaging_frame_list,
             imaging_sessions,

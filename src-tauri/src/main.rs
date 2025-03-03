@@ -53,8 +53,7 @@ fn main() {
             let mut dir = app_state
                 .lock()
                 .unwrap()
-                .preferences
-                .storage
+                .local_config
                 .root_directory
                 .clone();
             dir.push(".astrolog");

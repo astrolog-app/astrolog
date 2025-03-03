@@ -78,7 +78,7 @@ pub async fn classify_calibration_frames(
     state: State<'_, Mutex<AppState>>,
 ) -> Result<(), String> {
     let mut app_state = state.lock().unwrap();
-    let root_directory = app_state.preferences.storage.root_directory.clone();
+    let root_directory = app_state.local_config.root_directory.clone();
     let mut path = PathBuf::from(&root_directory);
     path.push("Calibration");
     path.push(&frames.calibration_type.to_string());

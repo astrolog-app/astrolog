@@ -11,7 +11,7 @@ use tauri::State;
 pub fn load_frontend_app_state(state: State<Mutex<AppState>>) -> Result<String, String> {
     let app_state = state.lock().unwrap();
 
-    let preferences = app_state.preferences.clone();
+    let local_config = app_state.local_config.clone();
     let image_list = app_state.gallery_image_list.values().cloned().collect();
 
     let calibration_frames = ImagingFrameList::get_calibration_frames(&app_state);
@@ -34,7 +34,7 @@ pub fn load_frontend_app_state(state: State<Mutex<AppState>>) -> Result<String, 
     let analytics = Analytics::new();
 
     let data = FrontendAppState {
-        preferences,
+        local_config,
         table_data,
         equipment_list: app_state.equipment_list.clone(),
         image_list,

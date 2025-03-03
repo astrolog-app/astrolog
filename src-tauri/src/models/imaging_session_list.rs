@@ -49,7 +49,7 @@ impl ImagingSessionList {
         // Step 1: Insert imaging session and save
         app_state.imaging_sessions.insert(imaging_session.id, imaging_session.clone());
         if let Err(e) = ImagingSessionList::save(
-            app_state.preferences.storage.root_directory.clone(),
+            app_state.local_config.root_directory.clone(),
             &app_state.imaging_sessions
         ) {
             // Roll back: remove the inserted imaging session
@@ -60,7 +60,7 @@ impl ImagingSessionList {
         // Step 2: Insert light frame and save
         app_state.imaging_frame_list.light_frames.insert(light_frame.id, light_frame.clone());
         if let Err(e) = ImagingFrameList::save(
-            app_state.preferences.storage.root_directory.clone(),
+            app_state.local_config.root_directory.clone(),
             &app_state.imaging_frame_list
         ) {
             // Roll back both: remove light frame and imaging session
@@ -68,7 +68,7 @@ impl ImagingSessionList {
             app_state.imaging_sessions.remove(&imaging_session.id);
             // Attempt to update the saved imaging session list after rollback
             let _ = ImagingSessionList::save(
-                app_state.preferences.storage.root_directory.clone(),
+                app_state.local_config.root_directory.clone(),
                 &app_state.imaging_sessions
             );
             return Err(e);

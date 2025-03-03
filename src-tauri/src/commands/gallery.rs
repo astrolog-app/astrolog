@@ -11,7 +11,7 @@ use uuid::Uuid;
 pub fn add_new_image(image: GalleryImage, state: State<Mutex<AppState>>) -> Result<(), String> {
     let app_state = state.lock().unwrap();
 
-    let mut destination = app_state.preferences.storage.root_directory.clone();
+    let mut destination = app_state.local_config.root_directory.clone();
     drop(app_state);
     destination.push("Gallery");
     fs::create_dir_all(&destination).ok(); // TODO: log
@@ -30,7 +30,7 @@ pub fn add_new_image(image: GalleryImage, state: State<Mutex<AppState>>) -> Resu
     app_state.gallery_image_list.insert(image.id, new_image);
 
     GalleryImageList::save(
-        PathBuf::from(&app_state.preferences.storage.root_directory),
+        PathBuf::from(&app_state.local_config.root_directory),
         &app_state.gallery_image_list,
     )
     .map_err(|e| e.to_string())?;

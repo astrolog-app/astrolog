@@ -72,7 +72,7 @@ export function FolderPathBuilder({ type }: { type: FolderPathBuilderType }) {
   const defaultBaseFolder = '';
   const defaultFolderPath = '';
 
-  const rootDirectory = appState.preferences.storage.root_directory
+  const rootDirectory = appState.local_config.root_directory
     .replace(/\\/g, "/")
     .replace(/\/+$/, "");
   const parts = rootDirectory.split("/").filter(Boolean);

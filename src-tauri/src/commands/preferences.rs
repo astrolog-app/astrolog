@@ -1,5 +1,5 @@
 use crate::file_system::{dir_contains_metadata, is_directory_empty};
-use crate::models::preferences::Preferences;
+use crate::models::preferences::LocalConfig;
 use crate::models::state::AppState;
 use std::path::PathBuf;
 use std::sync::Mutex;
@@ -10,17 +10,14 @@ pub fn setup_backup(_path: String) {}
 
 #[tauri::command]
 pub fn save_preferences(
-    preferences: Preferences,
+    local_config: LocalConfig,
     state: State<Mutex<AppState>>,
     app_handle: AppHandle,
 ) -> Result<(), String> {
     let mut app_state = state.lock().unwrap();
-    app_state.preferences = preferences;
-    Preferences::save(
-        app_handle.path().app_data_dir().unwrap(),
-        &app_state.preferences,
-    )
-    .map_err(|e| e.to_string())
+    app_state.local_config = local_config;
+    app_state.local_config.save(app_handle.path().app_data_dir().unwrap())
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -42,10 +39,7 @@ pub fn set_root_directory(
         );
     }
 
-    app_state.preferences.storage.root_directory = root_directory;
-    Preferences::save(
-        app_handle.path().app_data_dir().unwrap(),
-        &app_state.preferences,
-    )
-    .map_err(|e| e.to_string())
+    app_state.local_config.root_directory = root_directory;
+    app_state.local_config.save(app_handle.path().app_data_dir().unwrap())
+        .map_err(|e| e.to_string())
 }

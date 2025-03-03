@@ -43,9 +43,9 @@ export default function SourceForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      rootDirectory: appState.preferences.storage.root_directory,
-      backupDirectory: appState.preferences.storage.backup_directory,
-      sourceDirectory: appState.preferences.storage.source_directory,
+      rootDirectory: appState.local_config.root_directory,
+      backupDirectory: '',
+      sourceDirectory: appState.local_config.source_directory,
     },
   });
 
@@ -72,14 +72,14 @@ export default function SourceForm() {
               <FormLabel>Root Directory</FormLabel>
               <FormControl>
                 <FileSelector
-                  value={appState.preferences.storage.root_directory}
+                  value={appState.local_config.root_directory}
                   disabled
                 >
                   <CopyButton
-                    value={appState.preferences.storage.root_directory}
+                    value={appState.local_config.root_directory}
                   />
                   <FileSelectorChangeButton
-                    path="preferences.storage.root_directory"
+                    path="local_config.root_directory"
                     saveAction={(value, appState, setAppState, path) =>
                       rootAction(value, appState, setAppState, path)
                     }
@@ -106,16 +106,16 @@ export default function SourceForm() {
               <FormLabel>Backup Directory (Optional)</FormLabel>
               <FormControl>
                 <FileSelector
-                  value={appState.preferences.storage.backup_directory}
+                  value={''}
                   disabled
                 >
                   <DeleteButton
-                    value={appState.preferences.storage.backup_directory}
-                    path="preferences.storage.backup_directory"
+                    value={''}
+                    path="local_config.backup_directory"
                     saveAction={savePreferences}
                   />
                   <CopyButton
-                    value={appState.preferences.storage.backup_directory}
+                    value={''}
                   />
                   <FileSelectorChangeButton
                     path="preferences.storage.backup_directory"
@@ -143,19 +143,19 @@ export default function SourceForm() {
               <FormLabel>Source Directory (Optional)</FormLabel>
               <FormControl>
                 <FileSelector
-                  value={appState.preferences.storage.source_directory}
+                  value={appState.local_config.source_directory}
                   disabled
                 >
                   <DeleteButton
-                    value={appState.preferences.storage.source_directory}
-                    path="preferences.storage.source_directory"
+                    value={appState.local_config.source_directory}
+                    path="local_config.source_directory"
                     saveAction={savePreferences}
                   />
                   <CopyButton
-                    value={appState.preferences.storage.source_directory}
+                    value={appState.local_config.source_directory}
                   />
                   <FileSelectorChangeButton
-                    path="preferences.storage.source_directory"
+                    path="local_config.source_directory"
                     saveAction={savePreferences}
                     directory
                   />
@@ -180,7 +180,7 @@ function rootAction(
   setAppState: React.Dispatch<React.SetStateAction<AppState>>,
   path: string,
 ): void {
-  let origin = appState.preferences.storage.root_directory;
+  let origin = appState.local_config.root_directory;
 
   invoke('rename_directory', { origin: origin, destination: value }).catch(
     (error) => {
@@ -199,7 +199,7 @@ function backupAction(
   setAppState: React.Dispatch<React.SetStateAction<AppState>>,
   path: string,
 ): void {
-  const origin = appState.preferences.storage.backup_directory;
+  const origin = '';
 
   if (origin != '') {
     invoke('rename_directory', { origin: origin, destination: value })

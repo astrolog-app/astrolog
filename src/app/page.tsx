@@ -93,7 +93,7 @@ export default function Home() {
 
   useEffect(() => {
     // checkLicense();
-    if (appState.preferences.storage.root_directory == '') {
+    if (appState.local_config.root_directory == '') {
       //openModal(<RootDirectory />);
     }
   }, []);
