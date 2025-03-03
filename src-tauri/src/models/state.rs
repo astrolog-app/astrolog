@@ -2,14 +2,14 @@ use crate::models::equipment::EquipmentList;
 use crate::models::gallery_image_list::{GalleryImage, GalleryImageList};
 use crate::models::imaging_frames::ImagingFrameList;
 use crate::models::imaging_session_list::{ImagingSession, ImagingSessionList};
-use crate::models::preferences::LocalConfig;
+use crate::models::preferences::{Config, LocalConfig};
 use std::collections::HashMap;
-use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
 use uuid::Uuid;
 
 pub struct AppState {
     pub local_config: LocalConfig,
+    pub config: Config,
     pub equipment_list: EquipmentList,
     pub imaging_frame_list: ImagingFrameList,
     pub imaging_sessions: HashMap<Uuid, ImagingSession>,
@@ -20,6 +20,7 @@ pub struct AppState {
 impl AppState {
     pub fn new(app_handle: &AppHandle) -> Self {
         let mut local_config = LocalConfig::default();
+        let mut config = Config::default();
         let mut equipment_list = EquipmentList::new();
         let mut imaging_frame_list = ImagingFrameList::new();
         let mut imaging_sessions: HashMap<Uuid, ImagingSession> = HashMap::new();
@@ -30,14 +31,20 @@ impl AppState {
                 local_config = data;
             }
             Err(err) => {
-                eprintln!("Error loading preferences {}: {}", "", err);
+                eprintln!("Error loading local_config {}: {}", "", err);
             }
         }
 
-        log::error!("something bad happened!");
-        log::info!("Tauri is awesome!");
+        match Config::load(local_config.root_directory.clone()) {
+            Ok(data) => {
+                config = data;
+            }
+            Err(err) => {
+                eprintln!("Error loading config {}: {}", "", err);
+            }
+        }
 
-        match EquipmentList::load(PathBuf::from(&local_config.root_directory)) {
+        match EquipmentList::load(local_config.root_directory.clone()) {
             Ok(data) => {
                 equipment_list = data;
             }
@@ -46,7 +53,7 @@ impl AppState {
             }
         }
 
-        match ImagingFrameList::load(PathBuf::from(&local_config.root_directory)) {
+        match ImagingFrameList::load(local_config.root_directory.clone()) {
             Ok(data) => {
                 imaging_frame_list = data;
             }
@@ -55,7 +62,7 @@ impl AppState {
             }
         }
 
-        match ImagingSessionList::load(PathBuf::from(&local_config.root_directory)) {
+        match ImagingSessionList::load(local_config.root_directory.clone()) {
             Ok(data) => {
                 imaging_sessions = data.imaging_session_list;
             }
@@ -64,7 +71,7 @@ impl AppState {
             }
         }
 
-        match GalleryImageList::load(PathBuf::from(&local_config.root_directory)) {
+        match GalleryImageList::load(local_config.root_directory.clone()) {
             Ok(data) => {
                 image_list = data.gallery_image_list;
             }
@@ -75,6 +82,7 @@ impl AppState {
 
         AppState {
             local_config,
+            config,
             equipment_list,
             imaging_frame_list,
             imaging_sessions,

@@ -7,7 +7,7 @@ use commands::calibration::{analyze_calibration_frames, classify_calibration_fra
 use commands::gallery::{add_new_image, open_image};
 use commands::image::get_date;
 use commands::imaging_sessions::{export_csv, open_imaging_session, get_image_frames_path, classify_imaging_session, edit_imaging_session};
-use commands::preferences::{save_preferences, set_root_directory, setup_backup};
+use commands::preferences::{save_preferences, set_root_directory, setup_backup, change_imaging_session_folder_path};
 use commands::state::{
     add_close_lock, load_frontend_app_state, remove_close_lock,
 };
@@ -78,6 +78,7 @@ fn main() {
             add_close_lock,
             add_new_image,
             analyze_calibration_frames,
+            change_imaging_session_folder_path,
             check_equipment_duplicate,
             classify_calibration_frames,
             classify_imaging_session,

@@ -1,5 +1,5 @@
 use crate::file_system::{dir_contains_metadata, is_directory_empty};
-use crate::models::preferences::LocalConfig;
+use crate::models::preferences::{FolderPath, LocalConfig};
 use crate::models::state::AppState;
 use std::path::PathBuf;
 use std::sync::Mutex;
@@ -42,4 +42,28 @@ pub fn set_root_directory(
     app_state.local_config.root_directory = root_directory;
     app_state.local_config.save(app_handle.path().app_data_dir().unwrap())
         .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn change_imaging_session_folder_path(state: State<Mutex<AppState>>, base_folder: String, pattern: String) -> Result<(), String> {
+    let mut app_state = state.lock().map_err(|e| e.to_string())?;
+
+    if !app_state.imaging_frame_list.light_frames.is_empty() {
+        return Err("Feature not implemented: Can't change folder structure of already added imaging sessions in this version.".to_string())
+    }
+
+    let old = app_state.config.folder_paths.imaging_session_folder_path.clone();
+
+    let new = FolderPath {
+        base_folder,
+        pattern
+    };
+    app_state.config.folder_paths.imaging_session_folder_path = new;
+
+    if let Err(e) = app_state.config.save(app_state.local_config.root_directory.clone()) {
+        app_state.config.folder_paths.imaging_session_folder_path = old;
+        return Err(e.to_string())
+    }
+
+    Ok(())
 }

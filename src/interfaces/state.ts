@@ -11,6 +11,7 @@ import { Analytics } from '@/interfaces/analytics';
 
 export interface AppState {
   local_config: LocalConfig;
+  config: Config;
   table_data: TableData;
   equipment_list: EquipmentList;
   image_list: GalleryImage[];
@@ -20,6 +21,20 @@ export interface AppState {
 export interface LocalConfig {
   root_directory: string;
   source_directory: string;
+}
+
+export interface Config {
+  folder_paths: FolderPaths
+}
+
+interface FolderPaths {
+  imaging_session_folder_path: FolderPath,
+  calibration_frames_folder_path: FolderPath,
+}
+
+interface FolderPath {
+  base_folder: string,
+  pattern: string,
 }
 
 export interface TableData {

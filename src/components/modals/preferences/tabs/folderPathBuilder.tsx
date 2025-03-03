@@ -19,6 +19,8 @@ import {
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
 import { useAppState } from '@/context/stateProvider';
+import { invoke } from '@tauri-apps/api/core';
+import { toast } from '@/components/ui/use-toast';
 
 const PREDEFINED_TOKENS_IS: Token[] = [
   { value: '$$DATE$$', description: 'The Date of the Imaging Session' },
@@ -63,22 +65,21 @@ interface Token {
 }
 
 export function FolderPathBuilder({ type }: { type: FolderPathBuilderType }) {
-  const { appState } = useAppState();
+  const { appState, setAppState } = useAppState();
 
   const [errors, setErrors] = useState<string[]>([]);
   const [breadcrumbs, setBreadcrumbs] = useState<string[]>([]);
   const folderPathInputRef = useRef<HTMLInputElement>(null);
 
-  const defaultBaseFolder = '';
-  const defaultFolderPath = '';
-
   const rootDirectory = appState.local_config.root_directory
-    .replace(/\\/g, "/")
-    .replace(/\/+$/, "");
-  const parts = rootDirectory.split("/").filter(Boolean);
+    .replace(/\\/g, '/')
+    .replace(/\/+$/, '');
+  const parts = rootDirectory.split('/').filter(Boolean);
   const lastFolder = parts[parts.length - 1];
 
   const CONFIG: Record<FolderPathBuilderType, {
+    defaultBaseFolder: string;
+    defaultFolderPath: string;
     requiredTokens: string[];
     tokens: Token[];
     defaultTokenValues: Record<string, string>;
@@ -86,6 +87,8 @@ export function FolderPathBuilder({ type }: { type: FolderPathBuilderType }) {
     folderPathPlaceholder: string;
   }> = {
     [FolderPathBuilderType.IMAGING_SESSION]: {
+      defaultBaseFolder: appState.config.folder_paths.imaging_session_folder_path.base_folder,
+      defaultFolderPath: appState.config.folder_paths.imaging_session_folder_path.pattern,
       requiredTokens: ['$$DATE$$'],
       tokens: PREDEFINED_TOKENS_IS,
       defaultTokenValues: DEFAULT_TOKEN_VALUES_IS,
@@ -93,6 +96,8 @@ export function FolderPathBuilder({ type }: { type: FolderPathBuilderType }) {
       folderPathPlaceholder: '$$TARGET$$_$$TELESCOPE$$/$$DATE$$'
     },
     [FolderPathBuilderType.CALIBRATION]: {
+      defaultBaseFolder: appState.config.folder_paths.calibration_frames_folder_path.base_folder,
+      defaultFolderPath: appState.config.folder_paths.calibration_frames_folder_path.pattern,
       requiredTokens: ['$$CAMERA$$'],
       tokens: PREDEFINED_TOKENS_CAL,
       defaultTokenValues: DEFAULT_TOKEN_VALUES_CAL,
@@ -101,7 +106,7 @@ export function FolderPathBuilder({ type }: { type: FolderPathBuilderType }) {
     }
   };
 
-  const { requiredTokens, tokens, defaultTokenValues, baseFolderPlaceholder, folderPathPlaceholder } = CONFIG[type];
+  const { defaultBaseFolder, defaultFolderPath, requiredTokens, tokens, defaultTokenValues, baseFolderPlaceholder, folderPathPlaceholder } = CONFIG[type];
 
   const formSchema = z.object({
     baseFolder: z
@@ -206,7 +211,7 @@ export function FolderPathBuilder({ type }: { type: FolderPathBuilderType }) {
   };
 
   const updateBreadcrumbs = (baseFolder: string, folderPath: string) => {
-    const segments = [lastFolder, baseFolder, ...folderPath.split(/[/\\]/).filter(Boolean), 'image.fits'];
+    const segments = [lastFolder, baseFolder, ...folderPath.split(/[/\\]/).filter(Boolean), 'Light', 'image.fits'];
     const replacedSegments = segments.map((segment) => {
       return segment.replace(/\$\$[A-Z_]+\$\$/g, (match) => {
         return defaultTokenValues[match] || match;
@@ -236,8 +241,32 @@ export function FolderPathBuilder({ type }: { type: FolderPathBuilderType }) {
   };
 
   function handleSubmit() {
-    const path = form.getValues().baseFolder.trim() + '/' + form.getValues().folderPath.trim();
-    console.log(path)
+    const base_folder = form.getValues().baseFolder.trim();
+    const pattern = form.getValues().folderPath.trim();
+    invoke('change_imaging_session_folder_path', { baseFolder: base_folder, pattern: pattern })
+      .then(() => {
+        console.log("test");
+        setAppState(prevState => ({
+          ...prevState,
+          config: {
+            ...prevState.config,
+            folder_paths: {
+              ...prevState.config.folder_paths,
+              imaging_session_folder_path: {
+                base_folder: base_folder,
+                pattern: pattern,
+              }
+            }
+          }
+        }))
+      })
+      .catch((error) => {
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'Error: ' + error,
+        });
+      });
   }
 
   const isDefaultValue =
@@ -253,7 +282,7 @@ export function FolderPathBuilder({ type }: { type: FolderPathBuilderType }) {
             <FormItem>
               <FormLabel>Base Folder</FormLabel>
               <FormControl>
-                <Input placeholder={"e.g., " + baseFolderPlaceholder} {...field} />
+                <Input placeholder={'e.g., ' + baseFolderPlaceholder} {...field} />
               </FormControl>
               <FormDescription>Enter the base folder name. No separators allowed.</FormDescription>
               <FormMessage />

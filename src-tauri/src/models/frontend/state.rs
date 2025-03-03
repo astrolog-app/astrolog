@@ -5,7 +5,7 @@ use crate::models::gallery_image_list::GalleryImage;
 use crate::models::imaging_frames;
 use crate::models::imaging_frames::CalibrationType;
 use crate::models::imaging_session_list::ImagingSession;
-use crate::models::preferences::LocalConfig;
+use crate::models::preferences::{Config, LocalConfig};
 use crate::models::state::AppState;
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Serialize, Serializer};
@@ -15,6 +15,7 @@ use uuid::Uuid;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FrontendAppState {
     pub local_config: LocalConfig,
+    pub config: Config,
     pub table_data: TableData,
     pub equipment_list: EquipmentList,
     pub image_list: Vec<GalleryImage>,

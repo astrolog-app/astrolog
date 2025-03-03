@@ -11,7 +11,7 @@ import React, {
   useState,
 } from 'react';
 import { toast } from '@/components/ui/use-toast';
-import { AppState, CalibrationFrame, GalleryImage, ImagingSession, LocalConfig } from '@/interfaces/state';
+import { AppState, CalibrationFrame, Config, GalleryImage, ImagingSession, LocalConfig } from '@/interfaces/state';
 import { removeContextMenu } from '@/utils/browser';
 import { Camera, EquipmentItem, EquipmentNote, Filter, Flattener, Mount, Telescope } from '@/interfaces/equipment';
 import { UUID } from 'crypto';
@@ -21,6 +21,18 @@ const defaultAppState: AppState = {
   local_config: {
     root_directory: '',
     source_directory: '',
+  },
+  config: {
+    folder_paths: {
+      imaging_session_folder_path: {
+        base_folder: '',
+        pattern: '',
+      },
+      calibration_frames_folder_path: {
+        base_folder: '',
+        pattern: '',
+      },
+    }
   },
   table_data: {
     sessions: [],
@@ -49,13 +61,13 @@ const AppStateContext = createContext<AppStateContextType | undefined>(
 export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): void {
   invoke<string>('load_frontend_app_state')
     .then((payload) => {
-      console.log(payload)
       // Define the raw JSON shape for equipment items:
       type RawEquipmentItem<T> = Omit<T, 'notes'> & { notes?: Record<UUID, EquipmentNote> };
 
       // Parse the payload. Note: imaging session dates come as strings.
       const responseData = JSON.parse(payload) as {
         local_config: LocalConfig;
+        config: Config
         table_data: {
           sessions: Array<Omit<ImagingSession, 'date'> & { date: string }>;
           calibration: CalibrationFrame[];
@@ -106,6 +118,7 @@ export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): 
 
       const fixedAppState: AppState = {
         local_config: responseData.local_config,
+        config: responseData.config,
         table_data: {
           sessions,
           calibration: responseData.table_data.calibration,
