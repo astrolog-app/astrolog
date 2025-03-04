@@ -1,13 +1,7 @@
 'use client';
 
 import { Tab } from '@/components/ui/custom/tab';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import styles from './equipment.module.scss';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,6 +16,8 @@ import EquipmentDetails from '@/components/equipment/equipmentDetails';
 import EquipmentListView from '@/components/equipment/equipmentListView';
 import { useState } from 'react';
 import { EquipmentItem } from '@/interfaces/equipment';
+import HeaderCard from '@/components/headerCard';
+import { Plus } from 'lucide-react';
 
 export default function Equipment() {
   const { openModal } = useModal();
@@ -32,22 +28,21 @@ export default function Equipment() {
 
   return (
     <Tab className={styles.page}>
-      <Card>
-        <CardHeader>
-          <CardTitle>Equipment</CardTitle>
-          <CardDescription>Manage your equipment.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button
-            variant="secondary"
-            onClick={() =>
-              openModal(<EquipmentModal type={EquipmentType.TELESCOPE} />)
-            }
-          >
-            Add Equipment Item
-          </Button>
-        </CardContent>
-      </Card>
+      <HeaderCard
+        title="Equipment"
+        subtitle="Manage your equipment."
+      >
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() =>
+            openModal(<EquipmentModal type={EquipmentType.TELESCOPE} />)
+          }
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add Equipment Item
+        </Button>
+      </HeaderCard>
       <ResizablePanelGroup className={styles.content} direction="horizontal">
         <ResizablePanel defaultSize={30} minSize={20} maxSize={70}>
           <Card className={styles.card}>

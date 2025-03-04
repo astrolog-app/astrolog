@@ -1,12 +1,5 @@
 'use client';
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Tab } from '@/components/ui/custom/tab';
 import styles from './gallery.module.scss';
 import { useEffect, useState } from 'react';
@@ -16,6 +9,8 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { toast } from '@/components/ui/use-toast';
 import { useModal } from '@/context/modalProvider';
 import ImageGallery from '@/components/images/imageGallery';
+import HeaderCard from '@/components/headerCard';
+import { Plus } from 'lucide-react';
 
 export default function Gallery() {
   const { openModal } = useModal();
@@ -89,17 +84,19 @@ export default function Gallery() {
 
   return (
     <Tab>
-      <Card className={styles.card}>
-        <CardHeader>
-          <CardTitle>Gallery</CardTitle>
-          <CardDescription>View your processed astrophotos.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button variant="secondary" onClick={addNewImage}>
-            Add Image
-          </Button>
-        </CardContent>
-      </Card>
+      <HeaderCard
+        title="Gallery"
+        subtitle="View your processed astrophotos."
+      >
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={addNewImage}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add Image
+        </Button>
+      </HeaderCard>
       <ImageGallery columns={columns} />
     </Tab>
   );

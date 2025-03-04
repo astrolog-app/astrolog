@@ -25,6 +25,8 @@ import {
 import { useModal } from '@/context/modalProvider';
 import SelectImagingFrames from '@/components/modals/selectImagingFrames';
 import ImagePreview from '@/components/images/imagePreview';
+import HeaderCard from '@/components/headerCard';
+import { Download, Plus } from 'lucide-react';
 
 export default function Log() {
   const { openModal } = useModal();
@@ -60,31 +62,35 @@ export default function Log() {
 
   return (
     <Tab className={styles.page}>
-      <Card>
-        <CardHeader>
-          <CardTitle>Astrophotography Log</CardTitle>
-          <CardDescription>
-            Add imaging sessions and view your astrophotography log.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className={styles.buttons}>
-          <Button
-            variant="secondary"
-            onClick={() => openModal(<NewImagingSession />)}
-          >
-            Add Imaging Session
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={() => openModal(<SelectImagingFrames />)}
-          >
-            Add Calibration Frame
-          </Button>
-          <Button variant="ghost" onClick={exportCSV}>
-            Export CSV
-          </Button>
-        </CardContent>
-      </Card>
+      <HeaderCard
+        title="Astrophotography Log"
+        subtitle="Add imaging sessions and view your astrophotography log."
+      >
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => openModal(<NewImagingSession />)}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add Session
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => openModal(<SelectImagingFrames />)}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add Calibration
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={exportCSV}
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Export CSV
+        </Button>
+      </HeaderCard>
       <ResizablePanelGroup className={styles.content} direction="horizontal">
         <ResizablePanel defaultSize={70}>
           <Card className={styles.tableCard}>

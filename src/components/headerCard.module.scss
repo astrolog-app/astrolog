@@ -1,0 +1,18 @@
+.component {
+  margin-bottom: var(--padding);
+
+  .header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    .title {
+      margin-bottom: 0.5rem;
+    }
+
+    .children > *:not(:last-child) {
+      margin-right: 0.5rem;
+    }
+  }
+}
