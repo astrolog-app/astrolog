@@ -21,7 +21,7 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
 
   const [showCalibration, setShowCalibration] = useState(false);
   const [selectedRow, setSelectedRow] = useState<string | null>('1');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [globalFilter, setGlobalFilter] = useState('');
   const [isDetailedView, setIsDetailedView] = useState(false);
 
   return (
@@ -34,9 +34,9 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
               <Input
                 type="text"
                 placeholder="Search..."
+                value={globalFilter}
+                onChange={(event) => setGlobalFilter(event.target.value)}
                 className="pl-8 bg-secondary border-input text-secondary-foreground"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             <div className="flex items-center space-x-2">
@@ -87,7 +87,12 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
             </div>
           </div>
 
-          <DataTable columns={sessionsColumnsDetailed} data={appState.table_data.sessions} />
+          <DataTable
+            columns={sessionsColumnsDetailed}
+            data={appState.table_data.sessions}
+            globalFilter={globalFilter}
+            setGlobalFilter={setGlobalFilter}
+          />
         </CardContent>
       </Card>
 
