@@ -24,10 +24,11 @@ export interface LocalConfig {
 }
 
 export interface Config {
-  folder_paths: FolderPaths
+  folder_paths: FolderPaths,
+  locations: Map<UUID, Location>,
 }
 
-interface FolderPaths {
+export interface FolderPaths {
   imaging_session_folder_path: FolderPath,
   calibration_frames_folder_path: FolderPath,
 }
@@ -35,6 +36,15 @@ interface FolderPaths {
 interface FolderPath {
   base_folder: string,
   pattern: string,
+}
+
+export interface Location {
+  id: UUID,
+  name: string,
+  x: number,
+  y: number,
+  height: number,
+  bortle: number,
 }
 
 export interface TableData {

@@ -102,6 +102,7 @@ pub struct LightFrame {
     pub mount_id: Uuid,
     pub notes: Option<String>,
     pub sub_length: f64,
+    pub location_id: Uuid,
 }
 
 impl LightFrame {
@@ -121,6 +122,7 @@ impl LightFrame {
 
             date: session.general.date.clone(),
             target: session.general.target.clone(),
+            location_id: session.general.location_id.clone(),
 
             total_subs: session.base.frames.len() as u32,
             gain: session.details.gain,

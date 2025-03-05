@@ -1,5 +1,5 @@
 use crate::file_system::{dir_contains_metadata, is_directory_empty};
-use crate::models::preferences::{FolderPath, LocalConfig};
+use crate::models::preferences::{FolderPath, LocalConfig, Location};
 use crate::models::state::AppState;
 use std::path::PathBuf;
 use std::sync::Mutex;
@@ -66,4 +66,14 @@ pub fn change_imaging_session_folder_path(state: State<Mutex<AppState>>, base_fo
     }
 
     Ok(())
+}
+
+#[tauri::command]
+pub fn save_location(state: State<Mutex<AppState>>, location: Location) -> Result<(), String> {
+    location.save(&state).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn delete_location(state: State<Mutex<AppState>>, location: Location) -> Result<(), String> {
+    location.delete(&state).map_err(|e| e.to_string())
 }

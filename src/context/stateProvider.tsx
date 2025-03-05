@@ -11,7 +11,16 @@ import React, {
   useState,
 } from 'react';
 import { toast } from '@/components/ui/use-toast';
-import { AppState, CalibrationFrame, Config, GalleryImage, ImagingSession, LocalConfig } from '@/interfaces/state';
+import {
+  AppState,
+  CalibrationFrame,
+  Config,
+  FolderPaths,
+  GalleryImage,
+  ImagingSession,
+  LocalConfig,
+  Location
+} from '@/interfaces/state';
 import { removeContextMenu } from '@/utils/browser';
 import { Camera, EquipmentItem, EquipmentNote, Filter, Flattener, Mount, Telescope } from '@/interfaces/equipment';
 import { UUID } from 'crypto';
@@ -32,7 +41,8 @@ const defaultAppState: AppState = {
         base_folder: '',
         pattern: '',
       },
-    }
+    },
+    locations: new Map<UUID, Location>(),
   },
   table_data: {
     sessions: [],
@@ -67,7 +77,10 @@ export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): 
       // Parse the payload. Note: imaging session dates come as strings.
       const responseData = JSON.parse(payload) as {
         local_config: LocalConfig;
-        config: Config
+        config: {
+          folder_paths: FolderPaths;
+          locations: Record<UUID, Location>;
+        };
         table_data: {
           sessions: Array<Omit<ImagingSession, 'date'> & { date: string }>;
           calibration: CalibrationFrame[];
@@ -84,7 +97,7 @@ export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): 
       };
 
       // Convert a Record of equipment notes to a Map,
-      // and convert the note's date string to a Date object.
+      // converting each note's date string to an actual Date.
       const convertNotes = (notes?: Record<UUID, EquipmentNote>): Map<UUID, EquipmentNote> => {
         return new Map<UUID, EquipmentNote>(
           Object.entries(notes || {}).map(([noteId, note]) => [
@@ -116,9 +129,21 @@ export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): 
         date: new Date(session.date),
       }));
 
+      // Convert config.locations from a Record to a Map.
+      const rawLocations = responseData.config.locations;
+      const locationsMap = new Map<UUID, Location>(
+        Object.entries(rawLocations).map(([id, location]) => [id as UUID, location as Location])
+      );
+
+      const fixedConfig: Config = {
+        folder_paths: responseData.config.folder_paths,
+        locations: locationsMap,
+      };
+
+      // Construct the final AppState with parsed dates, equipment Maps, and config.locations as a Map.
       const fixedAppState: AppState = {
         local_config: responseData.local_config,
-        config: responseData.config,
+        config: fixedConfig,
         table_data: {
           sessions,
           calibration: responseData.table_data.calibration,

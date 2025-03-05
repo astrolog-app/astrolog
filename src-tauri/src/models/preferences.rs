@@ -1,8 +1,13 @@
+use std::collections::HashMap;
 use crate::file_store;
 use serde::{Deserialize, Serialize};
 use serde_json::to_string_pretty;
 use std::error::Error;
 use std::path::PathBuf;
+use std::sync::Mutex;
+use tauri::State;
+use uuid::Uuid;
+use crate::models::state::AppState;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LocalConfig {
@@ -37,6 +42,7 @@ impl LocalConfig {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Config {
     pub folder_paths: FolderPaths,
+    pub locations: HashMap<Uuid, Location>,
 }
 
 impl Config {
@@ -52,7 +58,8 @@ impl Config {
         };
 
         Config {
-            folder_paths
+            folder_paths,
+            locations: HashMap::new(),
         }
     }
 
@@ -84,4 +91,56 @@ pub struct FolderPaths {
 pub struct FolderPath {
     pub base_folder: String,
     pub pattern: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Location {
+    id: Uuid,
+    name: String,
+    x: f64,
+    y: f64,
+    height: f64,
+    bortle: u32,
+}
+
+impl Location {
+    pub fn save(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
+        let mut app_state = state.lock().map_err(|e| e.to_string())?;
+
+        let old_locations = app_state.config.locations.clone();
+
+        app_state.config.locations.insert(self.id, self.clone());
+
+        if let Err(e) = app_state.config.save(app_state.local_config.root_directory.clone()) {
+            app_state.config.locations = old_locations;
+            return Err(Box::new(e));
+        }
+
+        Ok(())
+    }
+
+    pub fn delete(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
+        let app_state = state.lock().map_err(|e| e.to_string())?;
+
+        // Check if any frame is using this location
+        if app_state
+            .imaging_frame_list
+            .light_frames
+            .values()
+            .any(|frame| frame.location_id == self.id)
+        {
+            return Err("Can't delete location: This location is used in an imaging session".into());
+        }
+
+        let old_locations = app_state.config.locations.clone();
+
+        app_state.config.locations.remove(&self.id);
+
+        if let Err(e) = app_state.config.save(app_state.local_config.root_directory.clone()) {
+            app_state.config.locations = old_locations;
+            return Err(Box::new(e));
+        }
+
+        Ok(())
+    }
 }

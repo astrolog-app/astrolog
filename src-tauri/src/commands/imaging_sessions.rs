@@ -79,6 +79,7 @@ pub struct ImagingSessionBase {
 pub struct ImagingSessionGeneral {
     pub date: DateTime<Utc>,
     pub target: String,
+    pub location_id: Uuid,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

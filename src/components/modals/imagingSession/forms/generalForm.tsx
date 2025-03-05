@@ -55,8 +55,9 @@ export default function GeneralForm({ setTab, isEdit, setGeneral, editSession }:
 
     const values = form.getValues();
     const general: ImagingSessionGeneral = {
-      date: values.date, // TODO
-      target: values.target
+      date: values.date,
+      target: values.target,
+      location_id: "09283b59-6dee-4431-b5fe-58bde76bd18b" // TODO
     }
     setGeneral(general);
     setTab('details');

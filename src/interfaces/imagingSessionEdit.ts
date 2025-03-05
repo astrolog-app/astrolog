@@ -8,6 +8,7 @@ export interface ImagingSessionBase {
 export interface ImagingSessionGeneral {
   date: Date,
   target: string,
+  location_id: UUID,
 }
 
 export interface ImagingSessionDetails {
