@@ -22,10 +22,9 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   globalFilter: string;
-  setGlobalFilter: Dispatch<SetStateAction<string>>;
 }
 
-export function DataTable<TData, TValue>({ columns, data, globalFilter, setGlobalFilter }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ columns, data, globalFilter }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([])
 
   const table = useReactTable({
@@ -34,7 +33,6 @@ export function DataTable<TData, TValue>({ columns, data, globalFilter, setGloba
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    onGlobalFilterChange: setGlobalFilter,
     getFilteredRowModel: getFilteredRowModel(),
     state: {
       sorting,
