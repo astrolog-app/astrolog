@@ -1,11 +1,11 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { Button } from '../ui/button';
+import { Button } from '../../ui/button';
 import { ArrowUpDown } from 'lucide-react';
 import { ImagingSession } from '@/interfaces/state';
 
-export const sessionsColumns: ColumnDef<ImagingSession>[] = [
+export const sessionsColumnsDetailed: ColumnDef<ImagingSession>[] = [
   {
     accessorKey: 'date',
     header: ({ column }) => {

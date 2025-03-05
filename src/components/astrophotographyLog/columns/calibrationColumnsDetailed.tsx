@@ -3,7 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { CalibrationFrame } from '@/interfaces/state';
 
-export const calibrationColumns: ColumnDef<CalibrationFrame>[] = [
+export const calibrationColumnsDetailed: ColumnDef<CalibrationFrame>[] = [
   {
     accessorKey: 'camera',
     header: 'Camera',

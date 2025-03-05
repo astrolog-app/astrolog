@@ -1,19 +1,11 @@
 'use client';
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Tab } from '@/components/ui/custom/tab';
 import styles from './log.module.scss';
-import { LogTable } from '@/components/sessionTable/logTable';
+import { AstrophotographyLog } from '@/components/astrophotographyLog/astrophotographyLog';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import NewImagingSession from '@/components/modals/imagingSession/newImagingSession';
-import { UUID } from 'crypto';
 import { save } from '@tauri-apps/plugin-dialog';
 import { toast } from '@/components/ui/use-toast';
 import { invoke } from '@tauri-apps/api/core';
@@ -31,9 +23,7 @@ import { Download, Plus } from 'lucide-react';
 export default function Log() {
   const { openModal } = useModal();
 
-  const [selectedSessionId, setSelectedSessionId] = useState<UUID | undefined>(
-    undefined,
-  );
+  const [images, setImages] = useState<string[] | undefined>(undefined);
 
   function exportCSV() {
     save({
@@ -93,15 +83,11 @@ export default function Log() {
       </HeaderCard>
       <ResizablePanelGroup className={styles.content} direction="horizontal">
         <ResizablePanel defaultSize={70}>
-          <Card className={styles.tableCard}>
-            <CardHeader className={styles.tableWrapper}>
-              <LogTable setSelectedSessionId={setSelectedSessionId} />
-            </CardHeader>
-          </Card>
+          <AstrophotographyLog setImages={setImages} />
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={30}>
-          <ImagePreview selectedSessionId={selectedSessionId} />
+          <ImagePreview selectedSessionId={setImages} />
         </ResizablePanel>
       </ResizablePanelGroup>
     </Tab>
