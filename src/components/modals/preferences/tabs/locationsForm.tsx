@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
+  FormControl, FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -31,42 +31,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-interface Location {
-  id: string;
-  name: string;
-  x: number;
-  y: number;
-  height: number;
-  bortle: number;
-};
+import { Location } from '@/interfaces/state';
+import { v4 as uuidv4 } from 'uuid';
+import { UUID } from 'crypto';
+import { invoke } from '@tauri-apps/api/core';
+import { toast } from '@/components/ui/use-toast';
+import { useAppState } from '@/context/stateProvider';
 
 export default function LocationsForm() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [editingLocation, setEditingLocation] = useState<Location | null>(null);
-
-  const addLocation = (location: Omit<Location, 'id'>) => {
-    const newLocation = {
-      ...location,
-      id: crypto.randomUUID(),
-    };
-    setLocations([...locations, newLocation]);
-  };
-
-  const updateLocation = (
-    updatedLocation: Partial<Location> & { id: string },
-  ) => {
-    setLocations(
-      locations.map((loc) =>
-        loc.id === updatedLocation.id ? { ...loc, ...updatedLocation } : loc,
-      ),
-    );
-    setEditingLocation(null);
-  };
-
-  const removeLocation = (id: string) => {
-    setLocations(locations.filter((location) => location.id !== id));
-  };
 
   const startEditing = (location: Location) => {
     setEditingLocation(location);
@@ -79,7 +53,7 @@ export default function LocationsForm() {
   return (
     <>
       <div className="space-y-8">
-        <Alert variant="default">
+        <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Warning</AlertTitle>
           <AlertDescription>
@@ -94,7 +68,6 @@ export default function LocationsForm() {
             {editingLocation ? 'Edit Location' : 'Add Location'}
           </h2>
           <LocationForm
-            onSubmit={editingLocation ? updateLocation : addLocation}
             editingLocation={editingLocation}
             onCancel={cancelEditing}
           />
@@ -102,11 +75,7 @@ export default function LocationsForm() {
 
         <div>
           <h2 className="text-xl font-semibold mb-4">Location List</h2>
-          <LocationList
-            locations={locations}
-            onRemoveLocation={removeLocation}
-            onEditLocation={startEditing}
-          />
+          <LocationList onEditLocation={startEditing} />
         </div>
       </div>
     </>
@@ -115,8 +84,8 @@ export default function LocationsForm() {
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  x: z.number().min(-1000).max(1000),
-  y: z.number().min(-1000).max(1000),
+  x: z.number().min(-180).max(180),
+  y: z.number().min(-90).max(90),
   height: z.number().positive('Height must be positive'),
   bortle: z.number().min(1).max(9),
 });
@@ -124,16 +93,13 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 interface LocationFormProps {
-  onSubmit: (location: Location | (Partial<Location> & { id: string })) => void;
   editingLocation: Location | null;
   onCancel: () => void;
 }
 
-export function LocationForm({
-  onSubmit,
-  editingLocation,
-  onCancel,
-}: LocationFormProps) {
+export function LocationForm({ editingLocation, onCancel }: LocationFormProps) {
+  const { setAppState } = useAppState();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -160,15 +126,36 @@ export function LocationForm({
   }, [editingLocation, form]);
 
   const handleSubmit = (values: FormValues) => {
-    if (editingLocation) {
-      onSubmit({
-        id: editingLocation.id,
-        name: values.name,
+    const loc: Location = {
+      id: (editingLocation?.id as UUID) ?? uuidv4(),
+      name: values.name,
+      x: values.x,
+      y: values.y,
+      height: values.height,
+      bortle: values.bortle,
+    };
+
+    invoke('save_location', { location: loc })
+      .then(() => {
+        setAppState((prevState) => ({
+          ...prevState,
+          config: {
+            ...prevState.config,
+            locations: new Map(prevState.config.locations).set(loc.id, loc),
+          },
+        }));
+        if (editingLocation) {
+          onCancel();
+        }
+        form.reset();
+      })
+      .catch((error) => {
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'Error: ' + error,
+        });
       });
-    } else {
-      onSubmit(values);
-    }
-    form.reset();
   };
 
   const handleCancel = () => {
@@ -218,6 +205,7 @@ export function LocationForm({
                             }
                           />
                         </FormControl>
+                        <FormDescription>E.g. -23.638</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -240,6 +228,7 @@ export function LocationForm({
                             }
                           />
                         </FormControl>
+                        <FormDescription>E.g. 32.3324</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -262,6 +251,7 @@ export function LocationForm({
                             }
                           />
                         </FormControl>
+                        <FormDescription>E.g. 426</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -319,22 +309,45 @@ export function LocationForm({
 }
 
 interface LocationListProps {
-  locations: Location[];
-  onRemoveLocation: (id: string) => void;
   onEditLocation: (location: Location) => void;
 }
 
-export function LocationList({
-  locations,
-  onRemoveLocation,
-  onEditLocation,
-}: LocationListProps) {
+export function LocationList({ onEditLocation }: LocationListProps) {
+  const { appState, setAppState } = useAppState();
+
+  const locations = Array.from(appState.config.locations.values());
+
   if (locations.length === 0) {
     return (
       <Card className="p-6 text-center text-muted-foreground">
         No locations added yet. Use the form above to add your first location.
       </Card>
     );
+  }
+
+  function deleteLocation(loc: Location) {
+    invoke('delete_location', { location: loc })
+      .then(() =>
+        setAppState((prevState) => {
+          const newLocations = new Map(prevState.config.locations);
+          newLocations.delete(loc.id);
+
+          return {
+            ...prevState,
+            config: {
+              ...prevState.config,
+              locations: newLocations,
+            },
+          };
+        }),
+      )
+      .catch((error) => {
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'Error: ' + error,
+        });
+      });
   }
 
   return (
@@ -372,7 +385,7 @@ export function LocationList({
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => onRemoveLocation(location.id)}
+                      onClick={() => deleteLocation(location)}
                       aria-label={`Remove ${location.name}`}
                     >
                       <Trash2 className="h-4 w-4" />

@@ -18,6 +18,7 @@ use std::env;
 use std::sync::Mutex;
 use tauri::{Emitter, Manager};
 use tauri_plugin_updater::UpdaterExt;
+use crate::commands::preferences::{delete_location, save_location};
 
 mod commands;
 mod file_store;
@@ -82,6 +83,7 @@ fn main() {
             check_equipment_duplicate,
             classify_calibration_frames,
             classify_imaging_session,
+            delete_location,
             edit_imaging_session,
             export_csv,
             get_date,
@@ -95,6 +97,7 @@ fn main() {
             save_camera,
             save_filter,
             save_flattener,
+            save_location,
             save_mount,
             save_preferences,
             save_telescope,

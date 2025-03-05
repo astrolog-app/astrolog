@@ -107,20 +107,26 @@ impl Location {
     pub fn save(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
         let mut app_state = state.lock().map_err(|e| e.to_string())?;
 
+        for existing_location in app_state.config.locations.values() {
+            if existing_location.name == self.name && existing_location.id != self.id {
+                return Err("A location with the same name already exists.".into());
+            }
+        }
+
         let old_locations = app_state.config.locations.clone();
 
         app_state.config.locations.insert(self.id, self.clone());
 
         if let Err(e) = app_state.config.save(app_state.local_config.root_directory.clone()) {
             app_state.config.locations = old_locations;
-            return Err(Box::new(e));
+            return Err(e);
         }
 
         Ok(())
     }
 
     pub fn delete(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
-        let app_state = state.lock().map_err(|e| e.to_string())?;
+        let mut app_state = state.lock().map_err(|e| e.to_string())?;
 
         // Check if any frame is using this location
         if app_state
@@ -129,7 +135,7 @@ impl Location {
             .values()
             .any(|frame| frame.location_id == self.id)
         {
-            return Err("Can't delete location: This location is used in an imaging session".into());
+            return Err("Can't delete location: This location is used in an imaging session!".into());
         }
 
         let old_locations = app_state.config.locations.clone();
@@ -138,7 +144,7 @@ impl Location {
 
         if let Err(e) = app_state.config.save(app_state.local_config.root_directory.clone()) {
             app_state.config.locations = old_locations;
-            return Err(Box::new(e));
+            return Err(e);
         }
 
         Ok(())
