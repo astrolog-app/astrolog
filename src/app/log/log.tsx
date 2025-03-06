@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/resizable';
 import { useModal } from '@/context/modalProvider';
 import SelectImagingFrames from '@/components/modals/selectImagingFrames';
-import ImagePreview from '@/components/images/imagePreview';
+import ImagePreview, { ImagePreviewUndefined } from '@/components/images/imagePreview';
 import HeaderCard from '@/components/headerCard';
 import { Download, Plus } from 'lucide-react';
 
@@ -82,7 +82,9 @@ export default function Log() {
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={30}>
-          <ImagePreview images={images} />
+          {images !== undefined && images.length > 0
+          ? <ImagePreview images={images} />
+          : <ImagePreviewUndefined />}
         </ResizablePanel>
       </ResizablePanelGroup>
     </Tab>

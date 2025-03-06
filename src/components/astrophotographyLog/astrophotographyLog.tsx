@@ -53,10 +53,9 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
 
     if (showCalibration) {
       setCalibration(value);
+      setImages(undefined);
     } else {
       setSession(value);
-
-      console.log(session?.id)
 
       if (value) {
         invoke<string[]>('get_image_frames_path', { id: value?.id })
