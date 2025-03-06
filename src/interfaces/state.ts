@@ -74,24 +74,6 @@ export interface ImagingSession {
   notes: string | undefined;
 }
 
-export function isImagingSession(val: any): val is ImagingSession {
-  return (
-    val &&
-    typeof val === "object" &&
-    "id" in val &&
-    "date" in val &&
-    "target" in val &&
-    "sub_length" in val &&
-    "total_subs" in val &&
-    "integrated_subs" in val &&
-    "filter" in val &&
-    "gain" in val &&
-    "telescope" in val &&
-    "mount" in val &&
-    "camera" in val
-  );
-}
-
 export interface CalibrationFrame {
   id: UUID;
   camera: string;
@@ -100,18 +82,6 @@ export interface CalibrationFrame {
   sub_length: number | undefined;
   camera_temp: number | undefined;
   total_subs: number;
-}
-
-export function isCalibrationFrame(val: any): val is CalibrationFrame {
-  return (
-    val &&
-    typeof val === "object" &&
-    "id" in val &&
-    "camera" in val &&
-    "calibration_type" in val &&
-    "gain" in val &&
-    "total_subs" in val
-  );
 }
 
 export interface EquipmentList {
