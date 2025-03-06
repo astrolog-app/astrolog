@@ -131,12 +131,8 @@ pub fn classify_imaging_session(
     state: State<Mutex<AppState>>,
     session: ImagingSessionEdit
 ) -> Result<LogTableRow, String> {
-    let app_state = state.lock().map_err(|e| e.to_string())?;
-    let root_directory = &app_state.local_config.root_directory.clone();
-    drop(app_state);
-
     // create light_frame
-    let mut light_frame = LightFrame::from(&session);
+    let light_frame = LightFrame::from(&session);
 
     // check for duplicates
     let path = ImagingSession::build_path(&light_frame);
@@ -150,17 +146,13 @@ pub fn classify_imaging_session(
     }
 
     // create imaging_session and save it to .json
-    let imaging_session = ImagingSessionList::add(state.clone(), &light_frame).map_err(|e| e.to_string())?;
+    let imaging_session = ImagingSessionList::add(&state, &light_frame).map_err(|e| e.to_string())?;
 
-    // classify the light_frames
-    light_frame.classify(state.clone(), window, root_directory).map_err(|e| e.to_string())?;
-
-    // TODO: classify flat frame
-
-    // TODO: classify dark frames (if DSLR)
+    // classify the imaging_session
+    imaging_session.classify(&state, &window).map_err(|e| e.to_string())?;
 
     // create a new log_table_row
-    let log_table_row = LogTableRow::new(&imaging_session, &state.lock().unwrap()).ok_or("TODO")?;
+    let log_table_row = LogTableRow::new(&imaging_session, &state.lock().unwrap()).ok_or("TODO")?; // TODO
 
     Ok(log_table_row)
 }

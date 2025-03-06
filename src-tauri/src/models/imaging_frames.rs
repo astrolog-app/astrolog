@@ -20,7 +20,7 @@ pub struct ImagingFrameList {
     pub light_frames: HashMap<Uuid, LightFrame>,
     pub dark_frames: HashMap<Uuid, DarkFrame>,
     pub bias_frames: HashMap<Uuid, BiasFrame>,
-    flat_frames: HashMap<Uuid, FlatFrame>,
+    pub flat_frames: HashMap<Uuid, FlatFrame>,
 }
 
 impl ImagingFrameList {
@@ -148,24 +148,23 @@ impl LightFrame {
 
     pub fn classify(
         &mut self,
-        state: State<Mutex<AppState>>,
-        window: Window,
-        root_directory: &PathBuf
+        state: &State<Mutex<AppState>>,
+        window: &Window,
     ) -> Result<(), Box<dyn Error>> {
-        let mut app_state = state.lock().map_err(|e| e.to_string())?;
+        let app_state = state.lock().map_err(|e| e.to_string())?;
+        let root_directory = app_state.local_config.root_directory.clone();
+        drop(app_state);
 
-        // spawn process
+        let mut errors = Vec::new();
+        let base = self.build_path();
+
         let mut process = Process::spawn(
             &window,
-            "Classifying Light Frames",
+            "Classifying Imaging Session",
             true,
             Some(self.frames_classified.len() as u32),
             Some(self.total_subs)
         );
-
-        let mut errors = Vec::new();
-
-        let base = self.build_path();
 
         for frame in &self.frames_to_classify.clone() {
             let mut destination = root_directory.clone();
@@ -204,18 +203,18 @@ impl LightFrame {
 
             // remove file_to_classify
             self.frames_to_classify.retain(|path| path != frame);
+            let mut app_state = state.lock().map_err(|e| e.to_string())?;
             app_state.imaging_frame_list.light_frames.insert(self.id, self.clone());
             if let Err(e) = ImagingFrameList::save(root_directory.clone(), &app_state.imaging_frame_list) {
                 // revert
                 app_state.imaging_frame_list.light_frames.insert(old.id, old);
                 fs::remove_file(&destination).ok();
             };
+            drop(app_state);
 
-            // update process
             process.update(&window);
         }
 
-        // finish process
         process.finish(&window);
 
         // return an error if any failures occurred

@@ -6,8 +6,9 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 use regex::Regex;
 use tauri::menu::NativeIcon::Path;
-use tauri::State;
+use tauri::{State, Window};
 use uuid::Uuid;
+use crate::models::frontend::process::Process;
 use crate::models::imaging_frames::{ImagingFrameList, LightFrame};
 use crate::models::state::AppState;
 
@@ -42,7 +43,7 @@ impl ImagingSessionList {
         )?)
     }
 
-    pub fn add(state: State<Mutex<AppState>>, light_frame: &LightFrame) -> Result<ImagingSession, Box<dyn Error>> {
+    pub fn add(state: &State<Mutex<AppState>>, light_frame: &LightFrame) -> Result<ImagingSession, Box<dyn Error>> {
         let mut app_state = state.lock().map_err(|e| e.to_string())?;
         let imaging_session = ImagingSession::from(&light_frame, &light_frame.id);
 
@@ -89,6 +90,15 @@ pub struct ImagingSession {
 }
 
 impl ImagingSession {
+    pub fn classify(&self, state: &State<Mutex<AppState>>, window: &Window) -> Result<(), Box<dyn Error>> {
+        let app_state = state.lock().map_err(|e| e.to_string())?;
+        let mut light_frame = app_state.imaging_frame_list.light_frames.get(&self.light_frame_id).ok_or("light_frame_id not found")?;
+
+        light_frame.classify(state, window)?;
+
+        Ok(())
+    }
+
     pub fn from(light_frame: &LightFrame, id: &Uuid) -> ImagingSession {
         let folder_dir = ImagingSession::build_path(light_frame);
 
