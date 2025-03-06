@@ -1,20 +1,30 @@
 'use client';
 
 import styles from './imagePreview.module.scss';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { UUID } from 'crypto';
 import { useEffect, useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
-import { toast } from '@/components/ui/use-toast';
 import ImageRenderer from '@/components/images/imageRenderer';
 
-export default function ImagePreview({ selectedSessionId }: { selectedSessionId: UUID | undefined }) {
-  const defaultDescription = 'Select Image';
-
-  const [images, setImages] = useState<string[] | undefined>(undefined);
+export default function ImagePreview({
+  images,
+}: {
+  images: string[] | undefined;
+}) {
+  if (images === undefined) {
+    return <div>undefined</div>;
+  }
   const [currentImage, setCurrentImage] = useState<number>(0);
   const [maxImage, setMaxImage] = useState<number>(0);
-  const [description, setDescription] = useState<string>(defaultDescription);
+  const [description, setDescription] = useState<string>(
+    getLastPathSegment(images[0]),
+  );
 
   function nextImage() {
     setCurrentImage(Math.min(maxImage, currentImage + 1));
@@ -29,36 +39,8 @@ export default function ImagePreview({ selectedSessionId }: { selectedSessionId:
   }
 
   useEffect(() => {
-    if (selectedSessionId === undefined) {
-      setImages(undefined);
-    } else {
-      invoke<string[]>('get_image_frames_path', { id: selectedSessionId })
-        .then((data) => {
-          setImages(data);
-          setCurrentImage(1);
-          setMaxImage(data.length);
-        })
-        .catch((error) => {
-          toast({
-            variant: 'destructive',
-            title: 'Uh oh! Something went wrong.',
-            description: 'Error: ' + error
-          });
-        });
-    }
-  }, [selectedSessionId]);
 
-  useEffect(() => {
-    if (images && images.length > 0 && currentImage > 0) {
-      const image = images.at(currentImage - 1);
-      if (image) {
-        setDescription(getLastPathSegment(image));
-        return;
-      }
-    }
-
-    setDescription(defaultDescription);
-  }, [currentImage, images]);
+  }, [images]);
 
   return (
     <Card className={styles.imagePreviewCard}>
@@ -67,13 +49,11 @@ export default function ImagePreview({ selectedSessionId }: { selectedSessionId:
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        {images === undefined ? (
-          <div>test</div>
-        ) : (
-          <ImageRenderer path={images?.at(currentImage - 1) ?? ''} />
-        )}
+        <ImageRenderer path={images.at(0) ?? ''} />
         <div onClick={() => prevImage()}>prev</div>
-        <div>{currentImage} / {maxImage}</div>
+        <div>
+          {currentImage} / {maxImage}
+        </div>
         <div onClick={() => nextImage()}>next</div>
       </CardContent>
     </Card>

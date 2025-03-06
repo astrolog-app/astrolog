@@ -92,7 +92,8 @@ pub struct ImagingSession {
 impl ImagingSession {
     pub fn classify(&self, state: &State<Mutex<AppState>>, window: &Window) -> Result<(), Box<dyn Error>> {
         let app_state = state.lock().map_err(|e| e.to_string())?;
-        let mut light_frame = app_state.imaging_frame_list.light_frames.get(&self.light_frame_id).ok_or("light_frame_id not found")?;
+        let mut light_frame = app_state.imaging_frame_list.light_frames.get(&self.light_frame_id).ok_or("light_frame_id not found")?.clone();
+        drop(app_state);
 
         light_frame.classify(state, window)?;
 

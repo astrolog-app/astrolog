@@ -4,7 +4,7 @@ import { Tab } from '@/components/ui/custom/tab';
 import styles from './log.module.scss';
 import { AstrophotographyLog } from '@/components/astrophotographyLog/astrophotographyLog';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import NewImagingSession from '@/components/modals/imagingSession/newImagingSession';
 import { save } from '@tauri-apps/plugin-dialog';
 import { toast } from '@/components/ui/use-toast';
@@ -41,13 +41,12 @@ export default function Log() {
           invoke('export_csv', { path: selectedPath });
         }
       })
-      .catch((err) => {
+      .catch((err) =>
         toast({
           variant: 'destructive',
           description: 'Failed to export CSV: ' + err,
-        });
-        console.log(err);
-      });
+        }),
+      );
   }
 
   return (
@@ -72,11 +71,7 @@ export default function Log() {
           <Plus className="h-4 w-4 mr-2" />
           Add Calibration
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={exportCSV}
-        >
+        <Button variant="outline" size="sm" onClick={exportCSV}>
           <Download className="h-4 w-4 mr-2" />
           Export CSV
         </Button>
@@ -87,7 +82,7 @@ export default function Log() {
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={30}>
-          <ImagePreview selectedSessionId={setImages} />
+          <ImagePreview images={images} />
         </ResizablePanel>
       </ResizablePanelGroup>
     </Tab>

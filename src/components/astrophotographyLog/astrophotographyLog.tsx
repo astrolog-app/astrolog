@@ -8,7 +8,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
 import { DataTable } from './dataTable';
 import { useAppState } from '@/context/stateProvider';
 import { sessionsColumnsDetailed } from '@/components/astrophotographyLog/columns/sessionsColumnsDetailed';
@@ -16,8 +20,15 @@ import { calibrationColumnsDetailed } from '@/components/astrophotographyLog/col
 import { sessionsColumnsSimple } from '@/components/astrophotographyLog/columns/sessionsColumnsSimple';
 import { calibrationColumnsSimple } from '@/components/astrophotographyLog/columns/calibrationColumsSimple';
 import { CalibrationFrame, ImagingSession } from '@/interfaces/state';
-import { ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuShortcut } from '../ui/context-menu';
+import {
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+} from '../ui/context-menu';
 import { DeleteSVG } from '@/public/svgs';
+import { invoke } from '@tauri-apps/api/core';
+import { toast } from '@/components/ui/use-toast';
 
 interface SessionTableProps {
   setImages: Dispatch<SetStateAction<string[] | undefined>>;
@@ -32,7 +43,9 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
 
   const [value, setValue] = useState<any>(undefined);
   const [session, setSession] = useState<ImagingSession | undefined>(undefined);
-  const [calibration, setCalibration] = useState<CalibrationFrame | undefined>(undefined);
+  const [calibration, setCalibration] = useState<CalibrationFrame | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     setSession(undefined);
@@ -42,6 +55,19 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
       setCalibration(value);
     } else {
       setSession(value);
+
+      console.log(session?.id)
+
+      if (value) {
+        invoke<string[]>('get_image_frames_path', { id: value?.id })
+          .then((images) => setImages(images))
+          .catch((err) =>
+            toast({
+              variant: 'destructive',
+              description: 'Failed to open Image: ' + err,
+            }),
+          );
+      }
     }
   }, [value]);
 
@@ -144,7 +170,7 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56">
-                    { /* TODO */}
+                    {/* TODO */}
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
@@ -176,7 +202,9 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
       {session && !showCalibration && !isDetailedView && (
         <Card className="mt-4 bg-card border-border">
           <CardContent className="p-4">
-            <h3 className="text-lg font-semibold mb-2 text-foreground">Session Details</h3>
+            <h3 className="text-lg font-semibold mb-2 text-foreground">
+              Session Details
+            </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -203,13 +231,14 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
   );
 }
 
-function ImagingSessionContextMenu({ session }: { session: ImagingSession | undefined }) {
+function ImagingSessionContextMenu({
+  session,
+}: {
+  session: ImagingSession | undefined;
+}) {
   return (
     <ContextMenuContent className="w-64">
-      <ContextMenuItem
-        inset
-        disabled={!session}
-      >
+      <ContextMenuItem inset disabled={!session}>
         Open...
         <ContextMenuShortcut>⌘]</ContextMenuShortcut>
       </ContextMenuItem>
@@ -217,59 +246,41 @@ function ImagingSessionContextMenu({ session }: { session: ImagingSession | unde
         Edit...
         <ContextMenuShortcut>⌘]</ContextMenuShortcut>
       </ContextMenuItem>
-      <ContextMenuItem
-        inset
-        disabled={!session}
-        className={styles.delete}
-      >
+      <ContextMenuItem inset disabled={!session} className={styles.delete}>
         Delete
         <ContextMenuShortcut>
           <DeleteSVG />
         </ContextMenuShortcut>
       </ContextMenuItem>
       <ContextMenuSeparator />
-      <ContextMenuItem
-        inset
-      >
-        Add new Session...
-      </ContextMenuItem>
+      <ContextMenuItem inset>Add new Session...</ContextMenuItem>
     </ContextMenuContent>
   );
 }
 
-function CalibrationContextMenu({ calibration }: { calibration: CalibrationFrame | undefined }) {
+function CalibrationContextMenu({
+  calibration,
+}: {
+  calibration: CalibrationFrame | undefined;
+}) {
   return (
     <ContextMenuContent className="w-64">
-      <ContextMenuItem
-        inset
-        disabled={!calibration}
-      >
+      <ContextMenuItem inset disabled={!calibration}>
         Open...
         <ContextMenuShortcut>⌘]</ContextMenuShortcut>
       </ContextMenuItem>
-      <ContextMenuItem
-        inset
-        disabled={!calibration}
-      >
+      <ContextMenuItem inset disabled={!calibration}>
         Edit...
         <ContextMenuShortcut>⌘]</ContextMenuShortcut>
       </ContextMenuItem>
-      <ContextMenuItem
-        inset
-        disabled={!calibration}
-        className={styles.delete}
-      >
+      <ContextMenuItem inset disabled={!calibration} className={styles.delete}>
         Delete
         <ContextMenuShortcut>
           <DeleteSVG />
         </ContextMenuShortcut>
       </ContextMenuItem>
       <ContextMenuSeparator />
-      <ContextMenuItem
-        inset
-      >
-        Add new Frames...
-      </ContextMenuItem>
+      <ContextMenuItem inset>Add new Frames...</ContextMenuItem>
     </ContextMenuContent>
   );
 }
