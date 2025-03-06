@@ -1,19 +1,23 @@
 'use client';
 
+import styles from './astrophotographyLog.module.scss';
 import { Search, Sun, Cloud, List, Grid, ChevronDown } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { DataTable } from './dataTable';
-import { sessionsColumnsDetailed } from '@/components/astrophotographyLog/columns/sessionsColumnsDetailed';
 import { useAppState } from '@/context/stateProvider';
+import { sessionsColumnsDetailed } from '@/components/astrophotographyLog/columns/sessionsColumnsDetailed';
 import { calibrationColumnsDetailed } from '@/components/astrophotographyLog/columns/calibrationColumnsDetailed';
 import { sessionsColumnsSimple } from '@/components/astrophotographyLog/columns/sessionsColumnsSimple';
 import { calibrationColumnsSimple } from '@/components/astrophotographyLog/columns/calibrationColumsSimple';
+import { CalibrationFrame, ImagingSession } from '@/interfaces/state';
+import { ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuShortcut } from '../ui/context-menu';
+import { DeleteSVG } from '@/public/svgs';
 
 interface SessionTableProps {
   setImages: Dispatch<SetStateAction<string[] | undefined>>;
@@ -24,13 +28,30 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
 
   const [showCalibration, setShowCalibration] = useState(false);
   const [isDetailedView, setIsDetailedView] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<string | null>(null);
   const [globalFilter, setGlobalFilter] = useState('');
+
+  const [value, setValue] = useState<any>(undefined);
+  const [session, setSession] = useState<ImagingSession | undefined>(undefined);
+  const [calibration, setCalibration] = useState<CalibrationFrame | undefined>(undefined);
+
+  useEffect(() => {
+    setSession(undefined);
+    setCalibration(undefined);
+
+    if (showCalibration) {
+      setCalibration(value);
+    } else {
+      setSession(value);
+    }
+  }, [value]);
+
+  useEffect(() => {
+    setValue(undefined);
+  }, [showCalibration]);
 
   const handleToggleChange = (checked: boolean) => {
     setShowCalibration(checked);
-    setSelectedRow(null);
-  }
+  };
 
   function renderTable() {
     if (showCalibration) {
@@ -40,7 +61,10 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
             columns={calibrationColumnsDetailed}
             data={appState.table_data.calibration}
             globalFilter={globalFilter}
-          />
+            setValue={setValue}
+          >
+            <CalibrationContextMenu calibration={calibration} />
+          </DataTable>
         );
       }
 
@@ -49,7 +73,10 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
           columns={calibrationColumnsSimple}
           data={appState.table_data.calibration}
           globalFilter={globalFilter}
-        />
+          setValue={setValue}
+        >
+          <CalibrationContextMenu calibration={calibration} />
+        </DataTable>
       );
     }
 
@@ -59,7 +86,10 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
           columns={sessionsColumnsDetailed}
           data={appState.table_data.sessions}
           globalFilter={globalFilter}
-        />
+          setValue={setValue}
+        >
+          <ImagingSessionContextMenu session={session} />
+        </DataTable>
       );
     }
 
@@ -68,7 +98,10 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
         columns={sessionsColumnsSimple}
         data={appState.table_data.sessions}
         globalFilter={globalFilter}
-      />
+        setValue={setValue}
+      >
+        <ImagingSessionContextMenu session={session} />
+      </DataTable>
     );
   }
 
@@ -99,7 +132,7 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
               </Label>
             </div>
             <div className="flex items-center space-x-2">
-              {isDetailedView && (
+              {isDetailedView && !showCalibration && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -140,7 +173,7 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
         </CardContent>
       </Card>
 
-      {selectedRow && !showCalibration && !isDetailedView && (
+      {session && !showCalibration && !isDetailedView && (
         <Card className="mt-4 bg-card border-border">
           <CardContent className="p-4">
             <h3 className="text-lg font-semibold mb-2 text-foreground">Session Details</h3>
@@ -167,5 +200,76 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
         </Card>
       )}
     </div>
+  );
+}
+
+function ImagingSessionContextMenu({ session }: { session: ImagingSession | undefined }) {
+  return (
+    <ContextMenuContent className="w-64">
+      <ContextMenuItem
+        inset
+        disabled={!session}
+      >
+        Open...
+        <ContextMenuShortcut>⌘]</ContextMenuShortcut>
+      </ContextMenuItem>
+      <ContextMenuItem inset disabled={!session}>
+        Edit...
+        <ContextMenuShortcut>⌘]</ContextMenuShortcut>
+      </ContextMenuItem>
+      <ContextMenuItem
+        inset
+        disabled={!session}
+        className={styles.delete}
+      >
+        Delete
+        <ContextMenuShortcut>
+          <DeleteSVG />
+        </ContextMenuShortcut>
+      </ContextMenuItem>
+      <ContextMenuSeparator />
+      <ContextMenuItem
+        inset
+      >
+        Add new Session...
+      </ContextMenuItem>
+    </ContextMenuContent>
+  );
+}
+
+function CalibrationContextMenu({ calibration }: { calibration: CalibrationFrame | undefined }) {
+  return (
+    <ContextMenuContent className="w-64">
+      <ContextMenuItem
+        inset
+        disabled={!calibration}
+      >
+        Open...
+        <ContextMenuShortcut>⌘]</ContextMenuShortcut>
+      </ContextMenuItem>
+      <ContextMenuItem
+        inset
+        disabled={!calibration}
+      >
+        Edit...
+        <ContextMenuShortcut>⌘]</ContextMenuShortcut>
+      </ContextMenuItem>
+      <ContextMenuItem
+        inset
+        disabled={!calibration}
+        className={styles.delete}
+      >
+        Delete
+        <ContextMenuShortcut>
+          <DeleteSVG />
+        </ContextMenuShortcut>
+      </ContextMenuItem>
+      <ContextMenuSeparator />
+      <ContextMenuItem
+        inset
+      >
+        Add new Frames...
+      </ContextMenuItem>
+    </ContextMenuContent>
   );
 }
