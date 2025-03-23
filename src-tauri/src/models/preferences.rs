@@ -48,8 +48,8 @@ pub struct Config {
 impl Config {
     pub fn default() -> Config {
         let default = FolderPath {
-            base_folder: "".to_string(),
-            pattern: "".to_string(),
+            base_folder: PathBuf::new(),
+            pattern: PathBuf::new(),
         };
 
         let folder_paths = FolderPaths {
@@ -89,8 +89,8 @@ pub struct FolderPaths {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct FolderPath {
-    pub base_folder: String,
-    pub pattern: String,
+    pub base_folder: PathBuf,
+    pub pattern: PathBuf,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

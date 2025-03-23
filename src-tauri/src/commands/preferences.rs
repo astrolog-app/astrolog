@@ -45,7 +45,7 @@ pub fn set_root_directory(
 }
 
 #[tauri::command]
-pub fn change_imaging_session_folder_path(state: State<Mutex<AppState>>, base_folder: String, pattern: String) -> Result<(), String> {
+pub fn change_imaging_session_folder_path(state: State<Mutex<AppState>>, base_folder: PathBuf, pattern: PathBuf) -> Result<(), String> {
     let mut app_state = state.lock().map_err(|e| e.to_string())?;
 
     if !app_state.imaging_frame_list.light_frames.is_empty() {

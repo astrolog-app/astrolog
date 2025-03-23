@@ -131,11 +131,12 @@ pub fn classify_imaging_session(
     state: State<Mutex<AppState>>,
     session: ImagingSessionEdit
 ) -> Result<LogTableRow, String> {
+    // TODO: improve error handling
     // create light_frame
     let light_frame = LightFrame::from(&session);
 
     // check for duplicates
-    let path = ImagingSession::build_path(&light_frame);
+    let path = ImagingSession::build_path(&light_frame, &state);
     if path.exists() {
         let entries = fs::read_dir(&path).map_err(|e| e.to_string())?;
         if entries.count() > 0 {

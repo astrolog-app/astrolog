@@ -128,7 +128,7 @@ pub struct Filter {
     name: String,
     notes: HashMap<Uuid, EquipmentNote>,
 
-    filter_type: String,
+    pub filter_type: String,
 }
 
 impl EquipmentItem for Filter {

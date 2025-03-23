@@ -25,23 +25,27 @@ import { toast } from '@/components/ui/use-toast';
 const PREDEFINED_TOKENS_IS: Token[] = [
   { value: '$$DATE$$', description: 'The Date of the Imaging Session' },
   { value: '$$TARGET$$', description: 'The Target Name' },
-  { value: '$$FILTER$$', description: 'The Filter Used' },
-  { value: '$$EXPOSURE$$', description: 'The Exposure Time' },
+  { value: '$$SITE$$', description: 'The Observation Site' },
+  { value: '$$CAMERA$$', description: 'The Filter Used' },
   { value: '$$TELESCOPE$$', description: 'The Telescope Used' },
-  { value: '$$CAMERA$$', description: 'The Camera Used' },
-  { value: '$$OBSERVER$$', description: 'The Observer Name' },
-  { value: '$$SITE$$', description: 'The Observation Site' }
+  { value: '$$FILTER$$', description: 'The Filter Used' },
+  { value: '$$FILTERTYPE$$', description: 'The Filter Used' },
+  { value: '$$SUBLENGTH$$', description: 'The Filter Used' },
+  { value: '$$TOTALSUBS$$', description: 'The Exposure Time' },
+  { value: '$$GAIN$$', description: 'The Camera Used' },
 ];
 
 const DEFAULT_TOKEN_VALUES_IS = {
   $$DATE$$: '2024-03-02',
   $$TARGET$$: 'M31',
-  $$FILTER$$: 'Ha',
-  $$EXPOSURE$$: '300s',
-  $$TELESCOPE$$: 'RC10',
-  $$CAMERA$$: 'ZWO533MM',
-  $$OBSERVER$$: 'JohnDoe',
-  $$SITE$$: 'Backyard'
+  $$SITE$$: 'Backyard',
+  $$CAMERA$$: 'ZWO2600MC Pro',
+  $$TELESCOPE$$: 'Sky-Watcher Esprit 100',
+  $$FILTER$$: 'Filter xy',
+  $$FILTERTYPE$$: "Ha",
+  $$SUBLENGTH$$: "300",
+  $$TOTALSUBS$$: "34",
+  $$GAIN$$: "100",
 };
 
 const PREDEFINED_TOKENS_CAL: Token[] = [
@@ -89,7 +93,7 @@ export function FolderPathBuilder({ type }: { type: FolderPathBuilderType }) {
     [FolderPathBuilderType.IMAGING_SESSION]: {
       defaultBaseFolder: appState.config.folder_paths.imaging_session_folder_path.base_folder,
       defaultFolderPath: appState.config.folder_paths.imaging_session_folder_path.pattern,
-      requiredTokens: ['$$DATE$$'],
+      requiredTokens: ['$$DATE$$', '$$TARGET$$'],
       tokens: PREDEFINED_TOKENS_IS,
       defaultTokenValues: DEFAULT_TOKEN_VALUES_IS,
       baseFolderPlaceholder: 'Data',
@@ -241,8 +245,14 @@ export function FolderPathBuilder({ type }: { type: FolderPathBuilderType }) {
   };
 
   function handleSubmit() {
+    form.setValue(
+      "folderPath",
+      form.getValues().folderPath.trim().replace(/\//g, "\\")
+    );
+
     const base_folder = form.getValues().baseFolder.trim();
     const pattern = form.getValues().folderPath.trim();
+
     invoke('change_imaging_session_folder_path', { baseFolder: base_folder, pattern: pattern })
       .then(() => {
         console.log("test");

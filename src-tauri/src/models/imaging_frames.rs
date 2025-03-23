@@ -106,8 +106,8 @@ pub struct LightFrame {
 }
 
 impl LightFrame {
-    pub fn build_path(&self) -> PathBuf {
-        let mut path = ImagingSession::build_path(self);
+    pub fn build_path(&self, state: &State<Mutex<AppState>>) -> PathBuf {
+        let mut path = ImagingSession::build_path(self, state);
 
         path.push(PathBuf::from("Light"));
 
@@ -156,7 +156,7 @@ impl LightFrame {
         drop(app_state);
 
         let mut errors = Vec::new();
-        let base = self.build_path();
+        let base = self.build_path(state);
 
         let mut process = Process::spawn(
             &window,
@@ -185,7 +185,6 @@ impl LightFrame {
             };
 
             destination.push(file_name);
-
             // try to copy frame
             if let Err(e) = fs::copy(frame, &destination) {
                 errors.push(format!("Failed to copy {:?} -> {:?}: {}", frame, destination, e));

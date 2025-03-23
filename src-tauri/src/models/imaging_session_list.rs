@@ -2,13 +2,12 @@ use crate::file_store;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::collections::HashMap;
 use std::error::Error;
-use std::path::PathBuf;
+use std::path::{Component, PathBuf};
 use std::sync::Mutex;
 use regex::Regex;
-use tauri::menu::NativeIcon::Path;
 use tauri::{State, Window};
 use uuid::Uuid;
-use crate::models::frontend::process::Process;
+use crate::models::equipment::{EquipmentItem, EquipmentList};
 use crate::models::imaging_frames::{ImagingFrameList, LightFrame};
 use crate::models::state::AppState;
 
@@ -44,8 +43,9 @@ impl ImagingSessionList {
     }
 
     pub fn add(state: &State<Mutex<AppState>>, light_frame: &LightFrame) -> Result<ImagingSession, Box<dyn Error>> {
+        let imaging_session = ImagingSession::from(&light_frame, &light_frame.id, state);
+
         let mut app_state = state.lock().map_err(|e| e.to_string())?;
-        let imaging_session = ImagingSession::from(&light_frame, &light_frame.id);
 
         // Step 1: Insert imaging session and save
         app_state.imaging_sessions.insert(imaging_session.id, imaging_session.clone());
@@ -100,8 +100,8 @@ impl ImagingSession {
         Ok(())
     }
 
-    pub fn from(light_frame: &LightFrame, id: &Uuid) -> ImagingSession {
-        let folder_dir = ImagingSession::build_path(light_frame);
+    pub fn from(light_frame: &LightFrame, id: &Uuid, state: &State<Mutex<AppState>>) -> ImagingSession {
+        let folder_dir = ImagingSession::build_path(light_frame, state);
 
         ImagingSession {
             id: id.clone(),
@@ -113,40 +113,51 @@ impl ImagingSession {
         }
     }
 
-    // TODO
-    fn get_field_value(light_frame: &LightFrame, field: &str) -> String {
+    fn get_field_value(
+        light_frame: &LightFrame,
+        field: &str,
+        equipment_list: &EquipmentList,
+    ) -> String {
         match field {
-            "CAMERA" => light_frame.camera_id.to_string(),
-            "GAIN" => light_frame.gain.to_string(),
-            "DATE" => light_frame.date.to_string(),
+            "DATE" => light_frame.date.format("%Y-%m-%d").to_string(),
             "TARGET" => light_frame.target.clone(),
-            _ => "".to_string(),
+            "SITE" => "site".to_string(),
+            "CAMERA" => equipment_list.cameras.get(&light_frame.camera_id)
+                .map_or("None".to_string(), |c| c.view_name().to_string()),
+            "TELESCOPE" => equipment_list.telescopes.get(&light_frame.telescope_id)
+                .map_or("None".to_string(), |t| t.view_name().to_string()),
+            "FILTER" => equipment_list.filters.get(&light_frame.filter_id)
+                .map_or("None".to_string(), |f| f.view_name().to_string()),
+            "FILTERTYPE" => equipment_list.filters.get(&light_frame.filter_id)
+                .map_or("None".to_string(), |f| f.filter_type.to_string()),
+            "SUBLENGTH" => light_frame.sub_length.to_string(),
+            "TOTALSUBS" => light_frame.total_subs.to_string(),
+            "GAIN" => light_frame.gain.to_string(),
+            _ => field.to_string(),
         }
     }
 
-    pub fn build_path(light_frame: &LightFrame) -> PathBuf {
-        // TODO: what if path is invalid
-        let mut path = PathBuf::from("Data");
+    pub fn build_path(light_frame: &LightFrame, state: &State<Mutex<AppState>>) -> PathBuf {
+        let app_state = state.lock().unwrap();
 
-        let template = "$$TARGET$$\\$$GAIN$$"; // TODO
+        let base_folder = app_state.config.folder_paths.imaging_session_folder_path.base_folder.clone();
+        let pattern_path = app_state.config.folder_paths.imaging_session_folder_path.pattern.clone();
 
-        let segments = template.split('\\')
-            .map(|segment| {
-                // Use a regex to replace placeholders in the form $$FIELD$$.
-                let re = Regex::new(r"\$\$(\w+)\$\$").unwrap();
-                let replaced = re.replace_all(segment, |caps: &regex::Captures| {
+        let re = Regex::new(r"\$\$(\w+)\$\$").unwrap();
+        let mut path = PathBuf::from(base_folder);
+
+        for component in pattern_path.components() {
+            if let Component::Normal(segment_osstr) = component {
+                let segment = segment_osstr.to_string_lossy();
+                let replaced = re.replace_all(&segment, |caps: &regex::Captures| {
                     let field_name = &caps[1];
-                    // Only include a field if it exists (for Option fields, this means Some(_))
-                    ImagingSession::get_field_value(light_frame, field_name)
+                    ImagingSession::get_field_value(light_frame, field_name, &app_state.equipment_list)
                 });
-                replaced.to_string()
-            })
-            // Filter out segments that are empty (which might happen for None options)
-            .filter(|s| !s.is_empty());
-
-        // Push each segment into the final path
-        for segment in segments {
-            path.push(segment);
+                let replaced_str = replaced.to_string();
+                if !replaced_str.is_empty() {
+                    path.push(replaced_str);
+                }
+            }
         }
 
         path
