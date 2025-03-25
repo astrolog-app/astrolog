@@ -12,6 +12,7 @@ use chrono::{DateTime, Utc};
 use tauri::{Emitter, State, Window};
 use uuid::Uuid;
 use crate::commands::imaging_sessions::ImagingSessionEdit;
+use crate::models::equipment::{EquipmentItem, EquipmentList};
 use crate::models::frontend::process::Process;
 use crate::models::imaging_session_list::{ImagingSession, ImagingSessionList};
 
@@ -106,12 +107,12 @@ pub struct LightFrame {
 }
 
 impl LightFrame {
-    pub fn build_path(&self, state: &State<Mutex<AppState>>) -> PathBuf {
-        let mut path = ImagingSession::build_path(self, state);
+    pub fn build_path(&self, state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>> {
+        let mut path = ImagingSession::build_path(self, state)?;
 
         path.push(PathBuf::from("Light"));
 
-        path
+        Ok(path)
     }
 
     pub fn from(session: &ImagingSessionEdit) -> LightFrame {
@@ -146,25 +147,42 @@ impl LightFrame {
         }
     }
 
+    pub fn get_field_value(
+        &self,
+        field: &str,
+        equipment_list: &EquipmentList,
+    ) -> String {
+        match field {
+            "DATE" => self.date.format("%Y-%m-%d").to_string(),
+            "TARGET" => self.target.clone(),
+            "SITE" => "site".to_string(),
+            "CAMERA" => equipment_list.cameras.get(&self.camera_id)
+                .map_or("None".to_string(), |c| c.view_name().to_string()),
+            "TELESCOPE" => equipment_list.telescopes.get(&self.telescope_id)
+                .map_or("None".to_string(), |t| t.view_name().to_string()),
+            "FILTER" => equipment_list.filters.get(&self.filter_id)
+                .map_or("None".to_string(), |f| f.view_name().to_string()),
+            "FILTERTYPE" => equipment_list.filters.get(&self.filter_id)
+                .map_or("None".to_string(), |f| f.filter_type.to_string()),
+            "SUBLENGTH" => self.sub_length.to_string(),
+            "TOTALSUBS" => self.total_subs.to_string(),
+            "GAIN" => self.gain.to_string(),
+            _ => field.to_string(),
+        }
+    }
+
     pub fn classify(
         &mut self,
         state: &State<Mutex<AppState>>,
         window: &Window,
+        process: &mut Process
     ) -> Result<(), Box<dyn Error>> {
         let app_state = state.lock().map_err(|e| e.to_string())?;
         let root_directory = app_state.local_config.root_directory.clone();
         drop(app_state);
 
         let mut errors = Vec::new();
-        let base = self.build_path(state);
-
-        let mut process = Process::spawn(
-            &window,
-            "Classifying Imaging Session",
-            true,
-            Some(self.frames_classified.len() as u32),
-            Some(self.total_subs)
-        );
+        let base = self.build_path(state)?;
 
         for frame in &self.frames_to_classify.clone() {
             let mut destination = root_directory.clone();
@@ -213,8 +231,6 @@ impl LightFrame {
 
             process.update(&window);
         }
-
-        process.finish(&window);
 
         // return an error if any failures occurred
         if !errors.is_empty() {

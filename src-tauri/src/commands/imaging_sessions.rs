@@ -136,7 +136,10 @@ pub fn classify_imaging_session(
     let light_frame = LightFrame::from(&session);
 
     // check for duplicates
-    let path = ImagingSession::build_path(&light_frame, &state);
+    let app_state = state.lock().map_err(|e| e.to_string())?;
+    let mut path = app_state.local_config.root_directory.clone();
+    drop(app_state);
+    path.push(ImagingSession::build_path(&light_frame, &state).map_err(|e| e.to_string())?);
     if path.exists() {
         let entries = fs::read_dir(&path).map_err(|e| e.to_string())?;
         if entries.count() > 0 {
