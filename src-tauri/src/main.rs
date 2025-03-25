@@ -22,9 +22,10 @@ use crate::commands::preferences::{delete_location, save_location};
 
 mod commands;
 mod file_store;
-pub mod file_system;
+mod file_system;
 mod image;
 mod models;
+mod classify;
 
 fn main() {
     let account_id = option_env!("ACCOUNT_ID")

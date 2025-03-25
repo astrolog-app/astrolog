@@ -1,20 +1,20 @@
+use crate::commands::imaging_sessions::ImagingSessionEdit;
 use crate::file_store;
+use crate::models::equipment::{EquipmentItem, EquipmentList};
+use crate::models::frontend::process::Process;
+use crate::models::imaging_session_list::{ImagingSession, ImagingSessionList};
 use crate::models::state::AppState;
+use chrono::{DateTime, Utc};
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::any::Any;
 use std::collections::HashMap;
 use std::error::Error;
-use std::{fmt, fs};
 use std::path::PathBuf;
 use std::sync::Mutex;
-use chrono::{DateTime, Utc};
+use std::{fmt, fs};
 use tauri::{Emitter, State, Window};
 use uuid::Uuid;
-use crate::commands::imaging_sessions::ImagingSessionEdit;
-use crate::models::equipment::{EquipmentItem, EquipmentList};
-use crate::models::frontend::process::Process;
-use crate::models::imaging_session_list::{ImagingSession, ImagingSessionList};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ImagingFrameList {
@@ -147,22 +147,26 @@ impl LightFrame {
         }
     }
 
-    pub fn get_field_value(
-        &self,
-        field: &str,
-        equipment_list: &EquipmentList,
-    ) -> String {
+    pub fn get_field_value(&self, field: &str, equipment_list: &EquipmentList) -> String {
         match field {
             "DATE" => self.date.format("%Y-%m-%d").to_string(),
             "TARGET" => self.target.clone(),
             "SITE" => "site".to_string(),
-            "CAMERA" => equipment_list.cameras.get(&self.camera_id)
+            "CAMERA" => equipment_list
+                .cameras
+                .get(&self.camera_id)
                 .map_or("None".to_string(), |c| c.view_name().to_string()),
-            "TELESCOPE" => equipment_list.telescopes.get(&self.telescope_id)
+            "TELESCOPE" => equipment_list
+                .telescopes
+                .get(&self.telescope_id)
                 .map_or("None".to_string(), |t| t.view_name().to_string()),
-            "FILTER" => equipment_list.filters.get(&self.filter_id)
+            "FILTER" => equipment_list
+                .filters
+                .get(&self.filter_id)
                 .map_or("None".to_string(), |f| f.view_name().to_string()),
-            "FILTERTYPE" => equipment_list.filters.get(&self.filter_id)
+            "FILTERTYPE" => equipment_list
+                .filters
+                .get(&self.filter_id)
                 .map_or("None".to_string(), |f| f.filter_type.to_string()),
             "SUBLENGTH" => self.sub_length.to_string(),
             "TOTALSUBS" => self.total_subs.to_string(),
@@ -171,74 +175,68 @@ impl LightFrame {
         }
     }
 
+    fn classify_helper(
+        &mut self,
+        base: &PathBuf,
+        file_name: &PathBuf,
+        frame: &PathBuf,
+        destination: &PathBuf,
+        state: &State<Mutex<AppState>>,
+    ) -> Result<(), Box<dyn Error>> {
+        // adjust self and save to .json
+        let old = self.clone();
+
+        let mut classify_path = base.clone();
+        classify_path.push(file_name);
+        self.frames_classified.push(classify_path);
+
+        // remove file_to_classify
+        self.frames_to_classify.retain(|path| path != frame);
+        let mut app_state = state.lock().map_err(|e| e.to_string())?;
+        app_state
+            .imaging_frame_list
+            .light_frames
+            .insert(self.id, self.clone());
+        if let Err(e) = ImagingFrameList::save(
+            app_state.local_config.root_directory.clone(),
+            &app_state.imaging_frame_list,
+        ) {
+            // revert
+            app_state
+                .imaging_frame_list
+                .light_frames
+                .insert(old.id, old);
+            fs::remove_file(&destination).ok();
+        };
+        drop(app_state);
+
+        Ok(())
+    }
+
     pub fn classify(
         &mut self,
         state: &State<Mutex<AppState>>,
         window: &Window,
-        process: &mut Process
+        process: &mut Process,
     ) -> Result<(), Box<dyn Error>> {
-        let app_state = state.lock().map_err(|e| e.to_string())?;
-        let root_directory = app_state.local_config.root_directory.clone();
-        drop(app_state);
-
-        let mut errors = Vec::new();
         let base = self.build_path(state)?;
+        let frames = self.frames_to_classify.clone();
+        let helper = |base: &PathBuf,
+                      file_name: &PathBuf,
+                      frame: &PathBuf,
+                      destination: &PathBuf,
+                      state: &State<Mutex<AppState>>| {
+            self.classify_helper(base, file_name, frame, destination, state)
+        };
 
-        for frame in &self.frames_to_classify.clone() {
-            let mut destination = root_directory.clone();
-            destination.push(&base);
-            if !destination.exists() {
-                fs::create_dir_all(&destination)?;
-            }
-
-            // extract file_name out of frame
-            let file_name = match frame.file_name() {
-                Some(name) => name,
-                None => {
-                    errors.push(format!("Couldn't extract filename out of frame: {:?}", frame));
-                    process.update(&window);
-
-                    continue;
-                }
-            };
-
-            destination.push(file_name);
-            // try to copy frame
-            if let Err(e) = fs::copy(frame, &destination) {
-                errors.push(format!("Failed to copy {:?} -> {:?}: {}", frame, destination, e));
-                process.update(&window);
-
-                continue;
-            }
-
-            // adjust self and save to .json
-            let old = self.clone();
-
-            let mut classify_path = base.clone();
-            classify_path.push(file_name);
-            self.frames_classified.push(classify_path);
-
-            // remove file_to_classify
-            self.frames_to_classify.retain(|path| path != frame);
-            let mut app_state = state.lock().map_err(|e| e.to_string())?;
-            app_state.imaging_frame_list.light_frames.insert(self.id, self.clone());
-            if let Err(e) = ImagingFrameList::save(root_directory.clone(), &app_state.imaging_frame_list) {
-                // revert
-                app_state.imaging_frame_list.light_frames.insert(old.id, old);
-                fs::remove_file(&destination).ok();
-            };
-            drop(app_state);
-
-            process.update(&window);
-        }
-
-        // return an error if any failures occurred
-        if !errors.is_empty() {
-            return Err(Box::new(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                errors.join("\n"),
-            )));
-        }
+        crate::classify::classify(
+            &base,
+            &frames,
+            state,
+            helper,
+            window,
+            process,
+        )?;
 
         Ok(())
     }
