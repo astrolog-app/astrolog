@@ -2,7 +2,7 @@ use crate::models::frontend::analytics::Analytics;
 use crate::models::frontend::state::{
     CalibrationTableRow, FrontendAppState, LogTableRow, TableData,
 };
-use crate::models::imaging_frames::ImagingFrameList;
+use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
 use crate::models::state::AppState;
 use std::sync::Mutex;
 use tauri::State;

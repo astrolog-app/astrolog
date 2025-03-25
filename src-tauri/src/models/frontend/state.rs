@@ -2,8 +2,8 @@ use chrono::{DateTime, Utc};
 use crate::models::equipment::{EquipmentItem, EquipmentList};
 use crate::models::frontend::analytics::Analytics;
 use crate::models::gallery_image_list::GalleryImage;
-use crate::models::imaging_frames;
-use crate::models::imaging_frames::CalibrationType;
+use crate::models::imaging_frames::{dark_frame, imaging_frame_list};
+use crate::models::imaging_frames::imaging_frame_list::CalibrationType;
 use crate::models::imaging_session_list::ImagingSession;
 use crate::models::preferences::{Config, LocalConfig};
 use crate::models::state::AppState;
@@ -132,7 +132,7 @@ pub struct CalibrationTableRow {
 
 impl CalibrationTableRow {
     pub fn new(
-        calibration_frame: Box<dyn imaging_frames::CalibrationFrame>,
+        calibration_frame: Box<dyn imaging_frame_list::CalibrationFrame>,
         app_state: &AppState,
     ) -> Self {
         let mut sub_length = None;
@@ -140,7 +140,7 @@ impl CalibrationTableRow {
 
         if let Some(dark_frame) = calibration_frame
             .as_any()
-            .downcast_ref::<imaging_frames::DarkFrame>()
+            .downcast_ref::<dark_frame::DarkFrame>()
         {
             sub_length = Option::from(dark_frame.sub_length);
             camera_temp = Option::from(dark_frame.camera_temp);

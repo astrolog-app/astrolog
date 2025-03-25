@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use tauri::{State, Window};
 use uuid::Uuid;
 use crate::models::frontend::state::LogTableRow;
-use crate::models::imaging_frames::LightFrame;
+use crate::models::imaging_frames::light_frame::LightFrame;
 use crate::models::imaging_session_list::{ImagingSession, ImagingSessionList};
 use crate::models::state::AppState;
 

@@ -7,9 +7,9 @@ use std::sync::Mutex;
 use regex::Regex;
 use tauri::{State, Window};
 use uuid::Uuid;
-use crate::models::equipment::{EquipmentItem, EquipmentList};
 use crate::models::frontend::process::Process;
-use crate::models::imaging_frames::{ImagingFrameList, LightFrame};
+use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
+use crate::models::imaging_frames::light_frame::LightFrame;
 use crate::models::state::AppState;
 
 #[derive(Debug, Deserialize, Serialize)]

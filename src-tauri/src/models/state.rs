@@ -1,6 +1,6 @@
 use crate::models::equipment::EquipmentList;
 use crate::models::gallery_image_list::{GalleryImage, GalleryImageList};
-use crate::models::imaging_frames::ImagingFrameList;
+use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
 use crate::models::imaging_session_list::{ImagingSession, ImagingSessionList};
 use crate::models::preferences::{Config, LocalConfig};
 use std::collections::HashMap;

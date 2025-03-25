@@ -1,6 +1,6 @@
 use crate::image::{get_exposure_time, get_gain};
 use crate::models::frontend::state::CalibrationTableRow;
-use crate::models::imaging_frames::{BiasFrame, CalibrationType, DarkFrame, ImagingFrameList};
+use crate::models::imaging_frames::imaging_frame_list::{CalibrationType, ImagingFrameList};
 use crate::models::state::AppState;
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -8,6 +8,8 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::State;
 use uuid::Uuid;
+use crate::models::imaging_frames::bias_frame::BiasFrame;
+use crate::models::imaging_frames::dark_frame::DarkFrame;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AnalyzedCalibrationFrames {
