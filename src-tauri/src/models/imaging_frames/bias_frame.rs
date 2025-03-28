@@ -8,8 +8,8 @@ use crate::models::imaging_frames::imaging_frame_list::{CalibrationFrame, Calibr
 pub struct BiasFrame {
     pub id: Uuid,
     pub camera_id: Uuid,
-    pub total_subs: i32,
-    pub gain: i32,
+    pub total_subs: u32,
+    pub gain: u32,
     pub frames: Vec<PathBuf>,
 
     #[serde(skip_serializing, skip_deserializing)]
@@ -25,11 +25,11 @@ impl CalibrationFrame for BiasFrame {
         &self.camera_id
     }
 
-    fn total_subs(&self) -> &i32 {
+    fn total_subs(&self) -> &u32 {
         &self.total_subs
     }
 
-    fn gain(&self) -> &i32 {
+    fn gain(&self) -> &u32 {
         &self.gain
     }
     fn calibration_type(&self) -> CalibrationType {

@@ -112,7 +112,8 @@ pub struct ImagingSessionWeather {
 pub struct ImagingSessionCalibration {
     pub dark_frame_list_id: Option<Uuid>,
     pub bias_frame_list_id: Option<Uuid>,
-    pub flat_frame_list_id: Option<Uuid>,
+    pub flat_frames_to_classify: Vec<PathBuf>,
+    pub dark_frames_to_classify: Vec<PathBuf>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -150,7 +151,12 @@ pub fn classify_imaging_session(
     }
 
     // create imaging_session and save it to .json
-    let imaging_session = ImagingSessionList::add(&state, &light_frame).map_err(|e| e.to_string())?;
+    let imaging_session = ImagingSessionList::add(
+        &state,
+        &light_frame,
+        &session.calibration.flat_frames_to_classify,
+        &session.calibration.dark_frames_to_classify
+    ).map_err(|e| e.to_string())?;
 
     // classify the imaging_session
     imaging_session.classify(&state, &window).map_err(|e| e.to_string())?;

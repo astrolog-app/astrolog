@@ -37,7 +37,8 @@ export interface ImagingSessionWeather {
 export interface ImagingSessionCalibration {
   dark_frame_list_id: UUID | undefined,
   bias_frame_list_id: UUID | undefined,
-  flat_frame_list_id: UUID | undefined,
+  flat_frames_to_classify: string[],
+  dark_frames_to_classify: string[],
 }
 
 export interface ImagingSessionEdit {

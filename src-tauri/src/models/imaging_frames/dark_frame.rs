@@ -2,15 +2,21 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use std::path::PathBuf;
 use std::any::Any;
+use std::error::Error;
+use std::sync::Mutex;
+use tauri::{State, Window};
+use crate::models::frontend::process::Process;
 use crate::models::imaging_frames::imaging_frame_list::{CalibrationFrame, CalibrationType};
+use crate::models::state::AppState;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DarkFrame {
     pub id: Uuid,
     pub camera_id: Uuid,
-    pub total_subs: i32,
-    pub gain: i32,
-    pub frames: Vec<PathBuf>,
+    pub total_subs: u32,
+    pub gain: u32,
+    pub frames_to_classify: Vec<PathBuf>,
+    pub frames_classified: Vec<PathBuf>,
 
     #[serde(skip_serializing, skip_deserializing)]
     pub calibration_type: CalibrationType,
@@ -28,11 +34,11 @@ impl CalibrationFrame for DarkFrame {
         &self.camera_id
     }
 
-    fn total_subs(&self) -> &i32 {
+    fn total_subs(&self) -> &u32 {
         &self.total_subs
     }
 
-    fn gain(&self) -> &i32 {
+    fn gain(&self) -> &u32 {
         &self.gain
     }
     fn calibration_type(&self) -> CalibrationType {
@@ -40,5 +46,16 @@ impl CalibrationFrame for DarkFrame {
     }
     fn as_any(&self) -> &dyn Any {
         self
+    }
+}
+
+impl DarkFrame {
+    pub fn classify(
+        &mut self,
+        state: &State<Mutex<AppState>>,
+        window: &Window,
+        process: &mut Process,
+    ) -> Result<(), Box<dyn Error>> {
+        Ok(())
     }
 }
