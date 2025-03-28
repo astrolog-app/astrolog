@@ -79,6 +79,7 @@ pub async fn classify_calibration_frames(
     paths: Vec<PathBuf>,
     state: State<'_, Mutex<AppState>>,
 ) -> Result<(), String> {
+    /*
     let mut app_state = state.lock().unwrap();
     let root_directory = app_state.local_config.root_directory.clone();
     let mut path = PathBuf::from(&root_directory);
@@ -136,6 +137,6 @@ pub async fn classify_calibration_frames(
     }
     ImagingFrameList::save(root_directory, &app_state.imaging_frame_list)
         .map_err(|e| e.to_string())?;
-
+    */
     Ok(())
 }

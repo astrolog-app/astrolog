@@ -1,6 +1,6 @@
 'use client';
 
-import styles from  './imagingSessionEditor.module.scss';
+import styles from './imagingSessionEditor.module.scss';
 import { Modal } from '@/components/ui/custom/modal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useState } from 'react';
@@ -30,13 +30,14 @@ export type TabKey = (typeof tabKeys)[number];
 const defaultWeather: ImagingSessionWeather = {
   outside_temp: undefined,
   average_seeing: undefined,
-  average_cloud_cover: undefined,
+  average_cloud_cover: undefined
 };
 
 const defaultCalibration: ImagingSessionCalibration = {
   dark_frame_list_id: undefined,
-    bias_frame_list_id: undefined,
-    flat_frame_list_id: undefined,
+  bias_frame_list_id: undefined,
+  flat_frames_to_classify: [],
+  dark_frames_to_classify: []
 };
 
 interface ImagingSessionEditorProps {
@@ -66,7 +67,7 @@ export default function ImagingSessionEditor({ session, base }: ImagingSessionEd
     ) {
       toast({
         variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
+        title: 'Uh oh! Something went wrong.'
       });
       return undefined;
     }
@@ -77,7 +78,7 @@ export default function ImagingSessionEditor({ session, base }: ImagingSessionEd
       equipment: equipment,
       details: details,
       weather: weather,
-      calibration: calibration,
+      calibration: calibration
     };
   }
 

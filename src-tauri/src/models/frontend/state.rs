@@ -124,10 +124,10 @@ pub struct CalibrationTableRow {
     pub(crate) id: Uuid,
     pub camera: String,
     pub calibration_type: CalibrationType,
-    pub gain: i32,
+    pub gain: u32,
     pub sub_length: Option<f64>,
     pub camera_temp: Option<f64>,
-    pub total_subs: i32,
+    pub total_subs: u32,
 }
 
 impl CalibrationTableRow {

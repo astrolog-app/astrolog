@@ -102,8 +102,8 @@ impl fmt::Display for CalibrationType {
 pub trait CalibrationFrame: Any {
     fn id(&self) -> &Uuid;
     fn camera_id(&self) -> &Uuid;
-    fn total_subs(&self) -> &i32;
-    fn gain(&self) -> &i32;
+    fn total_subs(&self) -> &u32;
+    fn gain(&self) -> &u32;
 
     fn calibration_type(&self) -> CalibrationType;
     fn as_any(&self) -> &dyn Any;

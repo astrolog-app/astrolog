@@ -132,7 +132,6 @@ pub fn classify_imaging_session(
     state: State<Mutex<AppState>>,
     session: ImagingSessionEdit
 ) -> Result<LogTableRow, String> {
-    // TODO: improve error handling
     // create light_frame
     let light_frame = LightFrame::from(&session);
 
@@ -158,11 +157,25 @@ pub fn classify_imaging_session(
         &session.calibration.dark_frames_to_classify
     ).map_err(|e| e.to_string())?;
 
-    // classify the imaging_session
-    imaging_session.classify(&state, &window).map_err(|e| e.to_string())?;
+    let mut errors = Vec::new();
 
-    // create a new log_table_row
-    let log_table_row = LogTableRow::new(&imaging_session, &state.lock().unwrap()).ok_or("TODO")?; // TODO
+    // classify imaging session
+    if let Err(e) = imaging_session.classify(&state, &window) {
+        errors.push(e.to_string());
+    }
+
+    // create new log_table_row
+    let log_table_row = match LogTableRow::new(&imaging_session, &state.lock().unwrap()) {
+        Some(row) => row,
+        None => {
+            errors.push("Failed to create LogTableRow".to_string()); // TODO
+            return Err(errors.join("; "));
+        }
+    };
+
+    if !errors.is_empty() {
+        return Err(errors.join("; "));
+    }
 
     Ok(log_table_row)
 }

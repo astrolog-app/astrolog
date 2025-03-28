@@ -187,10 +187,10 @@ impl ImagingSession {
         let mut light_frame = app_state.imaging_frame_list.light_frames.get(&self.light_frame_id).ok_or("light_frame_id not found")?.clone();
         let dark_frame = self.dark_frame_id
             .as_ref()
-            .and_then(|id| app_state.imaging_frame_list.dark_frames.remove(id));
+            .and_then(|id| app_state.imaging_frame_list.dark_frames.get(id).cloned());
         let flat_frame = self.flat_frame_id
             .as_ref()
-            .and_then(|id| app_state.imaging_frame_list.flat_frames.remove(id));
+            .and_then(|id| app_state.imaging_frame_list.flat_frames.get(id).cloned());
 
         let mut len = light_frame.total_subs;
         if let Some(ref frame) = dark_frame {
