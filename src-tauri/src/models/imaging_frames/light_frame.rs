@@ -49,6 +49,28 @@ impl LightFrame {
         Ok(path)
     }
 
+    pub fn add(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
+        let mut app_state = state.lock().map_err(|e| e.to_string())?;
+
+        app_state.imaging_frame_list.light_frames.insert(self.id, self.clone());
+
+        ImagingFrameList::save(
+            app_state.local_config.root_directory.clone(),
+            &app_state.imaging_frame_list,
+        )
+    }
+
+    pub fn remove(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
+        let mut app_state = state.lock().map_err(|e| e.to_string())?;
+
+        app_state.imaging_frame_list.light_frames.remove(&self.id);
+
+        ImagingFrameList::save(
+            app_state.local_config.root_directory.clone(),
+            &app_state.imaging_frame_list,
+        )
+    }
+
     pub fn from(session: &ImagingSessionEdit) -> LightFrame {
         LightFrame {
             id: Uuid::new_v4(),

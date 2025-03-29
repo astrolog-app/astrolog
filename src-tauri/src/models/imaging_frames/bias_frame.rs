@@ -2,7 +2,11 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use std::path::PathBuf;
 use std::any::Any;
-use crate::models::imaging_frames::imaging_frame_list::{CalibrationFrame, CalibrationType};
+use std::error::Error;
+use std::sync::Mutex;
+use tauri::State;
+use crate::models::imaging_frames::imaging_frame_list::{CalibrationFrame, CalibrationType, ImagingFrameList};
+use crate::models::state::AppState;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct BiasFrame {
@@ -38,4 +42,29 @@ impl CalibrationFrame for BiasFrame {
     fn as_any(&self) -> &dyn Any {
         self
     }
+}
+
+impl BiasFrame {
+    pub fn add(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
+        let mut app_state = state.lock().map_err(|e| e.to_string())?;
+
+        app_state.imaging_frame_list.bias_frames.insert(self.id, self.clone());
+
+        ImagingFrameList::save(
+            app_state.local_config.root_directory.clone(),
+            &app_state.imaging_frame_list,
+        )
+    }
+
+    pub fn remove(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
+        let mut app_state = state.lock().map_err(|e| e.to_string())?;
+
+        app_state.imaging_frame_list.bias_frames.remove(&self.id);
+
+        ImagingFrameList::save(
+            app_state.local_config.root_directory.clone(),
+            &app_state.imaging_frame_list,
+        )
+    }
+
 }

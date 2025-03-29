@@ -153,8 +153,7 @@ pub fn classify_imaging_session(
     let imaging_session = ImagingSessionList::add(
         &state,
         &light_frame,
-        &session.calibration.flat_frames_to_classify,
-        &session.calibration.dark_frames_to_classify
+        &session.calibration
     ).map_err(|e| e.to_string())?;
 
     let mut errors = Vec::new();

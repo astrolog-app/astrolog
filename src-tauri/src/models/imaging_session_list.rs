@@ -7,6 +7,7 @@ use std::sync::Mutex;
 use regex::Regex;
 use tauri::{State, Window};
 use uuid::Uuid;
+use crate::commands::imaging_sessions::ImagingSessionCalibration;
 use crate::models::frontend::process::Process;
 use crate::models::imaging_frames::dark_frame::DarkFrame;
 use crate::models::imaging_frames::flat_frame::FlatFrame;
@@ -48,25 +49,21 @@ impl ImagingSessionList {
     pub fn add(
         state: &State<Mutex<AppState>>,
         light_frame: &LightFrame,
-        flat_frames_to_classify: &Vec<PathBuf>,
-        dark_frames_to_classify: &Vec<PathBuf>,
+        calibration: &ImagingSessionCalibration
     ) -> Result<ImagingSession, Box<dyn Error>> {
-        let mut imaging_session = ImagingSession::from(&light_frame, &light_frame.id, state)?;
-
-        let mut app_state = state.lock().map_err(|e| e.to_string())?;
-
+        let mut imaging_session = ImagingSession::from(state, &light_frame, &calibration)?;
         let mut flat_frame = None;
         let mut dark_frame = None;
 
-        if flat_frames_to_classify.len() > 0 {
+        if calibration.flat_frames_to_classify.len() > 0 {
             let id = Uuid::new_v4();
 
             let frame = FlatFrame {
                 id,
                 camera_id: light_frame.camera_id,
-                total_subs: flat_frames_to_classify.len() as u32,
+                total_subs: calibration.flat_frames_to_classify.len() as u32,
                 gain: light_frame.gain,
-                frames_to_classify: flat_frames_to_classify.clone(),
+                frames_to_classify: calibration.flat_frames_to_classify.clone(),
                 frames_classified: vec![],
             };
 
@@ -74,15 +71,15 @@ impl ImagingSessionList {
             flat_frame = Some(frame);
         }
 
-        if dark_frames_to_classify.len() > 0 {
+        if calibration.dark_frames_to_classify.len() > 0 {
             let id = Uuid::new_v4();
 
             let frame = DarkFrame {
                 id,
                 camera_id: light_frame.camera_id,
-                total_subs: dark_frames_to_classify.len() as u32,
+                total_subs: calibration.dark_frames_to_classify.len() as u32,
                 gain: 0,
-                frames_to_classify: dark_frames_to_classify.clone(),
+                frames_to_classify: calibration.dark_frames_to_classify.clone(),
                 frames_classified: vec![],
                 calibration_type: CalibrationType::DARK,
                 camera_temp: 0.0,
@@ -93,71 +90,38 @@ impl ImagingSessionList {
             dark_frame = Some(frame);
         }
 
-        // Step 1: Insert imaging session and save
-        app_state.imaging_sessions.insert(imaging_session.id, imaging_session.clone());
-        if let Err(e) = ImagingSessionList::save(
-            app_state.local_config.root_directory.clone(),
-            &app_state.imaging_sessions,
-        ) {
-            app_state.imaging_sessions.remove(&imaging_session.id);
+        // Step 1: imaging session
+        if let Err(e) = imaging_session.add(state) {
+            imaging_session.remove(state).ok();
             return Err(e);
         }
 
-        // Step 2: Insert light frame and save
-        app_state.imaging_frame_list.light_frames.insert(light_frame.id, light_frame.clone());
-        if let Err(e) = ImagingFrameList::save(
-            app_state.local_config.root_directory.clone(),
-            &app_state.imaging_frame_list,
-        ) {
-            // Roll back: remove light frame and imaging session
-            app_state.imaging_frame_list.light_frames.remove(&light_frame.id);
-            app_state.imaging_sessions.remove(&imaging_session.id);
-            let _ = ImagingSessionList::save(
-                app_state.local_config.root_directory.clone(),
-                &app_state.imaging_sessions,
-            );
+        // Step 2: light frame
+        if let Err(e) = light_frame.add(state) {
+            light_frame.remove(state).ok();
+            imaging_session.remove(state).ok();
             return Err(e);
         }
 
-        // Step 3: If a flat frame is required, insert and save
+        // Step 3: flat frame
         if let Some(ref flat) = flat_frame {
-            app_state.imaging_frame_list.flat_frames.insert(flat.id, flat.clone());
-            if let Err(e) = ImagingFrameList::save(
-                app_state.local_config.root_directory.clone(),
-                &app_state.imaging_frame_list,
-            ) {
-                // Roll back: remove flat frame, light frame and imaging session
-                app_state.imaging_frame_list.flat_frames.remove(&flat.id);
-                app_state.imaging_frame_list.light_frames.remove(&light_frame.id);
-                app_state.imaging_sessions.remove(&imaging_session.id);
-                let _ = ImagingSessionList::save(
-                    app_state.local_config.root_directory.clone(),
-                    &app_state.imaging_sessions,
-                );
+            if let Err(e) = flat.add(state) {
+                flat.remove(state).ok();
+                light_frame.remove(state).ok();
+                imaging_session.remove(state).ok();
                 return Err(e);
             }
         }
 
-        // Step 4: If a dark frame is required, insert and save
+        // Step 4: dark frame
         if let Some(ref dark) = dark_frame {
-            app_state.imaging_frame_list.dark_frames.insert(dark.id, dark.clone());
-            if let Err(e) = ImagingFrameList::save(
-                app_state.local_config.root_directory.clone(),
-                &app_state.imaging_frame_list,
-            ) {
-                // Roll back: remove dark frame, and also flat frame (if it was inserted), light frame and imaging session
-                app_state.imaging_frame_list.dark_frames.remove(&dark.id);
-                if flat_frame.is_some() {
-                    if let Some(ref flat) = flat_frame {
-                        app_state.imaging_frame_list.flat_frames.remove(&flat.id);
-                    }
+            if let Err(e) = dark.add(state) {
+                dark.remove(state).ok();
+                if let Some(ref flat) = flat_frame {
+                    flat.remove(state).ok();
                 }
-                app_state.imaging_frame_list.light_frames.remove(&light_frame.id);
-                app_state.imaging_sessions.remove(&imaging_session.id);
-                let _ = ImagingSessionList::save(
-                    app_state.local_config.root_directory.clone(),
-                    &app_state.imaging_sessions,
-                );
+                light_frame.remove(state).ok();
+                imaging_session.remove(state).ok();
                 return Err(e);
             }
         }
@@ -177,6 +141,28 @@ pub struct ImagingSession {
 }
 
 impl ImagingSession {
+    fn add(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
+        let mut app_state = state.lock().map_err(|e| e.to_string())?;
+
+        app_state.imaging_sessions.insert(self.id, self.clone());
+
+        ImagingSessionList::save(
+            app_state.local_config.root_directory.clone(),
+            &app_state.imaging_sessions,
+        )
+    }
+
+    fn remove(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
+        let mut app_state = state.lock().map_err(|e| e.to_string())?;
+
+        app_state.imaging_sessions.remove(&self.id);
+
+        ImagingSessionList::save(
+            app_state.local_config.root_directory.clone(),
+            &app_state.imaging_sessions,
+        )
+    }
+
     pub fn classify(
         &self,
         state: &State<Mutex<AppState>>,
@@ -238,16 +224,20 @@ impl ImagingSession {
         }
     }
 
-    pub fn from(light_frame: &LightFrame, id: &Uuid, state: &State<Mutex<AppState>>) -> Result<ImagingSession, Box<dyn Error>> {
+    pub fn from(
+        state: &State<Mutex<AppState>>,
+        light_frame: &LightFrame,
+        calibration: &ImagingSessionCalibration
+    ) -> Result<ImagingSession, Box<dyn Error>> {
         let folder_dir = ImagingSession::build_path(light_frame, state)?;
 
         let imaging_session = ImagingSession {
-            id: id.clone(),
+            id: light_frame.id.clone(),
             folder_dir,
             light_frame_id: light_frame.id.clone(),
             flat_frame_id: None,
-            dark_frame_id: None,
-            bias_frame_id: None,
+            dark_frame_id: calibration.dark_frame_list_id,
+            bias_frame_id: calibration.bias_frame_list_id,
         };
 
         Ok(imaging_session)
