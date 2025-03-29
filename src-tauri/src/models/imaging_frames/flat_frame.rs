@@ -41,6 +41,10 @@ impl FlatFrame {
         )
     }
 
+    pub fn edit(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
+        Ok(())
+    }
+
     pub fn classify(
         &mut self,
         state: &State<Mutex<AppState>>,

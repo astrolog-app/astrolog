@@ -9,18 +9,19 @@ export interface AnalyzedCalibrationFrames {
   message: string;
 }
 
-export interface DarkFrames {
-  id: UUID;
-  camera: string;
-  total_subs: number;
-  gain: number;
-  camera_temp: string;
-  sub_length: string;
+export interface CalibrationFrame {
+  id: UUID,
+  camera_id: UUID,
+  total_subs: undefined,
+  gain: number,
+  frames_to_classify: string[],
+  frames_classified: string[],
 }
 
-export interface BiasFrames {
-  id: UUID;
-  camera: string;
-  total_subs: number;
-  gain: number;
+
+export interface DarkFrame extends CalibrationFrame {
+  camera_temp: number,
+  sub_length: number,
 }
+
+export interface BiasFrame extends CalibrationFrame {}

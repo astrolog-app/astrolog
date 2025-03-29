@@ -1,11 +1,13 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use std::path::PathBuf;
-use std::any::Any;
 use std::error::Error;
 use std::sync::Mutex;
-use tauri::State;
-use crate::models::imaging_frames::imaging_frame_list::{CalibrationFrame, CalibrationType, ImagingFrameList};
+use tauri::{State, Window};
+use crate::models::frontend::process::Process;
+use crate::models::imaging_frames::calibration_frame::CalibrationFrame;
+use crate::models::imaging_frames::calibration_type::CalibrationType;
+use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
 use crate::models::state::AppState;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -14,34 +16,11 @@ pub struct BiasFrame {
     pub camera_id: Uuid,
     pub total_subs: u32,
     pub gain: u32,
-    pub frames: Vec<PathBuf>,
+    pub frames_to_classify: Vec<PathBuf>,
+    pub frames_classified: Vec<PathBuf>,
 
     #[serde(skip_serializing, skip_deserializing)]
     pub calibration_type: CalibrationType,
-}
-
-impl CalibrationFrame for BiasFrame {
-    fn id(&self) -> &Uuid {
-        &self.id
-    }
-
-    fn camera_id(&self) -> &Uuid {
-        &self.camera_id
-    }
-
-    fn total_subs(&self) -> &u32 {
-        &self.total_subs
-    }
-
-    fn gain(&self) -> &u32 {
-        &self.gain
-    }
-    fn calibration_type(&self) -> CalibrationType {
-        CalibrationType::BIAS
-    }
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl BiasFrame {
@@ -67,4 +46,20 @@ impl BiasFrame {
         )
     }
 
+    pub fn edit(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
+        Ok(())
+    }
+
+    pub fn build_path(&self, state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>> {
+        Ok(PathBuf::default())
+    }
+
+    pub fn classify(
+        &mut self,
+        state: &State<Mutex<AppState>>,
+        window: &Window,
+        process: &mut Process,
+    ) -> Result<(), Box<dyn Error>> {
+        Ok(())
+    }
 }

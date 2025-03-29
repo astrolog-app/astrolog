@@ -8,7 +8,8 @@ use tauri::{State, Window};
 use uuid::Uuid;
 use crate::models::frontend::state::LogTableRow;
 use crate::models::imaging_frames::light_frame::LightFrame;
-use crate::models::imaging_session_list::{ImagingSession, ImagingSessionList};
+use crate::models::imaging_session::ImagingSession;
+use crate::models::imaging_session_list::ImagingSessionList;
 use crate::models::state::AppState;
 
 #[tauri::command]

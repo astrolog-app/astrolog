@@ -3,7 +3,7 @@
 
 use crate::commands::equipment::{check_equipment_duplicate, save_camera, save_filter, save_flattener, save_mount, save_telescope};
 use crate::file_system::set_folder_invisible;
-use commands::calibration::{analyze_calibration_frames, classify_calibration_frames};
+use commands::calibration::{analyze_calibration_frames, classify_dark_frame, classify_bias_frame};
 use commands::gallery::{add_new_image, open_image};
 use commands::image::get_date;
 use commands::imaging_sessions::{export_csv, open_imaging_session, get_image_frames_path, classify_imaging_session, edit_imaging_session};
@@ -82,7 +82,8 @@ fn main() {
             analyze_calibration_frames,
             change_imaging_session_folder_path,
             check_equipment_duplicate,
-            classify_calibration_frames,
+            classify_bias_frame,
+            classify_dark_frame,
             classify_imaging_session,
             delete_location,
             edit_imaging_session,

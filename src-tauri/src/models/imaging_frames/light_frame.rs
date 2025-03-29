@@ -10,45 +10,41 @@ use crate::commands::imaging_sessions::ImagingSessionEdit;
 use crate::models::equipment::{EquipmentItem, EquipmentList};
 use crate::models::frontend::process::Process;
 use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
-use crate::models::imaging_session_list::ImagingSession;
+use crate::models::imaging_session::ImagingSession;
 use crate::models::state::AppState;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LightFrame {
     pub id: Uuid,
-    pub camera_id: Uuid,
-    pub total_subs: u32,
-    pub gain: u32,
     pub frames_to_classify: Vec<PathBuf>,
     pub frames_classified: Vec<PathBuf>,
 
     pub date: DateTime<Utc>,
     pub target: String,
+    pub location_id: Uuid,
+
+    pub total_subs: u32,
+    pub gain: u32,
     pub integrated_subs: Option<u32>,
-    pub filter_id: Uuid,
     pub offset: Option<u32>,
     pub camera_temp: Option<f64>,
-    pub outside_temp: Option<f64>,
-    pub average_seeing: Option<f64>,
-    pub average_cloud_cover: Option<f64>,
-    pub average_moon: f64,
+    pub notes: Option<String>,
+    pub sub_length: f64,
+
+    pub camera_id: Uuid,
+    pub filter_id: Uuid,
     pub telescope_id: Uuid,
     pub flattener_id: Uuid,
     pub mount_id: Uuid,
-    pub notes: Option<String>,
-    pub sub_length: f64,
-    pub location_id: Uuid,
+
+    pub outside_temp: Option<f64>,
+    pub average_seeing: Option<f64>,
+    pub average_cloud_cover: Option<f64>,
+
+    pub average_moon: f64,
 }
 
 impl LightFrame {
-    pub fn build_path(&self, state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>> {
-        let mut path = ImagingSession::build_path(self, state)?;
-
-        path.push(PathBuf::from("Light"));
-
-        Ok(path)
-    }
-
     pub fn add(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
         let mut app_state = state.lock().map_err(|e| e.to_string())?;
 
@@ -69,6 +65,10 @@ impl LightFrame {
             app_state.local_config.root_directory.clone(),
             &app_state.imaging_frame_list,
         )
+    }
+
+    pub fn edit(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
+        Ok(())
     }
 
     pub fn from(session: &ImagingSessionEdit) -> LightFrame {
@@ -101,6 +101,14 @@ impl LightFrame {
 
             average_moon: 0.0, // TODO
         }
+    }
+
+    pub fn build_path(&self, state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>> {
+        let mut path = ImagingSession::build_path(self, state)?;
+
+        path.push(PathBuf::from("Light"));
+
+        Ok(path)
     }
 
     pub fn get_field_value(&self, field: &str, equipment_list: &EquipmentList) -> String {

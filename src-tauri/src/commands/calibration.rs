@@ -1,16 +1,14 @@
 use crate::image::{get_exposure_time, get_gain};
-use crate::models::frontend::state::CalibrationTableRow;
-use crate::models::imaging_frames::imaging_frame_list::{CalibrationType, ImagingFrameList};
 use crate::models::state::AppState;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
-use tauri::State;
-use uuid::Uuid;
+use tauri::{State, Window};
+use crate::models::frontend::process::Process;
 use crate::models::imaging_frames::bias_frame::BiasFrame;
+use crate::models::imaging_frames::calibration_type::CalibrationType;
 use crate::models::imaging_frames::dark_frame::DarkFrame;
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AnalyzedCalibrationFrames {
     calibration_type: CalibrationType,
@@ -74,69 +72,79 @@ pub fn analyze_calibration_frames(
 }
 
 #[tauri::command]
-pub async fn classify_calibration_frames(
-    frames: CalibrationTableRow,
-    paths: Vec<PathBuf>,
+pub async fn classify_dark_frame(
+    window: Window,
     state: State<'_, Mutex<AppState>>,
+    mut dark_frame: DarkFrame,
 ) -> Result<(), String> {
-    /*
-    let mut app_state = state.lock().unwrap();
-    let root_directory = app_state.local_config.root_directory.clone();
-    let mut path = PathBuf::from(&root_directory);
-    path.push("Calibration");
-    path.push(&frames.calibration_type.to_string());
-    path.push(&frames.camera);
-    path.push(frames.gain.to_string());
-
-    // Check if folder exists and if it's not empty
+    // check for duplicates
+    let app_state = state.lock().map_err(|e| e.to_string())?;
+    let mut path = app_state.local_config.root_directory.clone();
+    drop(app_state);
+    path.push(dark_frame.build_path(&state).map_err(|e| e.to_string())?);
     if path.exists() {
         let entries = fs::read_dir(&path).map_err(|e| e.to_string())?;
         if entries.count() > 0 {
             return Err(
-                "Such calibration frames already exist and the folder is not empty.".to_string(),
+                return Err("Such a Dark Frame already exists.".to_string())
             );
         }
     }
 
-    // Create the directory and copy the files
-    fs::create_dir_all(&path).map_err(|e| e.to_string())?;
-    for frame in paths {
-        let mut new_path = path.clone();
-        new_path.push(frame.file_name().ok_or("Couldn't get file_name")?);
-        fs::copy(&frame, &new_path).map_err(|e| e.to_string())?;
+    dark_frame.add(&state).map_err(|e| e.to_string())?;
+
+    let mut process = Process::spawn(
+        &window,
+        "",
+        false,
+        Some(0),
+        Some(dark_frame.frames_to_classify.len() as u32)
+    );
+
+    if let Err(e) = dark_frame.classify(&state, &window, &mut process) {
+        dark_frame.remove(&state).ok();
     }
 
-    if frames.calibration_type == CalibrationType::DARK {
-        let mut dark_frames = app_state.imaging_frame_list.dark_frames.clone();
-        let new_dark_frame = DarkFrame {
-            id: frames.id,
-            camera_id: Uuid::new_v4(),
-            total_subs: frames.total_subs,
-            gain: frames.gain,
-            frames: vec![],
-            calibration_type: frames.calibration_type,
-            camera_temp: frames.camera_temp.unwrap(),
-            sub_length: frames.sub_length.unwrap(),
-        };
-        dark_frames.insert(new_dark_frame.id, new_dark_frame);
+    process.finish(&window);
 
-        app_state.imaging_frame_list.dark_frames = dark_frames.clone();
-    } else {
-        let mut bias_frames = app_state.imaging_frame_list.bias_frames.clone();
-        let new_bias_frame = BiasFrame {
-            id: frames.id,
-            camera_id: Uuid::new_v4(),
-            total_subs: frames.total_subs,
-            gain: frames.gain,
-            frames: vec![],
-            calibration_type: frames.calibration_type,
-        };
-        bias_frames.insert(new_bias_frame.id, new_bias_frame);
+    Ok(())
+}
 
-        app_state.imaging_frame_list.bias_frames = bias_frames.clone();
+#[tauri::command]
+pub async fn classify_bias_frame(
+    window: Window,
+    state: State<'_, Mutex<AppState>>,
+    mut bias_frame: BiasFrame,
+) -> Result<(), String> {
+    // check for duplicates
+    let app_state = state.lock().map_err(|e| e.to_string())?;
+    let mut path = app_state.local_config.root_directory.clone();
+    drop(app_state);
+    path.push(bias_frame.build_path(&state).map_err(|e| e.to_string())?);
+    if path.exists() {
+        let entries = fs::read_dir(&path).map_err(|e| e.to_string())?;
+        if entries.count() > 0 {
+            return Err(
+                return Err("Such a Bias Frame already exists.".to_string())
+            );
+        }
     }
-    ImagingFrameList::save(root_directory, &app_state.imaging_frame_list)
-        .map_err(|e| e.to_string())?;
-    */
+
+    bias_frame.add(&state).map_err(|e| e.to_string())?;
+
+    let mut process = Process::spawn(
+        &window,
+        "",
+        false,
+        Some(0),
+        Some(bias_frame.frames_to_classify.len() as u32)
+    );
+
+    if let Err(e) = bias_frame.classify(&state, &window, &mut process) {
+        bias_frame.remove(&state).ok();
+    }
+
+    process.finish(&window);
+
     Ok(())
 }

@@ -1,12 +1,15 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use std::path::PathBuf;
-use std::any::Any;
 use std::error::Error;
+use std::fs;
 use std::sync::Mutex;
 use tauri::{State, Window};
+use crate::models::equipment::{EquipmentItem, EquipmentList};
 use crate::models::frontend::process::Process;
-use crate::models::imaging_frames::imaging_frame_list::{CalibrationFrame, CalibrationType, ImagingFrameList};
+use crate::models::imaging_frames::calibration_frame::CalibrationFrame;
+use crate::models::imaging_frames::calibration_type::CalibrationType;
+use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
 use crate::models::state::AppState;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -23,30 +26,6 @@ pub struct DarkFrame {
 
     pub camera_temp: f64,
     pub sub_length: f64,
-}
-
-impl CalibrationFrame for DarkFrame {
-    fn id(&self) -> &Uuid {
-        &self.id
-    }
-
-    fn camera_id(&self) -> &Uuid {
-        &self.camera_id
-    }
-
-    fn total_subs(&self) -> &u32 {
-        &self.total_subs
-    }
-
-    fn gain(&self) -> &u32 {
-        &self.gain
-    }
-    fn calibration_type(&self) -> CalibrationType {
-        CalibrationType::DARK
-    }
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl DarkFrame {
@@ -72,12 +51,63 @@ impl DarkFrame {
         )
     }
 
+    pub fn edit(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
+        Ok(())
+    }
+
+    pub fn build_path(&self, state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>> {
+        Ok(PathBuf::default())
+    }
+
+    pub fn get_field_value(&self, field: &str, equipment_list: &EquipmentList) -> String {
+        match field {
+            "CAMERA" => equipment_list
+                .cameras
+                .get(&self.camera_id)
+                .map_or("None".to_string(), |c| c.view_name().to_string()),
+            "SUBLENGTH" => self.sub_length.to_string(),
+            "TOTALSUBS" => self.total_subs.to_string(),
+            "GAIN" => self.gain.to_string(),
+            _ => field.to_string(),
+        }
+    }
+
+    fn classify_helper(
+        &mut self,
+        base: &PathBuf,
+        file_name: &PathBuf,
+        frame: &PathBuf,
+        destination: &PathBuf,
+        state: &State<Mutex<AppState>>,
+    ) -> Result<(), Box<dyn Error>> {
+        Ok(())
+    }
+
     pub fn classify(
         &mut self,
         state: &State<Mutex<AppState>>,
         window: &Window,
         process: &mut Process,
     ) -> Result<(), Box<dyn Error>> {
+        let base = self.build_path(state)?;
+        let frames = self.frames_to_classify.clone();
+        let helper = |base: &PathBuf,
+                      file_name: &PathBuf,
+                      frame: &PathBuf,
+                      destination: &PathBuf,
+                      state: &State<Mutex<AppState>>| {
+            self.classify_helper(base, file_name, frame, destination, state)
+        };
+
+        crate::classify::classify(
+            &base,
+            &frames,
+            state,
+            helper,
+            window,
+            process,
+        )?;
+
         Ok(())
     }
 }

@@ -2,13 +2,12 @@ use crate::file_store;
 use crate::models::state::AppState;
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use std::any::Any;
 use std::collections::HashMap;
 use std::error::Error;
 use std::path::PathBuf;
-use std::fmt;
 use uuid::Uuid;
 use crate::models::imaging_frames::bias_frame::BiasFrame;
+use crate::models::imaging_frames::calibration_frame::CalibrationFrame;
 use crate::models::imaging_frames::dark_frame::DarkFrame;
 use crate::models::imaging_frames::flat_frame::FlatFrame;
 use crate::models::imaging_frames::light_frame::LightFrame;
@@ -74,37 +73,4 @@ impl ImagingFrameList {
             )
             .collect()
     }
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub enum CalibrationType {
-    DEFAULT,
-    DARK,
-    BIAS,
-}
-
-impl Default for CalibrationType {
-    fn default() -> Self {
-        CalibrationType::DEFAULT
-    }
-}
-
-impl fmt::Display for CalibrationType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            CalibrationType::DARK => write!(f, "DARK"),
-            CalibrationType::BIAS => write!(f, "BIAS"),
-            CalibrationType::DEFAULT => write!(f, "DEFAULT"),
-        }
-    }
-}
-
-pub trait CalibrationFrame: Any {
-    fn id(&self) -> &Uuid;
-    fn camera_id(&self) -> &Uuid;
-    fn total_subs(&self) -> &u32;
-    fn gain(&self) -> &u32;
-
-    fn calibration_type(&self) -> CalibrationType;
-    fn as_any(&self) -> &dyn Any;
 }

@@ -1,11 +1,12 @@
 use crate::models::equipment::EquipmentList;
 use crate::models::gallery_image_list::{GalleryImage, GalleryImageList};
 use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
-use crate::models::imaging_session_list::{ImagingSession, ImagingSessionList};
+use crate::models::imaging_session_list::ImagingSessionList;
 use crate::models::preferences::{Config, LocalConfig};
 use std::collections::HashMap;
 use tauri::{AppHandle, Manager};
 use uuid::Uuid;
+use crate::models::imaging_session::ImagingSession;
 
 pub struct AppState {
     pub local_config: LocalConfig,
