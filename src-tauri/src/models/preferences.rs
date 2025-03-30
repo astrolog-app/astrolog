@@ -54,7 +54,8 @@ impl Config {
 
         let folder_paths = FolderPaths {
             imaging_session_folder_path: default.clone(),
-            calibration_frames_folder_path: default,
+            dark_frame_folder_path: default.clone(),
+            bias_frame_folder_path: default,
         };
 
         Config {
@@ -84,7 +85,8 @@ impl Config {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct FolderPaths {
     pub imaging_session_folder_path: FolderPath,
-    calibration_frames_folder_path: FolderPath,
+    pub dark_frame_folder_path: FolderPath,
+    pub bias_frame_folder_path: FolderPath,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

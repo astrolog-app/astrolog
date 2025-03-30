@@ -26,12 +26,13 @@ import { Label } from '@/components/ui/label';
 import { useModal } from '@/context/modalProvider';
 import EquipmentComboBox from '@/components/ui/equipmentComboBox';
 import { invoke } from '@tauri-apps/api/core';
-import { AnalyzedCalibrationFrames } from '@/interfaces/commands';
+import { AnalyzedCalibrationFrames, BiasFrame, DarkFrame } from '@/interfaces/commands';
 import { CalibrationType } from '@/enums/calibrationType';
 import { toast } from '@/components/ui/use-toast';
 import { CalibrationFrame } from '@/interfaces/state';
 import { EquipmentType } from '@/enums/equipmentType';
 import { UUID } from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 
 interface CalibrationRowEditorProps {
   analyzedFrames?: AnalyzedCalibrationFrames;
@@ -105,24 +106,29 @@ export default function CalibrationRowEditor({
 
   function onSubmit() {
     if (!edit) {
-      const newCalibrationFrame: CalibrationFrame = {
-        id: calibrationFrame?.id || '69359fdc-16ed-4476-b4f9-786bf22cd299',
-        camera: form.getValues().camera,
-        calibration_type: form.getValues().calibrationType,
-        gain: Number(form.getValues().gain), // Ensure this is converted to a number
-        sub_length: form.getValues().subLength
-          ? Number(form.getValues().subLength)
-          : undefined, // Convert or set undefined
-        camera_temp: form.getValues().cameraTemp
-          ? Number(form.getValues().cameraTemp)
-          : undefined, // Convert or set undefined
-        total_subs: Number(form.getValues().totalSubs) // Ensure this is converted to a number
+      const darkFrame: DarkFrame = {
+        id: calibrationFrame?.id || uuidv4() as UUID,
+        camera_id: form.getValues().camera as UUID,
+        total_subs: paths?.length ?? 0,
+        gain: Number(form.getValues().gain),
+        frames_to_classify: paths ?? [],
+        frames_classified: [],
+        camera_temp: Number(form.getValues().cameraTemp) ?? 0,
+        sub_length: Number(form.getValues().subLength) ?? 0
+      };
+
+      const biasFrame: BiasFrame = {
+        id: uuidv4() as UUID,
+        camera_id: form.getValues().camera as UUID,
+        total_subs: paths?.length ?? 0,
+        gain: Number(form.getValues().gain),
+        frames_to_classify: paths ?? [],
+        frames_classified: []
       };
 
       if (calibrationType == CalibrationType.DARK) {
-        invoke('classify_calibration_frames', {
-          frames: newCalibrationFrame,
-          paths: paths
+        invoke('classify_dark_frame', {
+          darkFrame: darkFrame
         }).catch((error) =>
           toast({
             variant: 'destructive',
@@ -131,7 +137,15 @@ export default function CalibrationRowEditor({
           })
         );
       } else {
-        invoke('classify_bias_frames').then();
+        invoke('classify_bias_frame', {
+          biasFrame: biasFrame
+        }).catch((error) =>
+          toast({
+            variant: 'destructive',
+            title: 'Uh oh! Something went wrong.',
+            description: 'Error: ' + error
+          })
+        );
       }
     }
   }

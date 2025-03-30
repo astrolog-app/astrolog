@@ -1,15 +1,15 @@
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
-use std::path::{Component, PathBuf};
-use tauri::{State, Window};
-use std::sync::Mutex;
-use std::error::Error;
-use regex::Regex;
 use crate::commands::imaging_sessions::ImagingSessionCalibration;
 use crate::models::frontend::process::Process;
 use crate::models::imaging_frames::light_frame::LightFrame;
 use crate::models::imaging_session_list::ImagingSessionList;
 use crate::models::state::AppState;
+use regex::Regex;
+use serde::{Deserialize, Serialize};
+use std::error::Error;
+use std::path::{Component, PathBuf};
+use std::sync::Mutex;
+use tauri::{State, Window};
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ImagingSession {
@@ -51,7 +51,7 @@ impl ImagingSession {
     pub fn from(
         state: &State<Mutex<AppState>>,
         light_frame: &LightFrame,
-        calibration: &ImagingSessionCalibration
+        calibration: &ImagingSessionCalibration,
     ) -> Result<ImagingSession, Box<dyn Error>> {
         let folder_dir = ImagingSession::build_path(light_frame, state)?;
 
@@ -67,28 +67,29 @@ impl ImagingSession {
         Ok(imaging_session)
     }
 
-    pub fn build_path(light_frame: &LightFrame, state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>> {
+    pub fn build_path(
+        light_frame: &LightFrame,
+        state: &State<Mutex<AppState>>,
+    ) -> Result<PathBuf, Box<dyn Error>> {
         let app_state = state.lock().map_err(|e| e.to_string())?;
 
-        let base_folder = app_state.config.folder_paths.imaging_session_folder_path.base_folder.clone();
-        let pattern_path = app_state.config.folder_paths.imaging_session_folder_path.pattern.clone();
+        let base_folder = app_state
+            .config
+            .folder_paths
+            .imaging_session_folder_path
+            .base_folder
+            .clone();
+        let pattern_path = app_state
+            .config
+            .folder_paths
+            .imaging_session_folder_path
+            .pattern
+            .clone();
 
-        let re = Regex::new(r"\$\$(\w+)\$\$")?;
-        let mut path = PathBuf::from(base_folder);
+        let get_field_value =
+            |field_name: &str| light_frame.get_field_value(field_name, &app_state.equipment_list);
 
-        for component in pattern_path.components() {
-            if let Component::Normal(segment_osstr) = component {
-                let segment = segment_osstr.to_string_lossy();
-                let replaced = re.replace_all(&segment, |caps: &regex::Captures| {
-                    let field_name = &caps[1];
-                    light_frame.get_field_value(field_name, &app_state.equipment_list)
-                });
-                let replaced_str = replaced.to_string();
-                if !replaced_str.is_empty() {
-                    path.push(replaced_str);
-                }
-            }
-        }
+        let path = crate::classify::build_path(&base_folder, &pattern_path, get_field_value)?;
 
         Ok(path)
     }
@@ -100,11 +101,18 @@ impl ImagingSession {
     ) -> Result<(), Box<dyn Error>> {
         let app_state = state.lock().map_err(|e| e.to_string())?;
 
-        let mut light_frame = app_state.imaging_frame_list.light_frames.get(&self.light_frame_id).ok_or("light_frame_id not found")?.clone();
-        let dark_frame = self.dark_frame_id
+        let mut light_frame = app_state
+            .imaging_frame_list
+            .light_frames
+            .get(&self.light_frame_id)
+            .ok_or("light_frame_id not found")?
+            .clone();
+        let dark_frame = self
+            .dark_frame_id
             .as_ref()
             .and_then(|id| app_state.imaging_frame_list.dark_frames.get(id).cloned());
-        let flat_frame = self.flat_frame_id
+        let flat_frame = self
+            .flat_frame_id
             .as_ref()
             .and_then(|id| app_state.imaging_frame_list.flat_frames.get(id).cloned());
 
@@ -123,7 +131,7 @@ impl ImagingSession {
             "Classifying Imaging Session",
             true,
             Some(0),
-            Some(len)
+            Some(len),
         );
 
         let mut errors = Vec::new();
@@ -133,13 +141,17 @@ impl ImagingSession {
         }
 
         if let Some(mut frame) = dark_frame {
-            if let Err(e) = frame.classify(state, window, &mut process) {
+            if let Err(e) =
+                frame.classify_to_imaging_session(state, window, &mut process, &self.folder_dir)
+            {
                 errors.push(format!("Dark frame error: {}", e));
             }
         }
 
         if let Some(mut frame) = flat_frame {
-            if let Err(e) = frame.classify(state, window, &mut process) {
+            if let Err(e) =
+                frame.classify_to_imaging_session(state, window, &mut process, &self.folder_dir)
+            {
                 errors.push(format!("Flat frame error: {}", e));
             }
         }

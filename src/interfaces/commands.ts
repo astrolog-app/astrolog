@@ -9,10 +9,10 @@ export interface AnalyzedCalibrationFrames {
   message: string;
 }
 
-export interface CalibrationFrame {
+interface CalibrationFrame {
   id: UUID,
   camera_id: UUID,
-  total_subs: undefined,
+  total_subs: number,
   gain: number,
   frames_to_classify: string[],
   frames_classified: string[],

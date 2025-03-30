@@ -1,11 +1,13 @@
 use std::error::Error;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Component, PathBuf};
 use std::sync::Mutex;
+use regex::Regex;
 use tauri::{State, Window};
 use crate::models::frontend::process::Process;
 use crate::models::state::AppState;
 
+// TODO: two images with same name?
 pub fn classify<F>(
     base: &PathBuf,
     frames_to_classify: &Vec<PathBuf>,
@@ -70,4 +72,32 @@ where
     }
 
     Ok(())
+}
+
+pub fn build_path<F>(
+    base_folder: &PathBuf,
+    pattern: &PathBuf,
+    get_field_value: F,
+) -> Result<PathBuf, Box<dyn Error>>
+where
+    F: Fn(&str) -> String,
+{
+    let re = Regex::new(r"\$\$(\w+)\$\$")?;
+    let mut path = PathBuf::from(base_folder);
+
+    for component in pattern.components() {
+        if let Component::Normal(segment_osstr) = component {
+            let segment = segment_osstr.to_string_lossy();
+            let replaced = re.replace_all(&segment, |caps: &regex::Captures| {
+                let field_name = &caps[1];
+                get_field_value(field_name)
+            });
+            let replaced_str = replaced.to_string();
+            if !replaced_str.is_empty() {
+                path.push(replaced_str);
+            }
+        }
+    }
+
+    Ok(path)
 }
