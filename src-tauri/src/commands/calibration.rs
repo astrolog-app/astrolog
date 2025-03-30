@@ -9,6 +9,8 @@ use crate::models::frontend::process::Process;
 use crate::models::imaging_frames::bias_frame::BiasFrame;
 use crate::models::imaging_frames::calibration_type::CalibrationType;
 use crate::models::imaging_frames::dark_frame::DarkFrame;
+use crate::models::imaging_frames::imaging_frame::ImagingFrame;
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AnalyzedCalibrationFrames {
     calibration_type: CalibrationType,

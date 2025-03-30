@@ -5,3 +5,4 @@ pub mod flat_frame;
 pub mod bias_frame;
 pub mod calibration_frame;
 pub mod calibration_type;
+pub mod imaging_frame;

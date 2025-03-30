@@ -10,6 +10,7 @@ use crate::commands::imaging_sessions::ImagingSessionCalibration;
 use crate::models::imaging_frames::calibration_type::CalibrationType;
 use crate::models::imaging_frames::dark_frame::DarkFrame;
 use crate::models::imaging_frames::flat_frame::FlatFrame;
+use crate::models::imaging_frames::imaging_frame::ImagingFrame;
 use crate::models::imaging_frames::light_frame::LightFrame;
 use crate::models::imaging_session::ImagingSession;
 use crate::models::state::AppState;

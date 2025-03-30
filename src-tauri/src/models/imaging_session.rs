@@ -10,6 +10,7 @@ use std::path::{Component, PathBuf};
 use std::sync::Mutex;
 use tauri::{State, Window};
 use uuid::Uuid;
+use crate::models::imaging_frames::imaging_frame::ImagingFrame;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ImagingSession {
@@ -136,7 +137,8 @@ impl ImagingSession {
 
         let mut errors = Vec::new();
 
-        if let Err(e) = light_frame.classify(state, window, &mut process) {
+        let base = ImagingSession::build_path(&light_frame, state)?;
+        if let Err(e) = light_frame.classify_to_imaging_session(state, window, &mut process, &base) {
             errors.push(format!("Light frame error: {}", e));
         }
 
