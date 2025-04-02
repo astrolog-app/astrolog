@@ -9,7 +9,7 @@ use chrono::{DateTime, Utc};
 use crate::commands::imaging_sessions::ImagingSessionEdit;
 use crate::models::equipment::{EquipmentItem, EquipmentList};
 use crate::models::frontend::process::Process;
-use crate::models::imaging_frames::imaging_frame::ImagingFrame;
+use crate::models::imaging_frames::imaging_frame::{ClassifiableFrame, ImagingSessionFrame};
 use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
 use crate::models::imaging_session::ImagingSession;
 use crate::models::state::AppState;
@@ -107,7 +107,7 @@ impl LightFrame {
     }
 }
 
-impl ImagingFrame for LightFrame {
+impl ClassifiableFrame for LightFrame {
     fn id(&self) -> Uuid {
         self.id
     }
@@ -131,7 +131,9 @@ impl ImagingFrame for LightFrame {
     fn remove_from_list(&self, list: &mut ImagingFrameList) {
         list.light_frames.remove(&self.id);
     }
+}
 
+impl ImagingSessionFrame for LightFrame {
     fn build_path(&self, _state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>> {
         Err("Not Supported!".into())
     }

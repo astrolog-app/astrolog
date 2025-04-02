@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::{State, Window};
 use crate::models::frontend::process::Process;
-use crate::models::imaging_frames::imaging_frame::ImagingFrame;
+use crate::models::imaging_frames::imaging_frame::{ClassifiableFrame, ImagingSessionFrame};
 use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
 use crate::models::state::AppState;
 
@@ -19,7 +19,7 @@ pub struct FlatFrame {
     pub frames_classified: Vec<PathBuf>,
 }
 
-impl ImagingFrame for FlatFrame {
+impl ClassifiableFrame for FlatFrame {
     fn id(&self) -> Uuid {
         self.id
     }
@@ -43,7 +43,9 @@ impl ImagingFrame for FlatFrame {
     fn remove_from_list(&self, list: &mut ImagingFrameList) {
         list.flat_frames.remove(&self.id);
     }
+}
 
+impl ImagingSessionFrame for FlatFrame {
     fn build_path(&self, _state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>> {
         Err("Not Supported!".into())
     }

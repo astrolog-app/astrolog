@@ -3,11 +3,12 @@ use uuid::Uuid;
 use std::path::PathBuf;
 use std::error::Error;
 use std::sync::Mutex;
-use tauri::{State};
+use tauri::State;
+use std::any::Any;
 use crate::models::equipment::{EquipmentItem, EquipmentList};
-use crate::models::imaging_frames::calibration_frame::CalibrationFrame;
+use crate::models::imaging_frames::imaging_frame::{CalibrationFrame, ClassifiableFrame};
 use crate::models::imaging_frames::calibration_type::CalibrationType;
-use crate::models::imaging_frames::imaging_frame::ImagingFrame;
+use crate::models::imaging_frames::imaging_frame::ImagingSessionFrame;
 use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
 use crate::models::state::AppState;
 
@@ -43,7 +44,7 @@ impl DarkFrame {
     }
 }
 
-impl ImagingFrame for DarkFrame {
+impl ClassifiableFrame for DarkFrame {
     fn id(&self) -> Uuid {
         self.id
     }
@@ -67,7 +68,9 @@ impl ImagingFrame for DarkFrame {
     fn remove_from_list(&self, list: &mut ImagingFrameList) {
         list.dark_frames.remove(&self.id);
     }
+}
 
+impl ImagingSessionFrame for DarkFrame {
     fn build_path(&self, state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>> {
         let app_state = state.lock().map_err(|e| e.to_string())?;
 
@@ -87,5 +90,29 @@ impl ImagingFrame for DarkFrame {
         path.push("Dark");
 
         Ok(path)
+    }
+}
+
+impl CalibrationFrame for DarkFrame {
+    fn id(&self) -> &Uuid {
+        &self.id
+    }
+
+    fn camera_id(&self) -> &Uuid {
+        &self.camera_id
+    }
+
+    fn total_subs(&self) -> &u32 {
+        &self.total_subs
+    }
+
+    fn gain(&self) -> &u32 {
+        &self.gain
+    }
+    fn calibration_type(&self) -> CalibrationType {
+        CalibrationType::DARK
+    }
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }

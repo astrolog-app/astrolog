@@ -10,7 +10,7 @@ use std::path::{Component, PathBuf};
 use std::sync::Mutex;
 use tauri::{State, Window};
 use uuid::Uuid;
-use crate::models::imaging_frames::imaging_frame::ImagingFrame;
+use crate::models::imaging_frames::imaging_frame::ImagingSessionFrame;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ImagingSession {

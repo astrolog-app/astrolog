@@ -7,7 +7,7 @@ use std::error::Error;
 use std::path::PathBuf;
 use uuid::Uuid;
 use crate::models::imaging_frames::bias_frame::BiasFrame;
-use crate::models::imaging_frames::calibration_frame::CalibrationFrame;
+use crate::models::imaging_frames::imaging_frame::CalibrationFrame;
 use crate::models::imaging_frames::dark_frame::DarkFrame;
 use crate::models::imaging_frames::flat_frame::FlatFrame;
 use crate::models::imaging_frames::light_frame::LightFrame;

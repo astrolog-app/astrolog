@@ -4,11 +4,13 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::{State, Window};
 use uuid::Uuid;
+use std::any::Any;
 use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
 use crate::models::state::AppState;
 use crate::models::frontend::process::Process;
+use crate::models::imaging_frames::calibration_type::CalibrationType;
 
-pub trait ImagingFrame: Clone {
+pub trait ClassifiableFrame: Clone {
     fn id(&self) -> Uuid;
     fn frames_to_classify(&self) -> &Vec<PathBuf>;
     fn frames_to_classify_mut(&mut self) -> &mut Vec<PathBuf>;
@@ -35,9 +37,9 @@ pub trait ImagingFrame: Clone {
         )
     }
 
-    fn edit(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
-        Ok(())
-    }
+    // fn edit(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
+    //     Ok(())
+    // }
 
     fn classify_helper(
         &mut self,
@@ -81,7 +83,9 @@ pub trait ImagingFrame: Clone {
 
         Ok(())
     }
+}
 
+pub trait ImagingSessionFrame: ClassifiableFrame + Clone {
     fn build_path(&self, state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>>;
 
     fn classify(
@@ -134,4 +138,14 @@ pub trait ImagingFrame: Clone {
 
         Ok(())
     }
+}
+
+pub trait CalibrationFrame: Any {
+    fn id(&self) -> &Uuid;
+    fn camera_id(&self) -> &Uuid;
+    fn total_subs(&self) -> &u32;
+    fn gain(&self) -> &u32;
+
+    fn calibration_type(&self) -> CalibrationType;
+    fn as_any(&self) -> &dyn Any;
 }

@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use crate::models::equipment::{EquipmentItem, EquipmentList};
 use crate::models::frontend::analytics::Analytics;
 use crate::models::gallery_image_list::GalleryImage;
-use crate::models::imaging_frames::{calibration_frame, dark_frame};
+use crate::models::imaging_frames::{dark_frame, imaging_frame};
 use crate::models::imaging_frames::calibration_type::CalibrationType;
 use crate::models::imaging_session::ImagingSession;
 use crate::models::preferences::{Config, LocalConfig};
@@ -132,7 +132,7 @@ pub struct CalibrationTableRow {
 
 impl CalibrationTableRow {
     pub fn new(
-        calibration_frame: Box<dyn calibration_frame::CalibrationFrame>,
+        calibration_frame: Box<dyn imaging_frame::CalibrationFrame>,
         app_state: &AppState,
     ) -> Self {
         let mut sub_length = None;

@@ -4,11 +4,12 @@ use std::path::PathBuf;
 use std::error::Error;
 use std::sync::Mutex;
 use tauri::{State, Window};
+use std::any::Any;
 use crate::models::equipment::{EquipmentItem, EquipmentList};
 use crate::models::frontend::process::Process;
-use crate::models::imaging_frames::calibration_frame::CalibrationFrame;
+use crate::models::imaging_frames::imaging_frame::{CalibrationFrame, ClassifiableFrame};
 use crate::models::imaging_frames::calibration_type::CalibrationType;
-use crate::models::imaging_frames::imaging_frame::ImagingFrame;
+use crate::models::imaging_frames::imaging_frame::ImagingSessionFrame;
 use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
 use crate::models::state::AppState;
 
@@ -39,7 +40,7 @@ impl BiasFrame {
     }
 }
 
-impl ImagingFrame for BiasFrame {
+impl ClassifiableFrame for BiasFrame {
     fn id(&self) -> Uuid {
         self.id
     }
@@ -63,7 +64,9 @@ impl ImagingFrame for BiasFrame {
     fn remove_from_list(&self, list: &mut ImagingFrameList) {
         list.bias_frames.remove(&self.id);
     }
+}
 
+impl ImagingSessionFrame for BiasFrame {
     fn build_path(&self, state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>> {
         let app_state = state.lock().map_err(|e| e.to_string())?;
 
@@ -83,5 +86,29 @@ impl ImagingFrame for BiasFrame {
 
     fn classify_to_imaging_session(&mut self, _state: &State<Mutex<AppState>>, _window: &Window, _process: &mut Process, _base: &PathBuf) -> Result<(), Box<dyn Error>> {
         Err("Not Supported!".into())
+    }
+}
+
+impl CalibrationFrame for BiasFrame {
+    fn id(&self) -> &Uuid {
+        &self.id
+    }
+
+    fn camera_id(&self) -> &Uuid {
+        &self.camera_id
+    }
+
+    fn total_subs(&self) -> &u32 {
+        &self.total_subs
+    }
+
+    fn gain(&self) -> &u32 {
+        &self.gain
+    }
+    fn calibration_type(&self) -> CalibrationType {
+        CalibrationType::BIAS
+    }
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
