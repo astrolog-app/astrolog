@@ -2,12 +2,8 @@ use std::error::Error;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use std::path::PathBuf;
-use std::sync::Mutex;
-use tauri::{State, Window};
-use crate::models::frontend::process::Process;
 use crate::models::imaging_frames::imaging_frame::{ClassifiableFrame, ImagingSessionFrame};
 use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
-use crate::models::state::AppState;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct FlatFrame {
@@ -46,15 +42,7 @@ impl ClassifiableFrame for FlatFrame {
 }
 
 impl ImagingSessionFrame for FlatFrame {
-    fn build_path(&self, _state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>> {
-        Err("Not Supported!".into())
-    }
-
-    fn classify(&mut self, _state: &State<Mutex<AppState>>, _window: &Window, _process: &mut Process) -> Result<(), Box<dyn Error>> {
-        Err("Not Supported!".into())
-    }
-
-    fn build_path_imaging_session(&self, base: &PathBuf) -> Result<PathBuf, Box<dyn Error>> {
+    fn build_path(&self, base: &PathBuf) -> Result<PathBuf, Box<dyn Error>> {
         let mut path = base.clone();
 
         path.push("Flat");

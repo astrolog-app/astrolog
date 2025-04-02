@@ -2,7 +2,6 @@ use chrono::{DateTime, Utc};
 use crate::models::equipment::{EquipmentItem, EquipmentList};
 use crate::models::frontend::analytics::Analytics;
 use crate::models::gallery_image_list::GalleryImage;
-use crate::models::imaging_frames::{dark_frame, imaging_frame};
 use crate::models::imaging_frames::calibration_type::CalibrationType;
 use crate::models::imaging_session::ImagingSession;
 use crate::models::preferences::{Config, LocalConfig};
@@ -128,38 +127,4 @@ pub struct CalibrationTableRow {
     pub sub_length: Option<f64>,
     pub camera_temp: Option<f64>,
     pub total_subs: u32,
-}
-
-impl CalibrationTableRow {
-    pub fn new(
-        calibration_frame: Box<dyn imaging_frame::CalibrationFrame>,
-        app_state: &AppState,
-    ) -> Self {
-        let mut sub_length = None;
-        let mut camera_temp = None;
-
-        if let Some(dark_frame) = calibration_frame
-            .as_any()
-            .downcast_ref::<dark_frame::DarkFrame>()
-        {
-            sub_length = Option::from(dark_frame.sub_length);
-            camera_temp = Option::from(dark_frame.camera_temp);
-        }
-
-        let camera_name = app_state
-            .equipment_list
-            .cameras
-            .get(&calibration_frame.camera_id())
-            .map_or("N/A".to_string(), |camera| camera.view_name().clone());
-
-        CalibrationTableRow {
-            id: *calibration_frame.id(),
-            camera: camera_name,
-            calibration_type: calibration_frame.calibration_type(),
-            gain: *calibration_frame.gain(),
-            sub_length,
-            camera_temp,
-            total_subs: *calibration_frame.total_subs(),
-        }
-    }
 }

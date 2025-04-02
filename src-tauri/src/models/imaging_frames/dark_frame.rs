@@ -6,8 +6,10 @@ use std::sync::Mutex;
 use tauri::State;
 use std::any::Any;
 use crate::models::equipment::{EquipmentItem, EquipmentList};
+use crate::models::frontend::state::CalibrationTableRow;
 use crate::models::imaging_frames::imaging_frame::{CalibrationFrame, ClassifiableFrame};
 use crate::models::imaging_frames::calibration_type::CalibrationType;
+use crate::models::imaging_frames::dark_frame;
 use crate::models::imaging_frames::imaging_frame::ImagingSessionFrame;
 use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
 use crate::models::state::AppState;
@@ -26,22 +28,6 @@ pub struct DarkFrame {
 
     pub camera_temp: f64,
     pub sub_length: f64,
-}
-
-impl DarkFrame {
-    pub fn get_field_value(&self, field: &str, equipment_list: &EquipmentList) -> String {
-        match field {
-            "CAMERA" => equipment_list
-                .cameras
-                .get(&self.camera_id)
-                .map_or("None".to_string(), |c| c.view_name().to_string()),
-            "SUBLENGTH" => self.sub_length.to_string(),
-            "TOTALSUBS" => self.total_subs.to_string(),
-            "GAIN" => self.gain.to_string(),
-            "CAMERATEMP" => self.camera_temp.to_string(),
-            _ => field.to_string(),
-        }
-    }
 }
 
 impl ClassifiableFrame for DarkFrame {
@@ -71,20 +57,7 @@ impl ClassifiableFrame for DarkFrame {
 }
 
 impl ImagingSessionFrame for DarkFrame {
-    fn build_path(&self, state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>> {
-        let app_state = state.lock().map_err(|e| e.to_string())?;
-
-        let mut base = app_state.config.folder_paths.dark_frame_folder_path.base_folder.clone();
-        base.push("Dark");
-        let pattern = app_state.config.folder_paths.dark_frame_folder_path.pattern.clone();
-        let get_field_value = |field_name: &str| {
-            self.get_field_value(field_name, &app_state.equipment_list)
-        };
-
-        crate::classify::build_path(&base, &pattern, get_field_value)
-    }
-
-    fn build_path_imaging_session(&self, base: &PathBuf) -> Result<PathBuf, Box<dyn Error>> {
+    fn build_path(&self, base: &PathBuf) -> Result<PathBuf, Box<dyn Error>> {
         let mut path = base.clone();
 
         path.push("Dark");
@@ -94,10 +67,6 @@ impl ImagingSessionFrame for DarkFrame {
 }
 
 impl CalibrationFrame for DarkFrame {
-    fn id(&self) -> &Uuid {
-        &self.id
-    }
-
     fn camera_id(&self) -> &Uuid {
         &self.camera_id
     }
@@ -114,5 +83,54 @@ impl CalibrationFrame for DarkFrame {
     }
     fn as_any(&self) -> &dyn Any {
         self
+    }
+
+    fn calibration_table_row(&self, state: &State<Mutex<AppState>>) -> Result<CalibrationTableRow, Box<dyn Error>> {
+        let app_state = state.lock().map_err(|e| e.to_string())?;
+
+        let camera_name = app_state
+            .equipment_list
+            .cameras
+            .get(&self.camera_id)
+            .map_or("N/A".to_string(), |camera| camera.view_name().clone());
+
+        let row = CalibrationTableRow {
+            id: self.id,
+            camera: camera_name,
+            calibration_type: CalibrationType::DARK,
+            gain: self.gain,
+            sub_length: Some(self.sub_length),
+            camera_temp: Some(self.camera_temp),
+            total_subs: self.total_subs,
+        };
+
+        Ok(row)
+    }
+
+    fn get_field_value(&self, field: &str, equipment_list: &EquipmentList) -> String {
+        match field {
+            "CAMERA" => equipment_list
+                .cameras
+                .get(&self.camera_id)
+                .map_or("None".to_string(), |c| c.view_name().to_string()),
+            "SUBLENGTH" => self.sub_length.to_string(),
+            "TOTALSUBS" => self.total_subs.to_string(),
+            "GAIN" => self.gain.to_string(),
+            "CAMERATEMP" => self.camera_temp.to_string(),
+            _ => field.to_string(),
+        }
+    }
+
+    fn build_path(&self, state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>> {
+        let app_state = state.lock().map_err(|e| e.to_string())?;
+
+        let mut base = app_state.config.folder_paths.dark_frame_folder_path.base_folder.clone();
+        base.push("Dark");
+        let pattern = app_state.config.folder_paths.dark_frame_folder_path.pattern.clone();
+        let get_field_value = |field_name: &str| {
+            self.get_field_value(field_name, &app_state.equipment_list)
+        };
+
+        crate::classify::build_path(&base, &pattern, get_field_value)
     }
 }

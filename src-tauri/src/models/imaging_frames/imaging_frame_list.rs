@@ -7,7 +7,6 @@ use std::error::Error;
 use std::path::PathBuf;
 use uuid::Uuid;
 use crate::models::imaging_frames::bias_frame::BiasFrame;
-use crate::models::imaging_frames::imaging_frame::CalibrationFrame;
 use crate::models::imaging_frames::dark_frame::DarkFrame;
 use crate::models::imaging_frames::flat_frame::FlatFrame;
 use crate::models::imaging_frames::light_frame::LightFrame;
@@ -45,32 +44,5 @@ impl ImagingFrameList {
             &filename,
             &serde_json::to_string_pretty(imaging_frame_list)?,
         )?)
-    }
-
-    pub fn get_calibration_frames(app_state: &AppState) -> Vec<Box<dyn CalibrationFrame>> {
-        // Clone the frames into vectors to own the data and avoid lifetime issues
-        let dark_frames: Vec<_> = app_state
-            .imaging_frame_list
-            .dark_frames
-            .values()
-            .cloned()
-            .collect();
-        let bias_frames: Vec<_> = app_state
-            .imaging_frame_list
-            .bias_frames
-            .values()
-            .cloned()
-            .collect();
-
-        // Now process the cloned data
-        dark_frames
-            .into_iter()
-            .map(|frame| Box::new(frame) as Box<dyn CalibrationFrame>)
-            .chain(
-                bias_frames
-                    .into_iter()
-                    .map(|frame| Box::new(frame) as Box<dyn CalibrationFrame>),
-            )
-            .collect()
     }
 }

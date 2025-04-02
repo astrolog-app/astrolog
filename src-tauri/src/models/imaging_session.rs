@@ -138,13 +138,13 @@ impl ImagingSession {
         let mut errors = Vec::new();
 
         let base = ImagingSession::build_path(&light_frame, state)?;
-        if let Err(e) = light_frame.classify_to_imaging_session(state, window, &mut process, &base) {
+        if let Err(e) = light_frame.classify(state, window, &mut process, &base) {
             errors.push(format!("Light frame error: {}", e));
         }
 
         if let Some(mut frame) = dark_frame {
             if let Err(e) =
-                frame.classify_to_imaging_session(state, window, &mut process, &self.folder_dir)
+                frame.classify(state, window, &mut process, &self.folder_dir)
             {
                 errors.push(format!("Dark frame error: {}", e));
             }
@@ -152,7 +152,7 @@ impl ImagingSession {
 
         if let Some(mut frame) = flat_frame {
             if let Err(e) =
-                frame.classify_to_imaging_session(state, window, &mut process, &self.folder_dir)
+                frame.classify(state, window, &mut process, &self.folder_dir)
             {
                 errors.push(format!("Flat frame error: {}", e));
             }

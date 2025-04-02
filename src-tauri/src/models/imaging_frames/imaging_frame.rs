@@ -5,9 +5,11 @@ use std::sync::Mutex;
 use tauri::{State, Window};
 use uuid::Uuid;
 use std::any::Any;
+use crate::models::equipment::EquipmentList;
 use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
 use crate::models::state::AppState;
 use crate::models::frontend::process::Process;
+use crate::models::frontend::state::CalibrationTableRow;
 use crate::models::imaging_frames::calibration_type::CalibrationType;
 
 pub trait ClassifiableFrame: Clone {
@@ -86,38 +88,16 @@ pub trait ClassifiableFrame: Clone {
 }
 
 pub trait ImagingSessionFrame: ClassifiableFrame + Clone {
-    fn build_path(&self, state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>>;
+    fn build_path(&self, base: &PathBuf) -> Result<PathBuf, Box<dyn Error>>;
 
     fn classify(
         &mut self,
         state: &State<Mutex<AppState>>,
         window: &Window,
         process: &mut Process,
-    ) -> Result<(), Box<dyn Error>> {
-        let base = self.build_path(state)?;
-        let frames = self.frames_to_classify().clone();
-        let helper = |base: &PathBuf,
-                      file_name: &PathBuf,
-                      frame: &PathBuf,
-                      destination: &PathBuf,
-                      state: &State<Mutex<AppState>>| {
-            self.classify_helper(base, file_name, frame, destination, state)
-        };
-
-        crate::classify::classify(&base, &frames, state, helper, window, process)?;
-        Ok(())
-    }
-
-    fn build_path_imaging_session(&self, base: &PathBuf) -> Result<PathBuf, Box<dyn Error>>;
-
-    fn classify_to_imaging_session(
-        &mut self,
-        state: &State<Mutex<AppState>>,
-        window: &Window,
-        process: &mut Process,
         base: &PathBuf,
     ) -> Result<(), Box<dyn Error>> {
-        let path = self.build_path_imaging_session(base)?;
+        let path = self.build_path(base)?;
         let frames = self.frames_to_classify().clone();
         let helper = |base: &PathBuf,
                       file_name: &PathBuf,
@@ -140,12 +120,36 @@ pub trait ImagingSessionFrame: ClassifiableFrame + Clone {
     }
 }
 
-pub trait CalibrationFrame: Any {
-    fn id(&self) -> &Uuid;
+pub trait CalibrationFrame: ClassifiableFrame + Clone + Any {
     fn camera_id(&self) -> &Uuid;
     fn total_subs(&self) -> &u32;
     fn gain(&self) -> &u32;
 
     fn calibration_type(&self) -> CalibrationType;
     fn as_any(&self) -> &dyn Any;
+
+    fn calibration_table_row(&self, state: &State<Mutex<AppState>>) -> Result<CalibrationTableRow, Box<dyn Error>>;
+    fn get_field_value(&self, field: &str, equipment_list: &EquipmentList) -> String;
+    fn build_path(&self, state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>>;
+
+    fn classify(
+        &mut self,
+        state: &State<Mutex<AppState>>,
+        window: &Window,
+        process: &mut Process,
+    ) -> Result<(), Box<dyn Error>> {
+        let base = self.build_path(state)?;
+        let frames = self.frames_to_classify().clone();
+        let helper = |base: &PathBuf,
+                      file_name: &PathBuf,
+                      frame: &PathBuf,
+                      destination: &PathBuf,
+                      state: &State<Mutex<AppState>>| {
+            self.classify_helper(base, file_name, frame, destination, state)
+        };
+
+        crate::classify::classify(&base, &frames, state, helper, window, process)?;
+
+        Ok(())
+    }
 }

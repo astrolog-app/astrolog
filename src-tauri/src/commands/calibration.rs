@@ -9,7 +9,7 @@ use crate::models::frontend::process::Process;
 use crate::models::imaging_frames::bias_frame::BiasFrame;
 use crate::models::imaging_frames::calibration_type::CalibrationType;
 use crate::models::imaging_frames::dark_frame::DarkFrame;
-use crate::models::imaging_frames::imaging_frame::{ClassifiableFrame, ImagingSessionFrame};
+use crate::models::imaging_frames::imaging_frame::{CalibrationFrame, ClassifiableFrame, ImagingSessionFrame};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AnalyzedCalibrationFrames {
@@ -83,7 +83,7 @@ pub async fn classify_dark_frame(
     let app_state = state.lock().map_err(|e| e.to_string())?;
     let mut path = app_state.local_config.root_directory.clone();
     drop(app_state);
-    path.push(dark_frame.build_path(&state).map_err(|e| e.to_string())?);
+    path.push(<DarkFrame as CalibrationFrame>::build_path(&dark_frame, &state).map_err(|e| e.to_string())?);
     if path.exists() {
         let entries = fs::read_dir(&path).map_err(|e| e.to_string())?;
         if entries.count() > 0 {
@@ -103,7 +103,7 @@ pub async fn classify_dark_frame(
         Some(dark_frame.frames_to_classify.len() as u32)
     );
 
-    if let Err(e) = dark_frame.classify(&state, &window, &mut process) {
+    if let Err(e) = <DarkFrame as CalibrationFrame>::classify(&mut dark_frame, &state, &window, &mut process) {
         dark_frame.remove(&state).ok();
     }
 

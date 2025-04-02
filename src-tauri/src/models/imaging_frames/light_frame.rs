@@ -1,18 +1,12 @@
-use tauri::{State, Window};
-use std::sync::Mutex;
 use std::path::PathBuf;
 use std::error::Error;
 use uuid::Uuid;
-use std::fs;
 use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
 use crate::commands::imaging_sessions::ImagingSessionEdit;
 use crate::models::equipment::{EquipmentItem, EquipmentList};
-use crate::models::frontend::process::Process;
 use crate::models::imaging_frames::imaging_frame::{ClassifiableFrame, ImagingSessionFrame};
 use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
-use crate::models::imaging_session::ImagingSession;
-use crate::models::state::AppState;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LightFrame {
@@ -134,15 +128,7 @@ impl ClassifiableFrame for LightFrame {
 }
 
 impl ImagingSessionFrame for LightFrame {
-    fn build_path(&self, _state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>> {
-        Err("Not Supported!".into())
-    }
-
-    fn classify(&mut self, _state: &State<Mutex<AppState>>, _window: &Window, _process: &mut Process) -> Result<(), Box<dyn Error>> {
-        Err("Not Supported!".into())
-    }
-
-    fn build_path_imaging_session(&self, base: &PathBuf) -> Result<PathBuf, Box<dyn Error>> {
+    fn build_path(&self, base: &PathBuf) -> Result<PathBuf, Box<dyn Error>> {
         let mut path = base.clone();
 
         path.push("Light");
