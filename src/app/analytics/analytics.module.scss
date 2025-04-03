@@ -1,36 +1,12 @@
-.card {
+.infoCards {
+  display: flex;
   margin-bottom: var(--padding);
-}
 
-.sessionsChart {
-  margin-bottom: var(--padding);
-}
+  & > * {
+    margin-right: var(--padding);
 
-.lower {
-  & > *:not(:last-child) {
-    margin-bottom: var(--padding);
-  }
-
-  .chartGroup {
-    display: flex;
-
-    & > *:not(:last-child) {
-      margin-right: var(--padding);
-    }
-
-    .equipmentChart {
-      width: 70%;
-    }
-
-    .integrationChart {
-      flex-grow: 1;
-    }
-
-    .infoCard {
-      flex-grow: 1;
+    &:last-of-type {
+      margin-right: 0;
     }
   }
-}
-
-@media only screen and (max-width: 1200px) {
 }

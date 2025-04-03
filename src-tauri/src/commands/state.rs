@@ -44,13 +44,16 @@ pub fn load_frontend_app_state(state: State<Mutex<AppState>>) -> Result<String, 
         calibration: calibration_data,
     };
 
-    let analytics = Analytics::new();
+    let equipment_list = app_state.equipment_list.clone();
+    drop(app_state);
+
+    let analytics = Analytics::new(&state).map_err(|e| e.to_string())?;
 
     let data = FrontendAppState {
         local_config,
         config,
         table_data,
-        equipment_list: app_state.equipment_list.clone(),
+        equipment_list,
         image_list,
         analytics,
     };

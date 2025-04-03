@@ -19,7 +19,7 @@ pub struct FrontendAppState {
     pub table_data: TableData,
     pub equipment_list: EquipmentList,
     pub image_list: Vec<GalleryImage>,
-    pub analytics: Analytics,
+    pub analytics: Option<Analytics>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
