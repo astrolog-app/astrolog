@@ -32,7 +32,6 @@ export default function DetailsForm({ setTab, isEdit, setDetails, editSession }:
       gain: 0,
       sub_length: 0,
       notes: '',
-      integrated_subs: undefined,
       offset: undefined,
       camera_temp: undefined
     }
@@ -52,7 +51,6 @@ export default function DetailsForm({ setTab, isEdit, setDetails, editSession }:
       notes: values.notes,
       offset: values.offset,
       camera_temp: values.camera_temp,
-      integrated_subs: values.integrated_subs,
     }
     setDetails(details);
     setTab('equipment');
@@ -92,25 +90,6 @@ export default function DetailsForm({ setTab, isEdit, setDetails, editSession }:
                   onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
                 />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="integrated_subs"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Integrated Subs</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  {...field}
-                  onChange={(e) => field.onChange(e.target.value ? Number.parseInt(e.target.value) : undefined)}
-                />
-              </FormControl>
-              <FormDescription>Optional</FormDescription>
               <FormMessage />
             </FormItem>
           )}

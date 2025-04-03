@@ -28,6 +28,10 @@ impl ClassifiableFrame for FlatFrame {
         &mut self.frames_to_classify
     }
 
+    fn frames_classified(&self) -> &Vec<PathBuf> {
+        &self.frames_classified
+    }
+
     fn frames_classified_mut(&mut self) -> &mut Vec<PathBuf> {
         &mut self.frames_classified
     }

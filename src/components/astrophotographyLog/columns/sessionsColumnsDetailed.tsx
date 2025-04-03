@@ -78,10 +78,6 @@ export const sessionsColumnsDetailed: ColumnDef<ImagingSession>[] = [
     },
   },
   {
-    accessorKey: 'integrated_subs',
-    header: 'Integrated Subs',
-  },
-  {
     accessorKey: 'filter',
     header: 'Filter',
   },

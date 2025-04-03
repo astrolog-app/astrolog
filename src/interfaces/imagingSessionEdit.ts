@@ -14,7 +14,6 @@ export interface ImagingSessionGeneral {
 export interface ImagingSessionDetails {
   gain: number,
   sub_length: number,
-  integrated_subs: number | undefined,
   offset: number | undefined,
   camera_temp: number | undefined,
   notes: string | undefined,
@@ -23,9 +22,9 @@ export interface ImagingSessionDetails {
 export interface ImagingSessionEquipment {
   camera_id: UUID,
   telescope_id: UUID,
-  flattener_id: UUID,
   mount_id: UUID,
-  filter_id: UUID,
+  filter_id: UUID | undefined,
+  flattener_id: UUID | undefined,
 }
 
 export interface ImagingSessionWeather {

@@ -20,11 +20,13 @@ pub fn export_csv(path: PathBuf) {
 #[tauri::command]
 pub fn open_imaging_session(state: State<Mutex<AppState>>, id: Uuid) -> Result<(), String> {
     let app_state = state.lock().map_err(|e| e.to_string())?;
-    let path = app_state
+    let mut path = app_state.local_config.root_directory.clone();
+    path.push(app_state
         .imaging_sessions
         .get(&id)
         .ok_or("Imaging session not found.")?
-        .folder_dir.clone();
+        .folder_dir.clone()
+    );
 
     #[cfg(target_os = "windows")]
     let command = "explorer";
@@ -87,7 +89,6 @@ pub struct ImagingSessionGeneral {
 pub struct ImagingSessionDetails {
     pub gain: u32,
     pub sub_length: f64,
-    pub integrated_subs: Option<u32>,
     pub offset: Option<u32>,
     pub camera_temp: Option<f64>,
     pub notes: Option<String>,
@@ -97,9 +98,9 @@ pub struct ImagingSessionDetails {
 pub struct ImagingSessionEquipment {
     pub camera_id: Uuid,
     pub telescope_id: Uuid,
-    pub flattener_id: Uuid,
     pub mount_id: Uuid,
-    pub filter_id: Uuid,
+    pub filter_id: Option<Uuid>,
+    pub flattener_id: Option<Uuid>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -145,7 +146,7 @@ pub fn classify_imaging_session(
         let entries = fs::read_dir(&path).map_err(|e| e.to_string())?;
         if entries.count() > 0 {
             return Err(
-                return Err("Such an ImagingSession already exists.".to_string())
+                "Such an ImagingSession already exists.".to_string()
             );
         }
     }

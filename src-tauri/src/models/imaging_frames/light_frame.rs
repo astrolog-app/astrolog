@@ -18,19 +18,17 @@ pub struct LightFrame {
     pub target: String,
     pub location_id: Uuid,
 
-    pub total_subs: u32,
     pub gain: u32,
-    pub integrated_subs: Option<u32>,
     pub offset: Option<u32>,
     pub camera_temp: Option<f64>,
     pub notes: Option<String>,
     pub sub_length: f64,
 
     pub camera_id: Uuid,
-    pub filter_id: Uuid,
     pub telescope_id: Uuid,
-    pub flattener_id: Uuid,
     pub mount_id: Uuid,
+    pub flattener_id: Option<Uuid>,
+    pub filter_id: Option<Uuid>,
 
     pub outside_temp: Option<f64>,
     pub average_seeing: Option<f64>,
@@ -50,9 +48,7 @@ impl LightFrame {
             target: session.general.target.clone(),
             location_id: session.general.location_id.clone(),
 
-            total_subs: session.base.frames.len() as u32,
             gain: session.details.gain,
-            integrated_subs: session.details.integrated_subs,
             offset: session.details.offset,
             camera_temp: session.details.camera_temp,
             notes: session.details.notes.clone(),
@@ -85,16 +81,15 @@ impl LightFrame {
                 .telescopes
                 .get(&self.telescope_id)
                 .map_or("None".to_string(), |t| t.view_name().to_string()),
-            "FILTER" => equipment_list
-                .filters
-                .get(&self.filter_id)
+            "FILTER" => self.filter_id
+                .and_then(|id| equipment_list.filters.get(&id))
                 .map_or("None".to_string(), |f| f.view_name().to_string()),
-            "FILTERTYPE" => equipment_list
-                .filters
-                .get(&self.filter_id)
+
+            "FILTERTYPE" => self.filter_id
+                .and_then(|id| equipment_list.filters.get(&id))
                 .map_or("None".to_string(), |f| f.filter_type.to_string()),
             "SUBLENGTH" => self.sub_length.to_string(),
-            "TOTALSUBS" => self.total_subs.to_string(),
+            "TOTALSUBS" => self.total_subs().to_string(),
             "GAIN" => self.gain.to_string(),
             _ => field.to_string(),
         }
@@ -112,6 +107,10 @@ impl ClassifiableFrame for LightFrame {
 
     fn frames_to_classify_mut(&mut self) -> &mut Vec<PathBuf> {
         &mut self.frames_to_classify
+    }
+
+    fn frames_classified(&self) -> &Vec<PathBuf> {
+        &self.frames_classified
     }
 
     fn frames_classified_mut(&mut self) -> &mut Vec<PathBuf> {

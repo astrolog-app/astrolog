@@ -58,7 +58,6 @@ export interface ImagingSession {
   target: string;
   sub_length: number;
   total_subs: number;
-  integrated_subs: number | undefined;
   filter: string;
   gain: number;
   offset: number | undefined;

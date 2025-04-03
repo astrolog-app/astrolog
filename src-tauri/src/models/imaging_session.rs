@@ -10,7 +10,7 @@ use std::path::{Component, PathBuf};
 use std::sync::Mutex;
 use tauri::{State, Window};
 use uuid::Uuid;
-use crate::models::imaging_frames::imaging_frame::ImagingSessionFrame;
+use crate::models::imaging_frames::imaging_frame::{ClassifiableFrame, ImagingSessionFrame};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ImagingSession {
@@ -117,7 +117,7 @@ impl ImagingSession {
             .as_ref()
             .and_then(|id| app_state.imaging_frame_list.flat_frames.get(id).cloned());
 
-        let mut len = light_frame.total_subs;
+        let mut len = light_frame.total_subs();
         if let Some(ref frame) = dark_frame {
             len += frame.total_subs;
         }

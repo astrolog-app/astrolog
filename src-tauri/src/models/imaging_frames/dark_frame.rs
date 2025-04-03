@@ -43,6 +43,10 @@ impl ClassifiableFrame for DarkFrame {
         &mut self.frames_to_classify
     }
 
+    fn frames_classified(&self) -> &Vec<PathBuf> {
+        &self.frames_classified
+    }
+
     fn frames_classified_mut(&mut self) -> &mut Vec<PathBuf> {
         &mut self.frames_classified
     }
@@ -80,9 +84,6 @@ impl CalibrationFrame for DarkFrame {
     }
     fn calibration_type(&self) -> CalibrationType {
         CalibrationType::DARK
-    }
-    fn as_any(&self) -> &dyn Any {
-        self
     }
 
     fn calibration_table_row(&self, state: &State<Mutex<AppState>>) -> Result<CalibrationTableRow, Box<dyn Error>> {

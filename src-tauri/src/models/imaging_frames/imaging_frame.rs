@@ -16,10 +16,18 @@ pub trait ClassifiableFrame: Clone {
     fn id(&self) -> Uuid;
     fn frames_to_classify(&self) -> &Vec<PathBuf>;
     fn frames_to_classify_mut(&mut self) -> &mut Vec<PathBuf>;
+    fn frames_classified(&self) -> &Vec<PathBuf>;
     fn frames_classified_mut(&mut self) -> &mut Vec<PathBuf>;
 
     fn add_to_list(&self, list: &mut ImagingFrameList);
     fn remove_from_list(&self, list: &mut ImagingFrameList);
+
+    fn total_subs(&self) -> u32 {
+        let mut size = self.frames_to_classify().len() as u32;
+        size += self.frames_classified().len() as u32;
+
+        size
+    }
 
     fn add(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
         let mut app_state = state.lock().map_err(|e| e.to_string())?;
@@ -126,7 +134,9 @@ pub trait CalibrationFrame: ClassifiableFrame + Clone + Any {
     fn gain(&self) -> &u32;
 
     fn calibration_type(&self) -> CalibrationType;
-    fn as_any(&self) -> &dyn Any;
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 
     fn calibration_table_row(&self, state: &State<Mutex<AppState>>) -> Result<CalibrationTableRow, Box<dyn Error>>;
     fn get_field_value(&self, field: &str, equipment_list: &EquipmentList) -> String;

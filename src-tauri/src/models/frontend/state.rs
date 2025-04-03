@@ -10,6 +10,7 @@ use serde::ser::SerializeMap;
 use serde::{Deserialize, Serialize, Serializer};
 use serde::de::Error;
 use uuid::Uuid;
+use crate::models::imaging_frames::imaging_frame::ClassifiableFrame;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FrontendAppState {
@@ -34,7 +35,6 @@ pub struct LogTableRow {
     target: String,
     sub_length: f64,
     total_subs: u32,
-    integrated_subs: Option<u32>,
     filter: String,
     gain: u32,
     offset: Option<u32>,
@@ -59,10 +59,8 @@ impl LogTableRow {
 
         match light_frame {
             Some(light_frame) => {
-                let filter_name = app_state
-                    .equipment_list
-                    .filters
-                    .get(&light_frame.filter_id)
+                let filter_name = light_frame.filter_id
+                    .and_then(|id| app_state.equipment_list.filters.get(&id))
                     .map_or("N/A".to_string(), |filter| filter.view_name().clone());
 
                 let telescope_name = app_state
@@ -71,10 +69,8 @@ impl LogTableRow {
                     .get(&light_frame.telescope_id)
                     .map_or("N/A".to_string(), |telescope| telescope.view_name().clone());
 
-                let flattener_name = app_state
-                    .equipment_list
-                    .flatteners
-                    .get(&light_frame.flattener_id)
+                let flattener_name = light_frame.flattener_id
+                    .and_then(|id| app_state.equipment_list.flatteners.get(&id))
                     .map_or("N/A".to_string(), |flattener| flattener.view_name().clone());
 
                 let mount_name = app_state
@@ -94,8 +90,7 @@ impl LogTableRow {
                     date: light_frame.date.clone(),
                     target: light_frame.target.clone(),
                     sub_length: light_frame.sub_length,
-                    total_subs: light_frame.total_subs,
-                    integrated_subs: light_frame.integrated_subs,
+                    total_subs: light_frame.total_subs(),
                     filter: filter_name,
                     gain: light_frame.gain,
                     offset: light_frame.offset,

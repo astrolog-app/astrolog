@@ -19,7 +19,6 @@ export const ImagingSessionDetailsSchema = z.object({
   gain: z.number().nonnegative("Gain must be a non-negative number"),
   sub_length: z.number().positive("Sub length must be a positive number"),
   notes: z.string().optional(),
-  integrated_subs: z.number().int().positive("Integrated subs must be a positive integer").optional(),
   offset: z.number().optional(),
   camera_temp: z.number().optional(),
 })
@@ -36,10 +35,10 @@ export const ImagingSessionEquipmentSchema = z.object({
   }),
   filter: z.string().uuid({
     message: "Filter ID must be a valid UUID."
-  }),
+  }).optional(),
   flattener: z.string().uuid({
     message: "Flattener ID must be a valid UUID."
-  })
+  }).optional()
 });
 
 export const ImagingSessionWeatherSchema = z.object({

@@ -29,6 +29,8 @@ import {
 import { DeleteSVG } from '@/public/svgs';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from '@/components/ui/use-toast';
+import { useModal } from '@/context/modalProvider';
+import NewImagingSession from '@/components/modals/imagingSession/newImagingSession';
 
 interface SessionTableProps {
   setImages: Dispatch<SetStateAction<string[] | undefined>>;
@@ -235,9 +237,20 @@ function ImagingSessionContextMenu({
 }: {
   session: ImagingSession | undefined;
 }) {
+  const { openModal } = useModal();
+
   return (
     <ContextMenuContent className="w-64">
-      <ContextMenuItem inset disabled={!session}>
+        <ContextMenuItem inset disabled={!session} onClick={() =>
+          invoke("open_imaging_session", { id: session?.id })
+            .catch((error) => {
+              toast({
+                variant: 'destructive',
+                title: 'Uh oh! Something went wrong.',
+                description: 'Error: ' + error,
+              });
+            })
+        }>
         Open...
         <ContextMenuShortcut>⌘]</ContextMenuShortcut>
       </ContextMenuItem>
@@ -252,7 +265,12 @@ function ImagingSessionContextMenu({
         </ContextMenuShortcut>
       </ContextMenuItem>
       <ContextMenuSeparator />
-      <ContextMenuItem inset>Add new Session...</ContextMenuItem>
+      <ContextMenuItem
+        inset
+        onClick={() => openModal(<NewImagingSession />)}
+      >
+        Add new Session...
+      </ContextMenuItem>
     </ContextMenuContent>
   );
 }
