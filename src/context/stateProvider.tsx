@@ -140,6 +140,17 @@ export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): 
         locations: locationsMap,
       };
 
+      let fixedAnalytics: Analytics | null = null;
+      if (responseData.analytics) {
+        fixedAnalytics = {
+          ...responseData.analytics,
+          sessions_chart: responseData.analytics.sessions_chart.map((item) => ({
+            ...item,
+            date: new Date(item.date),
+          })),
+        };
+      }
+
       // Construct the final AppState with parsed dates, equipment Maps, and config.locations as a Map.
       const fixedAppState: AppState = {
         local_config: responseData.local_config,
@@ -149,7 +160,7 @@ export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): 
           calibration: responseData.table_data.calibration,
         },
         image_list: responseData.image_list,
-        analytics: responseData.analytics,
+        analytics: fixedAnalytics,
         equipment_list: {
           cameras: parseEquipmentItem<Camera>(responseData.equipment_list.cameras),
           telescopes: parseEquipmentItem<Telescope>(responseData.equipment_list.telescopes),

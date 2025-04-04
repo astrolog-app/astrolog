@@ -26,7 +26,7 @@ export function Analytics() {
               <InfoCard infoCard={appState.analytics.info_cards.total_imaging_session} />
               <InfoCard infoCard={appState.analytics.info_cards.unique_targets} />
             </div>
-            <SessionsChart />
+            <SessionsChart data={appState.analytics.sessions_chart} />
           </div>
         )
       }

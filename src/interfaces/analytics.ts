@@ -3,8 +3,8 @@ export interface Analytics {
   info_cards: InfoCards;
 }
 
-interface SessionsChartData {
-  date: string;
+export interface SessionsChartData {
+  date: Date;
   seconds: number;
 }
 
