@@ -22,6 +22,7 @@ pub fn load_frontend_app_state(state: State<Mutex<AppState>>) -> Result<String, 
     // TODO: now skips if calibration_table_row() returns an error
     let mut calibration_data: Vec<CalibrationTableRow> = dark_frames
         .iter()
+        .filter(|f| !f.1.in_imaging_session)
         .map(|f| f.1.calibration_table_row(&state))
         .filter_map(Result::ok) // keep only successful results
         .collect();

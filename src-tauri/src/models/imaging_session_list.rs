@@ -81,6 +81,7 @@ impl ImagingSessionList {
                 gain: 0,
                 frames_to_classify: calibration.dark_frames_to_classify.clone(),
                 frames_classified: vec![],
+                in_imaging_session: true,
                 calibration_type: CalibrationType::DARK,
                 camera_temp: 0.0,
                 sub_length: light_frame.sub_length,

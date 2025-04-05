@@ -22,6 +22,7 @@ pub struct DarkFrame {
     pub gain: u32,
     pub frames_to_classify: Vec<PathBuf>,
     pub frames_classified: Vec<PathBuf>,
+    pub in_imaging_session: bool,
 
     #[serde(skip_serializing, skip_deserializing)]
     pub calibration_type: CalibrationType,

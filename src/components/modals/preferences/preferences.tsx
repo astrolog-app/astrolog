@@ -8,6 +8,7 @@ import LocationsForm from './tabs/locationsForm';
 import BackupForm from '@/components/modals/preferences/tabs/backupForm';
 import { FolderPathBuilder, FolderPathBuilderType } from '@/components/modals/preferences/tabs/folderPathBuilder';
 import { ReactNode } from 'react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function Preferences() {
   return (
@@ -86,13 +87,13 @@ interface ContentProps {
 
 function Content({ title, subtitle, children }: ContentProps) {
   return (
-    <div className={styles.content}>
-      <div className={styles.header}>
+    <ScrollArea className={styles.scrollArea}>
+      <div className={styles.inner}>
         <div className={styles.title}>{title}</div>
         <div className={styles.subtitle}>{subtitle}</div>
         <Separator className={styles.separator} />
+        {children}
       </div>
-      <div className={styles.children}>{children}</div>
-    </div>
+    </ScrollArea>
   );
 }

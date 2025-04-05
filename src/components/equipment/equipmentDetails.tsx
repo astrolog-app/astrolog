@@ -24,6 +24,8 @@ import { useModal } from '@/context/modalProvider';
 import EquipmentModal from '@/components/modals/equipment/equipment';
 import EquipmentNoteEditor from '@/components/modals/equipment/equipmentNoteEditor';
 import { cn } from '@/utils/classNames';
+import { InfoCardData } from '@/interfaces/analytics';
+import { toast } from '@/components/ui/use-toast';
 
 interface EquipmentDetailsProps {
   selectedItem: EquipmentItem | undefined;
@@ -60,12 +62,10 @@ export default function EquipmentDetails({ selectedItem }: EquipmentDetailsProps
         </Button>
       </div>
 
-      <QuickOverview />
-
       <Tabs defaultValue="specs">
         <TabsList className={styles.tabsList}>
           <TabsTrigger value="specs">Detailed Specs</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          {/*<TabsTrigger value="analytics">Analytics</TabsTrigger> TODO*/}
           <TabsTrigger value="notes">Notes ({selectedItem.notes.size})</TabsTrigger>
         </TabsList>
         <TabsContent value="specs">
@@ -81,43 +81,6 @@ export default function EquipmentDetails({ selectedItem }: EquipmentDetailsProps
 
       { /* Gallery */}
     </ScrollArea>
-  );
-}
-
-function QuickOverview() {
-  return (
-    <div className={styles.overview}>
-      <h2 className="text-xl font-semibold mb-4">Quick Overview</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="flex items-center space-x-4">
-          <div className="bg-blue-500 rounded-full p-3">
-            <Clock className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-400">Total Observation Time</p>
-            <p className="text-2xl font-bold">127.5 hours</p>
-          </div>
-        </div>
-        <div className="flex items-center space-x-4">
-          <div className="bg-green-500 rounded-full p-3">
-            <Star className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-400">Objects Observed</p>
-            <p className="text-2xl font-bold">342</p>
-          </div>
-        </div>
-        <div className="flex items-center space-x-4">
-          <div className="bg-purple-500 rounded-full p-3">
-            <Galaxy className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-400">Last Target</p>
-            <p className="text-2xl font-bold">M31 Andromeda</p>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -189,13 +152,18 @@ function EquipmentDetailsTable({ selectedItem }: { selectedItem: EquipmentItem }
 }
 
 function EquipmentAnalytics({ selectedItem }: { selectedItem: EquipmentItem }) {
+  const data: InfoCardData = {
+    content: '', decrease: false, value: '', value_description: '',
+    title: "test"
+
+  }
   return (
     <div>
       <EquipmentMonthlyUsage />
       <div className={styles.infoCards}>
-        <InfoCard index={0} className={styles.card} />
-        <InfoCard index={0} className={styles.card} />
-        <InfoCard index={0} className={styles.card} />
+        <InfoCard infoCard={data} className={styles.card} />
+        <InfoCard infoCard={data} className={styles.card} />
+        <InfoCard infoCard={data} className={styles.card} />
       </div>
     </div>
   );
@@ -228,28 +196,40 @@ function EquipmentNotes({ selectedItem }: { selectedItem: EquipmentItem }) {
   );
 }
 
-function Note({ className, note, item }: { className?: string, note: EquipmentNote, item: EquipmentItem }) {
-  const { openModal } = useModal();
+function Note({
+                       className,
+                       note,
+                       item,
+                     }: {
+  className?: string
+  note: EquipmentNote
+  item: EquipmentItem
+}) {
+  const { openModal } = useModal()
 
   const formatDate = (date: Date): string => {
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+  }
 
-  function deleteNote() {}
+  function deleteNote() {
+    toast({
+      variant: 'destructive',
+      title: 'Feature not implemented!',
+      description: 'This feature will be available soon.'
+    });
+  }
 
   return (
-    <div
-      className={cn(className, "group relative bg-gray-900 p-4 rounded-lg hover:bg-gray-800 transition-colors")}
-    >
+    <div className={cn("group relative bg-muted p-4 rounded-lg hover:bg-muted/80 border transition-colors", className)}>
       <div className="flex items-center gap-2 mb-2">
-        <Clock className="w-4 h-4 text-blue-400" />
-        <p className="font-medium text-gray-100">{formatDate(note.date)}</p>
+        <Clock className="w-4 h-4 text-primary" />
+        <p className="font-medium text-foreground">{formatDate(note.date)}</p>
       </div>
-      <p className="text-gray-300">{note.note}</p>
+      <p className="text-foreground/80">{note.note}</p>
       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
         <Button
           variant="ghost"
@@ -262,12 +242,12 @@ function Note({ className, note, item }: { className?: string, note: EquipmentNo
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-red-400 hover:text-red-300"
+          className="h-8 w-8 text-destructive hover:text-destructive/80"
           onClick={() => deleteNote()}
         >
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
     </div>
-  );
+  )
 }

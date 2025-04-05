@@ -43,22 +43,17 @@ export default function Equipment() {
           Add Equipment Item
         </Button>
       </HeaderCard>
-      <ResizablePanelGroup className={styles.content} direction="horizontal">
-        <ResizablePanel defaultSize={30} minSize={20} maxSize={70}>
-          <Card className={styles.card}>
-            <EquipmentListView
-              selectedItem={selectedItem}
-              setSelectedItem={setSelectedItem}
-            />
-          </Card>
-        </ResizablePanel>
-        <ResizableHandle withHandle className={styles.handle} />
-        <ResizablePanel defaultSize={70}>
-          <Card className={styles.card}>
-            <EquipmentDetails selectedItem={selectedItem} />
-          </Card>
-        </ResizablePanel>
-      </ResizablePanelGroup>
+      <div className={styles.lower}>
+        <Card className={styles.listView}>
+          <EquipmentListView
+            selectedItem={selectedItem}
+            setSelectedItem={setSelectedItem}
+          />
+        </Card>
+        <Card className={styles.details}>
+          <EquipmentDetails selectedItem={selectedItem} />
+        </Card>
+      </div>
     </Tab>
   );
 }

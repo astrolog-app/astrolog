@@ -140,7 +140,9 @@ export default function EquipmentModal({ type, item }: EquipmentProps) {
                 <FormLabel>Equipment Type</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger
+                      disabled={isEdit}
+                    >
                       <SelectValue placeholder="Select equipment type" />
                     </SelectTrigger>
                   </FormControl>

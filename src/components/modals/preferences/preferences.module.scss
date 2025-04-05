@@ -15,26 +15,26 @@
       margin-bottom: 0.25rem;
 
       &:last-of-type {
-        margin-bottom: 0rem;
+        margin-bottom: 0;
       }
     }
   }
 
   .tabsContent {
-    padding-left: 1rem;
+    padding-left: 0.75rem;
     flex-grow: 1;
     overflow-y: hidden;
   }
 }
 
-.content {
+.scrollArea {
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  max-width: 55rem;
+  padding-right: 0.5rem;
 
-  .header {
-    margin-bottom: 1.25rem;
+  .inner {
+    padding-right: 0.25rem;
+    padding-left: 0.25rem;
+    max-width: 55rem;
 
     .title {
       font-weight: 600;
@@ -50,12 +50,8 @@
     .separator {
       margin-top: 1.25rem;
       width: 100%;
+      margin-bottom: 1.25rem;
     }
-  }
-
-  .children {
-    overflow: auto;
-    flex-grow: 1;
   }
 }
 
@@ -86,12 +82,16 @@
 
       button {
         width: fit-content;
-        margin-bottom: 0rem;
+        margin-bottom: 0;
       }
     }
 
     .tabsContent {
       padding-left: 0;
     }
+  }
+
+  .scrollArea {
+    margin-top: var(--padding);
   }
 }

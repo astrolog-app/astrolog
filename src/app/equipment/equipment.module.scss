@@ -2,16 +2,17 @@
   display: flex;
   flex-direction: column;
 
-  .content {
+  .lower {
+    display: flex;
     flex-grow: 1;
 
-    .card {
-      height: 100%;
+    .listView {
+      margin-right: var(--padding);
+      width: 30rem;
     }
 
-    .handle {
-      margin-left: var(--padding);
-      margin-right: var(--padding);
+    .details {
+      flex-grow: 1;
     }
   }
 }
