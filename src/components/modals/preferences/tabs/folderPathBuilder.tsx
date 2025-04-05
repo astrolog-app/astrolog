@@ -91,8 +91,8 @@ export function FolderPathBuilder({ type }: { type: FolderPathBuilderType }) {
     folderPathPlaceholder: string;
   }> = {
     [FolderPathBuilderType.IMAGING_SESSION]: {
-      defaultBaseFolder: appState.config.folder_paths.imaging_session_folder_path.base_folder,
-      defaultFolderPath: appState.config.folder_paths.imaging_session_folder_path.pattern,
+      defaultBaseFolder: appState.config.folder_paths.imaging_session_base_folder,
+      defaultFolderPath: appState.config.folder_paths.imaging_session_pattern,
       requiredTokens: ['$$DATE$$', '$$TARGET$$'],
       tokens: PREDEFINED_TOKENS_IS,
       defaultTokenValues: DEFAULT_TOKEN_VALUES_IS,
@@ -100,8 +100,8 @@ export function FolderPathBuilder({ type }: { type: FolderPathBuilderType }) {
       folderPathPlaceholder: '$$TARGET$$_$$TELESCOPE$$/$$DATE$$'
     },
     [FolderPathBuilderType.CALIBRATION]: {
-      defaultBaseFolder: appState.config.folder_paths.calibration_frames_folder_path.base_folder,
-      defaultFolderPath: appState.config.folder_paths.calibration_frames_folder_path.pattern,
+      defaultBaseFolder: appState.config.folder_paths.calibration_base_folder,
+      defaultFolderPath: appState.config.folder_paths.dark_frame_pattern,
       requiredTokens: ['$$CAMERA$$'],
       tokens: PREDEFINED_TOKENS_CAL,
       defaultTokenValues: DEFAULT_TOKEN_VALUES_CAL,

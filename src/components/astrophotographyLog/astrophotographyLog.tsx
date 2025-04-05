@@ -11,7 +11,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '../ui/dropdown-menu';
 import { DataTable } from './dataTable';
 import { useAppState } from '@/context/stateProvider';
@@ -24,13 +24,15 @@ import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
-  ContextMenuShortcut,
+  ContextMenuShortcut
 } from '../ui/context-menu';
 import { DeleteSVG } from '@/public/svgs';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from '@/components/ui/use-toast';
 import { useModal } from '@/context/modalProvider';
-import NewImagingSession from '@/components/modals/imagingSession/newImagingSession';
+import NewImagingSession, { newImagingSession } from '@/components/modals/imagingSession/newImagingSession';
+import { newCalibrationFrameSession } from '@/components/modals/calibrationRowEditor';
+import SelectImagingFrames from '@/components/modals/selectImagingFrames';
 
 interface SessionTableProps {
   setImages: Dispatch<SetStateAction<string[] | undefined>>;
@@ -46,7 +48,7 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
   const [value, setValue] = useState<any>(undefined);
   const [session, setSession] = useState<ImagingSession | undefined>(undefined);
   const [calibration, setCalibration] = useState<CalibrationFrame | undefined>(
-    undefined,
+    undefined
   );
 
   useEffect(() => {
@@ -65,8 +67,8 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
           .catch((err) =>
             toast({
               variant: 'destructive',
-              description: 'Failed to open Image: ' + err,
-            }),
+              description: 'Failed to open Image: ' + err
+            })
           );
       }
     }
@@ -233,32 +235,49 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
 }
 
 function ImagingSessionContextMenu({
-  session,
-}: {
+                                     session
+                                   }: {
   session: ImagingSession | undefined;
 }) {
   const { openModal } = useModal();
+  const { appState } = useAppState();
 
   return (
     <ContextMenuContent className="w-64">
-        <ContextMenuItem inset disabled={!session} onClick={() =>
-          invoke("open_imaging_session", { id: session?.id })
-            .catch((error) => {
-              toast({
-                variant: 'destructive',
-                title: 'Uh oh! Something went wrong.',
-                description: 'Error: ' + error,
-              });
-            })
-        }>
+      <ContextMenuItem inset disabled={!session} onClick={() =>
+        invoke('open_imaging_session', { id: session?.id })
+          .catch((error) => {
+            toast({
+              variant: 'destructive',
+              title: 'Uh oh! Something went wrong.',
+              description: 'Error: ' + error
+            });
+          })
+      }>
         Open...
         <ContextMenuShortcut>⌘]</ContextMenuShortcut>
       </ContextMenuItem>
-      <ContextMenuItem inset disabled={!session}>
+      <ContextMenuItem
+        inset
+        disabled={!session}
+        onClick={() => toast({
+          variant: 'destructive',
+          title: 'Feature not implemented!',
+          description: 'This feature will be available soon.'
+        })}
+      >
         Edit...
-        <ContextMenuShortcut>⌘]</ContextMenuShortcut>
       </ContextMenuItem>
-      <ContextMenuItem inset disabled={!session} className={styles.delete}>
+      <ContextMenuItem
+        inset
+        disabled={!session}
+        className={styles.delete}
+        onClick={() => toast({
+          variant: 'destructive',
+          title: 'Feature not implemented!',
+          description: 'This feature will be available soon.'
+        })}
+      >
         Delete
         <ContextMenuShortcut>
           <DeleteSVG />
@@ -267,7 +286,10 @@ function ImagingSessionContextMenu({
       <ContextMenuSeparator />
       <ContextMenuItem
         inset
-        onClick={() => openModal(<NewImagingSession />)}
+        onClick={() => newImagingSession({
+          appState,
+          open: () => openModal(<NewImagingSession />),
+        })}
       >
         Add new Session...
       </ContextMenuItem>
@@ -276,28 +298,61 @@ function ImagingSessionContextMenu({
 }
 
 function CalibrationContextMenu({
-  calibration,
-}: {
+                                  calibration
+                                }: {
   calibration: CalibrationFrame | undefined;
 }) {
+  const { openModal } = useModal();
+  const { appState } = useAppState();
+
   return (
     <ContextMenuContent className="w-64">
-      <ContextMenuItem inset disabled={!calibration}>
+      <ContextMenuItem
+        inset
+        disabled={!calibration}
+        onClick={() => toast({
+          variant: 'destructive',
+          title: 'Feature not implemented!',
+          description: 'This feature will be available soon.'
+        })}
+      >
         Open...
-        <ContextMenuShortcut>⌘]</ContextMenuShortcut>
       </ContextMenuItem>
-      <ContextMenuItem inset disabled={!calibration}>
+      <ContextMenuItem
+        inset
+        disabled={!calibration}
+        onClick={() => toast({
+          variant: 'destructive',
+          title: 'Feature not implemented!',
+          description: 'This feature will be available soon.'
+        })}
+      >
         Edit...
-        <ContextMenuShortcut>⌘]</ContextMenuShortcut>
       </ContextMenuItem>
-      <ContextMenuItem inset disabled={!calibration} className={styles.delete}>
+      <ContextMenuItem
+        inset
+        disabled={!calibration}
+        className={styles.delete}
+        onClick={() => toast({
+          variant: 'destructive',
+          title: 'Feature not implemented!',
+          description: 'This feature will be available soon.'
+        })}
+      >
         Delete
         <ContextMenuShortcut>
           <DeleteSVG />
         </ContextMenuShortcut>
       </ContextMenuItem>
       <ContextMenuSeparator />
-      <ContextMenuItem inset>Add new Frames...</ContextMenuItem>
+      <ContextMenuItem
+        inset
+        onClick={() => newCalibrationFrameSession({
+          appState,
+          open: () => openModal(<SelectImagingFrames />),
+        })}
+      >Add new Frames...
+      </ContextMenuItem>
     </ContextMenuContent>
   );
 }

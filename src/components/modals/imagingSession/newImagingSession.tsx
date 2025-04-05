@@ -13,7 +13,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import FileListSelector from '@/components/fileSelectors/fileListSelector';
@@ -23,6 +23,9 @@ import { ImagingSessionBaseSchema } from '@/schemas/imagingSessionSchema';
 import { ImagingSessionBase } from '@/interfaces/imagingSessionEdit';
 import { v4 as uuidv4 } from 'uuid';
 import { UUID } from 'crypto';
+import { useAppState } from '@/context/stateProvider';
+import { AppState } from '@/interfaces/state';
+import { toast } from '@/components/ui/use-toast';
 
 export default function NewImagingSession() {
   const { openModal } = useModal();
@@ -30,15 +33,15 @@ export default function NewImagingSession() {
   const form = useForm<z.infer<typeof ImagingSessionBaseSchema>>({
     resolver: zodResolver(ImagingSessionBaseSchema),
     defaultValues: {
-      frames: [],
-    },
+      frames: []
+    }
   });
 
   function onSubmit() {
     const base: ImagingSessionBase = {
       id: uuidv4() as UUID,
       frames: form.getValues().frames
-    }
+    };
 
     openModal(<ImagingSessionEditor base={base} />);
   }
@@ -74,4 +77,58 @@ export default function NewImagingSession() {
       </Form>
     </Modal>
   );
+}
+
+export function newImagingSession({ open, appState }: { open: () => void, appState: AppState }) {
+  if (appState.config.folder_paths.imaging_session_base_folder === "" || appState.config.folder_paths.imaging_session_pattern === "") {
+    toast({
+      variant: 'destructive',
+      title: 'Uh oh! Something went wrong.',
+      description: 'You have to set a folder path for your imaging sessions (preferences)!'
+    });
+
+    return;
+  }
+
+  if (appState.config.locations.size === 0) {
+    toast({
+      variant: 'destructive',
+      title: 'Uh oh! Something went wrong.',
+      description: 'You have to set at least one location (preferences)!'
+    });
+
+    return;
+  }
+
+  if (appState.equipment_list.cameras.size === 0) {
+    toast({
+      variant: 'destructive',
+      title: 'Uh oh! Something went wrong.',
+      description: 'You have to add at least one camera to your equipment list!!'
+    });
+
+    return;
+  }
+
+  if (appState.equipment_list.telescopes.size === 0) {
+    toast({
+      variant: 'destructive',
+      title: 'Uh oh! Something went wrong.',
+      description: 'You have to add at least one telescope to your equipment list!!'
+    });
+
+    return;
+  }
+
+  if (appState.equipment_list.mounts.size === 0) {
+    toast({
+      variant: 'destructive',
+      title: 'Uh oh! Something went wrong.',
+      description: 'You have to add at least one mount to your equipment list!!'
+    });
+
+    return;
+  }
+
+  open()
 }

@@ -38,12 +38,12 @@ export default function Home() {
       tooltip: 'Equipment',
       icon: <EquipmentSVG />,
     },
-    {
-      component: <Gallery />,
-      key: 'gallery',
-      tooltip: 'Gallery',
-      icon: <GallerySVG />,
-    },
+    // {
+    //   component: <Gallery />,
+    //   key: 'gallery',
+    //   tooltip: 'Gallery',
+    //   icon: <GallerySVG />,
+    // },
     {
       component: <Analytics />,
       key: 'analytics',

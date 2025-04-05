@@ -33,14 +33,11 @@ const defaultAppState: AppState = {
   },
   config: {
     folder_paths: {
-      imaging_session_folder_path: {
-        base_folder: '',
-        pattern: '',
-      },
-      calibration_frames_folder_path: {
-        base_folder: '',
-        pattern: '',
-      },
+      imaging_session_base_folder: "",
+      imaging_session_pattern: "",
+      calibration_base_folder: "",
+      dark_frame_pattern: "",
+      bias_frame_pattern: "",
     },
     locations: new Map<UUID, Location>(),
   },

@@ -98,7 +98,7 @@ export default function SourceForm() {
             </FormItem>
           )}
         />
-        <FormField
+        {/*<FormField
           control={form.control}
           name="backupDirectory"
           render={({ field }) => (
@@ -134,7 +134,7 @@ export default function SourceForm() {
               <FormMessage />
             </FormItem>
           )}
-        />
+        />*/}
         <FormField
           control={form.control}
           name="sourceDirectory"

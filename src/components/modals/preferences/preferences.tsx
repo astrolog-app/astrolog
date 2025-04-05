@@ -16,7 +16,7 @@ export function Preferences() {
         <TabsList className={styles.tabsList}>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
           <TabsTrigger value="source">Source</TabsTrigger>
-          <TabsTrigger value="backup">Backup</TabsTrigger>
+          {/*<TabsTrigger value="backup">Backup</TabsTrigger>*/}
           <TabsTrigger value="imaging_sessions">Imaging Sessions</TabsTrigger>
           <TabsTrigger value="calibration_frames">Calibration Frames</TabsTrigger>
           <TabsTrigger value="location">Locations</TabsTrigger>

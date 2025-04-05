@@ -10,16 +10,22 @@ import {
   MenubarSub,
   MenubarSubContent,
   MenubarSubTrigger,
-  MenubarTrigger,
+  MenubarTrigger
 } from '@/components/ui/menubar';
 import { Preferences } from '../modals/preferences/preferences';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from '@/components/ui/use-toast';
 import { useModal } from '@/context/modalProvider';
-import NewImagingSession from '@/components/modals/imagingSession/newImagingSession';
+import NewImagingSession, { newImagingSession } from '@/components/modals/imagingSession/newImagingSession';
+import { newCalibrationFrameSession } from '@/components/modals/calibrationRowEditor';
+import SelectImagingFrames from '@/components/modals/selectImagingFrames';
+import { useAppState } from '@/context/stateProvider';
+import EquipmentModal from '@/components/modals/equipment/equipment';
+import { EquipmentType } from '@/enums/equipmentType';
 
 export function TopBar() {
   const { openModal } = useModal();
+  const { appState } = useAppState();
 
   function openBrowser(url: string): void {
     invoke('open_browser', { url: url }).catch((error) => {
@@ -50,7 +56,7 @@ export function TopBar() {
         <MenubarMenu>
           <MenubarTrigger className={styles.astrolog}>AstroLog</MenubarTrigger>
           <MenubarContent>
-            <MenubarItem>About AstroLog</MenubarItem>
+            <MenubarItem onClick={() => openBrowser('https://astro-log.app/about/')}>About AstroLog</MenubarItem>
             <MenubarSeparator />
             <MenubarItem onClick={() => openModal(<Preferences />)}>
               Preferences...
@@ -63,17 +69,22 @@ export function TopBar() {
         <MenubarMenu>
           <MenubarTrigger>Imaging Frames</MenubarTrigger>
           <MenubarContent>
-            <MenubarItem onClick={() => openModal(<NewImagingSession />)}>
+            <MenubarItem
+              onClick={() => newImagingSession({
+                appState,
+                open: () => openModal(<NewImagingSession />),
+              })}
+            >
               New Imaging Session...
             </MenubarItem>
-            <MenubarSeparator />
-            <MenubarSub>
-              <MenubarSubTrigger>Calibration</MenubarSubTrigger>
-              <MenubarSubContent>
-                <MenubarItem>New Dark Frame...</MenubarItem>
-                <MenubarItem>New Bias Frame...</MenubarItem>
-              </MenubarSubContent>
-            </MenubarSub>
+            <MenubarItem
+              onClick={() => newCalibrationFrameSession({
+                appState,
+                open: () => openModal(<SelectImagingFrames />),
+              })}
+            >
+              New Calibration Frame...
+            </MenubarItem>
           </MenubarContent>
         </MenubarMenu>
         <MenubarMenu>
@@ -82,21 +93,21 @@ export function TopBar() {
             <MenubarSub>
               <MenubarSubTrigger>New Equipment Item</MenubarSubTrigger>
               <MenubarSubContent>
-                <MenubarItem>New Telescope...</MenubarItem>
-                <MenubarItem>New Camera...</MenubarItem>
-                <MenubarItem>New Mount...</MenubarItem>
-                <MenubarItem>New Filter...</MenubarItem>
-                <MenubarItem>New Flattener...</MenubarItem>
+                <MenubarItem onClick={() => openModal(<EquipmentModal type={EquipmentType.TELESCOPE} />)}>New Telescope...</MenubarItem>
+                <MenubarItem onClick={() => openModal(<EquipmentModal type={EquipmentType.CAMERA} />)}>New Camera...</MenubarItem>
+                <MenubarItem onClick={() => openModal(<EquipmentModal type={EquipmentType.MOUNT} />)}>New Mount...</MenubarItem>
+                <MenubarItem onClick={() => openModal(<EquipmentModal type={EquipmentType.FILTER} />)}>New Filter...</MenubarItem>
+                <MenubarItem onClick={() => openModal(<EquipmentModal type={EquipmentType.FLATTENER} />)}>New Flattener...</MenubarItem>
               </MenubarSubContent>
             </MenubarSub>
           </MenubarContent>
         </MenubarMenu>
-        <MenubarMenu>
+        {/*<MenubarMenu>
           <MenubarTrigger>Gallery</MenubarTrigger>
           <MenubarContent>
             <MenubarItem>New Image...</MenubarItem>
           </MenubarContent>
-        </MenubarMenu>
+        </MenubarMenu>*/}
         <MenubarMenu>
           <MenubarTrigger>Help</MenubarTrigger>
           <MenubarContent>

@@ -125,9 +125,9 @@ impl CalibrationFrame for DarkFrame {
     fn build_path(&self, state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>> {
         let app_state = state.lock().map_err(|e| e.to_string())?;
 
-        let mut base = app_state.config.folder_paths.dark_frame_folder_path.base_folder.clone();
+        let mut base = app_state.config.folder_paths.calibration_base_folder.clone();
         base.push("Dark");
-        let pattern = app_state.config.folder_paths.dark_frame_folder_path.pattern.clone();
+        let pattern = app_state.config.folder_paths.dark_frame_pattern.clone();
         let get_field_value = |field_name: &str| {
             self.get_field_value(field_name, &app_state.equipment_list)
         };

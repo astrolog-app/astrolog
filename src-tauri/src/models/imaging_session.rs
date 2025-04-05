@@ -77,14 +77,12 @@ impl ImagingSession {
         let base_folder = app_state
             .config
             .folder_paths
-            .imaging_session_folder_path
-            .base_folder
+            .imaging_session_base_folder
             .clone();
         let pattern_path = app_state
             .config
             .folder_paths
-            .imaging_session_folder_path
-            .pattern
+            .imaging_session_pattern
             .clone();
 
         let get_field_value =

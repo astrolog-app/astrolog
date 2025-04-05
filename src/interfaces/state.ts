@@ -29,13 +29,12 @@ export interface Config {
 }
 
 export interface FolderPaths {
-  imaging_session_folder_path: FolderPath,
-  calibration_frames_folder_path: FolderPath,
-}
+  imaging_session_base_folder: string;
+  imaging_session_pattern: string;
 
-interface FolderPath {
-  base_folder: string,
-  pattern: string,
+  calibration_base_folder: string;
+  dark_frame_pattern: string;
+  bias_frame_pattern: string;
 }
 
 export interface Location {

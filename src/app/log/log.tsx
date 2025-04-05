@@ -5,7 +5,7 @@ import styles from './log.module.scss';
 import { AstrophotographyLog } from '@/components/astrophotographyLog/astrophotographyLog';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
-import NewImagingSession from '@/components/modals/imagingSession/newImagingSession';
+import NewImagingSession, { newImagingSession } from '@/components/modals/imagingSession/newImagingSession';
 import { save } from '@tauri-apps/plugin-dialog';
 import { toast } from '@/components/ui/use-toast';
 import { invoke } from '@tauri-apps/api/core';
@@ -19,34 +19,42 @@ import SelectImagingFrames from '@/components/modals/selectImagingFrames';
 import ImagePreview, { ImagePreviewUndefined } from '@/components/images/imagePreview';
 import HeaderCard from '@/components/headerCard';
 import { Download, Plus } from 'lucide-react';
+import { useAppState } from '@/context/stateProvider';
+import { newCalibrationFrameSession } from '@/components/modals/calibrationRowEditor';
 
 export default function Log() {
   const { openModal } = useModal();
+  const { appState } = useAppState();
 
   const [images, setImages] = useState<string[] | undefined>(undefined);
 
   function exportCSV() {
-    save({
-      defaultPath: '', // TODO: define default path
-      filters: [
-        {
-          name: '.csv',
-          extensions: ['csv'],
-        },
-      ],
+    toast({
+      variant: 'destructive',
+      title: 'Feature not implemented!',
+      description: 'This feature will be available soon.'
     })
-      .then((selectedPath) => {
-        if (selectedPath) {
-          console.log(selectedPath);
-          invoke('export_csv', { path: selectedPath });
-        }
-      })
-      .catch((err) =>
-        toast({
-          variant: 'destructive',
-          description: 'Failed to export CSV: ' + err,
-        }),
-      );
+    // save({
+    //   defaultPath: '', // TODO: define default path
+    //   filters: [
+    //     {
+    //       name: '.csv',
+    //       extensions: ['csv'],
+    //     },
+    //   ],
+    // })
+    //   .then((selectedPath) => {
+    //     if (selectedPath) {
+    //       console.log(selectedPath);
+    //       invoke('export_csv', { path: selectedPath });
+    //     }
+    //   })
+    //   .catch((err) =>
+    //     toast({
+    //       variant: 'destructive',
+    //       description: 'Failed to export CSV: ' + err,
+    //     }),
+    //   );
   }
 
   return (
@@ -58,7 +66,10 @@ export default function Log() {
         <Button
           variant="secondary"
           size="sm"
-          onClick={() => openModal(<NewImagingSession />)}
+          onClick={() => newImagingSession({
+            appState,
+            open: () => openModal(<NewImagingSession />),
+          })}
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Session
@@ -66,7 +77,10 @@ export default function Log() {
         <Button
           variant="secondary"
           size="sm"
-          onClick={() => openModal(<SelectImagingFrames />)}
+          onClick={() => newCalibrationFrameSession({
+            appState,
+            open: () => openModal(<SelectImagingFrames />),
+          })}
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Calibration

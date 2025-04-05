@@ -29,7 +29,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { AnalyzedCalibrationFrames, BiasFrame, DarkFrame } from '@/interfaces/commands';
 import { CalibrationType } from '@/enums/calibrationType';
 import { toast } from '@/components/ui/use-toast';
-import { CalibrationFrame } from '@/interfaces/state';
+import { AppState, CalibrationFrame } from '@/interfaces/state';
 import { EquipmentType } from '@/enums/equipmentType';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
@@ -288,3 +288,28 @@ export default function CalibrationRowEditor({
     </Modal>
   );
 }
+
+export function newCalibrationFrameSession({ open, appState }: { open: () => void, appState: AppState }) {
+  if (appState.config.folder_paths.calibration_base_folder === "" || appState.config.folder_paths.dark_frame_pattern === "" || appState.config.folder_paths.bias_frame_pattern === "") {
+    toast({
+      variant: 'destructive',
+      title: 'Uh oh! Something went wrong.',
+      description: 'You have to set a folder path for your calibration frames (preferences)!'
+    });
+
+    return;
+  }
+
+  if (appState.equipment_list.cameras.size === 0) {
+    toast({
+      variant: 'destructive',
+      title: 'Uh oh! Something went wrong.',
+      description: 'You have to add at least one camera to your equipment list!!'
+    });
+
+    return;
+  }
+
+  open()
+}
+

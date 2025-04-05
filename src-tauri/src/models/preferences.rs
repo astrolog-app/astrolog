@@ -47,15 +47,12 @@ pub struct Config {
 
 impl Config {
     pub fn default() -> Config {
-        let default = FolderPath {
-            base_folder: PathBuf::new(),
-            pattern: PathBuf::new(),
-        };
-
         let folder_paths = FolderPaths {
-            imaging_session_folder_path: default.clone(),
-            dark_frame_folder_path: default.clone(),
-            bias_frame_folder_path: default,
+            imaging_session_base_folder: PathBuf::new(),
+            imaging_session_pattern: PathBuf::new(),
+            calibration_base_folder: PathBuf::new(),
+            dark_frame_pattern: PathBuf::new(),
+            bias_frame_pattern: PathBuf::new(),
         };
 
         Config {
@@ -84,15 +81,12 @@ impl Config {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct FolderPaths {
-    pub imaging_session_folder_path: FolderPath,
-    pub dark_frame_folder_path: FolderPath,
-    pub bias_frame_folder_path: FolderPath,
-}
+    pub imaging_session_base_folder: PathBuf,
+    pub imaging_session_pattern: PathBuf,
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct FolderPath {
-    pub base_folder: PathBuf,
-    pub pattern: PathBuf,
+    pub calibration_base_folder: PathBuf,
+    pub dark_frame_pattern: PathBuf,
+    pub bias_frame_pattern: PathBuf,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
