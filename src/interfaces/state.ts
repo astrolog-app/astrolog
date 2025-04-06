@@ -55,6 +55,8 @@ export interface ImagingSession {
   id: UUID;
   date: Date;
   target: string;
+  location_name: string | undefined;
+  location_bortle: number | undefined;
   sub_length: number;
   total_subs: number;
   filter: string;

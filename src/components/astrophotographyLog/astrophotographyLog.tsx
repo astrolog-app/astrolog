@@ -135,8 +135,8 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
   }
 
   return (
-    <div>
-      <Card className="bg-card border-border">
+    <div className="h-full flex flex-col">
+      <Card className="bg-card border-border flex-1">
         <CardContent className="p-0">
           <div className="p-4 border-b border-border flex flex-col sm:flex-row justify-between gap-4">
             <div className="relative flex-1">
@@ -213,17 +213,17 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
               <div>
                 <p className="flex items-center gap-2 mb-1 text-foreground">
                   <Sun className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">Filter:</span> filter
+                  <span className="font-medium">Gain:</span> {session?.gain}
                 </p>
                 <p className="flex items-center gap-2 text-foreground">
                   <Cloud className="h-4 w-4 text-muted-foreground" />
                   <span className="font-medium">Conditions:</span>
-                  {`Seeing: 1, Clouds: 2%, Moon: 3%`}
+                  {'Seeing: ' + session?.average_seeing + ', Clouds: ' + session?.average_cloud_cover + ', Moon: ' + session?.average_moon + '%'}
                 </p>
               </div>
               <div>
                 <p className="mb-1 text-foreground">
-                  <span className="font-medium">Notes:</span> xxx
+                  <span className="font-medium">Notes:</span> {session?.notes}
                 </p>
               </div>
             </div>

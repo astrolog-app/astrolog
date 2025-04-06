@@ -18,7 +18,7 @@ use std::env;
 use std::sync::Mutex;
 use tauri::{Emitter, Manager};
 use tauri_plugin_updater::UpdaterExt;
-use crate::commands::preferences::{delete_location, save_location};
+use crate::commands::preferences::{change_bias_frames_folder_path, change_dark_frames_folder_path, delete_location, save_location};
 
 mod commands;
 mod file_store;
@@ -80,6 +80,8 @@ fn main() {
             add_close_lock,
             add_new_image,
             analyze_calibration_frames,
+            change_bias_frames_folder_path,
+            change_dark_frames_folder_path,
             change_imaging_session_folder_path,
             check_equipment_duplicate,
             classify_bias_frame,

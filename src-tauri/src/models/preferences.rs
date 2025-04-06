@@ -92,11 +92,11 @@ pub struct FolderPaths {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Location {
     id: Uuid,
-    name: String,
+    pub name: String,
     x: f64,
     y: f64,
     height: f64,
-    bortle: u32,
+    pub bortle: u32,
 }
 
 impl Location {

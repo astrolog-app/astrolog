@@ -20,7 +20,10 @@ export default function ImagePreview({ images }: { images: string[] }) {
   }
 
   function getLastPathSegment(path: string): string {
-    return path.replace(/\\/g, '/').split('/').filter(Boolean).pop() || '';
+    if (path) {
+      return path.replace(/\\/g, '/').split('/').filter(Boolean).pop() || "";
+    }
+    return '';
   }
 
   useEffect(() => {
@@ -29,7 +32,7 @@ export default function ImagePreview({ images }: { images: string[] }) {
 
   return (
     <ImagePreviewBase>
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col h-full">
         <div className="relative aspect-video bg-black rounded-lg overflow-hidden mb-4 flex-shrink-0">
           <ImageRenderer
             path={images[currentImage - 1] || '/placeholder.svg'}
@@ -67,7 +70,7 @@ export default function ImagePreview({ images }: { images: string[] }) {
         </div>
 
         {/* Thumbnails */}
-        <ScrollArea className="flex-1">
+        <ScrollArea className="mb-10">
           <div className="grid grid-cols-3 gap-2">
             {images.map((imageId, index) => (
               <div
@@ -107,7 +110,6 @@ function ImagePreviewBase({ children }: { children: ReactNode }) {
           <Image className="h-5 w-5 text-primary" />
           Image Preview
         </h3>
-
         {children}
       </CardContent>
     </Card>

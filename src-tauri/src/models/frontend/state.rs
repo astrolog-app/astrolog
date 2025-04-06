@@ -33,6 +33,8 @@ pub struct LogTableRow {
     id: Uuid,
     date: DateTime<Utc>,
     target: String,
+    location_name: Option<String>,
+    location_bortle: Option<u32>,
     sub_length: f64,
     total_subs: u32,
     filter: String,
@@ -85,10 +87,16 @@ impl LogTableRow {
                     .get(&light_frame.camera_id)
                     .map_or("N/A".to_string(), |camera| camera.view_name().clone());
 
+                let location = app_state.config.locations.get(&light_frame.location_id).cloned();
+                let location_name = location.as_ref().map(|loc| loc.name.clone());
+                let location_bortle = location.as_ref().map(|loc| loc.bortle);
+
                 Some(LogTableRow {
                     id: imaging_session.id,
                     date: light_frame.date.clone(),
                     target: light_frame.target.clone(),
+                    location_name,
+                    location_bortle,
                     sub_length: light_frame.sub_length,
                     total_subs: light_frame.total_subs(),
                     filter: filter_name,

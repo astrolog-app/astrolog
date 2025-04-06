@@ -91,11 +91,11 @@ export default function Log() {
         </Button>
       </HeaderCard>
       <ResizablePanelGroup className={styles.content} direction="horizontal">
-        <ResizablePanel defaultSize={70}>
+        <ResizablePanel defaultSize={70} minSize={20}>
           <AstrophotographyLog setImages={setImages} />
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={30}>
+        <ResizablePanel defaultSize={30} minSize={20}>
           {images !== undefined && images.length > 0
           ? <ImagePreview images={images} />
           : <ImagePreviewUndefined />}
