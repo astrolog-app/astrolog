@@ -27,6 +27,7 @@ import { UUID } from 'crypto';
 import { Analytics } from '@/interfaces/analytics';
 
 const defaultAppState: AppState = {
+  initialised: false,
   local_config: {
     root_directory: '',
     source_directory: '',
@@ -150,6 +151,7 @@ export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): 
 
       // Construct the final AppState with parsed dates, equipment Maps, and config.locations as a Map.
       const fixedAppState: AppState = {
+        initialised: true,
         local_config: responseData.local_config,
         config: fixedConfig,
         table_data: {

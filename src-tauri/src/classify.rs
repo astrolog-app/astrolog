@@ -1,11 +1,11 @@
+use crate::models::frontend::process::Process;
+use crate::models::state::AppState;
+use regex::Regex;
 use std::error::Error;
 use std::fs;
 use std::path::{Component, PathBuf};
 use std::sync::Mutex;
-use regex::Regex;
 use tauri::{State, Window};
-use crate::models::frontend::process::Process;
-use crate::models::state::AppState;
 
 // TODO: two images with same name?
 pub fn classify<F>(
@@ -17,7 +17,13 @@ pub fn classify<F>(
     process: &mut Process,
 ) -> Result<(), Box<dyn Error>>
 where
-    F: FnMut(&PathBuf, &PathBuf, &PathBuf, &PathBuf, &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>>,
+    F: FnMut(
+        &PathBuf,
+        &PathBuf,
+        &PathBuf,
+        &PathBuf,
+        &State<Mutex<AppState>>,
+    ) -> Result<(), Box<dyn Error>>,
 {
     let app_state = state.lock().map_err(|e| e.to_string())?;
     let root_directory = app_state.local_config.root_directory.clone();

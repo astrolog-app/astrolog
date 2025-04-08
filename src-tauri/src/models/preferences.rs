@@ -1,13 +1,13 @@
-use std::collections::HashMap;
 use crate::file_store;
+use crate::models::state::AppState;
 use serde::{Deserialize, Serialize};
 use serde_json::to_string_pretty;
+use std::collections::HashMap;
 use std::error::Error;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::State;
 use uuid::Uuid;
-use crate::models::state::AppState;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LocalConfig {
@@ -32,10 +32,7 @@ impl LocalConfig {
     pub fn save(&self, dir: PathBuf) -> Result<(), Box<dyn Error>> {
         let mut filename = dir;
         filename.push("local_config.json");
-        Ok(file_store::save(
-            &filename,
-            &to_string_pretty(self)?,
-        )?)
+        Ok(file_store::save(&filename, &to_string_pretty(self)?)?)
     }
 }
 
@@ -72,10 +69,7 @@ impl Config {
         let mut filename = dir;
         filename.push(".astrolog");
         filename.push("config.json");
-        Ok(file_store::save(
-            &filename,
-            &to_string_pretty(self)?,
-        )?)
+        Ok(file_store::save(&filename, &to_string_pretty(self)?)?)
     }
 }
 
@@ -113,7 +107,10 @@ impl Location {
 
         app_state.config.locations.insert(self.id, self.clone());
 
-        if let Err(e) = app_state.config.save(app_state.local_config.root_directory.clone()) {
+        if let Err(e) = app_state
+            .config
+            .save(app_state.local_config.root_directory.clone())
+        {
             app_state.config.locations = old_locations;
             return Err(e);
         }
@@ -131,14 +128,19 @@ impl Location {
             .values()
             .any(|frame| frame.location_id == self.id)
         {
-            return Err("Can't delete location: This location is used in an imaging session!".into());
+            return Err(
+                "Can't delete location: This location is used in an imaging session!".into(),
+            );
         }
 
         let old_locations = app_state.config.locations.clone();
 
         app_state.config.locations.remove(&self.id);
 
-        if let Err(e) = app_state.config.save(app_state.local_config.root_directory.clone()) {
+        if let Err(e) = app_state
+            .config
+            .save(app_state.local_config.root_directory.clone())
+        {
             app_state.config.locations = old_locations;
             return Err(e);
         }

@@ -2,10 +2,10 @@ use crate::models::frontend::analytics::Analytics;
 use crate::models::frontend::state::{
     CalibrationTableRow, FrontendAppState, LogTableRow, TableData,
 };
+use crate::models::imaging_frames::imaging_frame::CalibrationFrame;
 use crate::models::state::AppState;
 use std::sync::Mutex;
 use tauri::State;
-use crate::models::imaging_frames::imaging_frame::CalibrationFrame;
 
 #[tauri::command]
 pub fn load_frontend_app_state(state: State<Mutex<AppState>>) -> Result<String, String> {
@@ -30,7 +30,7 @@ pub fn load_frontend_app_state(state: State<Mutex<AppState>>) -> Result<String, 
         bias_frames
             .iter()
             .map(|f| f.1.calibration_table_row(&state))
-            .filter_map(Result::ok)
+            .filter_map(Result::ok),
     );
 
     let app_state = state.lock().map_err(|e| e.to_string())?;

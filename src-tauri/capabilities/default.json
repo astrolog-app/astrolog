@@ -3,5 +3,8 @@
   "identifier": "main-capability",
   "description": "Capability for the main window",
   "windows": ["main"],
-  "permissions": ["log:default"]
+  "permissions": [
+    "log:default",
+    "process:default"
+  ]
 }

@@ -1,16 +1,16 @@
-use chrono::{DateTime, Utc};
 use crate::models::equipment::{EquipmentItem, EquipmentList};
 use crate::models::frontend::analytics::Analytics;
 use crate::models::gallery_image_list::GalleryImage;
 use crate::models::imaging_frames::calibration_type::CalibrationType;
+use crate::models::imaging_frames::imaging_frame::ClassifiableFrame;
 use crate::models::imaging_session::ImagingSession;
 use crate::models::preferences::{Config, LocalConfig};
 use crate::models::state::AppState;
+use chrono::{DateTime, Utc};
+use serde::de::Error;
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Serialize, Serializer};
-use serde::de::Error;
 use uuid::Uuid;
-use crate::models::imaging_frames::imaging_frame::ClassifiableFrame;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FrontendAppState {
@@ -61,7 +61,8 @@ impl LogTableRow {
 
         match light_frame {
             Some(light_frame) => {
-                let filter_name = light_frame.filter_id
+                let filter_name = light_frame
+                    .filter_id
                     .and_then(|id| app_state.equipment_list.filters.get(&id))
                     .map_or("N/A".to_string(), |filter| filter.view_name().clone());
 
@@ -71,7 +72,8 @@ impl LogTableRow {
                     .get(&light_frame.telescope_id)
                     .map_or("N/A".to_string(), |telescope| telescope.view_name().clone());
 
-                let flattener_name = light_frame.flattener_id
+                let flattener_name = light_frame
+                    .flattener_id
                     .and_then(|id| app_state.equipment_list.flatteners.get(&id))
                     .map_or("N/A".to_string(), |flattener| flattener.view_name().clone());
 
@@ -87,7 +89,11 @@ impl LogTableRow {
                     .get(&light_frame.camera_id)
                     .map_or("N/A".to_string(), |camera| camera.view_name().clone());
 
-                let location = app_state.config.locations.get(&light_frame.location_id).cloned();
+                let location = app_state
+                    .config
+                    .locations
+                    .get(&light_frame.location_id)
+                    .cloned();
                 let location_name = location.as_ref().map(|loc| loc.name.clone());
                 let location_bortle = location.as_ref().map(|loc| loc.bortle);
 
@@ -114,9 +120,7 @@ impl LogTableRow {
                     notes: light_frame.notes.clone(),
                 })
             }
-            None => {
-                None
-            }
+            None => None,
         }
     }
 }

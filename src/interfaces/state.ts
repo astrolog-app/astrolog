@@ -10,6 +10,7 @@ import {
 import { Analytics } from '@/interfaces/analytics';
 
 export interface AppState {
+  initialised: boolean;
   local_config: LocalConfig;
   config: Config;
   table_data: TableData;

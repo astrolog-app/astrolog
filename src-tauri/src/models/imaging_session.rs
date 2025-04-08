@@ -1,5 +1,6 @@
 use crate::commands::imaging_sessions::ImagingSessionCalibration;
 use crate::models::frontend::process::Process;
+use crate::models::imaging_frames::imaging_frame::{ClassifiableFrame, ImagingSessionFrame};
 use crate::models::imaging_frames::light_frame::LightFrame;
 use crate::models::imaging_session_list::ImagingSessionList;
 use crate::models::state::AppState;
@@ -10,7 +11,6 @@ use std::path::{Component, PathBuf};
 use std::sync::Mutex;
 use tauri::{State, Window};
 use uuid::Uuid;
-use crate::models::imaging_frames::imaging_frame::{ClassifiableFrame, ImagingSessionFrame};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ImagingSession {
@@ -141,17 +141,13 @@ impl ImagingSession {
         }
 
         if let Some(mut frame) = dark_frame {
-            if let Err(e) =
-                frame.classify(state, window, &mut process, &self.folder_dir)
-            {
+            if let Err(e) = frame.classify(state, window, &mut process, &self.folder_dir) {
                 errors.push(format!("Dark frame error: {}", e));
             }
         }
 
         if let Some(mut frame) = flat_frame {
-            if let Err(e) =
-                frame.classify(state, window, &mut process, &self.folder_dir)
-            {
+            if let Err(e) = frame.classify(state, window, &mut process, &self.folder_dir) {
                 errors.push(format!("Flat frame error: {}", e));
             }
         }

@@ -19,7 +19,7 @@ impl Process {
         name: &str,
         modal: bool,
         step: Option<u32>,
-        max: Option<u32>
+        max: Option<u32>,
     ) -> Process {
         let process = Process {
             id: Uuid::new_v4(),

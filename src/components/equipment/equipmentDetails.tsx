@@ -153,9 +153,12 @@ function EquipmentDetailsTable({ selectedItem }: { selectedItem: EquipmentItem }
 
 function EquipmentAnalytics({ selectedItem }: { selectedItem: EquipmentItem }) {
   const data: InfoCardData = {
-    content: '', decrease: false, value: '', value_description: '',
-    title: "test"
-
+    title: '',
+    content: '',
+    decrease: false,
+    green: false,
+    value: '',
+    value_description: ''
   }
   return (
     <div>

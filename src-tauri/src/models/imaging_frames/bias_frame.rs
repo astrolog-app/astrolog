@@ -1,17 +1,17 @@
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
-use std::path::PathBuf;
-use std::error::Error;
-use std::sync::Mutex;
-use tauri::State;
-use std::any::Any;
 use crate::models::equipment::{EquipmentItem, EquipmentList};
 use crate::models::frontend::state::CalibrationTableRow;
-use crate::models::imaging_frames::imaging_frame::{CalibrationFrame, ClassifiableFrame};
 use crate::models::imaging_frames::calibration_type::CalibrationType;
 use crate::models::imaging_frames::imaging_frame::ImagingSessionFrame;
+use crate::models::imaging_frames::imaging_frame::{CalibrationFrame, ClassifiableFrame};
 use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
 use crate::models::state::AppState;
+use serde::{Deserialize, Serialize};
+use std::any::Any;
+use std::error::Error;
+use std::path::PathBuf;
+use std::sync::Mutex;
+use tauri::State;
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct BiasFrame {
@@ -57,7 +57,6 @@ impl ClassifiableFrame for BiasFrame {
 }
 
 impl CalibrationFrame for BiasFrame {
-
     fn camera_id(&self) -> &Uuid {
         &self.camera_id
     }
@@ -73,7 +72,10 @@ impl CalibrationFrame for BiasFrame {
         CalibrationType::BIAS
     }
 
-    fn calibration_table_row(&self, state: &State<Mutex<AppState>>) -> Result<CalibrationTableRow, Box<dyn Error>> {
+    fn calibration_table_row(
+        &self,
+        state: &State<Mutex<AppState>>,
+    ) -> Result<CalibrationTableRow, Box<dyn Error>> {
         let app_state = state.lock().map_err(|e| e.to_string())?;
 
         let camera_name = app_state
@@ -110,12 +112,15 @@ impl CalibrationFrame for BiasFrame {
     fn build_path(&self, state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>> {
         let app_state = state.lock().map_err(|e| e.to_string())?;
 
-        let mut base = app_state.config.folder_paths.calibration_base_folder.clone();
+        let mut base = app_state
+            .config
+            .folder_paths
+            .calibration_base_folder
+            .clone();
         base.push("Bias");
         let pattern = app_state.config.folder_paths.bias_frame_pattern.clone();
-        let get_field_value = |field_name: &str| {
-            self.get_field_value(field_name, &app_state.equipment_list)
-        };
+        let get_field_value =
+            |field_name: &str| self.get_field_value(field_name, &app_state.equipment_list);
 
         crate::classify::build_path(&base, &pattern, get_field_value)
     }

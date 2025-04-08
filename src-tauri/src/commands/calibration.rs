@@ -1,15 +1,17 @@
 use crate::image::{get_exposure_time, get_gain};
+use crate::models::frontend::process::Process;
+use crate::models::imaging_frames::bias_frame::BiasFrame;
+use crate::models::imaging_frames::calibration_type::CalibrationType;
+use crate::models::imaging_frames::dark_frame::DarkFrame;
+use crate::models::imaging_frames::imaging_frame::{
+    CalibrationFrame, ClassifiableFrame, ImagingSessionFrame,
+};
 use crate::models::state::AppState;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::{State, Window};
-use crate::models::frontend::process::Process;
-use crate::models::imaging_frames::bias_frame::BiasFrame;
-use crate::models::imaging_frames::calibration_type::CalibrationType;
-use crate::models::imaging_frames::dark_frame::DarkFrame;
-use crate::models::imaging_frames::imaging_frame::{CalibrationFrame, ClassifiableFrame, ImagingSessionFrame};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AnalyzedCalibrationFrames {
@@ -83,13 +85,14 @@ pub async fn classify_dark_frame(
     let app_state = state.lock().map_err(|e| e.to_string())?;
     let mut path = app_state.local_config.root_directory.clone();
     drop(app_state);
-    path.push(<DarkFrame as CalibrationFrame>::build_path(&dark_frame, &state).map_err(|e| e.to_string())?);
+    path.push(
+        <DarkFrame as CalibrationFrame>::build_path(&dark_frame, &state)
+            .map_err(|e| e.to_string())?,
+    );
     if path.exists() {
         let entries = fs::read_dir(&path).map_err(|e| e.to_string())?;
         if entries.count() > 0 {
-            return Err(
-                return Err("Such a Dark Frame already exists.".to_string())
-            );
+            return Err(return Err("Such a Dark Frame already exists.".to_string()));
         }
     }
 
@@ -100,10 +103,12 @@ pub async fn classify_dark_frame(
         "",
         false,
         Some(0),
-        Some(dark_frame.frames_to_classify.len() as u32)
+        Some(dark_frame.frames_to_classify.len() as u32),
     );
 
-    if let Err(e) = <DarkFrame as CalibrationFrame>::classify(&mut dark_frame, &state, &window, &mut process) {
+    if let Err(e) =
+        <DarkFrame as CalibrationFrame>::classify(&mut dark_frame, &state, &window, &mut process)
+    {
         dark_frame.remove(&state).ok();
     }
 
@@ -126,9 +131,7 @@ pub async fn classify_bias_frame(
     if path.exists() {
         let entries = fs::read_dir(&path).map_err(|e| e.to_string())?;
         if entries.count() > 0 {
-            return Err(
-                return Err("Such a Bias Frame already exists.".to_string())
-            );
+            return Err(return Err("Such a Bias Frame already exists.".to_string()));
         }
     }
 
@@ -139,7 +142,7 @@ pub async fn classify_bias_frame(
         "",
         false,
         Some(0),
-        Some(bias_frame.frames_to_classify.len() as u32)
+        Some(bias_frame.frames_to_classify.len() as u32),
     );
 
     if let Err(e) = bias_frame.classify(&state, &window, &mut process) {

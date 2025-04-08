@@ -1,4 +1,8 @@
 use crate::file_store;
+use crate::models::imaging_frames::bias_frame::BiasFrame;
+use crate::models::imaging_frames::dark_frame::DarkFrame;
+use crate::models::imaging_frames::flat_frame::FlatFrame;
+use crate::models::imaging_frames::light_frame::LightFrame;
 use crate::models::state::AppState;
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -6,10 +10,6 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::path::PathBuf;
 use uuid::Uuid;
-use crate::models::imaging_frames::bias_frame::BiasFrame;
-use crate::models::imaging_frames::dark_frame::DarkFrame;
-use crate::models::imaging_frames::flat_frame::FlatFrame;
-use crate::models::imaging_frames::light_frame::LightFrame;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ImagingFrameList {

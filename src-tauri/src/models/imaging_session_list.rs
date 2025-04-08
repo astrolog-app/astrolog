@@ -1,12 +1,5 @@
-use crate::file_store;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use std::collections::HashMap;
-use std::error::Error;
-use std::path::PathBuf;
-use std::sync::Mutex;
-use tauri::State;
-use uuid::Uuid;
 use crate::commands::imaging_sessions::ImagingSessionCalibration;
+use crate::file_store;
 use crate::models::imaging_frames::calibration_type::CalibrationType;
 use crate::models::imaging_frames::dark_frame::DarkFrame;
 use crate::models::imaging_frames::flat_frame::FlatFrame;
@@ -14,6 +7,13 @@ use crate::models::imaging_frames::imaging_frame::{ClassifiableFrame, ImagingSes
 use crate::models::imaging_frames::light_frame::LightFrame;
 use crate::models::imaging_session::ImagingSession;
 use crate::models::state::AppState;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::collections::HashMap;
+use std::error::Error;
+use std::path::PathBuf;
+use std::sync::Mutex;
+use tauri::State;
+use uuid::Uuid;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ImagingSessionList {
@@ -49,7 +49,7 @@ impl ImagingSessionList {
     pub fn add(
         state: &State<Mutex<AppState>>,
         light_frame: &LightFrame,
-        calibration: &ImagingSessionCalibration
+        calibration: &ImagingSessionCalibration,
     ) -> Result<ImagingSession, Box<dyn Error>> {
         let mut imaging_session = ImagingSession::from(state, &light_frame, &calibration)?;
         let mut flat_frame = None;

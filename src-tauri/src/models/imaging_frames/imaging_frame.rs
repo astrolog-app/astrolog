@@ -1,16 +1,16 @@
+use crate::models::equipment::EquipmentList;
+use crate::models::frontend::process::Process;
+use crate::models::frontend::state::CalibrationTableRow;
+use crate::models::imaging_frames::calibration_type::CalibrationType;
+use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
+use crate::models::state::AppState;
+use std::any::Any;
 use std::error::Error;
 use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::{State, Window};
 use uuid::Uuid;
-use std::any::Any;
-use crate::models::equipment::EquipmentList;
-use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
-use crate::models::state::AppState;
-use crate::models::frontend::process::Process;
-use crate::models::frontend::state::CalibrationTableRow;
-use crate::models::imaging_frames::calibration_type::CalibrationType;
 
 pub trait ClassifiableFrame: Clone {
     fn id(&self) -> Uuid;
@@ -115,14 +115,7 @@ pub trait ImagingSessionFrame: ClassifiableFrame + Clone {
             self.classify_helper(base, file_name, frame, destination, state)
         };
 
-        crate::classify::classify(
-            &path,
-            &frames,
-            state,
-            helper,
-            window,
-            process,
-        )?;
+        crate::classify::classify(&path, &frames, state, helper, window, process)?;
 
         Ok(())
     }
@@ -138,7 +131,10 @@ pub trait CalibrationFrame: ClassifiableFrame + Clone + Any {
         self
     }
 
-    fn calibration_table_row(&self, state: &State<Mutex<AppState>>) -> Result<CalibrationTableRow, Box<dyn Error>>;
+    fn calibration_table_row(
+        &self,
+        state: &State<Mutex<AppState>>,
+    ) -> Result<CalibrationTableRow, Box<dyn Error>>;
     fn get_field_value(&self, field: &str, equipment_list: &EquipmentList) -> String;
     fn build_path(&self, state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>>;
 

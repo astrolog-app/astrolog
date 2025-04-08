@@ -16,7 +16,9 @@ pub fn save_preferences(
 ) -> Result<(), String> {
     let mut app_state = state.lock().unwrap();
     app_state.local_config = local_config;
-    app_state.local_config.save(app_handle.path().app_data_dir().unwrap())
+    app_state
+        .local_config
+        .save(app_handle.path().app_data_dir().unwrap())
         .map_err(|e| e.to_string())
 }
 
@@ -40,7 +42,9 @@ pub fn set_root_directory(
     }
 
     app_state.local_config.root_directory = root_directory;
-    app_state.local_config.save(app_handle.path().app_data_dir().unwrap())
+    app_state
+        .local_config
+        .save(app_handle.path().app_data_dir().unwrap())
         .map_err(|e| e.to_string())
 }
 
@@ -48,7 +52,7 @@ pub fn set_root_directory(
 pub fn change_imaging_session_folder_path(
     state: State<Mutex<AppState>>,
     base_folder: PathBuf,
-    pattern: PathBuf
+    pattern: PathBuf,
 ) -> Result<(), String> {
     let mut app_state = state.lock().map_err(|e| e.to_string())?;
 
@@ -56,13 +60,24 @@ pub fn change_imaging_session_folder_path(
         return Err("Feature not implemented: Can't change folder structure of already added imaging sessions in this version.".to_string());
     }
 
-    let old_base = app_state.config.folder_paths.imaging_session_base_folder.clone();
-    let old_pattern = app_state.config.folder_paths.imaging_session_pattern.clone();
+    let old_base = app_state
+        .config
+        .folder_paths
+        .imaging_session_base_folder
+        .clone();
+    let old_pattern = app_state
+        .config
+        .folder_paths
+        .imaging_session_pattern
+        .clone();
 
     app_state.config.folder_paths.imaging_session_base_folder = base_folder;
     app_state.config.folder_paths.imaging_session_pattern = pattern;
 
-    if let Err(e) = app_state.config.save(app_state.local_config.root_directory.clone()) {
+    if let Err(e) = app_state
+        .config
+        .save(app_state.local_config.root_directory.clone())
+    {
         // revert to old values on failure
         app_state.config.folder_paths.imaging_session_base_folder = old_base;
         app_state.config.folder_paths.imaging_session_pattern = old_pattern;
@@ -76,7 +91,7 @@ pub fn change_imaging_session_folder_path(
 pub fn change_dark_frames_folder_path(
     state: State<Mutex<AppState>>,
     base_folder: PathBuf,
-    pattern: PathBuf
+    pattern: PathBuf,
 ) -> Result<(), String> {
     let mut app_state = state.lock().map_err(|e| e.to_string())?;
 
@@ -86,13 +101,20 @@ pub fn change_dark_frames_folder_path(
         }
     }
 
-    let old_base = app_state.config.folder_paths.calibration_base_folder.clone();
+    let old_base = app_state
+        .config
+        .folder_paths
+        .calibration_base_folder
+        .clone();
     let old_pattern = app_state.config.folder_paths.dark_frame_pattern.clone();
 
     app_state.config.folder_paths.calibration_base_folder = base_folder;
     app_state.config.folder_paths.dark_frame_pattern = pattern;
 
-    if let Err(e) = app_state.config.save(app_state.local_config.root_directory.clone()) {
+    if let Err(e) = app_state
+        .config
+        .save(app_state.local_config.root_directory.clone())
+    {
         // revert to old values on failure
         app_state.config.folder_paths.calibration_base_folder = old_base;
         app_state.config.folder_paths.dark_frame_pattern = old_pattern;
@@ -106,7 +128,7 @@ pub fn change_dark_frames_folder_path(
 pub fn change_bias_frames_folder_path(
     state: State<Mutex<AppState>>,
     base_folder: PathBuf,
-    pattern: PathBuf
+    pattern: PathBuf,
 ) -> Result<(), String> {
     let mut app_state = state.lock().map_err(|e| e.to_string())?;
 
@@ -114,13 +136,20 @@ pub fn change_bias_frames_folder_path(
         return Err("Feature not implemented: Can't change folder structure of already added bias frames in this version.".to_string());
     }
 
-    let old_base = app_state.config.folder_paths.calibration_base_folder.clone();
+    let old_base = app_state
+        .config
+        .folder_paths
+        .calibration_base_folder
+        .clone();
     let old_pattern = app_state.config.folder_paths.bias_frame_pattern.clone();
 
     app_state.config.folder_paths.calibration_base_folder = base_folder;
     app_state.config.folder_paths.bias_frame_pattern = pattern;
 
-    if let Err(e) = app_state.config.save(app_state.local_config.root_directory.clone()) {
+    if let Err(e) = app_state
+        .config
+        .save(app_state.local_config.root_directory.clone())
+    {
         // revert to old values on failure
         app_state.config.folder_paths.calibration_base_folder = old_base;
         app_state.config.folder_paths.bias_frame_pattern = old_pattern;

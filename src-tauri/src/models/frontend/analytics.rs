@@ -1,11 +1,11 @@
-use std::collections::HashSet;
+use crate::models::imaging_frames::imaging_frame::ClassifiableFrame;
 use crate::models::state::AppState;
+use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 use std::error::Error;
 use std::sync::Mutex;
-use chrono::{DateTime, Duration, Utc};
 use tauri::State;
-use crate::models::imaging_frames::imaging_frame::ClassifiableFrame;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Analytics {
@@ -93,7 +93,9 @@ impl Analytics {
             (diff.abs(), diff < 0.0)
         };
 
-        let new_unique_targets: HashSet<_> = unique_targets.difference(&previous_unique_targets).collect();
+        let new_unique_targets: HashSet<_> = unique_targets
+            .difference(&previous_unique_targets)
+            .collect();
 
         let total_exposure_time = InfoCardData {
             title: "Total Exposure Time".to_string(),
@@ -139,7 +141,9 @@ impl Analytics {
         })
     }
 
-    fn get_sessions_chart(state: &State<Mutex<AppState>>) -> Result<Vec<SessionsChartData>, Box<dyn Error>> {
+    fn get_sessions_chart(
+        state: &State<Mutex<AppState>>,
+    ) -> Result<Vec<SessionsChartData>, Box<dyn Error>> {
         let app_state = state.lock().map_err(|e| e.to_string())?;
 
         let mut data: Vec<SessionsChartData> = Vec::new();
@@ -147,7 +151,7 @@ impl Analytics {
         for light_frame in app_state.imaging_frame_list.light_frames.values() {
             let chart_data_point = SessionsChartData {
                 date: light_frame.date,
-                seconds: (light_frame.sub_length * light_frame.total_subs() as f64) as u32
+                seconds: (light_frame.sub_length * light_frame.total_subs() as f64) as u32,
             };
 
             data.push(chart_data_point);
@@ -178,5 +182,5 @@ struct InfoCardData {
     decrease: bool,
     green: bool,
     value: String,
-    value_description: String
+    value_description: String,
 }

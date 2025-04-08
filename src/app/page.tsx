@@ -3,12 +3,11 @@
 import styles from './page.module.scss';
 import { Analytics } from './analytics/analytics';
 import Log from './log/log';
-import Gallery from './gallery/gallery';
 import { TopBar } from '@/components/bars/topBar';
 import SideNav from '@/components/bars/sideNav';
 import React, { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { AnalyticsSVG, EquipmentSVG, GallerySVG, LogSVG } from '@/public/svgs';
+import { AnalyticsSVG, EquipmentSVG, LogSVG } from '@/public/svgs';
 import Equipment from '@/app/equipment/equipment';
 import License from '@/components/modals/license';
 import { KeygenLicense } from 'tauri-plugin-keygen-api';
@@ -16,6 +15,7 @@ import { toast } from '@/components/ui/use-toast';
 import { useModal } from '@/context/modalProvider';
 import { useAppState } from '@/context/stateProvider';
 import BottomBar from '@/components/bars/bottomBar';
+import RootDirectory from '@/components/modals/rootDirectory';
 
 export interface Tab {
   component: React.ReactNode;
@@ -93,10 +93,10 @@ export default function Home() {
 
   useEffect(() => {
     // checkLicense();
-    if (appState.local_config.root_directory == '') {
-      //openModal(<RootDirectory />);
+    if (appState.local_config.root_directory == '' && appState.initialised) {
+      openModal(<RootDirectory />);
     }
-  }, []);
+  }, [appState.initialised]);
 
   return (
     <div className={styles.tabs}>

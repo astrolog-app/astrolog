@@ -1,12 +1,12 @@
-use std::path::PathBuf;
-use std::error::Error;
-use uuid::Uuid;
-use serde::{Deserialize, Serialize};
-use chrono::{DateTime, Utc};
 use crate::commands::imaging_sessions::ImagingSessionEdit;
 use crate::models::equipment::{EquipmentItem, EquipmentList};
 use crate::models::imaging_frames::imaging_frame::{ClassifiableFrame, ImagingSessionFrame};
 use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use std::error::Error;
+use std::path::PathBuf;
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LightFrame {
@@ -81,11 +81,13 @@ impl LightFrame {
                 .telescopes
                 .get(&self.telescope_id)
                 .map_or("None".to_string(), |t| t.view_name().to_string()),
-            "FILTER" => self.filter_id
+            "FILTER" => self
+                .filter_id
                 .and_then(|id| equipment_list.filters.get(&id))
                 .map_or("None".to_string(), |f| f.view_name().to_string()),
 
-            "FILTERTYPE" => self.filter_id
+            "FILTERTYPE" => self
+                .filter_id
                 .and_then(|id| equipment_list.filters.get(&id))
                 .map_or("None".to_string(), |f| f.filter_type.to_string()),
             "SUBLENGTH" => self.sub_length.to_string(),

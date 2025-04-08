@@ -1,9 +1,9 @@
-use std::error::Error;
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
-use std::path::PathBuf;
 use crate::models::imaging_frames::imaging_frame::{ClassifiableFrame, ImagingSessionFrame};
 use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
+use serde::{Deserialize, Serialize};
+use std::error::Error;
+use std::path::PathBuf;
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct FlatFrame {

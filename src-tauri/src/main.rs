@@ -1,16 +1,24 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use crate::commands::equipment::{check_equipment_duplicate, save_camera, save_filter, save_flattener, save_mount, save_telescope};
+use crate::commands::equipment::{
+    check_equipment_duplicate, save_camera, save_filter, save_flattener, save_mount, save_telescope,
+};
+use crate::commands::preferences::{
+    change_bias_frames_folder_path, change_dark_frames_folder_path, delete_location, save_location,
+};
 use crate::file_system::set_folder_invisible;
-use commands::calibration::{analyze_calibration_frames, classify_dark_frame, classify_bias_frame};
+use commands::calibration::{analyze_calibration_frames, classify_bias_frame, classify_dark_frame};
 use commands::gallery::{add_new_image, open_image};
 use commands::image::get_date;
-use commands::imaging_sessions::{export_csv, open_imaging_session, get_image_frames_path, classify_imaging_session, edit_imaging_session};
-use commands::preferences::{save_preferences, set_root_directory, setup_backup, change_imaging_session_folder_path};
-use commands::state::{
-    add_close_lock, load_frontend_app_state, remove_close_lock,
+use commands::imaging_sessions::{
+    classify_imaging_session, edit_imaging_session, export_csv, get_image_frames_path,
+    open_imaging_session,
 };
+use commands::preferences::{
+    change_imaging_session_folder_path, save_preferences, set_root_directory, setup_backup,
+};
+use commands::state::{add_close_lock, load_frontend_app_state, remove_close_lock};
 use commands::utils::{open_browser, rename_directory};
 use models::frontend::process::Process;
 use models::state::AppState;
@@ -18,14 +26,13 @@ use std::env;
 use std::sync::Mutex;
 use tauri::{Emitter, Manager};
 use tauri_plugin_updater::UpdaterExt;
-use crate::commands::preferences::{change_bias_frames_folder_path, change_dark_frames_folder_path, delete_location, save_location};
 
+mod classify;
 mod commands;
 mod file_store;
 mod file_system;
 mod image;
 mod models;
-mod classify;
 
 fn main() {
     let account_id = option_env!("ACCOUNT_ID")
@@ -36,6 +43,7 @@ fn main() {
         .to_string();
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_window_state::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
