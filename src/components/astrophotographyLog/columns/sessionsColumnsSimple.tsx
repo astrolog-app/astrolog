@@ -6,24 +6,22 @@ import { ImagingSession } from '@/interfaces/state';
 
 export const sessionsColumnsSimple: ColumnDef<ImagingSession>[] = [
   {
-    accessorKey: "date",
+    id: "date",
+    accessorFn: (row) => new Date(row.date),
     header: "Date",
     cell: ({ getValue }) => {
-      const rawValue = getValue() as string
-      const date = new Date(rawValue)
-      // Ensure day and month have leading zeros
+      const date = getValue() as Date
       const day = String(date.getDate()).padStart(2, "0")
       const month = String(date.getMonth() + 1).padStart(2, "0")
       const year = date.getFullYear()
-      const formattedDate = `${day}.${month}.${year}`
-
+      const formatted = `${day}.${month}.${year}`
       return (
         <div className="flex items-center gap-2">
           <Calendar className="h-4 w-4 text-muted-foreground" />
-          {formattedDate}
+          {formatted}
         </div>
       )
-    },
+    }
   },
   {
     accessorKey: "target",
@@ -36,6 +34,8 @@ export const sessionsColumnsSimple: ColumnDef<ImagingSession>[] = [
     ),
   },
   {
+    id: "location",
+    accessorFn: (row) => `Bortle ${row.location_bortle}, ${row.location_name}`,
     header: "Location",
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
@@ -45,6 +45,8 @@ export const sessionsColumnsSimple: ColumnDef<ImagingSession>[] = [
     ),
   },
   {
+    id: "equipment",
+    accessorFn: (row) => `${row.telescope}, ${row.camera}, ${row.filter}`,
     header: "Equipment",
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
@@ -54,6 +56,8 @@ export const sessionsColumnsSimple: ColumnDef<ImagingSession>[] = [
     ),
   },
   {
+    id: "exposure",
+    accessorFn: (row) => `${row.total_subs} x ${row.sub_length}s`,
     header: "Exposure",
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
@@ -61,5 +65,5 @@ export const sessionsColumnsSimple: ColumnDef<ImagingSession>[] = [
         {`${row.original.total_subs} x ${row.original.sub_length}s`}
       </div>
     ),
-  },
+  }
 ]

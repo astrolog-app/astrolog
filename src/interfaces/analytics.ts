@@ -19,6 +19,7 @@ export interface InfoCardData {
   title: string;
   content: string;
   decrease: boolean;
+  green: boolean;
   value: string;
   value_description: string;
 }

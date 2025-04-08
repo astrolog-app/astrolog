@@ -36,7 +36,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { UUID } from 'crypto';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from '@/components/ui/use-toast';
-import { useAppState } from '@/context/stateProvider';
+import { fetchAppState, useAppState } from '@/context/stateProvider';
 
 export default function LocationsForm() {
   const [locations, setLocations] = useState<Location[]>([]);
@@ -145,6 +145,7 @@ export function LocationForm({ editingLocation, onCancel }: LocationFormProps) {
           },
         }));
         if (editingLocation) {
+          fetchAppState(setAppState);
           onCancel();
         }
         form.reset();

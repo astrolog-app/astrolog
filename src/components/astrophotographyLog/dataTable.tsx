@@ -9,7 +9,8 @@ import {
   TableRow
 } from '@/components/ui/table';
 import {
-  ColumnDef,
+  ColumnDef, ColumnSort,
+  FilterFn,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -19,6 +20,7 @@ import {
 } from '@tanstack/react-table';
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react';
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
+import { rankItem } from "@tanstack/match-sorter-utils"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -26,13 +28,21 @@ interface DataTableProps<TData, TValue> {
   globalFilter: string;
   setValue: Dispatch<SetStateAction<any>>;
   children?: ReactNode;
+  columnSort?: ColumnSort[];
 }
 
-export function DataTable<TData, TValue>({ columns, data, globalFilter, setValue, children }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([]);
+const fuzzyFilter: FilterFn<any> = (row, columnId, value) => {
+  const itemRank = rankItem(row.getValue(columnId), value)
+  console.log(columnId)
+  return itemRank.passed
+}
+
+// TODO: make date sortable (search bar)
+export function DataTable<TData, TValue>({ columns, data, globalFilter, setValue, children, columnSort = [] }: DataTableProps<TData, TValue>) {
+  const [sorting, setSorting] = useState<SortingState>(columnSort);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
-  const table = useReactTable({
+  const table = useReactTable<TData>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
@@ -42,8 +52,13 @@ export function DataTable<TData, TValue>({ columns, data, globalFilter, setValue
     state: {
       sorting,
       globalFilter
-    }
+    },
+    globalFilterFn: fuzzyFilter,
   });
+
+  useEffect(() => {
+    setSorting(columnSort);
+  }, [columns]);
 
   useEffect(() => {
     setSelectedRowId(null);

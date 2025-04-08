@@ -116,6 +116,7 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
           data={appState.table_data.sessions}
           globalFilter={globalFilter}
           setValue={setValue}
+          columnSort={[{ id: "date", desc: true }]}
         >
           <ImagingSessionContextMenu session={session} />
         </DataTable>
@@ -128,6 +129,7 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
         data={appState.table_data.sessions}
         globalFilter={globalFilter}
         setValue={setValue}
+        columnSort={[{ id: "date", desc: true }, { id: "target", desc: true }]}
       >
         <ImagingSessionContextMenu session={session} />
       </DataTable>

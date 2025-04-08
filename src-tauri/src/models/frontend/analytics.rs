@@ -48,6 +48,7 @@ impl Analytics {
 
         let mut unique_targets = HashSet::new();
         let mut recent_unique_targets = HashSet::new();
+        let mut previous_unique_targets = HashSet::new();
 
         for light_frame in app_state.imaging_frame_list.light_frames.values() {
             let frame_exposure = (light_frame.sub_length * light_frame.total_subs() as f64) as u32;
@@ -69,17 +70,14 @@ impl Analytics {
                     recent_seeing_total += seeing;
                     recent_seeing_count += 1;
                 }
+            } else {
+                previous_unique_targets.insert(light_frame.target.clone());
             }
         }
 
         // convert exposure time to minutes
         let exposure_time_min = exposure_time / 60;
-
-        let exposure_increase = if exposure_time == 0 {
-            0
-        } else {
-            (recent_exposure_time * 100) / exposure_time
-        };
+        let recent_exposure_time_min = recent_exposure_time / 60;
 
         let average_seeing = if seeing_count == 0 {
             0.0
@@ -88,18 +86,21 @@ impl Analytics {
         };
 
         let (seeing_difference, seeing_decrease) = if recent_seeing_count == 0 {
-            (0.0, false)
+            (0.0, true)
         } else {
             let recent_average = recent_seeing_total / recent_seeing_count as f64;
             let diff = recent_average - average_seeing;
             (diff.abs(), diff < 0.0)
         };
 
+        let new_unique_targets: HashSet<_> = unique_targets.difference(&previous_unique_targets).collect();
+
         let total_exposure_time = InfoCardData {
             title: "Total Exposure Time".to_string(),
             content: format!("{} min", exposure_time_min),
             decrease: false,
-            value: format!("{}%", exposure_increase),
+            green: true,
+            value: recent_exposure_time_min.to_string() + " min",
             value_description: "from last 30 days".to_string(),
         };
 
@@ -107,6 +108,7 @@ impl Analytics {
             title: "Average Seeing".to_string(),
             content: format!("{:.2}\"", average_seeing),
             decrease: seeing_decrease,
+            green: seeing_difference <= 0.0,
             value: format!("{:.2}\"", seeing_difference),
             value_description: "from last 30 days".to_string(),
         };
@@ -115,6 +117,7 @@ impl Analytics {
             title: "Imaging Sessions".to_string(),
             content: app_state.imaging_frame_list.light_frames.len().to_string(),
             decrease: false,
+            green: true,
             value: recent_imaging_sessions.to_string(),
             value_description: "from last 30 days".to_string(),
         };
@@ -123,8 +126,9 @@ impl Analytics {
             title: "Unique Targets".to_string(),
             content: unique_targets.len().to_string(),
             decrease: false,
-            value: recent_unique_targets.len().to_string(),
-            value_description: "from last 30 days".to_string(),
+            green: true,
+            value: new_unique_targets.len().to_string(),
+            value_description: "new in last 30 days".to_string(),
         };
 
         Ok(InfoCards {
@@ -172,6 +176,7 @@ struct InfoCardData {
     title: String,
     content: String,
     decrease: bool,
+    green: bool,
     value: String,
     value_description: String
 }

@@ -28,7 +28,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { Switch } from '@/components/ui/switch';
 import { toast } from '@/components/ui/use-toast';
 import { getViewName } from '@/utils/equipment';
-import { useAppState } from '@/context/stateProvider';
+import { fetchAppState, useAppState } from '@/context/stateProvider';
 import { useModal } from '@/context/modalProvider';
 import { EquipmentList } from '@/interfaces/state';
 import { EquipmentFormValues, equipmentSchema } from '@/schemas/equipmentSchema';
@@ -103,6 +103,7 @@ export default function EquipmentModal({ type, item }: EquipmentProps) {
                 [equipment.key]: new Map(prevState.equipment_list[equipment.key]).set(new_item.id, new_item)
               }
             }));
+            fetchAppState(setAppState);
             toast({ description: `Saved ${equipmentType} successfully!` });
             closeModal();
           })
