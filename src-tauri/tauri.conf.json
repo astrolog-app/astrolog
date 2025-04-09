@@ -46,7 +46,7 @@
   "identifier": "astrolog",
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEVFMEJBRDFBQzlFNzlGM0MKUldROG4rZkpHcTBMN3B1dTJXRFBKenpqN05yVFZlcjdsa2tjU0s0UXhQelZMdnlQYkVQdHNCaXYK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQyQjFGQUM1QTg2NDQ4QkQKUldTOVNHU294ZnF4UXJyOHVEbWpmaWdyUkFkcU10NUN6bG5NNmdoejRmNis3eUhWTmJ4NXlMbWgK",
       "endpoints": [
         "https://github.com/astrolog-app/astrolog/releases/latest/download/latest.json"
       ]
