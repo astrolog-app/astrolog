@@ -106,6 +106,7 @@ impl Analytics {
             value_description: "from last 30 days".to_string(),
         };
 
+        // TODO: add weight of exposure time
         let average_seeing_card = InfoCardData {
             title: "Average Seeing".to_string(),
             content: format!("{:.2}\"", average_seeing),

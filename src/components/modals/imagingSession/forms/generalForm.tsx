@@ -30,6 +30,7 @@ import { ImagingSessionGeneralSchema } from '@/schemas/imagingSessionSchema';
 import { TabKey } from '@/components/modals/imagingSession/imagingSessionEditor';
 import { ImagingSessionGeneral } from '@/interfaces/imagingSessionEdit';
 import { ButtonBar } from '@/components/ui/custom/modal';
+import { useAppState } from '@/context/stateProvider';
 
 interface GeneralFormFormProps {
   setTab: Dispatch<SetStateAction<TabKey>>
@@ -39,6 +40,7 @@ interface GeneralFormFormProps {
 }
 
 export default function GeneralForm({ setTab, isEdit, setGeneral, editSession }: GeneralFormFormProps) {
+  const { appState } = useAppState()
   const form = useForm<z.infer<typeof ImagingSessionGeneralSchema>>({
     resolver: zodResolver(ImagingSessionGeneralSchema),
     defaultValues: {
@@ -57,7 +59,7 @@ export default function GeneralForm({ setTab, isEdit, setGeneral, editSession }:
     const general: ImagingSessionGeneral = {
       date: values.date,
       target: values.target,
-      location_id: "09283b59-6dee-4431-b5fe-58bde76bd18b" // TODO
+      location_id: appState.config.locations.keys().next().value // TODO
     }
     setGeneral(general);
     setTab('details');

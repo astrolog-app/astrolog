@@ -169,7 +169,7 @@ pub fn classify_imaging_session(
     }
 
     // create imaging_session and save it to .json
-    let imaging_session = ImagingSessionList::add(&state, &light_frame, &session.calibration)
+    let imaging_session = ImagingSessionList::add(&state, &light_frame, &session.calibration, &session.base.id)
         .map_err(|e| e.to_string())?;
 
     let mut errors = Vec::new();

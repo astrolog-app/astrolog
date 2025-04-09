@@ -53,11 +53,12 @@ impl ImagingSession {
         state: &State<Mutex<AppState>>,
         light_frame: &LightFrame,
         calibration: &ImagingSessionCalibration,
+        id: &Uuid,
     ) -> Result<ImagingSession, Box<dyn Error>> {
         let folder_dir = ImagingSession::build_path(light_frame, state)?;
 
         let imaging_session = ImagingSession {
-            id: light_frame.id.clone(),
+            id: id.clone(),
             folder_dir,
             light_frame_id: light_frame.id.clone(),
             flat_frame_id: None,

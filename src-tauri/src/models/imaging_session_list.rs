@@ -50,8 +50,9 @@ impl ImagingSessionList {
         state: &State<Mutex<AppState>>,
         light_frame: &LightFrame,
         calibration: &ImagingSessionCalibration,
+        id: &Uuid,
     ) -> Result<ImagingSession, Box<dyn Error>> {
-        let mut imaging_session = ImagingSession::from(state, &light_frame, &calibration)?;
+        let mut imaging_session = ImagingSession::from(state, &light_frame, &calibration, id)?;
         let mut flat_frame = None;
         let mut dark_frame = None;
 
