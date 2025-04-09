@@ -1,13 +1,21 @@
 # AstroLog
 
-AstroLog is an astrophotography application that lets you log and classify all your imaging sessions - by its own or manually.
+AstroLog is an astrophotography application that lets you log and classify all your imaging sessions - by its own or
+manually.
 
-<img src=".github/screenshots.png" alt="AstroLog" />
+<picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/astrolog-app/astrolog/main/.github/screenshots_dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/astrolog-app/astrolog/main/.github/screenshots_light.png">
+    <img alt="AstroLog screenshots">
+</picture>
 
 ## Getting Started
 
-> [!WARNING]  
-> You can't activate your AstroLog license in development mode, only in the [compiled version](https://astro-log.app/download/).
+[//]: # (> [!WARNING]  )
+
+[//]: # (> You can't activate your AstroLog license in development mode, only in)
+
+[//]: # (> the [compiled version]&#40;https://astro-log.app/download/&#41;.)
 
 **To run AstroLog locally you have to follow these steps:**
 
@@ -34,4 +42,4 @@ cargo tauri dev
 
 **Contributing will be possible after the official release of AstroLog.**
 <br />
-You can get notified when AstroLog releases by signing up to the [waitlist](https://astro-log.app).
+You can get notified when AstroLog releases by signing up to the [waitlist](https://signup.astro-log.app).
