@@ -6,3 +6,4 @@ pub mod imaging_session;
 pub mod imaging_session_list;
 pub mod preferences;
 pub mod state;
+pub mod database;

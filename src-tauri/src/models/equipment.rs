@@ -80,13 +80,13 @@ impl EquipmentItem for Telescope {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Camera {
     pub id: Uuid,
-    brand: String,
-    name: String,
-    notes: HashMap<Uuid, EquipmentNote>,
+    pub brand: String,
+    pub name: String,
+    pub notes: HashMap<Uuid, EquipmentNote>,
 
-    chip_size: String,
-    mega_pixel: f64,
-    rgb: bool,
+    pub chip_size: String,
+    pub mega_pixel: f64,
+    pub rgb: bool,
 }
 
 impl EquipmentItem for Camera {
@@ -166,7 +166,7 @@ impl EquipmentItem for Flattener {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-struct EquipmentNote {
+pub struct EquipmentNote {
     id: Uuid,
     date: DateTime<Utc>,
     note: String,
