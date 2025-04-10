@@ -57,12 +57,12 @@ pub trait EquipmentItem {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Telescope {
     pub id: Uuid,
-    brand: String,
-    name: String,
-    notes: HashMap<Uuid, EquipmentNote>,
+    pub brand: String,
+    pub name: String,
+    pub notes: HashMap<Uuid, EquipmentNote>,
 
-    focal_length: i32,
-    aperture: i32,
+    pub focal_length: i32,
+    pub aperture: i32,
 }
 
 impl EquipmentItem for Telescope {
@@ -104,9 +104,9 @@ impl EquipmentItem for Camera {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Mount {
     pub id: Uuid,
-    brand: String,
-    name: String,
-    notes: HashMap<Uuid, EquipmentNote>,
+    pub brand: String,
+    pub name: String,
+    pub notes: HashMap<Uuid, EquipmentNote>,
 }
 
 impl EquipmentItem for Mount {
@@ -124,9 +124,9 @@ impl EquipmentItem for Mount {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Filter {
     pub id: Uuid,
-    brand: String,
-    name: String,
-    notes: HashMap<Uuid, EquipmentNote>,
+    pub brand: String,
+    pub name: String,
+    pub notes: HashMap<Uuid, EquipmentNote>,
 
     pub filter_type: String,
 }
@@ -146,11 +146,11 @@ impl EquipmentItem for Filter {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Flattener {
     pub id: Uuid,
-    brand: String,
-    name: String,
-    notes: HashMap<Uuid, EquipmentNote>,
+    pub brand: String,
+    pub name: String,
+    pub notes: HashMap<Uuid, EquipmentNote>,
 
-    factor: f64,
+    pub factor: f64,
 }
 
 impl EquipmentItem for Flattener {
@@ -167,7 +167,7 @@ impl EquipmentItem for Flattener {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct EquipmentNote {
-    id: Uuid,
-    date: DateTime<Utc>,
-    note: String,
+    pub id: Uuid,
+    pub date: DateTime<Utc>,
+    pub note: String,
 }

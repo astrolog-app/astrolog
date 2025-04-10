@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use crate::models::frontend::analytics::Analytics;
 use crate::models::frontend::state::{
     CalibrationTableRow, FrontendAppState, LogTableRow, TableData,
@@ -6,6 +7,8 @@ use crate::models::imaging_frames::imaging_frame::CalibrationFrame;
 use crate::models::state::AppState;
 use std::sync::Mutex;
 use tauri::State;
+use crate::models::database::Database;
+use crate::models::equipment::EquipmentList;
 
 #[tauri::command]
 pub fn load_frontend_app_state(state: State<Mutex<AppState>>) -> Result<String, String> {
@@ -45,8 +48,17 @@ pub fn load_frontend_app_state(state: State<Mutex<AppState>>) -> Result<String, 
         calibration: calibration_data,
     };
 
-    let equipment_list = app_state.equipment_list.clone();
+    let db = Database::new(&app_state.local_config.root_directory).map_err(|e| e.to_string())?;
     drop(app_state);
+
+    // If you want to build a full EquipmentList:
+    let equipment_list = EquipmentList {
+        cameras: db.get_cameras().map_err(|e| e.to_string())?,
+        telescopes: db.get_telescopes().map_err(|e| e.to_string())?,
+        mounts: db.get_mounts().map_err(|e| e.to_string())?,
+        filters: db.get_filters().map_err(|e| e.to_string())?,
+        flatteners: db.get_flatteners().map_err(|e| e.to_string())?,
+    };
 
     let analytics = Analytics::new(&state).map_err(|e| e.to_string())?;
 

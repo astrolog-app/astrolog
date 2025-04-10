@@ -1,3 +1,4 @@
+use crate::models::database::Database;
 use crate::models::equipment::{Camera, EquipmentItem, Filter, Flattener, Mount, Telescope};
 use crate::models::state::AppState;
 use std::sync::Mutex;
@@ -11,54 +12,47 @@ pub fn check_equipment_duplicate(
     is_edit: bool,
 ) -> Result<(), String> {
     let state = state.lock().unwrap();
+    let db = Database::new(&state.local_config.root_directory)
+        .map_err(|e| format!("Failed to open database: {e}"))?;
 
-    let mut equipment_items: Vec<&dyn EquipmentItem> = Vec::new();
+    let mut equipment_items: Vec<Box<dyn EquipmentItem>> = Vec::new();
+
+    let telescopes = db.get_telescopes().map_err(|e| e.to_string())?;
+    let cameras = db.get_cameras().map_err(|e| e.to_string())?;
+    let mounts = db.get_mounts().map_err(|e| e.to_string())?;
+    let filters = db.get_filters().map_err(|e| e.to_string())?;
+    let flatteners = db.get_flatteners().map_err(|e| e.to_string())?;
 
     equipment_items.extend(
-        state
-            .equipment_list
-            .telescopes
+        telescopes
             .values()
-            .map(|t| t as &dyn EquipmentItem),
+            .map(|t| Box::new(t.clone()) as Box<dyn EquipmentItem>),
     );
     equipment_items.extend(
-        state
-            .equipment_list
-            .cameras
+        cameras
             .values()
-            .map(|c| c as &dyn EquipmentItem),
+            .map(|c| Box::new(c.clone()) as Box<dyn EquipmentItem>),
     );
     equipment_items.extend(
-        state
-            .equipment_list
-            .mounts
+        mounts
             .values()
-            .map(|m| m as &dyn EquipmentItem),
+            .map(|m| Box::new(m.clone()) as Box<dyn EquipmentItem>),
     );
     equipment_items.extend(
-        state
-            .equipment_list
-            .filters
+        filters
             .values()
-            .map(|f| f as &dyn EquipmentItem),
+            .map(|f| Box::new(f.clone()) as Box<dyn EquipmentItem>),
     );
     equipment_items.extend(
-        state
-            .equipment_list
-            .flatteners
+        flatteners
             .values()
-            .map(|fl| fl as &dyn EquipmentItem),
+            .map(|fl| Box::new(fl.clone()) as Box<dyn EquipmentItem>),
     );
 
-    if equipment_items.iter().any(|item| {
-        if item.view_name() == view_name {
-            if is_edit {
-                return false;
-            }
-            return true;
-        }
-        false
-    }) {
+    if equipment_items
+        .iter()
+        .any(|item| item.view_name() == view_name && !is_edit)
+    {
         return Err(format!("Duplicate equipment item found: {}", view_name));
     }
 
@@ -67,130 +61,45 @@ pub fn check_equipment_duplicate(
 
 #[tauri::command]
 pub fn save_telescope(state: State<Mutex<AppState>>, telescope: Telescope) -> Result<(), String> {
-    let mut state = state.lock().unwrap();
-    let path = state.local_config.root_directory.clone();
-
-    let old_telescope: Option<Telescope> = state
-        .equipment_list
-        .telescopes
-        .insert(telescope.id.clone(), telescope.clone());
-
-    if let Err(err) = state.equipment_list.save(&path) {
-        // Revert the change if save fails
-        match old_telescope {
-            Some(old) => {
-                state.equipment_list.telescopes.insert(old.id, old);
-            }
-            None => {
-                state.equipment_list.telescopes.remove(&telescope.id);
-            }
-        }
-        return Err(err.to_string());
-    }
-
+    let app_state = state.lock().map_err(|e| e.to_string())?;
+    let mut db = Database::new(&app_state.local_config.root_directory)
+        .map_err(|e| format!("Failed to open database: {e}"))?;
+    db.insert_telescope(&telescope).map_err(|e| e.to_string())?;
     Ok(())
 }
 
 #[tauri::command]
 pub fn save_camera(state: State<Mutex<AppState>>, camera: Camera) -> Result<(), String> {
-    let mut state = state.lock().unwrap();
-    let path = state.local_config.root_directory.clone();
-
-    let old_camera: Option<Camera> = state
-        .equipment_list
-        .cameras
-        .insert(camera.id.clone(), camera.clone());
-
-    if let Err(err) = state.equipment_list.save(&path) {
-        // Revert the change if save fails
-        match old_camera {
-            Some(old) => {
-                state.equipment_list.cameras.insert(old.id, old);
-            }
-            None => {
-                state.equipment_list.cameras.remove(&camera.id);
-            }
-        }
-        return Err(err.to_string());
-    }
-
+    let app_state = state.lock().map_err(|e| e.to_string())?;
+    let mut db = Database::new(&app_state.local_config.root_directory)
+        .map_err(|e| format!("Failed to open database: {e}"))?;
+    db.insert_camera(&camera).map_err(|e| e.to_string())?;
     Ok(())
 }
 
 #[tauri::command]
 pub fn save_mount(state: State<Mutex<AppState>>, mount: Mount) -> Result<(), String> {
-    let mut state = state.lock().unwrap();
-    let path = state.local_config.root_directory.clone();
-
-    let old_mount: Option<Mount> = state
-        .equipment_list
-        .mounts
-        .insert(mount.id.clone(), mount.clone());
-
-    if let Err(err) = state.equipment_list.save(&path) {
-        // Revert the change if save fails
-        match old_mount {
-            Some(old) => {
-                state.equipment_list.mounts.insert(old.id, old);
-            }
-            None => {
-                state.equipment_list.mounts.remove(&mount.id);
-            }
-        }
-        return Err(err.to_string());
-    }
-
+    let app_state = state.lock().map_err(|e| e.to_string())?;
+    let mut db = Database::new(&app_state.local_config.root_directory)
+        .map_err(|e| format!("Failed to open database: {e}"))?;
+    db.insert_mount(&mount).map_err(|e| e.to_string())?;
     Ok(())
 }
 
 #[tauri::command]
 pub fn save_filter(state: State<Mutex<AppState>>, filter: Filter) -> Result<(), String> {
-    let mut state = state.lock().unwrap();
-    let path = state.local_config.root_directory.clone();
-
-    let old_filter: Option<Filter> = state
-        .equipment_list
-        .filters
-        .insert(filter.id.clone(), filter.clone());
-
-    if let Err(err) = state.equipment_list.save(&path) {
-        // Revert the change if save fails
-        match old_filter {
-            Some(old) => {
-                state.equipment_list.filters.insert(old.id, old);
-            }
-            None => {
-                state.equipment_list.filters.remove(&filter.id);
-            }
-        }
-        return Err(err.to_string());
-    }
-
+    let app_state = state.lock().map_err(|e| e.to_string())?;
+    let mut db = Database::new(&app_state.local_config.root_directory)
+        .map_err(|e| format!("Failed to open database: {e}"))?;
+    db.insert_filter(&filter).map_err(|e| e.to_string())?;
     Ok(())
 }
 
 #[tauri::command]
 pub fn save_flattener(state: State<Mutex<AppState>>, flattener: Flattener) -> Result<(), String> {
-    let mut state = state.lock().unwrap();
-    let path = state.local_config.root_directory.clone();
-
-    let old_flattener: Option<Flattener> = state
-        .equipment_list
-        .flatteners
-        .insert(flattener.id.clone(), flattener.clone());
-
-    if let Err(err) = state.equipment_list.save(&path) {
-        // Revert the change if save fails
-        match old_flattener {
-            Some(old) => {
-                state.equipment_list.flatteners.insert(old.id, old);
-            }
-            None => {
-                state.equipment_list.flatteners.remove(&flattener.id);
-            }
-        }
-        return Err(err.to_string());
-    }
-
+    let app_state = state.lock().map_err(|e| e.to_string())?;
+    let mut db = Database::new(&app_state.local_config.root_directory)
+        .map_err(|e| format!("Failed to open database: {e}"))?;
+    db.insert_flattener(&flattener).map_err(|e| e.to_string())?;
     Ok(())
 }
