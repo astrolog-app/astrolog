@@ -86,7 +86,8 @@ pub struct Camera {
 
     pub chip_size: String,
     pub mega_pixel: f64,
-    pub rgb: bool,
+    pub is_monochrome: bool,
+    pub is_dslr: bool,
 }
 
 impl EquipmentItem for Camera {
