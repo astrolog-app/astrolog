@@ -5,6 +5,7 @@ use rusqlite_migration::{Migrations, M};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use uuid::Uuid;
+use crate::models::imaging_session::ImagingSession;
 
 pub struct Database {
     pub conn: Connection,
@@ -30,43 +31,53 @@ impl Database {
             M::up(
                 "CREATE TABLE IF NOT EXISTS telescopes (
                 id TEXT PRIMARY KEY,
-                brand TEXT,
-                name TEXT,
-                focal_length INTEGER,
-                aperture INTEGER
+                brand TEXT NOT NULL,
+                name TEXT NOT NULL,
+                focal_length INTEGER NOT NULL,
+                aperture INTEGER NOT NULL
             );",
             ),
             M::up(
                 "CREATE TABLE IF NOT EXISTS cameras (
                 id TEXT PRIMARY KEY,
-                brand TEXT,
-                name TEXT,
-                chip_size TEXT,
-                mega_pixel REAL,
-                rgb INTEGER
+                brand TEXT NOT NULL,
+                name TEXT NOT NULL,
+                chip_size TEXT NOT NULL,
+                mega_pixel REAL NOT NULL,
+                rgb INTEGER NOT NULL
             );",
             ),
             M::up(
                 "CREATE TABLE IF NOT EXISTS mounts (
                 id TEXT PRIMARY KEY,
-                brand TEXT,
-                name TEXT
+                brand TEXT NOT NULL,
+                name TEXT NOT NULL
             );",
             ),
             M::up(
                 "CREATE TABLE IF NOT EXISTS filters (
                 id TEXT PRIMARY KEY,
-                brand TEXT,
-                name TEXT,
-                filter_type TEXT
+                brand TEXT NOT NULL,
+                name TEXT NOT NULL,
+                filter_type TEXT NOT NULL
             );",
             ),
             M::up(
                 "CREATE TABLE IF NOT EXISTS flatteners (
                 id TEXT PRIMARY KEY,
-                brand TEXT,
-                name TEXT,
-                factor REAL
+                brand TEXT NOT NULL,
+                name TEXT NOT NULL,
+                factor REAL NOT NULL
+            );",
+            ),
+            M::up(
+                "CREATE TABLE IF NOT EXISTS imaging_sessions (
+                id TEXT PRIMARY KEY,
+                folder_dir TEXT NOT NULL,
+                light_frame_id TEXT NOT NULL,
+                flat_frame_id TEXT,
+                dark_frame_id TEXT,
+                bias_frame_id TEXT,
             );",
             ),
         ]);
@@ -77,6 +88,7 @@ impl Database {
         Ok(Self { conn })
     }
 
+    // ------------ Equipment ------------
     fn get_notes_for_equipment(&self, equipment_id: Uuid) -> Result<HashMap<Uuid, EquipmentNote>> {
         let mut stmt = self
             .conn
@@ -136,12 +148,13 @@ impl Database {
     }
 
     pub fn remove_camera(&mut self, id: Uuid) -> Result<()> {
-        self.conn
-            .execute("DELETE FROM cameras WHERE id = ?1", params![id.to_string()])?;
-        self.conn.execute(
+        let tx = self.conn.transaction()?;
+        tx.execute("DELETE FROM cameras WHERE id = ?1", params![id.to_string()])?;
+        tx.execute(
             "DELETE FROM equipment_notes WHERE equipment_id = ?1",
             params![id.to_string()],
         )?;
+        tx.commit()?;
         Ok(())
     }
 
@@ -224,10 +237,16 @@ impl Database {
     }
 
     pub fn remove_telescope(&mut self, id: Uuid) -> Result<()> {
-        self.conn.execute(
+        let tx = self.conn.transaction()?;
+        tx.execute(
             "DELETE FROM telescopes WHERE id = ?1",
             params![id.to_string()],
         )?;
+        tx.execute(
+            "DELETE FROM equipment_notes WHERE equipment_id = ?1",
+            params![id.to_string()],
+        )?;
+        tx.commit()?;
         Ok(())
     }
 
@@ -300,8 +319,13 @@ impl Database {
     }
 
     pub fn remove_mount(&mut self, id: Uuid) -> Result<()> {
-        self.conn
-            .execute("DELETE FROM mounts WHERE id = ?1", params![id.to_string()])?;
+        let tx = self.conn.transaction()?;
+        tx.execute("DELETE FROM mounts WHERE id = ?1", params![id.to_string()])?;
+        tx.execute(
+            "DELETE FROM equipment_notes WHERE equipment_id = ?1",
+            params![id.to_string()],
+        )?;
+        tx.commit()?;
         Ok(())
     }
 
@@ -373,8 +397,13 @@ impl Database {
     }
 
     pub fn remove_filter(&mut self, id: Uuid) -> Result<()> {
-        self.conn
-            .execute("DELETE FROM filters WHERE id = ?1", params![id.to_string()])?;
+        let tx = self.conn.transaction()?;
+        tx.execute("DELETE FROM filters WHERE id = ?1", params![id.to_string()])?;
+        tx.execute(
+            "DELETE FROM equipment_notes WHERE equipment_id = ?1",
+            params![id.to_string()],
+        )?;
+        tx.commit()?;
         Ok(())
     }
 
@@ -450,10 +479,16 @@ impl Database {
     }
 
     pub fn remove_flattener(&mut self, id: Uuid) -> Result<()> {
-        self.conn.execute(
+        let tx = self.conn.transaction()?;
+        tx.execute(
             "DELETE FROM flatteners WHERE id = ?1",
             params![id.to_string()],
         )?;
+        tx.execute(
+            "DELETE FROM equipment_notes WHERE equipment_id = ?1",
+            params![id.to_string()],
+        )?;
+        tx.commit()?;
         Ok(())
     }
 
@@ -497,4 +532,72 @@ impl Database {
         }
         Ok(result)
     }
+
+    // ------------ Imaging Sessions ------------
+    pub fn insert_imaging_session(&self, imaging_session: &ImagingSession) -> Result<()> {
+        self.conn
+            .execute(
+            "INSERT INTO imaging_sessions (id, equipment_id, date, note) VALUES (?1, ?2, ?3, ?4)",
+            params![
+                imaging_session.id.to_string(),
+                imaging_session.folder_dir,
+                imaging_session.light_frame_id,
+                imaging_session.flat_frame_id,
+                imaging_session.dark_frame_id,
+                imaging_session.bias_frame_id,
+            ],
+        )?;
+        Ok(())
+    }
+
+    pub fn remove_imaging_session(&mut self, id: Uuid) -> Result<()> {
+        self.conn.execute(
+            "DELETE FROM imaging_sessions WHERE id = ?1",
+            params![id.to_string()],
+        )?;
+        Ok(())
+    }
+
+    pub fn get_imaging_session_by_id(&self, id: Uuid) -> Result<Option<ImagingSession>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT id, folder_dir, light_frame_id, flat_frame_id, dark_frame_id, bias_frame_id
+         FROM imaging_sessions WHERE id = ?1",
+        )?;
+        let mut rows = stmt.query([id.to_string()])?;
+
+        if let Some(row) = rows.next()? {
+            Ok(Some(imaging_session_from_row(&row)?))
+        } else {
+            Ok(None)
+        }
+    }
+
+    pub fn get_imaging_sessions(&self) -> Result<HashMap<Uuid, ImagingSession>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT id, folder_dir, light_frame_id, flat_frame_id, dark_frame_id, bias_frame_id
+         FROM imaging_sessions",
+        )?;
+        let mut rows = stmt.query([])?;
+        let mut result = HashMap::new();
+
+        while let Some(row) = rows.next()? {
+            let session = imaging_session_from_row(&row)?;
+            result.insert(session.id, session);
+        }
+
+        Ok(result)
+    }
+
+    // ------------ Imaging Frames ------------
+}
+
+fn imaging_session_from_row(row: &rusqlite::Row) -> Result<ImagingSession> {
+    Ok(ImagingSession {
+        id: Uuid::parse_str(&row.get::<_, String>(0)?).unwrap_or_else(|_| Uuid::nil()),
+        folder_dir: PathBuf::from(row.get::<_, String>(1)?),
+        light_frame_id: Uuid::parse_str(&row.get::<_, String>(2)?).unwrap_or_else(|_| Uuid::nil()),
+        flat_frame_id: row.get::<_, Option<String>>(3)?.as_deref().and_then(|s| Uuid::parse_str(s).ok()),
+        dark_frame_id: row.get::<_, Option<String>>(4)?.as_deref().and_then(|s| Uuid::parse_str(s).ok()),
+        bias_frame_id: row.get::<_, Option<String>>(5)?.as_deref().and_then(|s| Uuid::parse_str(s).ok()),
+    })
 }
