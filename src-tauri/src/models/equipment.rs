@@ -1,10 +1,7 @@
-use crate::file_store;
 use chrono::{DateTime, Utc};
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::collections::HashMap;
-use std::error::Error;
-use std::path::PathBuf;
 use uuid::Uuid;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -25,23 +22,6 @@ impl EquipmentList {
             filters: HashMap::new(),
             flatteners: HashMap::new(),
         }
-    }
-
-    pub fn load(dir: PathBuf) -> Result<EquipmentList, Box<dyn Error>> {
-        let mut filename = dir;
-        filename.push(".astrolog");
-        filename.push("equipment_list.json");
-        Ok(file_store::load(&filename)?)
-    }
-
-    pub fn save(&self, dir: &PathBuf) -> Result<(), Box<dyn Error>> {
-        let mut filename = dir.canonicalize().unwrap();
-        filename.push(".astrolog");
-        filename.push("equipment_list.json");
-        Ok(file_store::save(
-            &filename,
-            &serde_json::to_string_pretty(self)?,
-        )?)
     }
 }
 

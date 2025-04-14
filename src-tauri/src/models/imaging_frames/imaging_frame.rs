@@ -1,4 +1,4 @@
-use crate::models::equipment::EquipmentList;
+use crate::models::equipment::{Camera};
 use crate::models::frontend::process::Process;
 use crate::models::frontend::state::CalibrationTableRow;
 use crate::models::imaging_frames::calibration_type::CalibrationType;
@@ -135,7 +135,7 @@ pub trait CalibrationFrame: ClassifiableFrame + Clone + Any {
         &self,
         state: &State<Mutex<AppState>>,
     ) -> Result<CalibrationTableRow, Box<dyn Error>>;
-    fn get_field_value(&self, field: &str, equipment_list: &EquipmentList) -> String;
+    fn get_field_value(&self, field: &str, camera: &Option<Camera>) -> String;
     fn build_path(&self, state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>>;
 
     fn classify(

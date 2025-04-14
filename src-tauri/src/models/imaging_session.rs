@@ -4,13 +4,13 @@ use crate::models::imaging_frames::imaging_frame::{ClassifiableFrame, ImagingSes
 use crate::models::imaging_frames::light_frame::LightFrame;
 use crate::models::imaging_session_list::ImagingSessionList;
 use crate::models::state::AppState;
-use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
-use std::path::{Component, PathBuf};
+use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::{State, Window};
 use uuid::Uuid;
+use crate::models::database::Database;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ImagingSession {
@@ -74,6 +74,7 @@ impl ImagingSession {
         state: &State<Mutex<AppState>>,
     ) -> Result<PathBuf, Box<dyn Error>> {
         let app_state = state.lock().map_err(|e| e.to_string())?;
+        let db = Database::new(&app_state.local_config.root_directory)?;
 
         let base_folder = app_state
             .config
@@ -85,9 +86,10 @@ impl ImagingSession {
             .folder_paths
             .imaging_session_pattern
             .clone();
+        let equipment_list = db.get_equipment_list()?;
 
         let get_field_value =
-            |field_name: &str| light_frame.get_field_value(field_name, &app_state.equipment_list);
+            |field_name: &str| light_frame.get_field_value(field_name, &equipment_list);
 
         let path = crate::classify::build_path(&base_folder, &pattern_path, get_field_value)?;
 

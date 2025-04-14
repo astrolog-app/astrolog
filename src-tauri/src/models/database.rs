@@ -1,4 +1,4 @@
-use crate::models::equipment::{Camera, EquipmentNote, Filter, Flattener, Mount, Telescope};
+use crate::models::equipment::{Camera, EquipmentList, EquipmentNote, Filter, Flattener, Mount, Telescope};
 use crate::models::imaging_frames::bias_frame::BiasFrame;
 use crate::models::imaging_frames::calibration_type::CalibrationType;
 use crate::models::imaging_frames::dark_frame::DarkFrame;
@@ -156,6 +156,17 @@ impl Database {
     }
 
     // ------------ Equipment ------------
+    pub fn get_equipment_list(&self) -> Result<EquipmentList> {
+        let list = EquipmentList {
+            telescopes: self.get_telescopes()?,
+            cameras: self.get_cameras()?,
+            mounts: self.get_mounts()?,
+            filters: self.get_filters()?,
+            flatteners: self.get_flatteners()?,
+        };
+        Ok(list)
+    }
+
     fn get_notes_for_equipment(&self, equipment_id: Uuid) -> Result<HashMap<Uuid, EquipmentNote>> {
         let mut stmt = self
             .conn

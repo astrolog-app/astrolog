@@ -11,6 +11,7 @@ use serde::de::Error;
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Serialize, Serializer};
 use uuid::Uuid;
+use crate::models::database::Database;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FrontendAppState {
@@ -54,39 +55,35 @@ pub struct LogTableRow {
 
 impl LogTableRow {
     pub fn new(imaging_session: &ImagingSession, app_state: &AppState) -> Option<Self> {
-        let light_frame = app_state
-            .imaging_frame_list
-            .light_frames
-            .get(&imaging_session.light_frame_id);
+        let db = Database::new(&app_state.local_config.root_directory).unwrap(); // TODO
+        let light_frame = db.get_light_frame_by_id(imaging_session.light_frame_id).unwrap();
 
         match light_frame {
             Some(light_frame) => {
-                let filter_name = light_frame
-                    .filter_id
-                    .and_then(|id| app_state.equipment_list.filters.get(&id))
+                let filter_name = light_frame.filter_id
+                    .as_ref()
+                    .and_then(|id| db.get_filter_by_id(id.clone()).unwrap())
                     .map_or("N/A".to_string(), |filter| filter.view_name().clone());
 
-                let telescope_name = app_state
-                    .equipment_list
-                    .telescopes
-                    .get(&light_frame.telescope_id)
+                let telescope_name = db
+                    .get_telescope_by_id(light_frame.telescope_id.clone())
+                    .unwrap() // TODO
                     .map_or("N/A".to_string(), |telescope| telescope.view_name().clone());
 
-                let flattener_name = light_frame
-                    .flattener_id
-                    .and_then(|id| app_state.equipment_list.flatteners.get(&id))
+                let flattener_name = light_frame.flattener_id
+                    .as_ref()
+                    .and_then(|id| db.get_flattener_by_id(id.clone()).unwrap())
                     .map_or("N/A".to_string(), |flattener| flattener.view_name().clone());
 
-                let mount_name = app_state
-                    .equipment_list
-                    .mounts
-                    .get(&light_frame.mount_id)
+                let mount_name = db
+                    .get_mount_by_id(light_frame.mount_id.clone())
+                    .unwrap()
                     .map_or("N/A".to_string(), |mount| mount.view_name().clone());
 
-                let camera_name = app_state
-                    .equipment_list
-                    .cameras
-                    .get(&light_frame.camera_id)
+                let camera_name = db
+                    .get_camera_by_id(light_frame.camera_id.clone())
+                    .ok()
+                    .flatten()
                     .map_or("N/A".to_string(), |camera| camera.view_name().clone());
 
                 let location = app_state
