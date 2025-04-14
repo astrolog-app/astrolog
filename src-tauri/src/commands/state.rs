@@ -37,19 +37,20 @@ pub fn load_frontend_app_state(state: State<Mutex<AppState>>) -> Result<String, 
     );
 
     let app_state = state.lock().map_err(|e| e.to_string())?;
-    let sessions_data: Vec<LogTableRow> = app_state
-        .imaging_sessions
+    let db = Database::new(&app_state.local_config.root_directory).map_err(|e| e.to_string())?;
+    let sessions_data: Vec<LogTableRow> = db
+        .get_imaging_sessions()
+        .map_err(|e| e.to_string())?
         .iter()
         .filter_map(|i| LogTableRow::new(i.1, &app_state))
         .collect();
+
+    drop(app_state);
 
     let table_data = TableData {
         sessions: sessions_data,
         calibration: calibration_data,
     };
-
-    let db = Database::new(&app_state.local_config.root_directory).map_err(|e| e.to_string())?;
-    drop(app_state);
 
     // If you want to build a full EquipmentList:
     let equipment_list = EquipmentList {

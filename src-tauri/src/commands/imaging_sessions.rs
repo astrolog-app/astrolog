@@ -1,7 +1,7 @@
+use crate::models::database::Database;
 use crate::models::frontend::state::LogTableRow;
 use crate::models::imaging_frames::light_frame::LightFrame;
 use crate::models::imaging_session::ImagingSession;
-use crate::models::imaging_session_list::ImagingSessionList;
 use crate::models::state::AppState;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -20,11 +20,11 @@ pub fn export_csv(path: PathBuf) {
 #[tauri::command]
 pub fn open_imaging_session(state: State<Mutex<AppState>>, id: Uuid) -> Result<(), String> {
     let app_state = state.lock().map_err(|e| e.to_string())?;
+    let db = Database::new(&app_state.local_config.root_directory).map_err(|e| e.to_string())?;
     let mut path = app_state.local_config.root_directory.clone();
     path.push(
-        app_state
-            .imaging_sessions
-            .get(&id)
+        db.get_imaging_session_by_id(id)
+            .map_err(|e| e.to_string())?
             .ok_or("Imaging session not found.")?
             .folder_dir
             .clone(),
@@ -65,10 +65,11 @@ pub fn get_image_frames_path(
         .lock()
         .map_err(|_| "Failed to acquire lock".to_string())?;
     let base_path = &app_state.local_config.root_directory;
+    let db = Database::new(&app_state.local_config.root_directory).map_err(|e| e.to_string())?;
 
-    let session = app_state
-        .imaging_sessions
-        .get(&id)
+    let session = db
+        .get_imaging_session_by_id(id)
+        .map_err(|e| e.to_string())?
         .ok_or_else(|| format!("Session with ID {} not found", id))?;
 
     let light_frames = app_state
@@ -169,8 +170,9 @@ pub fn classify_imaging_session(
     }
 
     // create imaging_session and save it to .json
-    let imaging_session = ImagingSessionList::add(&state, &light_frame, &session.calibration, &session.base.id)
-        .map_err(|e| e.to_string())?;
+    let imaging_session =
+        ImagingSession::add_to_list(&state, &light_frame, &session.calibration, &session.base.id)
+            .map_err(|e| e.to_string())?;
 
     let mut errors = Vec::new();
 

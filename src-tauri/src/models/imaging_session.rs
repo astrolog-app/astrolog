@@ -2,7 +2,6 @@ use crate::commands::imaging_sessions::ImagingSessionCalibration;
 use crate::models::frontend::process::Process;
 use crate::models::imaging_frames::imaging_frame::{ClassifiableFrame, ImagingSessionFrame};
 use crate::models::imaging_frames::light_frame::LightFrame;
-use crate::models::imaging_session_list::ImagingSessionList;
 use crate::models::state::AppState;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
@@ -11,6 +10,9 @@ use std::sync::Mutex;
 use tauri::{State, Window};
 use uuid::Uuid;
 use crate::models::database::Database;
+use crate::models::imaging_frames::calibration_type::CalibrationType;
+use crate::models::imaging_frames::dark_frame::DarkFrame;
+use crate::models::imaging_frames::flat_frame::FlatFrame;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ImagingSession {
@@ -23,31 +25,112 @@ pub struct ImagingSession {
 }
 
 impl ImagingSession {
+    pub fn add_to_list( // TODO: add revert via transactions
+        state: &State<Mutex<AppState>>,
+        light_frame: &LightFrame,
+        calibration: &ImagingSessionCalibration,
+        id: &Uuid,
+    ) -> Result<Self, Box<dyn Error>> {
+        let mut imaging_session = ImagingSession::from(state, &light_frame, &calibration, id)?;
+        let mut flat_frame = None;
+        let mut dark_frame = None;
+
+        if calibration.flat_frames_to_classify.len() > 0 {
+            let id = Uuid::new_v4();
+
+            let frame = FlatFrame {
+                id,
+                camera_id: light_frame.camera_id,
+                total_subs: calibration.flat_frames_to_classify.len() as u32,
+                gain: light_frame.gain,
+                frames_to_classify: calibration.flat_frames_to_classify.clone(),
+                frames_classified: vec![],
+            };
+
+            imaging_session.flat_frame_id = Some(id);
+            flat_frame = Some(frame);
+        }
+
+        if calibration.dark_frames_to_classify.len() > 0 {
+            let id = Uuid::new_v4();
+
+            let frame = DarkFrame {
+                id,
+                camera_id: light_frame.camera_id,
+                total_subs: calibration.dark_frames_to_classify.len() as u32,
+                gain: 0,
+                frames_to_classify: calibration.dark_frames_to_classify.clone(),
+                frames_classified: vec![],
+                in_imaging_session: true,
+                calibration_type: CalibrationType::DARK,
+                camera_temp: 0.0,
+                sub_length: light_frame.sub_length,
+            };
+
+            imaging_session.dark_frame_id = Some(id);
+            dark_frame = Some(frame);
+        }
+
+        // Step 1: imaging session
+        if let Err(e) = imaging_session.add(state) {
+            imaging_session.remove(state).ok();
+            return Err(e);
+        }
+
+        // Step 2: light frame
+        if let Err(e) = light_frame.add(state) {
+            light_frame.remove(state).ok();
+            imaging_session.remove(state).ok();
+            return Err(e);
+        }
+
+        // Step 3: flat frame
+        if let Some(ref flat) = flat_frame {
+            if let Err(e) = flat.add(state) {
+                flat.remove(state).ok();
+                light_frame.remove(state).ok();
+                imaging_session.remove(state).ok();
+                return Err(e);
+            }
+        }
+
+        // Step 4: dark frame
+        if let Some(ref dark) = dark_frame {
+            if let Err(e) = dark.add(state) {
+                dark.remove(state).ok();
+                if let Some(ref flat) = flat_frame {
+                    flat.remove(state).ok();
+                }
+                light_frame.remove(state).ok();
+                imaging_session.remove(state).ok();
+                return Err(e);
+            }
+        }
+
+        Ok(imaging_session)
+    }
+
     pub fn add(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
         let mut app_state = state.lock().map_err(|e| e.to_string())?;
+        let db = Database::new(&app_state.local_config.root_directory)?;
 
-        app_state.imaging_sessions.insert(self.id, self.clone());
+        db.insert_imaging_session(&self)?;
 
-        ImagingSessionList::save(
-            app_state.local_config.root_directory.clone(),
-            &app_state.imaging_sessions,
-        )
+        Ok(())
     }
 
     pub fn remove(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
-        let mut app_state = state.lock().map_err(|e| e.to_string())?;
+        let app_state = state.lock().map_err(|e| e.to_string())?;
+        let mut db = Database::new(&app_state.local_config.root_directory)?;
 
-        app_state.imaging_sessions.remove(&self.id);
+        db.remove_imaging_session(self.id)?;
 
-        ImagingSessionList::save(
-            app_state.local_config.root_directory.clone(),
-            &app_state.imaging_sessions,
-        )
-    }
-
-    pub fn edit(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
         Ok(())
     }
+
+    // pub fn edit(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
+    //     Ok(())
+    // }
 
     pub fn from(
         state: &State<Mutex<AppState>>,

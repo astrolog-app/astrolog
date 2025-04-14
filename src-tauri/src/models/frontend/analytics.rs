@@ -6,6 +6,7 @@ use std::collections::HashSet;
 use std::error::Error;
 use std::sync::Mutex;
 use tauri::State;
+use crate::models::database::Database;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Analytics {
@@ -16,10 +17,13 @@ pub struct Analytics {
 impl Analytics {
     pub fn new(state: &State<Mutex<AppState>>) -> Result<Option<Analytics>, Box<dyn Error>> {
         let app_state = state.lock().map_err(|e| e.to_string())?;
-        if app_state.imaging_sessions.is_empty() {
+        let db = Database::new(&app_state.local_config.root_directory)?;
+        drop(app_state);
+
+        let imaging_sessions = db.get_imaging_sessions()?;
+        if imaging_sessions.is_empty() {
             return Ok(None);
         }
-        drop(app_state);
 
         let info_cards = Analytics::get_info_cards(&state)?;
         let sessions_chart = Analytics::get_sessions_chart(&state)?;
