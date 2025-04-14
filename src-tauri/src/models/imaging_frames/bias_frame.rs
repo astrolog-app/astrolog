@@ -47,12 +47,12 @@ impl ClassifiableFrame for BiasFrame {
         &mut self.frames_classified
     }
 
-    fn add_to_list(&self, list: &mut ImagingFrameList) {
-        list.bias_frames.insert(self.id, self.clone());
+    fn add_to_database(&self, db: &mut Database) -> Result<(), Box<dyn Error>> {
+        Ok(db.insert_bias_frame(&self)?)
     }
 
-    fn remove_from_list(&self, list: &mut ImagingFrameList) {
-        list.bias_frames.remove(&self.id);
+    fn remove_from_database(&self, db: &mut Database) -> Result<(), Box<dyn Error>> {
+        Ok(db.remove_bias_frame(self.id)?)
     }
 }
 

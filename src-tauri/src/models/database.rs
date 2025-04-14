@@ -6,7 +6,7 @@ use crate::models::imaging_frames::flat_frame::FlatFrame;
 use crate::models::imaging_frames::light_frame::LightFrame;
 use crate::models::imaging_session::ImagingSession;
 use chrono::{DateTime, Utc};
-use rusqlite::{params, Connection, Result};
+use rusqlite::{params, Connection, Result, Row};
 use rusqlite_migration::{Migrations, M};
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -624,8 +624,9 @@ impl Database {
 
     // ------------ Imaging Sessions ------------
     pub fn insert_imaging_session(&self, imaging_session: &ImagingSession) -> Result<()> {
+        println!("test");
         self.conn.execute(
-            "INSERT INTO imaging_sessions (id, equipment_id, date, note) VALUES (?1, ?2, ?3, ?4)",
+            "INSERT OR REPLACE INTO imaging_sessions (id, folder_dir, light_frame_id, flat_frame_id, dark_frame_id, bias_frame_id) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
             params![
                 imaging_session.id.to_string(),
                 imaging_session.folder_dir.to_string_lossy(),
@@ -644,6 +645,7 @@ impl Database {
                     .map(|id| id.to_string()),
             ],
         )?;
+        println!("test2");
         Ok(())
     }
 
@@ -747,37 +749,42 @@ impl Database {
         let tx = self.conn.transaction()?;
 
         tx.execute(
-            "INSERT INTO light_frames (
+            "INSERT OR REPLACE INTO light_frames (
             id, date, target, location_id, gain, offset, camera_temp, notes, sub_length,
             camera_id, telescope_id, mount_id, flattener_id, filter_id,
             outside_temp, average_seeing, average_cloud_cover, average_moon
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             rusqlite::params![
-                frame.id.to_string(),
-                frame.date.to_rfc3339(),
-                frame.target,
-                frame.location_id.to_string(),
-                frame.gain,
-                frame.offset,
-                frame.camera_temp,
-                frame.notes,
-                frame.sub_length,
-                frame.camera_id.to_string(),
-                frame.telescope_id.to_string(),
-                frame.mount_id.to_string(),
-                frame.flattener_id.map(|id| id.to_string()),
-                frame.filter_id.map(|id| id.to_string()),
-                frame.outside_temp,
-                frame.average_seeing,
-                frame.average_cloud_cover,
-                frame.average_moon
-            ],
+            frame.id.to_string(),
+            frame.date.to_rfc3339(),
+            frame.target,
+            frame.location_id.to_string(),
+            frame.gain,
+            frame.offset,
+            frame.camera_temp,
+            frame.notes,
+            frame.sub_length,
+            frame.camera_id.to_string(),
+            frame.telescope_id.to_string(),
+            frame.mount_id.to_string(),
+            frame.flattener_id.map(|id| id.to_string()),
+            frame.filter_id.map(|id| id.to_string()),
+            frame.outside_temp,
+            frame.average_seeing,
+            frame.average_cloud_cover,
+            frame.average_moon,
+        ],
+        )?;
+
+        tx.execute(
+            "DELETE FROM frame_files WHERE frame_id = ?",
+            rusqlite::params![frame.id.to_string()],
         )?;
 
         let insert_file = |path: &PathBuf, classified: bool| -> Result<()> {
             let id = Uuid::new_v4();
             tx.execute(
-                "INSERT INTO frame_files (id, frame_id, path, classified, frame_type) VALUES (?, ?, ?, ?, ?)",
+                "INSERT OR REPLACE INTO frame_files (id, frame_id, path, classified, frame_type) VALUES (?, ?, ?, ?, ?)",
                 rusqlite::params![
                 id.to_string(),
                 frame.id.to_string(),
@@ -844,25 +851,30 @@ impl Database {
         let tx = self.conn.transaction()?;
 
         tx.execute(
-            "INSERT INTO dark_frames (
+            "INSERT OR REPLACE INTO dark_frames (
             id, camera_id, total_subs, gain, in_imaging_session,
             camera_temp, sub_length
         ) VALUES (?, ?, ?, ?, ?, ?, ?)",
             rusqlite::params![
-                frame.id.to_string(),
-                frame.camera_id.to_string(),
-                frame.total_subs,
-                frame.gain,
-                frame.in_imaging_session as i32,
-                frame.camera_temp,
-                frame.sub_length,
-            ],
+            frame.id.to_string(),
+            frame.camera_id.to_string(),
+            frame.total_subs,
+            frame.gain,
+            frame.in_imaging_session as i32,
+            frame.camera_temp,
+            frame.sub_length,
+        ],
+        )?;
+
+        tx.execute(
+            "DELETE FROM frame_files WHERE frame_id = ?",
+            rusqlite::params![frame.id.to_string()],
         )?;
 
         let insert_file = |path: &PathBuf, classified: bool| -> Result<()> {
             let id = Uuid::new_v4();
             tx.execute(
-                "INSERT INTO frame_files (id, frame_id, path, classified, frame_type) VALUES (?, ?, ?, ?, ?)",
+                "INSERT OR REPLACE INTO frame_files (id, frame_id, path, classified, frame_type) VALUES (?, ?, ?, ?, ?)",
                 rusqlite::params![
                 id.to_string(),
                 frame.id.to_string(),
@@ -970,21 +982,26 @@ impl Database {
         let tx = self.conn.transaction()?;
 
         tx.execute(
-            "INSERT INTO flat_frames (
+            "INSERT OR REPLACE INTO flat_frames (
             id, camera_id, total_subs, gain
         ) VALUES (?, ?, ?, ?)",
             rusqlite::params![
-                frame.id.to_string(),
-                frame.camera_id.to_string(),
-                frame.total_subs,
-                frame.gain,
-            ],
+            frame.id.to_string(),
+            frame.camera_id.to_string(),
+            frame.total_subs,
+            frame.gain,
+        ],
         )?;
 
-        let insert_file = |path: &PathBuf, classified: bool| -> rusqlite::Result<()> {
+        tx.execute(
+            "DELETE FROM frame_files WHERE frame_id = ?",
+            rusqlite::params![frame.id.to_string()],
+        )?;
+
+        let insert_file = |path: &PathBuf, classified: bool| -> Result<()> {
             let id = Uuid::new_v4();
             tx.execute(
-                "INSERT INTO frame_files (id, frame_id, path, classified, frame_type) VALUES (?, ?, ?, ?, ?)",
+                "INSERT OR REPLACE INTO frame_files (id, frame_id, path, classified, frame_type) VALUES (?, ?, ?, ?, ?)",
                 rusqlite::params![
                 id.to_string(),
                 frame.id.to_string(),
@@ -1084,21 +1101,26 @@ impl Database {
         let tx = self.conn.transaction()?;
 
         tx.execute(
-            "INSERT INTO bias_frames (
+            "INSERT OR REPLACE INTO bias_frames (
             id, camera_id, total_subs, gain
         ) VALUES (?, ?, ?, ?)",
             rusqlite::params![
-                frame.id.to_string(),
-                frame.camera_id.to_string(),
-                frame.total_subs,
-                frame.gain,
-            ],
+            frame.id.to_string(),
+            frame.camera_id.to_string(),
+            frame.total_subs,
+            frame.gain,
+        ],
+        )?;
+
+        tx.execute(
+            "DELETE FROM frame_files WHERE frame_id = ?",
+            rusqlite::params![frame.id.to_string()],
         )?;
 
         let insert_file = |path: &PathBuf, classified: bool| -> Result<()> {
             let id = Uuid::new_v4();
             tx.execute(
-                "INSERT INTO frame_files (id, frame_id, path, classified, frame_type) VALUES (?, ?, ?, ?, ?)",
+                "INSERT OR REPLACE INTO frame_files (id, frame_id, path, classified, frame_type) VALUES (?, ?, ?, ?, ?)",
                 rusqlite::params![
                 id.to_string(),
                 frame.id.to_string(),
@@ -1197,7 +1219,7 @@ impl Database {
     }
 }
 
-fn imaging_session_from_row(row: &rusqlite::Row) -> Result<ImagingSession> {
+fn imaging_session_from_row(row: &Row) -> Result<ImagingSession> {
     Ok(ImagingSession {
         id: Uuid::parse_str(&row.get::<_, String>(0)?).unwrap_or_else(|_| Uuid::nil()),
         folder_dir: PathBuf::from(row.get::<_, String>(1)?),

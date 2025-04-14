@@ -2,7 +2,6 @@ use crate::models::equipment::{Camera};
 use crate::models::frontend::process::Process;
 use crate::models::frontend::state::CalibrationTableRow;
 use crate::models::imaging_frames::calibration_type::CalibrationType;
-use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
 use crate::models::state::AppState;
 use std::any::Any;
 use std::error::Error;
@@ -11,6 +10,7 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::{State, Window};
 use uuid::Uuid;
+use crate::models::database::Database;
 
 pub trait ClassifiableFrame: Clone {
     fn id(&self) -> Uuid;
@@ -19,8 +19,8 @@ pub trait ClassifiableFrame: Clone {
     fn frames_classified(&self) -> &Vec<PathBuf>;
     fn frames_classified_mut(&mut self) -> &mut Vec<PathBuf>;
 
-    fn add_to_list(&self, list: &mut ImagingFrameList);
-    fn remove_from_list(&self, list: &mut ImagingFrameList);
+    fn add_to_database(&self, db: &mut Database) -> Result<(), Box<dyn Error>>;
+    fn remove_from_database(&self, db: &mut Database) -> Result<(), Box<dyn Error>>;
 
     fn total_subs(&self) -> u32 {
         let mut size = self.frames_to_classify().len() as u32;
@@ -31,26 +31,21 @@ pub trait ClassifiableFrame: Clone {
 
     fn add(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
         let mut app_state = state.lock().map_err(|e| e.to_string())?;
-        self.add_to_list(&mut app_state.imaging_frame_list);
-        ImagingFrameList::save(
-            app_state.local_config.root_directory.clone(),
-            &app_state.imaging_frame_list,
-        )
+        let mut db = Database::new(&app_state.local_config.root_directory)?;
+        self.add_to_database(&mut db)
     }
 
     fn remove(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
         let mut app_state = state.lock().map_err(|e| e.to_string())?;
-        self.remove_from_list(&mut app_state.imaging_frame_list);
-        ImagingFrameList::save(
-            app_state.local_config.root_directory.clone(),
-            &app_state.imaging_frame_list,
-        )
+        let mut db = Database::new(&app_state.local_config.root_directory)?;
+        self.remove_from_database(&mut db)
     }
 
     // fn edit(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
     //     Ok(())
     // }
 
+    // TODO: revert with transaction
     fn classify_helper(
         &mut self,
         base: &PathBuf,
@@ -71,18 +66,14 @@ pub trait ClassifiableFrame: Clone {
         self.frames_to_classify_mut().retain(|p| p != frame);
 
         let mut app_state = state.lock().map_err(|e| e.to_string())?;
-        // add the updated frame into the corresponding hashmap
-        self.add_to_list(&mut app_state.imaging_frame_list);
+        let mut db = Database::new(&app_state.local_config.root_directory)?;
 
-        if let Err(e) = ImagingFrameList::save(
-            app_state.local_config.root_directory.clone(),
-            &app_state.imaging_frame_list,
-        ) {
+        if let Err(e) = self.add_to_database(&mut db) {
             // revert on error:
             // 1. remove the current (updated) value
-            self.remove_from_list(&mut app_state.imaging_frame_list);
+            self.remove_from_database(&mut db).ok();
             // 2. restore the old value into the hashmap
-            old.add_to_list(&mut app_state.imaging_frame_list);
+            old.add_to_database(&mut db).ok();
             // 3. reset self to the old state
             *self = old;
             // 4. remove the destination file

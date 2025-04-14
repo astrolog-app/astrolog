@@ -13,13 +13,14 @@ use crate::models::equipment::EquipmentList;
 #[tauri::command]
 pub fn load_frontend_app_state(state: State<Mutex<AppState>>) -> Result<String, String> {
     let app_state = state.lock().map_err(|e| e.to_string())?;
+    let db = Database::new(&app_state.local_config.root_directory).map_err(|e| e.to_string())?;
 
     let local_config = app_state.local_config.clone();
     let config = app_state.config.clone();
     let image_list = app_state.gallery_image_list.values().cloned().collect();
 
-    let dark_frames = app_state.imaging_frame_list.dark_frames.clone();
-    let bias_frames = app_state.imaging_frame_list.bias_frames.clone();
+    let dark_frames = db.get_dark_frames().map_err(|e| e.to_string())?;
+    let bias_frames = db.get_bias_frames().map_err(|e| e.to_string())?;
     drop(app_state);
 
     // TODO: now skips if calibration_table_row() returns an error

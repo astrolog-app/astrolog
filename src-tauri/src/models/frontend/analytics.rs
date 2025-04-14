@@ -25,8 +25,8 @@ impl Analytics {
             return Ok(None);
         }
 
-        let info_cards = Analytics::get_info_cards(&state)?;
-        let sessions_chart = Analytics::get_sessions_chart(&state)?;
+        let info_cards = Analytics::get_info_cards(&db)?;
+        let sessions_chart = Analytics::get_sessions_chart(&db)?;
 
         Ok(Some(Analytics {
             info_cards,
@@ -34,8 +34,7 @@ impl Analytics {
         }))
     }
 
-    fn get_info_cards(state: &State<Mutex<AppState>>) -> Result<InfoCards, Box<dyn Error>> {
-        let app_state = state.lock().map_err(|e| e.to_string())?;
+    fn get_info_cards(db: &Database) -> Result<InfoCards, Box<dyn Error>> {
         let now = Utc::now();
         let cutoff = now - Duration::days(30);
 
@@ -54,7 +53,7 @@ impl Analytics {
         let mut recent_unique_targets = HashSet::new();
         let mut previous_unique_targets = HashSet::new();
 
-        for light_frame in app_state.imaging_frame_list.light_frames.values() {
+        for light_frame in db.get_light_frames()?.values() {
             let frame_exposure = (light_frame.sub_length * light_frame.total_subs() as f64) as u32;
             exposure_time += frame_exposure;
 
@@ -122,7 +121,7 @@ impl Analytics {
 
         let total_imaging_session = InfoCardData {
             title: "Imaging Sessions".to_string(),
-            content: app_state.imaging_frame_list.light_frames.len().to_string(),
+            content: db.get_light_frames()?.len().to_string(),
             decrease: false,
             green: true,
             value: recent_imaging_sessions.to_string(),
@@ -146,14 +145,10 @@ impl Analytics {
         })
     }
 
-    fn get_sessions_chart(
-        state: &State<Mutex<AppState>>,
-    ) -> Result<Vec<SessionsChartData>, Box<dyn Error>> {
-        let app_state = state.lock().map_err(|e| e.to_string())?;
-
+    fn get_sessions_chart(db: &Database) -> Result<Vec<SessionsChartData>, Box<dyn Error>> {
         let mut data: Vec<SessionsChartData> = Vec::new();
 
-        for light_frame in app_state.imaging_frame_list.light_frames.values() {
+        for light_frame in db.get_light_frames()?.values() {
             let chart_data_point = SessionsChartData {
                 date: light_frame.date,
                 seconds: (light_frame.sub_length * light_frame.total_subs() as f64) as u32,

@@ -53,12 +53,12 @@ impl ClassifiableFrame for DarkFrame {
         &mut self.frames_classified
     }
 
-    fn add_to_list(&self, list: &mut ImagingFrameList) {
-        list.dark_frames.insert(self.id, self.clone());
+    fn add_to_database(&self, db: &mut Database) -> Result<(), Box<dyn Error>> {
+        Ok(db.insert_dark_frame(&self)?)
     }
 
-    fn remove_from_list(&self, list: &mut ImagingFrameList) {
-        list.dark_frames.remove(&self.id);
+    fn remove_from_database(&self, db: &mut Database) -> Result<(), Box<dyn Error>> {
+        Ok(db.remove_dark_frame(self.id)?)
     }
 }
 

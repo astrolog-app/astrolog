@@ -72,10 +72,9 @@ pub fn get_image_frames_path(
         .map_err(|e| e.to_string())?
         .ok_or_else(|| format!("Session with ID {} not found", id))?;
 
-    let light_frames = app_state
-        .imaging_frame_list
-        .light_frames
-        .get(&session.light_frame_id)
+    let light_frames = db
+        .get_light_frame_by_id(session.light_frame_id)
+        .map_err(|e| e.to_string())?
         .ok_or_else(|| {
             format!(
                 "No light frames found for session ID {}",
@@ -178,7 +177,7 @@ pub fn classify_imaging_session(
 
     // classify imaging session
     if let Err(e) = imaging_session.classify(&state, &window) {
-        errors.push(e.to_string());
+        errors.push(format!("Error classifying frames: {}", e));
     }
 
     // create new log_table_row

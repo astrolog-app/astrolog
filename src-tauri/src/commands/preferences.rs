@@ -4,6 +4,7 @@ use crate::models::state::AppState;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::{AppHandle, Manager, State};
+use crate::models::database::Database;
 
 #[tauri::command]
 pub fn setup_backup(_path: String) {}
@@ -55,8 +56,9 @@ pub fn change_imaging_session_folder_path(
     pattern: PathBuf,
 ) -> Result<(), String> {
     let mut app_state = state.lock().map_err(|e| e.to_string())?;
+    let db = Database::new(&app_state.local_config.root_directory).map_err(|e| e.to_string())?;
 
-    if !app_state.imaging_frame_list.light_frames.is_empty() {
+    if !db.get_light_frames().map_err(|e| e.to_string())?.is_empty() {
         return Err("Feature not implemented: Can't change folder structure of already added imaging sessions in this version.".to_string());
     }
 
@@ -94,8 +96,9 @@ pub fn change_dark_frames_folder_path(
     pattern: PathBuf,
 ) -> Result<(), String> {
     let mut app_state = state.lock().map_err(|e| e.to_string())?;
+    let db = Database::new(&app_state.local_config.root_directory).map_err(|e| e.to_string())?;
 
-    for dark_frame in &app_state.imaging_frame_list.dark_frames {
+    for dark_frame in db.get_dark_frames().map_err(|e| e.to_string())? {
         if !dark_frame.1.in_imaging_session {
             return Err("Feature not implemented: Can't change folder structure of already added dark frames in this version.".to_string());
         }
@@ -131,8 +134,9 @@ pub fn change_bias_frames_folder_path(
     pattern: PathBuf,
 ) -> Result<(), String> {
     let mut app_state = state.lock().map_err(|e| e.to_string())?;
+    let db = Database::new(&app_state.local_config.root_directory).map_err(|e| e.to_string())?;
 
-    if !app_state.imaging_frame_list.bias_frames.is_empty() {
+    if !db.get_bias_frames().map_err(|e| e.to_string())?.is_empty() {
         return Err("Feature not implemented: Can't change folder structure of already added bias frames in this version.".to_string());
     }
 

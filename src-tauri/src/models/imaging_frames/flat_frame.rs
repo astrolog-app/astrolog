@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::path::PathBuf;
 use uuid::Uuid;
+use crate::models::database::Database;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct FlatFrame {
@@ -36,12 +37,12 @@ impl ClassifiableFrame for FlatFrame {
         &mut self.frames_classified
     }
 
-    fn add_to_list(&self, list: &mut ImagingFrameList) {
-        list.flat_frames.insert(self.id, self.clone());
+    fn add_to_database(&self, db: &mut Database) -> Result<(), Box<dyn Error>> {
+        Ok(db.insert_flat_frame(&self)?)
     }
 
-    fn remove_from_list(&self, list: &mut ImagingFrameList) {
-        list.flat_frames.remove(&self.id);
+    fn remove_from_database(&self, db: &mut Database) -> Result<(), Box<dyn Error>> {
+        Ok(db.remove_flat_frame(self.id)?)
     }
 }
 

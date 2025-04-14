@@ -1,12 +1,12 @@
 use crate::commands::imaging_sessions::ImagingSessionEdit;
 use crate::models::equipment::{EquipmentItem, EquipmentList};
 use crate::models::imaging_frames::imaging_frame::{ClassifiableFrame, ImagingSessionFrame};
-use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::path::PathBuf;
 use uuid::Uuid;
+use crate::models::database::Database;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LightFrame {
@@ -119,12 +119,12 @@ impl ClassifiableFrame for LightFrame {
         &mut self.frames_classified
     }
 
-    fn add_to_list(&self, list: &mut ImagingFrameList) {
-        list.light_frames.insert(self.id, self.clone());
+    fn add_to_database(&self, db: &mut Database) -> Result<(), Box<dyn Error>> {
+        Ok(db.insert_light_frame(&self)?)
     }
 
-    fn remove_from_list(&self, list: &mut ImagingFrameList) {
-        list.light_frames.remove(&self.id);
+    fn remove_from_database(&self, db: &mut Database) -> Result<(), Box<dyn Error>> {
+        Ok(db.remove_light_frame(self.id)?)
     }
 }
 

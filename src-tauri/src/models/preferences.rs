@@ -8,6 +8,7 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::State;
 use uuid::Uuid;
+use crate::models::database::Database;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LocalConfig {
@@ -120,11 +121,12 @@ impl Location {
 
     pub fn delete(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
         let mut app_state = state.lock().map_err(|e| e.to_string())?;
+        let mut db = Database::new(&app_state.local_config.root_directory)?;
 
         // Check if any frame is using this location
-        if app_state
-            .imaging_frame_list
-            .light_frames
+        if db
+            .get_light_frames()
+            .map_err(|e| e.to_string())?
             .values()
             .any(|frame| frame.location_id == self.id)
         {
