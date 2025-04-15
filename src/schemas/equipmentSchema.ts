@@ -14,7 +14,8 @@ export const telescopeSchema = baseEquipmentSchema.extend({
 export const cameraSchema = baseEquipmentSchema.extend({
   chip_size: z.string().min(1, 'Chip size is required'),
   mega_pixel: z.number().positive('Mega pixel must be a positive number'),
-  rgb: z.boolean()
+  is_monochrome: z.boolean().default(false),
+  is_dslr: z.boolean().default(false)
 });
 
 export const mountSchema = baseEquipmentSchema;

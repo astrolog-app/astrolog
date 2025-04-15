@@ -22,7 +22,8 @@ export interface Telescope extends EquipmentItem {
 export interface Camera extends EquipmentItem {
   chip_size: string;
   mega_pixel: number;
-  rgb: boolean;
+  is_monochrome: boolean;
+  is_dslr: boolean;
 }
 
 export interface Mount extends EquipmentItem {}

@@ -36,7 +36,7 @@ export default function EquipmentDetails({ selectedItem }: EquipmentDetailsProps
 
   if (selectedItem === undefined) {
     return (
-      <div>No Item Selected.</div>
+      <div className="flex-1 flex items-center justify-center text-muted-foreground h-full">No item selected.</div>
     );
   }
 
@@ -130,7 +130,7 @@ function EquipmentDetailsTable({ selectedItem }: { selectedItem: EquipmentItem }
             </TableRow>
             <TableRow>
               <TableCell>RGB</TableCell>
-              <TableCell>{(selectedItem as Camera).rgb ? 'Yes' : 'No'}</TableCell>
+              <TableCell>{(selectedItem as Camera).is_monochrome ? 'Yes' : 'No'}</TableCell>
             </TableRow>
           </>
         )}

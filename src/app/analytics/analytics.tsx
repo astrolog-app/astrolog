@@ -6,18 +6,23 @@ import SessionsChart from '@/components/analytics/sessionsChart';
 import InfoCard from '@/components/analytics/infoCard';
 import HeaderCard from '@/components/headerCard';
 import { useAppState } from '@/context/stateProvider';
+import { Card } from '@/components/ui/card';
 
 export function Analytics() {
   const { appState } = useAppState();
 
   return (
-    <Tab>
+    <Tab className={styles.tab}>
       <HeaderCard
         title="Analytics"
         subtitle="View the analytics of your imaging sessions."
       />
       {appState.analytics === null
-        ? <div>No Data.</div>
+        ? (
+          <Card className='flex-1'>
+            <div className="flex-1 flex items-center justify-center text-muted-foreground h-full">No analytics available.</div>
+          </Card>
+        )
         : (
           <div className={styles.lower}>
             <div className={styles.infoCards}>

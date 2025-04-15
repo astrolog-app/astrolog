@@ -64,7 +64,8 @@ export default function EquipmentModal({ type, item }: EquipmentProps) {
       aperture: (item as Telescope)?.aperture,
       chip_size: (item as Camera)?.chip_size,
       mega_pixel: (item as Camera)?.mega_pixel,
-      rgb: (item as Camera)?.rgb,
+      is_monochrome: (item as Camera)?.is_monochrome,
+      is_dslr: (item as Camera)?.is_dslr,
       filter_type: (item as Filter)?.filter_type,
       factor: (item as Flattener)?.factor,
     }
@@ -260,13 +261,33 @@ export default function EquipmentModal({ type, item }: EquipmentProps) {
               />
               <FormField
                 control={form.control}
-                name="rgb"
+                name="is_monochrome"
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
-                      <FormLabel className="text-base">RGB</FormLabel>
+                      <FormLabel className="text-base">Monochrome</FormLabel>
                       <FormDescription>
-                        Is this an RGB camera?
+                        Is this a monochrome camera?
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="is_dslr"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">DSLR</FormLabel>
+                      <FormDescription>
+                        Is this a DSLR camera?
                       </FormDescription>
                     </div>
                     <FormControl>

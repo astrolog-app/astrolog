@@ -1,12 +1,17 @@
-.infoCards {
+.tab {
   display: flex;
-  margin-bottom: var(--padding);
+  flex-direction: column;
 
-  & > * {
-    margin-right: var(--padding);
+  .infoCards {
+    display: flex;
+    margin-bottom: var(--padding);
 
-    &:last-of-type {
-      margin-right: 0;
+    & > * {
+      margin-right: var(--padding);
+
+      &:last-of-type {
+        margin-right: 0;
+      }
     }
   }
 }

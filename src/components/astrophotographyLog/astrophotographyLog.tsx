@@ -291,6 +291,7 @@ function ImagingSessionContextMenu({
         onClick={() => newImagingSession({
           appState,
           open: () => openModal(<NewImagingSession />),
+          openModal: openModal
         })}
       >
         Add new Session...
@@ -352,6 +353,7 @@ function CalibrationContextMenu({
         onClick={() => newCalibrationFrameSession({
           appState,
           open: () => openModal(<SelectImagingFrames />),
+          openModal: openModal
         })}
       >Add new Frames...
       </ContextMenuItem>

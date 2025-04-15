@@ -10,10 +10,10 @@ import { FolderPathBuilder, FolderPathBuilderType } from '@/components/modals/pr
 import { ReactNode } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-export function Preferences() {
+export function Preferences({ defaultValue = "appearance" }: { defaultValue?: string }) {
   return (
     <Modal title="Preferences" subtitle="Customize AstroLog" separator={true}>
-      <Tabs defaultValue="appearance" className={styles.preferences}>
+      <Tabs defaultValue={defaultValue} className={styles.preferences}>
         <TabsList className={styles.tabsList}>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
           <TabsTrigger value="source">Source</TabsTrigger>

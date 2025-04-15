@@ -27,8 +27,6 @@ export default function RootDirectory() {
                 description: 'Error: ' + e
               })
             );
-
-          void relaunch();
         }
       })
   }

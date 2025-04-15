@@ -13,7 +13,7 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import {
   Select,
   SelectContent,
@@ -33,6 +33,9 @@ import { AppState, CalibrationFrame } from '@/interfaces/state';
 import { EquipmentType } from '@/enums/equipmentType';
 import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
+import { ToastAction } from '@/components/ui/toast';
+import { Preferences } from '@/components/modals/preferences/preferences';
+import EquipmentModal from '@/components/modals/equipment/equipment';
 
 interface CalibrationRowEditorProps {
   analyzedFrames?: AnalyzedCalibrationFrames;
@@ -289,12 +292,13 @@ export default function CalibrationRowEditor({
   );
 }
 
-export function newCalibrationFrameSession({ open, appState }: { open: () => void, appState: AppState }) {
+export function newCalibrationFrameSession({ open, appState, openModal }: { open: () => void, appState: AppState, openModal: (content: ReactNode) => void }) {
   if (appState.config.folder_paths.calibration_base_folder === "" || appState.config.folder_paths.dark_frame_pattern === "" || appState.config.folder_paths.bias_frame_pattern === "") {
     toast({
       variant: 'destructive',
       title: 'Uh oh! Something went wrong.',
-      description: 'You have to set a folder path for your calibration frames (preferences)!'
+      description: 'You have to set a folder path for your calibration frames!',
+      action: <ToastAction altText="Configure" onClick={() => openModal(<Preferences defaultValue="calibration_frames" />)}>Configure</ToastAction>,
     });
 
     return;
@@ -304,7 +308,8 @@ export function newCalibrationFrameSession({ open, appState }: { open: () => voi
     toast({
       variant: 'destructive',
       title: 'Uh oh! Something went wrong.',
-      description: 'You have to add at least one camera to your equipment list!!'
+      description: 'You have to add at least one camera to your equipment list!',
+      action: <ToastAction altText="Configure" onClick={() => openModal(<EquipmentModal type={EquipmentType.CAMERA} />)}>Add</ToastAction>,
     });
 
     return;

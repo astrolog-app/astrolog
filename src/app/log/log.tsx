@@ -69,6 +69,7 @@ export default function Log() {
           onClick={() => newImagingSession({
             appState,
             open: () => openModal(<NewImagingSession />),
+            openModal: openModal
           })}
         >
           <Plus className="h-4 w-4 mr-2" />
@@ -80,6 +81,7 @@ export default function Log() {
           onClick={() => newCalibrationFrameSession({
             appState,
             open: () => openModal(<SelectImagingFrames />),
+            openModal: openModal
           })}
         >
           <Plus className="h-4 w-4 mr-2" />

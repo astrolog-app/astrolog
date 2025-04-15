@@ -73,6 +73,7 @@ export function TopBar() {
               onClick={() => newImagingSession({
                 appState,
                 open: () => openModal(<NewImagingSession />),
+                openModal: openModal
               })}
             >
               New Imaging Session...
@@ -81,6 +82,7 @@ export function TopBar() {
               onClick={() => newCalibrationFrameSession({
                 appState,
                 open: () => openModal(<SelectImagingFrames />),
+                openModal: openModal
               })}
             >
               New Calibration Frame...

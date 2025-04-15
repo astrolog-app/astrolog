@@ -182,7 +182,7 @@ export function FolderPathBuilder({ type }: { type: FolderPathBuilderType }) {
       }
     })
     return () => subscription.unsubscribe()
-  }, [form.watch])
+  }, [form.watch, calibrationFrameType])
 
   useEffect(() => {
     if (defaultBaseFolder || defaultFolderPath) {
@@ -327,6 +327,7 @@ export function FolderPathBuilder({ type }: { type: FolderPathBuilderType }) {
               ...prevState.config,
               folder_paths: {
                 ...prevState.config.folder_paths,
+                calibration_base_folder: base_folder,
                 [calibrationFrameType === CalibrationFrameType.DARK_FRAME
                   ? "dark_frame_pattern"
                   : "bias_frame_pattern"]: pattern,

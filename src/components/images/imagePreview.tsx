@@ -96,7 +96,7 @@ export default function ImagePreview({ images }: { images: string[] }) {
 export function ImagePreviewUndefined() {
   return (
     <ImagePreviewBase>
-      <div className="flex-1 flex items-center justify-center text-muted-foreground">No images available</div>
+      <div className="flex-1 flex items-center justify-center text-muted-foreground">No images available.</div>
     </ImagePreviewBase>
   );
 }
