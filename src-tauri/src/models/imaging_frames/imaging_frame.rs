@@ -7,7 +7,6 @@ use std::any::Any;
 use std::error::Error;
 use std::fs;
 use std::path::PathBuf;
-use std::sync::Mutex;
 use tauri::{State, Window};
 use uuid::Uuid;
 use crate::models::database::Database;
@@ -29,15 +28,13 @@ pub trait ClassifiableFrame: Clone {
         size
     }
 
-    fn add(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
-        let mut app_state = state.lock().map_err(|e| e.to_string())?;
-        let mut db = Database::new(&app_state.local_config.root_directory)?;
+    fn add(&self, state: &State<AppState>) -> Result<(), Box<dyn Error>> {
+        let mut db = state.db.lock().map_err(|e| e.to_string())?;
         self.add_to_database(&mut db)
     }
 
-    fn remove(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
-        let mut app_state = state.lock().map_err(|e| e.to_string())?;
-        let mut db = Database::new(&app_state.local_config.root_directory)?;
+    fn remove(&self, state: &State<AppState>) -> Result<(), Box<dyn Error>> {
+        let mut db = state.db.lock().map_err(|e| e.to_string())?;
         self.remove_from_database(&mut db)
     }
 
@@ -52,7 +49,7 @@ pub trait ClassifiableFrame: Clone {
         file_name: &PathBuf,
         frame: &PathBuf,
         destination: &PathBuf,
-        state: &State<Mutex<AppState>>,
+        state: &State<AppState>,
     ) -> Result<(), Box<dyn Error>> {
         // save a clone of the current state
         let old = self.clone();
@@ -65,8 +62,7 @@ pub trait ClassifiableFrame: Clone {
         // remove the frame from the list to classify
         self.frames_to_classify_mut().retain(|p| p != frame);
 
-        let mut app_state = state.lock().map_err(|e| e.to_string())?;
-        let mut db = Database::new(&app_state.local_config.root_directory)?;
+        let mut db = state.db.lock().map_err(|e| e.to_string())?;
 
         if let Err(e) = self.add_to_database(&mut db) {
             // revert on error:
@@ -80,7 +76,6 @@ pub trait ClassifiableFrame: Clone {
             fs::remove_file(&destination).ok();
             return Err(e);
         }
-        drop(app_state);
 
         Ok(())
     }
@@ -91,7 +86,7 @@ pub trait ImagingSessionFrame: ClassifiableFrame + Clone {
 
     fn classify(
         &mut self,
-        state: &State<Mutex<AppState>>,
+        state: &State<AppState>,
         window: &Window,
         process: &mut Process,
         base: &PathBuf,
@@ -102,7 +97,7 @@ pub trait ImagingSessionFrame: ClassifiableFrame + Clone {
                       file_name: &PathBuf,
                       frame: &PathBuf,
                       destination: &PathBuf,
-                      state: &State<Mutex<AppState>>| {
+                      state: &State<AppState>| {
             self.classify_helper(base, file_name, frame, destination, state)
         };
 
@@ -124,14 +119,14 @@ pub trait CalibrationFrame: ClassifiableFrame + Clone + Any {
 
     fn calibration_table_row(
         &self,
-        state: &State<Mutex<AppState>>,
+        state: &State<AppState>,
     ) -> Result<CalibrationTableRow, Box<dyn Error>>;
     fn get_field_value(&self, field: &str, camera: &Option<Camera>) -> String;
-    fn build_path(&self, state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>>;
+    fn build_path(&self, state: &State<AppState>) -> Result<PathBuf, Box<dyn Error>>;
 
     fn classify(
         &mut self,
-        state: &State<Mutex<AppState>>,
+        state: &State<AppState>,
         window: &Window,
         process: &mut Process,
     ) -> Result<(), Box<dyn Error>> {
@@ -141,7 +136,7 @@ pub trait CalibrationFrame: ClassifiableFrame + Clone + Any {
                       file_name: &PathBuf,
                       frame: &PathBuf,
                       destination: &PathBuf,
-                      state: &State<Mutex<AppState>>| {
+                      state: &State<AppState>| {
             self.classify_helper(base, file_name, frame, destination, state)
         };
 

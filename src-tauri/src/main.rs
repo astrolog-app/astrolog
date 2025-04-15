@@ -57,13 +57,13 @@ fn main() {
             });
 
             // init app_state
-            let app_state = Mutex::new(AppState::new(app.handle()));
+            let app_state = AppState::new(app.handle());
 
             // set .astrolog folder invisible on windows
             let mut dir = app_state
+                .local_config
                 .lock()
                 .unwrap()
-                .local_config
                 .root_directory
                 .clone();
             dir.push(".astrolog");
@@ -76,9 +76,8 @@ fn main() {
         })
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                let state: tauri::State<Mutex<AppState>> = window.state();
-                let lock_state = state.lock().unwrap();
-                if lock_state.close_lock {
+                let state: tauri::State<AppState> = window.state();
+                if *state.close_lock.lock().unwrap() {
                     api.prevent_close();
                     window.emit("close_lock", ()).unwrap();
                 }

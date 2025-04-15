@@ -4,7 +4,6 @@ use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::error::Error;
-use std::sync::Mutex;
 use tauri::State;
 use crate::models::database::Database;
 
@@ -15,10 +14,8 @@ pub struct Analytics {
 }
 
 impl Analytics {
-    pub fn new(state: &State<Mutex<AppState>>) -> Result<Option<Analytics>, Box<dyn Error>> {
-        let app_state = state.lock().map_err(|e| e.to_string())?;
-        let db = Database::new(&app_state.local_config.root_directory)?;
-        drop(app_state);
+    pub fn new(state: &State<AppState>) -> Result<Option<Analytics>, Box<dyn Error>> {
+        let db = state.db.lock().map_err(|e| e.to_string())?;
 
         let imaging_sessions = db.get_imaging_sessions()?;
         if imaging_sessions.is_empty() {

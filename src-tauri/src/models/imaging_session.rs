@@ -6,10 +6,8 @@ use crate::models::state::AppState;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::path::PathBuf;
-use std::sync::Mutex;
 use tauri::{State, Window};
 use uuid::Uuid;
-use crate::models::database::Database;
 use crate::models::imaging_frames::calibration_type::CalibrationType;
 use crate::models::imaging_frames::dark_frame::DarkFrame;
 use crate::models::imaging_frames::flat_frame::FlatFrame;
@@ -26,7 +24,7 @@ pub struct ImagingSession {
 
 impl ImagingSession {
     pub fn add_to_list( // TODO: add revert via transactions
-        state: &State<Mutex<AppState>>,
+        state: &State<AppState>,
         light_frame: &LightFrame,
         calibration: &ImagingSessionCalibration,
         id: &Uuid,
@@ -110,18 +108,16 @@ impl ImagingSession {
         Ok(imaging_session)
     }
 
-    pub fn add(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
-        let mut app_state = state.lock().map_err(|e| e.to_string())?;
-        let db = Database::new(&app_state.local_config.root_directory)?;
+    pub fn add(&self, state: &State<AppState>) -> Result<(), Box<dyn Error>> {
+        let db = state.db.lock().map_err(|e| e.to_string())?;
 
         db.insert_imaging_session(&self)?;
 
         Ok(())
     }
 
-    pub fn remove(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
-        let app_state = state.lock().map_err(|e| e.to_string())?;
-        let mut db = Database::new(&app_state.local_config.root_directory)?;
+    pub fn remove(&self, state: &State<AppState>) -> Result<(), Box<dyn Error>> {
+        let mut db = state.db.lock().map_err(|e| e.to_string())?;
 
         db.remove_imaging_session(self.id)?;
 
@@ -133,7 +129,7 @@ impl ImagingSession {
     // }
 
     pub fn from(
-        state: &State<Mutex<AppState>>,
+        state: &State<AppState>,
         light_frame: &LightFrame,
         calibration: &ImagingSessionCalibration,
         id: &Uuid,
@@ -154,18 +150,16 @@ impl ImagingSession {
 
     pub fn build_path(
         light_frame: &LightFrame,
-        state: &State<Mutex<AppState>>,
+        state: &State<AppState>,
     ) -> Result<PathBuf, Box<dyn Error>> {
-        let app_state = state.lock().map_err(|e| e.to_string())?;
-        let db = Database::new(&app_state.local_config.root_directory)?;
+        let config = state.config.lock().map_err(|e| e.to_string())?;
+        let db = state.db.lock().map_err(|e| e.to_string())?;
 
-        let base_folder = app_state
-            .config
+        let base_folder = config
             .folder_paths
             .imaging_session_base_folder
             .clone();
-        let pattern_path = app_state
-            .config
+        let pattern_path = config
             .folder_paths
             .imaging_session_pattern
             .clone();
@@ -181,11 +175,10 @@ impl ImagingSession {
 
     pub fn classify(
         &self,
-        state: &State<Mutex<AppState>>,
+        state: &State<AppState>,
         window: &Window,
     ) -> Result<(), Box<dyn Error>> {
-        let app_state = state.lock().map_err(|e| e.to_string())?;
-        let mut db = Database::new(&app_state.local_config.root_directory)?;
+        let db = state.db.lock().map_err(|e| e.to_string())?;
 
         let mut light_frame = db
             .get_light_frame_by_id(self.light_frame_id)
@@ -204,6 +197,7 @@ impl ImagingSession {
             .map(|id| db.get_flat_frame_by_id(id))
             .transpose()?
             .flatten();
+        drop(db);
 
         let mut len = light_frame.total_subs();
         if let Some(ref frame) = dark_frame {
@@ -212,8 +206,6 @@ impl ImagingSession {
         if let Some(ref frame) = flat_frame {
             len += frame.total_subs;
         }
-
-        drop(app_state);
 
         let mut process = Process::spawn(
             &window,

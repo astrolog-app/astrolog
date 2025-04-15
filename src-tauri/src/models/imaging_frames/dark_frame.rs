@@ -1,16 +1,12 @@
-use crate::models::equipment::{Camera, EquipmentItem, EquipmentList};
+use crate::models::equipment::{Camera, EquipmentItem};
 use crate::models::frontend::state::CalibrationTableRow;
 use crate::models::imaging_frames::calibration_type::CalibrationType;
-use crate::models::imaging_frames::dark_frame;
 use crate::models::imaging_frames::imaging_frame::ImagingSessionFrame;
 use crate::models::imaging_frames::imaging_frame::{CalibrationFrame, ClassifiableFrame};
-use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
 use crate::models::state::AppState;
 use serde::{Deserialize, Serialize};
-use std::any::Any;
 use std::error::Error;
 use std::path::PathBuf;
-use std::sync::Mutex;
 use tauri::State;
 use uuid::Uuid;
 use crate::models::database::Database;
@@ -90,10 +86,9 @@ impl CalibrationFrame for DarkFrame {
 
     fn calibration_table_row(
         &self,
-        state: &State<Mutex<AppState>>,
+        state: &State<AppState>,
     ) -> Result<CalibrationTableRow, Box<dyn Error>> {
-        let app_state = state.lock().map_err(|e| e.to_string())?;
-        let db = Database::new(&app_state.local_config.root_directory)?;
+        let db = state.db.lock().map_err(|e| e.to_string())?;
 
         let camera_name = db
             .get_camera_by_id(self.camera_id)?
@@ -125,17 +120,16 @@ impl CalibrationFrame for DarkFrame {
         }
     }
 
-    fn build_path(&self, state: &State<Mutex<AppState>>) -> Result<PathBuf, Box<dyn Error>> {
-        let app_state = state.lock().map_err(|e| e.to_string())?;
-        let db = Database::new(&app_state.local_config.root_directory)?;
+    fn build_path(&self, state: &State<AppState>) -> Result<PathBuf, Box<dyn Error>> {
+        let config = state.config.lock().map_err(|e| e.to_string())?;
+        let db = state.db.lock().map_err(|e| e.to_string())?;
 
-        let mut base = app_state
-            .config
+        let mut base = config
             .folder_paths
             .calibration_base_folder
             .clone();
         base.push("Dark");
-        let pattern = app_state.config.folder_paths.dark_frame_pattern.clone();
+        let pattern = config.folder_paths.dark_frame_pattern.clone();
         let camera = db.get_camera_by_id(self.camera_id)?;
         let get_field_value =
             |field_name: &str| self.get_field_value(field_name, &camera);

@@ -5,10 +5,8 @@ use serde_json::to_string_pretty;
 use std::collections::HashMap;
 use std::error::Error;
 use std::path::PathBuf;
-use std::sync::Mutex;
 use tauri::State;
 use uuid::Uuid;
-use crate::models::database::Database;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LocalConfig {
@@ -95,33 +93,32 @@ pub struct Location {
 }
 
 impl Location {
-    pub fn save(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
-        let mut app_state = state.lock().map_err(|e| e.to_string())?;
+    pub fn save(&self, state: &State<AppState>) -> Result<(), Box<dyn Error>> {
+        let mut config = state.config.lock().map_err(|e| e.to_string())?;
 
-        for existing_location in app_state.config.locations.values() {
+        for existing_location in config.locations.values() {
             if existing_location.name == self.name && existing_location.id != self.id {
                 return Err("A location with the same name already exists.".into());
             }
         }
 
-        let old_locations = app_state.config.locations.clone();
+        let old_locations = config.locations.clone();
 
-        app_state.config.locations.insert(self.id, self.clone());
+        config.locations.insert(self.id, self.clone());
 
-        if let Err(e) = app_state
-            .config
-            .save(app_state.local_config.root_directory.clone())
+        if let Err(e) = config
+            .save(state.root_directory.clone())
         {
-            app_state.config.locations = old_locations;
+            config.locations = old_locations;
             return Err(e);
         }
 
         Ok(())
     }
 
-    pub fn delete(&self, state: &State<Mutex<AppState>>) -> Result<(), Box<dyn Error>> {
-        let mut app_state = state.lock().map_err(|e| e.to_string())?;
-        let mut db = Database::new(&app_state.local_config.root_directory)?;
+    pub fn delete(&self, state: &State<AppState>) -> Result<(), Box<dyn Error>> {
+        let mut config = state.config.lock().map_err(|e| e.to_string())?;
+        let db = state.db.lock().map_err(|e| e.to_string())?;
 
         // Check if any frame is using this location
         if db
@@ -135,15 +132,14 @@ impl Location {
             );
         }
 
-        let old_locations = app_state.config.locations.clone();
+        let old_locations = config.locations.clone();
 
-        app_state.config.locations.remove(&self.id);
+        config.locations.remove(&self.id);
 
-        if let Err(e) = app_state
-            .config
-            .save(app_state.local_config.root_directory.clone())
+        if let Err(e) = config
+            .save(state.root_directory.clone())
         {
-            app_state.config.locations = old_locations;
+            config.locations = old_locations;
             return Err(e);
         }
 

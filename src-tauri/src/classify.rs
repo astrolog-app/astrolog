@@ -11,7 +11,7 @@ use tauri::{State, Window};
 pub fn classify<F>(
     base: &PathBuf,
     frames_to_classify: &Vec<PathBuf>,
-    state: &State<Mutex<AppState>>,
+    state: &State<AppState>,
     mut save: F,
     window: &Window,
     process: &mut Process,
@@ -22,17 +22,13 @@ where
         &PathBuf,
         &PathBuf,
         &PathBuf,
-        &State<Mutex<AppState>>,
+        &State<AppState>,
     ) -> Result<(), Box<dyn Error>>,
 {
-    let app_state = state.lock().map_err(|e| e.to_string())?;
-    let root_directory = app_state.local_config.root_directory.clone();
-    drop(app_state);
-
     let mut errors = Vec::new();
 
     for frame in frames_to_classify {
-        let mut destination = root_directory.clone();
+        let mut destination = state.root_directory.clone();
         destination.push(&base);
         if !destination.exists() {
             fs::create_dir_all(&destination)?;

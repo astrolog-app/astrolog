@@ -18,10 +18,9 @@ pub fn export_csv(path: PathBuf) {
 } // TODO: implement
 
 #[tauri::command]
-pub fn open_imaging_session(state: State<Mutex<AppState>>, id: Uuid) -> Result<(), String> {
-    let app_state = state.lock().map_err(|e| e.to_string())?;
-    let db = Database::new(&app_state.local_config.root_directory).map_err(|e| e.to_string())?;
-    let mut path = app_state.local_config.root_directory.clone();
+pub fn open_imaging_session(state: State<AppState>, id: Uuid) -> Result<(), String> {
+    let db = state.db.lock().map_err(|e| e.to_string())?;
+    let mut path = state.root_directory.clone();
     path.push(
         db.get_imaging_session_by_id(id)
             .map_err(|e| e.to_string())?
@@ -58,14 +57,11 @@ pub fn open_imaging_session(state: State<Mutex<AppState>>, id: Uuid) -> Result<(
 
 #[tauri::command]
 pub fn get_image_frames_path(
-    state: State<Mutex<AppState>>,
+    state: State<AppState>,
     id: Uuid,
 ) -> Result<Vec<PathBuf>, String> {
-    let app_state = state
-        .lock()
-        .map_err(|_| "Failed to acquire lock".to_string())?;
-    let base_path = &app_state.local_config.root_directory;
-    let db = Database::new(&app_state.local_config.root_directory).map_err(|e| e.to_string())?;
+    let base_path = state.root_directory.clone();
+    let db = state.db.lock().map_err(|e| e.to_string())?;
 
     let session = db
         .get_imaging_session_by_id(id)
@@ -150,16 +146,14 @@ pub struct ImagingSessionEdit {
 #[tauri::command]
 pub fn classify_imaging_session(
     window: Window,
-    state: State<Mutex<AppState>>,
+    state: State<AppState>,
     session: ImagingSessionEdit,
 ) -> Result<LogTableRow, String> {
     // create light_frame
     let light_frame = LightFrame::from(&session);
 
     // check for duplicates
-    let app_state = state.lock().map_err(|e| e.to_string())?;
-    let mut path = app_state.local_config.root_directory.clone();
-    drop(app_state);
+    let mut path = state.root_directory.clone();
     path.push(ImagingSession::build_path(&light_frame, &state).map_err(|e| e.to_string())?);
     if path.exists() {
         let entries = fs::read_dir(&path).map_err(|e| e.to_string())?;
@@ -181,7 +175,7 @@ pub fn classify_imaging_session(
     }
 
     // create new log_table_row
-    let log_table_row = match LogTableRow::new(&imaging_session, &state.lock().unwrap()) {
+    let log_table_row = match LogTableRow::new(&imaging_session, &state) {
         Some(row) => row,
         None => {
             errors.push("Failed to create LogTableRow".to_string()); // TODO

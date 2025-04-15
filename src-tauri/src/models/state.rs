@@ -1,22 +1,21 @@
-use crate::models::gallery_image_list::{GalleryImage, GalleryImageList};
-use crate::models::imaging_frames::imaging_frame_list::ImagingFrameList;
+use std::path::PathBuf;
 use crate::models::preferences::{Config, LocalConfig};
-use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 use tauri::{AppHandle, Manager};
-use uuid::Uuid;
+use crate::models::database::Database;
 
 pub struct AppState {
-    pub local_config: LocalConfig,
-    pub config: Config,
-    pub gallery_image_list: HashMap<Uuid, GalleryImage>,
-    pub close_lock: bool,
+    pub root_directory: PathBuf,
+    pub local_config: Arc<Mutex<LocalConfig>>,
+    pub config: Arc<Mutex<Config>>,
+    pub db: Arc<Mutex<Database>>,
+    pub close_lock: Arc<Mutex<bool>>,
 }
 
 impl AppState {
     pub fn new(app_handle: &AppHandle) -> Self {
         let mut local_config = LocalConfig::default();
         let mut config = Config::default();
-        let mut image_list: HashMap<Uuid, GalleryImage> = HashMap::new();
 
         match LocalConfig::load(app_handle.path().app_data_dir().unwrap()) {
             Ok(data) => {
@@ -36,20 +35,14 @@ impl AppState {
             }
         }
 
-        match GalleryImageList::load(local_config.root_directory.clone()) {
-            Ok(data) => {
-                image_list = data.gallery_image_list;
-            }
-            Err(err) => {
-                eprintln!("Error loading gallery_image_list {}: {}", "", err);
-            }
-        }
+        let db = Database::new(&local_config.root_directory).unwrap();
 
         AppState {
-            local_config,
-            config,
-            gallery_image_list: image_list,
-            close_lock: false,
+            root_directory: local_config.root_directory.clone(),
+            local_config: Arc::new(Mutex::new(local_config)),
+            config: Arc::new(Mutex::new(config)),
+            db: Arc::new(Mutex::new(db)),
+            close_lock: Arc::new(Mutex::new(false)),
         }
     }
 }

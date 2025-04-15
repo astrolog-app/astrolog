@@ -55,7 +55,7 @@ pub struct LogTableRow {
 
 impl LogTableRow {
     pub fn new(imaging_session: &ImagingSession, app_state: &AppState) -> Option<Self> {
-        let db = Database::new(&app_state.local_config.root_directory).unwrap(); // TODO
+        let db = app_state.db.lock().unwrap(); // TODO
         let light_frame = db.get_light_frame_by_id(imaging_session.light_frame_id).unwrap();
 
         match light_frame {
@@ -88,6 +88,8 @@ impl LogTableRow {
 
                 let location = app_state
                     .config
+                    .lock()
+                    .unwrap() // TODO
                     .locations
                     .get(&light_frame.location_id)
                     .cloned();

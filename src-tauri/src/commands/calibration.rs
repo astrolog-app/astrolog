@@ -78,13 +78,11 @@ pub fn analyze_calibration_frames(
 #[tauri::command]
 pub async fn classify_dark_frame(
     window: Window,
-    state: State<'_, Mutex<AppState>>,
+    state: State<'_, AppState>,
     mut dark_frame: DarkFrame,
 ) -> Result<(), String> {
     // check for duplicates
-    let app_state = state.lock().map_err(|e| e.to_string())?;
-    let mut path = app_state.local_config.root_directory.clone();
-    drop(app_state);
+    let mut path = state.root_directory.clone();
     path.push(
         <DarkFrame as CalibrationFrame>::build_path(&dark_frame, &state)
             .map_err(|e| e.to_string())?,
@@ -120,13 +118,11 @@ pub async fn classify_dark_frame(
 #[tauri::command]
 pub async fn classify_bias_frame(
     window: Window,
-    state: State<'_, Mutex<AppState>>,
+    state: State<'_, AppState>,
     mut bias_frame: BiasFrame,
 ) -> Result<(), String> {
     // check for duplicates
-    let app_state = state.lock().map_err(|e| e.to_string())?;
-    let mut path = app_state.local_config.root_directory.clone();
-    drop(app_state);
+    let mut path = state.root_directory.clone();
     path.push(bias_frame.build_path(&state).map_err(|e| e.to_string())?);
     if path.exists() {
         let entries = fs::read_dir(&path).map_err(|e| e.to_string())?;
