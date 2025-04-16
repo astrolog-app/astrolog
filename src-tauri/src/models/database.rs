@@ -22,7 +22,6 @@ impl Database {
         std::fs::create_dir_all(db_path.parent().unwrap())
             .map_err(|e| rusqlite::Error::ExecuteReturnedResults)?;
         let mut conn = Connection::open(db_path)?;
-        conn.pragma_update(None, "journal_mode", "WAL")?;
 
         let migrations = Migrations::new(vec![
             M::up(

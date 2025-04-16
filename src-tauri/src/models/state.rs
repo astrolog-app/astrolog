@@ -35,7 +35,7 @@ impl AppState {
             }
         }
 
-        let db = Database::new(&local_config.root_directory).unwrap();
+        let db = Database::new(&local_config.root_directory).unwrap(); // TODO: what if root_directory == ""
 
         AppState {
             root_directory: local_config.root_directory.clone(),
