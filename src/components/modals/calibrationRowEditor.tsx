@@ -24,7 +24,7 @@ import {
 import { Input } from '../ui/input';
 import { Label } from '@/components/ui/label';
 import { useModal } from '@/context/modalProvider';
-import EquipmentComboBox from '@/components/ui/equipmentComboBox';
+import { EquipmentComboBox } from '@/components/ui/comboBox';
 import { invoke } from '@tauri-apps/api/core';
 import { AnalyzedCalibrationFrames, BiasFrame, DarkFrame } from '@/interfaces/commands';
 import { CalibrationType } from '@/enums/calibrationType';

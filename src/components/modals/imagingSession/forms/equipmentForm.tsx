@@ -12,7 +12,7 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import styles from './equipmentForm.module.scss';
-import EquipmentComboBox from '@/components/ui/equipmentComboBox';
+import { EquipmentComboBox } from '@/components/ui/comboBox';
 import { EquipmentType } from '@/enums/equipmentType';
 import { ImagingSessionEquipmentSchema } from '@/schemas/imagingSessionSchema';
 import { TabKey } from '@/components/modals/imagingSession/imagingSessionEditor';
