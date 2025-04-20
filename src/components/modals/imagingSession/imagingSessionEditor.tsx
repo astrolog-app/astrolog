@@ -130,8 +130,7 @@ export default function ImagingSessionEditor({ session, base }: ImagingSessionEd
 
   return (
     <Modal
-      title="test"
-      subtitle="subtitle"
+      title="Add Imaging Session"
       separator
       className={styles.modal}
     >

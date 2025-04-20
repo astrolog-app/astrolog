@@ -59,80 +59,89 @@ export default function DetailsForm({ setTab, isEdit, setDetails, editSession }:
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="gain"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Gain</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  {...field}
-                  onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Row 1: Gain and Sub Length */}
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="gain"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Gain</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
+                  />
+                </FormControl>
+                <FormMessage />
+                <FormDescription>Adjust the input sensitivity level</FormDescription>
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="sub_length"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Sub Length (seconds)</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  {...field}
-                  onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="sub_length"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Sub Length (seconds)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
+                  />
+                </FormControl>
+                <FormMessage />
+                <FormDescription>Duration in seconds</FormDescription>
+              </FormItem>
+            )}
+          />
+        </div>
 
-        <FormField
-          control={form.control}
-          name="offset"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Offset</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  {...field}
-                  onChange={(e) => field.onChange(e.target.value ? Number.parseFloat(e.target.value) : undefined)}
-                />
-              </FormControl>
-              <FormDescription>Optional</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Row 2: Offset and Camera Temperature */}
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="offset"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Offset</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(e.target.value ? Number.parseFloat(e.target.value) : undefined)}
+                  />
+                </FormControl>
+                <FormDescription>Optional - Time offset in seconds</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="camera_temp"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Camera Temperature</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  {...field}
-                  onChange={(e) => field.onChange(e.target.value ? Number.parseFloat(e.target.value) : undefined)}
-                />
-              </FormControl>
-              <FormDescription>Optional</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="camera_temp"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Camera Temperature</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(e.target.value ? Number.parseFloat(e.target.value) : undefined)}
+                  />
+                </FormControl>
+                <FormDescription>Optional - Temperature in degrees Celsius</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
+        {/* Row 3: Notes */}
         <FormField
           control={form.control}
           name="notes"
@@ -142,11 +151,13 @@ export default function DetailsForm({ setTab, isEdit, setDetails, editSession }:
               <FormControl>
                 <Textarea {...field} />
               </FormControl>
+              <FormDescription>Additional information or observations</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <ButtonBar>{isEdit ? 'Save' : 'Next'}</ButtonBar>
+
+        <ButtonBar>{isEdit ? "Save" : "Next"}</ButtonBar>
       </form>
     </Form>
   );

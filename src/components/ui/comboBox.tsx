@@ -3,7 +3,6 @@
 import * as React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { Check, ChevronsUpDown } from 'lucide-react';
-
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -19,9 +18,13 @@ interface ComboBoxPros {
   value: UUID | undefined;
   // eslint-disable-next-line no-unused-vars
   onChange: (value: UUID | undefined) => void;
+}
+
+interface DefaultComboBoxProps extends ComboBoxPros {
   values: ComboBoxValue[];
   placeholder: string;
-  nullItem?: boolean;
+  nullItem: boolean;
+  placeFirst: boolean;
 }
 
 interface ComboBoxValue {
@@ -29,7 +32,14 @@ interface ComboBoxValue {
   name: string;
 }
 
-function ComboBox({ value, onChange, values, placeholder, nullItem = false }: ComboBoxPros) {
+function ComboBox({ 
+                    value,
+                    onChange,
+                    values,
+                    placeholder,
+                    nullItem,
+                    placeFirst
+                  }: DefaultComboBoxProps) {
   const [open, setOpen] = useState(false);
 
   const finalValues = useMemo(() => {
@@ -39,10 +49,10 @@ function ComboBox({ value, onChange, values, placeholder, nullItem = false }: Co
   }, [nullItem, values]);
 
   useEffect(() => {
-    if (!value && finalValues.length === 1) {
+    if (placeFirst && !value && finalValues.length === 1) {
       onChange(finalValues[0].id);
     }
-  }, [onChange, finalValues, value]);
+  }, [onChange, finalValues, value, placeFirst]);
 
   const selectedName = finalValues.find((boxValue) => boxValue.id === value);
 
@@ -71,7 +81,6 @@ function ComboBox({ value, onChange, values, placeholder, nullItem = false }: Co
                   value={item.id}
                   onSelect={(currentValue) => {
                     onChange(currentValue as UUID);
-                    console.log(currentValue);
                     setOpen(false);
                   }}
                 >
@@ -92,13 +101,7 @@ function ComboBox({ value, onChange, values, placeholder, nullItem = false }: Co
   );
 }
 
-interface FormComboBox {
-  value: UUID | undefined;
-  // eslint-disable-next-line no-unused-vars
-  onChange: (value: UUID | undefined) => void;
-}
-
-interface EquipmentComboBoxProps extends FormComboBox{
+interface EquipmentComboBoxProps extends ComboBoxPros{
   type: EquipmentType;
 }
 
@@ -155,19 +158,26 @@ export function EquipmentComboBox({
       values={values}
       placeholder={type.toString()}
       nullItem={nullItem}
+      placeFirst={true}
     />
   );
 }
 
-export function LocationComboBox({ value, onChange }: FormComboBox) {
+export function LocationComboBox({ value, onChange }: ComboBoxPros) {
   const { appState } = useAppState();
 
-  const locations = Array.from(appState.config.locations.values());
+  const [values, setValues] = useState<ComboBoxValue[]>([]);
 
-  const values: ComboBoxValue[] = locations.map(loc => ({
-    id: loc.id,
-    name: loc.name,
-  }));
+  useEffect(() => {
+    const locations = Array.from(appState.config.locations.values());
+
+    const newValues: ComboBoxValue[] = locations.map(loc => ({
+      id: loc.id,
+      name: loc.name,
+    }));
+
+    setValues(newValues)
+  }, [appState.config.locations]);
 
   return (
     <ComboBox
@@ -175,11 +185,13 @@ export function LocationComboBox({ value, onChange }: FormComboBox) {
       onChange={onChange}
       values={values}
       placeholder="Location"
+      nullItem={false}
+      placeFirst={true}
     />
   );
 }
 
-export function BiasFrameComboBox({ value, onChange }: FormComboBox) {
+export function BiasFrameComboBox({ value, onChange }: ComboBoxPros) {
   const { appState } = useAppState();
 
   const biasFrames = Array.from(appState.table_data.calibration).filter(frame => frame.calibration_type === CalibrationType.BIAS);
@@ -194,17 +206,19 @@ export function BiasFrameComboBox({ value, onChange }: FormComboBox) {
       value={value}
       onChange={onChange}
       values={values}
-      placeholder="Bias Frame"
+      placeholder="Bias Frames"
+      nullItem={true}
+      placeFirst={false}
     />
   );
 }
 
-export function DarkFrameComboBox({ value, onChange }: FormComboBox) {
+export function DarkFrameComboBox({ value, onChange }: ComboBoxPros) {
   const { appState } = useAppState();
 
-  const biasFrames = Array.from(appState.table_data.calibration).filter(frame => frame.calibration_type === CalibrationType.DARK);
+  const darkFrames = Array.from(appState.table_data.calibration).filter(frame => frame.calibration_type === CalibrationType.DARK);
 
-  const values: ComboBoxValue[] = biasFrames.map(frame => ({
+  const values: ComboBoxValue[] = darkFrames.map(frame => ({
     id: frame.id,
     name: frame.camera + " " + frame.gain,
   }));
@@ -214,7 +228,9 @@ export function DarkFrameComboBox({ value, onChange }: FormComboBox) {
       value={value}
       onChange={onChange}
       values={values}
-      placeholder="Dark Frame"
+      placeholder="Dark Frames"
+      nullItem={true}
+      placeFirst={false}
     />
   );
 }

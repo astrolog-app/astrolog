@@ -8,7 +8,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from '@/components/ui/form';
 import React, { Dispatch, SetStateAction, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button';
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger,
+  PopoverTrigger
 } from '@/components/ui/popover';
 import { cn } from '@/utils/classNames';
 import { CalendarIcon } from 'lucide-react';
@@ -30,7 +30,8 @@ import { ImagingSessionGeneralSchema } from '@/schemas/imagingSessionSchema';
 import { TabKey } from '@/components/modals/imagingSession/imagingSessionEditor';
 import { ImagingSessionGeneral } from '@/interfaces/imagingSessionEdit';
 import { ButtonBar } from '@/components/ui/custom/modal';
-import { useAppState } from '@/context/stateProvider';
+import { LocationComboBox } from '@/components/ui/comboBox';
+import { UUID } from 'crypto';
 
 interface GeneralFormFormProps {
   setTab: Dispatch<SetStateAction<TabKey>>
@@ -40,12 +41,11 @@ interface GeneralFormFormProps {
 }
 
 export default function GeneralForm({ setTab, isEdit, setGeneral, editSession }: GeneralFormFormProps) {
-  const { appState } = useAppState()
   const form = useForm<z.infer<typeof ImagingSessionGeneralSchema>>({
     resolver: zodResolver(ImagingSessionGeneralSchema),
     defaultValues: {
-      target: '',
-    },
+      target: ''
+    }
   });
 
   function onSubmit() {
@@ -59,8 +59,8 @@ export default function GeneralForm({ setTab, isEdit, setGeneral, editSession }:
     const general: ImagingSessionGeneral = {
       date: values.date,
       target: values.target,
-      location_id: appState.config.locations.keys().next().value // TODO
-    }
+      location_id: values.location as UUID
+    };
     setGeneral(general);
     setTab('details');
   }
@@ -68,35 +68,29 @@ export default function GeneralForm({ setTab, isEdit, setGeneral, editSession }:
   useEffect(() => {
     invoke('get_date', {
       image:
-        'E:\\Astrof\\DATA\\2022\\M 42\\Orion UK 200 mm\\27.12\\2\\Light\\L_m42_0164_ISO800_10s__NA.NEF',
+        'E:\\Astrof\\DATA\\2022\\M 42\\Orion UK 200 mm\\27.12\\2\\Light\\L_m42_0164_ISO800_10s__NA.NEF'
     }).then((date) => form.setValue('date', new Date(date as Date)));
   }, [form]);
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className={styles.form}>
-        <div className={styles.general}>
+        {/* First row with Date and Target side by side */}
+        <div className="flex flex-col md:flex-row gap-4 w-full mb-4">
           <FormField
             control={form.control}
             name="date"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
+              <FormItem className="flex flex-col flex-1">
                 <FormLabel>Acquisition Date</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
-                        variant={'outline'}
-                        className={cn(
-                          'w-[240px] pl-3 text-left font-normal',
-                          !field.value && 'text-muted-foreground',
-                        )}
+                        variant={"outline"}
+                        className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
                       >
-                        {field.value ? (
-                          format(field.value, 'PPP')
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
+                        {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
                     </FormControl>
@@ -106,38 +100,52 @@ export default function GeneralForm({ setTab, isEdit, setGeneral, editSession }:
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date('1900-01-01')
-                      }
+                      disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                       initialFocus
                     />
                   </PopoverContent>
                 </Popover>
-                <FormDescription className="w-[240px]">
-                  The date you took your imaging frames.
-                </FormDescription>
+                <FormDescription>The date you took your imaging frames.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="target"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
+              <FormItem className="flex flex-col flex-1">
                 <FormLabel>Target</FormLabel>
                 <FormControl>
                   <Input {...field} placeholder="NGC 9999" />
                 </FormControl>
-                <FormDescription>
-                  The name of the target (e.g. NGC 7000).
-                </FormDescription>
+                <FormDescription>The name of the target (e.g. NGC 7000).</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
-        <ButtonBar>{isEdit ? "Save" : "Next"}</ButtonBar>
+
+        {/* Second row with Location taking full width */}
+        <div className="w-full mb-4">
+          <FormField
+            control={form.control}
+            name="location"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Location</FormLabel>
+                <FormControl>
+                  <LocationComboBox value={field.value as UUID} onChange={field.onChange} />
+                </FormControl>
+                <FormDescription>The location you captured your data for this imaging session.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <ButtonBar cancelButton>{isEdit ? "Save" : "Next"}</ButtonBar>
       </form>
     </Form>
   );

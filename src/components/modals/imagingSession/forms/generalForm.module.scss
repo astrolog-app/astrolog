@@ -3,6 +3,7 @@
 
   .general {
     display: flex;
+    width: 100%;
 
     & > *:not(:last-child) {
       margin-right: var(--padding);

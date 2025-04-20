@@ -12,6 +12,9 @@ export const ImagingSessionGeneralSchema = z.object({
   }),
   target: z.string().min(2, {
     message: 'Target must be set.'
+  }),
+  location: z.string().uuid({
+    message: "Location ID must be a valid UUID."
   })
 });
 
