@@ -23,6 +23,7 @@ import { saveEquipment } from '@/components/modals/equipment/equipment';
 import { UUID } from 'crypto';
 import { toast } from '@/components/ui/use-toast';
 import { useModal } from '@/context/modalProvider';
+import { Button } from '@/components/ui/button';
 
 interface EquipmentNoteProps {
   item: EquipmentItem,
@@ -101,7 +102,9 @@ export default function EquipmentNoteEditor({ item, note }: EquipmentNoteProps) 
               </FormItem>
             )}
           />
-          <ButtonBar cancelButton>Save</ButtonBar>
+          <ButtonBar name="Save" >
+            <Button onClick={() => closeModal()}>Cancel</Button>
+          </ButtonBar>
         </form>
       </Form>
     </Modal>

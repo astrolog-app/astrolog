@@ -62,29 +62,21 @@ export function Modal({
 }
 
 interface ButtonBarProps {
-  children: ReactNode;
+  children?: ReactNode;
   classname?: string;
-  cancelButton?: boolean;
+  name?: string;
+  onClick?: () => void
 }
 
-export function ButtonBar({ children, classname, cancelButton }: ButtonBarProps) {
-  const { closeModal } = useModal();
-
+export function ButtonBar({ children, classname, name = "Next", onClick }: ButtonBarProps) {
   return (
     <div className={cn(classname, styles.buttonBar)}>
-      {cancelButton && (
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => closeModal()}
-        >
-          Cancel
-        </Button>
-      )}
+      {children}
       <Button
         type="submit"
+        onClick={onClick}
       >
-        {children}
+        {name}
       </Button>
     </div>
   );

@@ -27,24 +27,26 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { invoke } from '@tauri-apps/api/core';
 import { ImagingSessionGeneralSchema } from '@/schemas/imagingSessionSchema';
-import { TabKey } from '@/components/modals/imagingSession/imagingSessionEditor';
 import { ImagingSessionGeneral } from '@/interfaces/imagingSessionEdit';
 import { ButtonBar } from '@/components/ui/custom/modal';
 import { LocationComboBox } from '@/components/ui/comboBox';
 import { UUID } from 'crypto';
 
 interface GeneralFormFormProps {
-  setTab: Dispatch<SetStateAction<TabKey>>
+  nextTab: () => void,
   isEdit: boolean,
+  general: ImagingSessionGeneral | undefined,
   setGeneral: Dispatch<SetStateAction<ImagingSessionGeneral | undefined>>,
   editSession: () => void,
 }
 
-export default function GeneralForm({ setTab, isEdit, setGeneral, editSession }: GeneralFormFormProps) {
+export default function GeneralForm({ nextTab, isEdit, general, setGeneral, editSession }: GeneralFormFormProps) {
   const form = useForm<z.infer<typeof ImagingSessionGeneralSchema>>({
     resolver: zodResolver(ImagingSessionGeneralSchema),
     defaultValues: {
-      target: ''
+      target: general?.target ?? "",
+      date: general?.date ?? new Date(),
+      location: general?.location_id
     }
   });
 
@@ -62,15 +64,17 @@ export default function GeneralForm({ setTab, isEdit, setGeneral, editSession }:
       location_id: values.location as UUID
     };
     setGeneral(general);
-    setTab('details');
+    nextTab();
   }
 
-  useEffect(() => {
-    invoke('get_date', {
-      image:
-        'E:\\Astrof\\DATA\\2022\\M 42\\Orion UK 200 mm\\27.12\\2\\Light\\L_m42_0164_ISO800_10s__NA.NEF'
-    }).then((date) => form.setValue('date', new Date(date as Date)));
-  }, [form]);
+  // useEffect(() => {
+  //   if (general?.target === undefined) {
+  //     invoke('get_date', {
+  //       image:
+  //         'E:\\Astrof\\DATA\\2022\\M 42\\Orion UK 200 mm\\27.12\\2\\Light\\L_m42_0164_ISO800_10s__NA.NEF'
+  //     }).then((date) => form.setValue('date', new Date(date as Date)));
+  //   }
+  // }, [form, general?.target]);
 
   return (
     <Form {...form}>
@@ -145,7 +149,7 @@ export default function GeneralForm({ setTab, isEdit, setGeneral, editSession }:
           />
         </div>
 
-        <ButtonBar cancelButton>{isEdit ? "Save" : "Next"}</ButtonBar>
+        <ButtonBar name={isEdit ? "Save" : "Next"}></ButtonBar>
       </form>
     </Form>
   );

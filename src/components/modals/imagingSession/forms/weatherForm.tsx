@@ -1,28 +1,36 @@
 import {
   Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage
 } from '@/components/ui/form';
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction, useRef } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { TabKey } from '@/components/modals/imagingSession/imagingSessionEditor';
 import { ImagingSessionWeather } from '@/interfaces/imagingSessionEdit';
 import { ButtonBar } from '@/components/ui/custom/modal';
 import { ImagingSessionWeatherSchema } from '@/schemas/imagingSessionSchema';
-import { LocationComboBox } from '@/components/ui/comboBox';
 import { UUID } from 'crypto';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 interface WeatherFormFormProps {
-  setTab: Dispatch<SetStateAction<TabKey>>
+  prevTab: () => void,
+  nextTab: () => void,
   isEdit: boolean,
+  weather: ImagingSessionWeather,
   setWeather: Dispatch<SetStateAction<ImagingSessionWeather>>,
   editSession: () => void,
 }
 
-export default function WeatherForm({ setTab, isEdit, setWeather, editSession }: WeatherFormFormProps) {
+export default function WeatherForm({ prevTab, nextTab, isEdit, weather, setWeather, editSession }: WeatherFormFormProps) {
+  const submitAction = useRef<"next" | "prev" | null>(null);
+
   const form = useForm<z.infer<typeof ImagingSessionWeatherSchema>>({
     resolver: zodResolver(ImagingSessionWeatherSchema),
+    defaultValues: {
+      outside_temp: weather.outside_temp,
+      average_cloud_cover: weather.average_cloud_cover,
+      average_seeing: weather.average_seeing,
+    }
   });
 
   function onSubmit() {
@@ -32,8 +40,19 @@ export default function WeatherForm({ setTab, isEdit, setWeather, editSession }:
       return;
     }
 
-    // TODO
-    setTab('calibration');
+    const values = form.getValues();
+    const newWeather: ImagingSessionWeather = {
+      outside_temp: values.outside_temp,
+      average_seeing: values.average_seeing,
+      average_cloud_cover: values.average_cloud_cover
+    }
+    setWeather(newWeather);
+
+    if (submitAction.current === "next") {
+      nextTab();
+    } else if (submitAction.current === "prev") {
+      prevTab();
+    }
   }
 
   return (
@@ -102,7 +121,14 @@ export default function WeatherForm({ setTab, isEdit, setWeather, editSession }:
           />
         </div>
 
-        <ButtonBar>{isEdit ? "Save" : "Next"}</ButtonBar>
+        <ButtonBar name={isEdit ? "Save" : "Next"} onClick={() => (submitAction.current = "next")}>
+          <Button
+            variant='secondary'
+            onClick={() => (submitAction.current = "prev")}
+          >
+            Prev
+          </Button>
+        </ButtonBar>
       </form>
     </Form>
   );

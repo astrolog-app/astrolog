@@ -7,33 +7,37 @@ import {
   FormLabel,
   FormMessage
 } from '@/components/ui/form';
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { TabKey } from '@/components/modals/imagingSession/imagingSessionEditor';
 import { ImagingSessionDetails } from '@/interfaces/imagingSessionEdit';
 import { ButtonBar } from '@/components/ui/custom/modal';
 import { Textarea } from '@/components/ui/textarea';
 import { ImagingSessionDetailsSchema } from '@/schemas/imagingSessionSchema';
+import { Button } from '@/components/ui/button';
 
 interface DetailsFormProps {
-  setTab: Dispatch<SetStateAction<TabKey>>
+  prevTab: () => void,
+  nextTab: () => void,
   isEdit: boolean,
+  details: ImagingSessionDetails | undefined,
   setDetails: Dispatch<SetStateAction<ImagingSessionDetails | undefined>>,
   editSession: () => void,
 }
 
-export default function DetailsForm({ setTab, isEdit, setDetails, editSession }: DetailsFormProps) {
+export default function DetailsForm({ prevTab, nextTab, isEdit, details, setDetails, editSession }: DetailsFormProps) {
+  const submitAction = useRef<"next" | "prev" | null>(null);
+
   const form = useForm<z.infer<typeof ImagingSessionDetailsSchema>>({
     resolver: zodResolver(ImagingSessionDetailsSchema),
     defaultValues: {
-      gain: 0,
-      sub_length: 0,
-      notes: '',
-      offset: undefined,
-      camera_temp: undefined
+      gain: details?.gain ?? 0,
+      sub_length: details?.sub_length ?? 0,
+      notes: details?.notes ?? '',
+      offset: details?.offset,
+      camera_temp: details?.camera_temp
     }
   });
 
@@ -53,7 +57,12 @@ export default function DetailsForm({ setTab, isEdit, setDetails, editSession }:
       camera_temp: values.camera_temp,
     }
     setDetails(details);
-    setTab('equipment');
+
+    if (submitAction.current === "next") {
+      nextTab();
+    } else if (submitAction.current === "prev") {
+      prevTab();
+    }
   }
 
   return (
@@ -157,7 +166,14 @@ export default function DetailsForm({ setTab, isEdit, setDetails, editSession }:
           )}
         />
 
-        <ButtonBar>{isEdit ? "Save" : "Next"}</ButtonBar>
+        <ButtonBar name={isEdit ? "Save" : "Next"} onClick={() => (submitAction.current = "next")}>
+          <Button
+            variant='secondary'
+            onClick={() => (submitAction.current = "prev")}
+          >
+            Prev
+          </Button>
+        </ButtonBar>
       </form>
     </Form>
   );

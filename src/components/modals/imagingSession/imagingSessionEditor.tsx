@@ -46,7 +46,7 @@ interface ImagingSessionEditorProps {
 }
 
 export default function ImagingSessionEditor({ session, base }: ImagingSessionEditorProps) {
-  const { setAppState } = useAppState();
+  const { appState, setAppState } = useAppState();
   const { closeModal } = useModal();
 
   const isEdit = session !== undefined;
@@ -58,7 +58,27 @@ export default function ImagingSessionEditor({ session, base }: ImagingSessionEd
   const [weather, setWeather] = useState<ImagingSessionWeather>(defaultWeather);
   const [calibration, setCalibration] = useState<ImagingSessionCalibration>(defaultCalibration);
 
-  function buildSession(): ImagingSessionEdit | undefined {
+  const nextTab = () => {
+    setTab((currentTab) => {
+      const currentIndex = tabKeys.indexOf(currentTab);
+      if (currentIndex < tabKeys.length - 1) {
+        return tabKeys[currentIndex + 1];
+      }
+      return currentTab; // stay on last tab
+    });
+  };
+
+  const prevTab = () => {
+    setTab((currentTab) => {
+      const currentIndex = tabKeys.indexOf(currentTab);
+      if (currentIndex > 0) {
+        return tabKeys[currentIndex - 1];
+      }
+      return currentTab; // stay on first tab
+    });
+  };
+
+  function buildSession(newCalibration: ImagingSessionCalibration | undefined): ImagingSessionEdit | undefined {
     if (
       base === undefined ||
       general === undefined ||
@@ -78,12 +98,12 @@ export default function ImagingSessionEditor({ session, base }: ImagingSessionEd
       equipment: equipment,
       details: details,
       weather: weather,
-      calibration: calibration
+      calibration: newCalibration ?? calibration
     };
   }
 
-  function editSession() {
-    const newSession: ImagingSessionEdit | undefined = buildSession();
+  function editSession(newCalibration?: ImagingSessionCalibration) {
+    const newSession: ImagingSessionEdit | undefined = buildSession(newCalibration);
 
     if (newSession === undefined) {
       return;
@@ -100,8 +120,8 @@ export default function ImagingSessionEditor({ session, base }: ImagingSessionEd
       });
   }
 
-  function classifySession() {
-    const newSession: ImagingSessionEdit | undefined = buildSession();
+  function classifySession(newCalibration: ImagingSessionCalibration) {
+    const newSession: ImagingSessionEdit | undefined = buildSession(newCalibration);
 
     if (newSession === undefined) {
       return;
@@ -146,39 +166,49 @@ export default function ImagingSessionEditor({ session, base }: ImagingSessionEd
         )}
         <TabsContent value="general">
           <GeneralForm
-            setTab={setTab}
+            nextTab={nextTab}
             isEdit={isEdit}
+            general={general}
             setGeneral={setGeneral}
             editSession={editSession}
           />
         </TabsContent>
         <TabsContent value="details">
           <DetailsForm
-            setTab={setTab}
+            prevTab={prevTab}
+            nextTab={nextTab}
             isEdit={isEdit}
+            details={details}
             setDetails={setDetails}
             editSession={editSession}
           />
         </TabsContent>
         <TabsContent value="equipment">
           <EquipmentForm
-            setTab={setTab}
+            prevTab={prevTab}
+            nextTab={nextTab}
             isEdit={isEdit}
+            equipment={equipment}
             setEquipment={setEquipment}
             editSession={editSession}
           />
         </TabsContent>
         <TabsContent value="weather">
           <WeatherForm
-            setTab={setTab}
+            prevTab={prevTab}
+            nextTab={nextTab}
             isEdit={isEdit}
+            weather={weather}
             setWeather={setWeather}
             editSession={editSession}
           />
         </TabsContent>
         <TabsContent value="calibration">
           <CalibrationForm
+            prevTab={prevTab}
             isEdit={isEdit}
+            isDslr={equipment === undefined ? false :  appState.equipment_list.cameras.get(equipment?.camera_id)?.is_dslr ?? false}
+            calibration={calibration}
             setCalibration={setCalibration}
             editSession={editSession}
             classifySession={classifySession}

@@ -7,31 +7,41 @@ import {
   FormItem, FormLabel,
   FormMessage
 } from '@/components/ui/form';
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction, useRef } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import styles from './equipmentForm.module.scss';
 import { EquipmentComboBox } from '@/components/ui/comboBox';
 import { EquipmentType } from '@/enums/equipmentType';
 import { ImagingSessionEquipmentSchema } from '@/schemas/imagingSessionSchema';
-import { TabKey } from '@/components/modals/imagingSession/imagingSessionEditor';
 import { ImagingSessionEquipment } from '@/interfaces/imagingSessionEdit';
 import { ButtonBar } from '@/components/ui/custom/modal';
 import { UUID } from 'crypto';
 import { Separator } from '@/components/ui/separator';
 import { Camera, Compass, Filter, Layers, Telescope } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface EquipmentFormFormProps {
-  setTab: Dispatch<SetStateAction<TabKey>>
+  prevTab: () => void,
+  nextTab: () => void,
   isEdit: boolean,
+  equipment: ImagingSessionEquipment | undefined,
   setEquipment: Dispatch<SetStateAction<ImagingSessionEquipment | undefined>>,
   editSession: () => void,
 }
 
-export default function EquipmentForm({ setTab, isEdit, setEquipment, editSession }: EquipmentFormFormProps) {
+export default function EquipmentForm({ prevTab, nextTab, isEdit, equipment, setEquipment, editSession }: EquipmentFormFormProps) {
+  const submitAction = useRef<"next" | "prev" | null>(null);
+
   const form = useForm<z.infer<typeof ImagingSessionEquipmentSchema>>({
-    resolver: zodResolver(ImagingSessionEquipmentSchema)
+    resolver: zodResolver(ImagingSessionEquipmentSchema),
+    defaultValues: {
+      camera: equipment?.camera_id,
+      telescope: equipment?.telescope_id,
+      flattener: equipment?.flattener_id,
+      mount: equipment?.mount_id,
+      filter: equipment?.filter_id,
+    }
   });
 
   function onSubmit() {
@@ -50,7 +60,12 @@ export default function EquipmentForm({ setTab, isEdit, setEquipment, editSessio
       filter_id: values.filter as UUID
     };
     setEquipment(equipment);
-    setTab('weather');
+
+    if (submitAction.current === "next") {
+      nextTab();
+    } else if (submitAction.current === "prev") {
+      prevTab();
+    }
   }
 
   return (
@@ -171,7 +186,14 @@ export default function EquipmentForm({ setTab, isEdit, setEquipment, editSessio
           />
         </div>
 
-        <ButtonBar>{isEdit ? 'Save' : 'Next'}</ButtonBar>
+        <ButtonBar name={isEdit ? "Save" : "Next"} onClick={() => (submitAction.current = "next")}>
+          <Button
+            variant='secondary'
+            onClick={() => (submitAction.current = "prev")}
+          >
+            Prev
+          </Button>
+        </ButtonBar>
       </form>
     </Form>
   );

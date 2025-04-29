@@ -336,9 +336,7 @@ export default function EquipmentModal({ type, item }: EquipmentProps) {
               )}
             />
           )}
-          <ButtonBar>
-            Save {equipmentType}
-          </ButtonBar>
+          <ButtonBar name={"Save " + equipmentType} />
         </form>
       </Form>
     </Modal>

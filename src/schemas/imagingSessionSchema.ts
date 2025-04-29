@@ -53,5 +53,6 @@ export const ImagingSessionWeatherSchema = z.object({
 export const ImagingSessionCalibrationSchema = z.object({
   dark_frame_list_id: z.string().uuid().optional(),
   bias_frame_list_id: z.string().uuid().optional(),
-  flat_frame_list_id: z.string().uuid().optional(),
+  flat_frames_to_classify: z.array(z.string()),
+  dark_frames_to_classify: z.array(z.string()),
 });
