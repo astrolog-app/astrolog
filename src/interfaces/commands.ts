@@ -22,6 +22,7 @@ interface CalibrationFrame {
 export interface DarkFrame extends CalibrationFrame {
   camera_temp: number,
   sub_length: number,
+  in_imaging_session: boolean,
 }
 
 export interface BiasFrame extends CalibrationFrame {}

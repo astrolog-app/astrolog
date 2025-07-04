@@ -116,6 +116,7 @@ export default function CalibrationRowEditor({
         gain: Number(form.getValues().gain),
         frames_to_classify: paths ?? [],
         frames_classified: [],
+        in_imaging_session: false,
         camera_temp: Number(form.getValues().cameraTemp) ?? 0,
         sub_length: Number(form.getValues().subLength) ?? 0
       };
@@ -132,17 +133,21 @@ export default function CalibrationRowEditor({
       if (calibrationType == CalibrationType.DARK) {
         invoke('classify_dark_frame', {
           darkFrame: darkFrame
-        }).catch((error) =>
-          toast({
-            variant: 'destructive',
-            title: 'Uh oh! Something went wrong.',
-            description: 'Error: ' + error
-          })
-        );
+        })
+          .then(() => closeModal())
+          .catch((error) =>
+            toast({
+              variant: 'destructive',
+              title: 'Uh oh! Something went wrong.',
+              description: 'Error: ' + error
+            })
+          );
       } else {
         invoke('classify_bias_frame', {
           biasFrame: biasFrame
-        }).catch((error) =>
+        })
+          .then(() => closeModal())
+          .catch((error) =>
           toast({
             variant: 'destructive',
             title: 'Uh oh! Something went wrong.',

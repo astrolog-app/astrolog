@@ -1,12 +1,12 @@
 use crate::commands::imaging_sessions::ImagingSessionEdit;
 use crate::models::equipment::{EquipmentItem, EquipmentList};
 use crate::models::imaging_frames::imaging_frame::{ClassifiableFrame, ImagingSessionFrame};
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::path::PathBuf;
 use uuid::Uuid;
 use crate::models::database::Database;
+use chrono::{DateTime, Utc};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LightFrame {

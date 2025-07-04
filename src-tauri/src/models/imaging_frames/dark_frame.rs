@@ -90,9 +90,16 @@ impl CalibrationFrame for DarkFrame {
     ) -> Result<CalibrationTableRow, Box<dyn Error>> {
         let db = state.db.lock().map_err(|e| e.to_string())?;
 
-        let camera_name = db
-            .get_camera_by_id(self.camera_id)?
-            .map_or("N/A".to_string(), |camera| camera.view_name().clone());
+        println!("id. {}", self.id);
+        println!("camera_id: {}", self.camera_id);
+
+        let camera_name = match db.get_camera_by_id(self.camera_id)? {
+            Some(camera) => camera.view_name().clone(),
+            None => {
+                eprintln!("WARN: No camera found for ID {}", self.camera_id);
+                "N/A".to_string()
+            }
+        };
 
         let row = CalibrationTableRow {
             id: self.id,

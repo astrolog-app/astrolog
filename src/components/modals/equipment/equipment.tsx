@@ -62,8 +62,9 @@ export default function EquipmentModal({ type, item }: EquipmentProps) {
       name: item?.name,
       focal_length: (item as Telescope)?.focal_length,
       aperture: (item as Telescope)?.aperture,
-      chip_size: (item as Camera)?.chip_size,
-      mega_pixel: (item as Camera)?.mega_pixel,
+      pixel_size: (item as Camera)?.pixel_size,
+      pixel_x: (item as Camera)?.pixel_x,
+      pixel_y: (item as Camera)?.pixel_y,
       is_monochrome: (item as Camera)?.is_monochrome,
       is_dslr: (item as Camera)?.is_dslr,
       filter_type: (item as Filter)?.filter_type,
@@ -230,12 +231,17 @@ export default function EquipmentModal({ type, item }: EquipmentProps) {
             <>
               <FormField
                 control={form.control}
-                name="chip_size"
+                name="pixel_size"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Chip Size</FormLabel>
+                    <FormLabel>Pixel Size</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter chip size" {...field} />
+                      <Input
+                        type="number"
+                        placeholder="Enter mega pixels"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -243,10 +249,28 @@ export default function EquipmentModal({ type, item }: EquipmentProps) {
               />
               <FormField
                 control={form.control}
-                name="mega_pixel"
+                name="pixel_x"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mega Pixels</FormLabel>
+                    <FormLabel>Pixel X</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Enter mega pixels"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="pixel_y"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Pixel Y</FormLabel>
                     <FormControl>
                       <Input
                         type="number"

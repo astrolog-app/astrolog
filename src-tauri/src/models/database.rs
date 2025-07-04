@@ -43,13 +43,14 @@ impl Database {
             ),
             M::up(
                 "CREATE TABLE IF NOT EXISTS cameras (
-                id TEXT PRIMARY KEY,
-                brand TEXT NOT NULL,
-                name TEXT NOT NULL,
-                chip_size TEXT NOT NULL,
-                mega_pixel REAL NOT NULL,
-                is_monochrome INTEGER NOT NULL,
-                is_dslr INTEGER NOT NULL
+                 id TEXT PRIMARY KEY,
+                 brand TEXT NOT NULL,
+                 name TEXT NOT NULL,
+                 pixel_size REAL NOT NULL,
+                 pixel_x INTEGER NOT NULL,
+                 pixel_y INTEGER NOT NULL,
+                 is_monochrome INTEGER NOT NULL,
+                 is_dslr INTEGER NOT NULL
             );",
             ),
             M::up(
@@ -194,16 +195,18 @@ impl Database {
     pub fn insert_camera(&mut self, camera: &Camera) -> Result<()> {
         let tx = self.conn.transaction()?;
         tx.execute(
-            "INSERT OR REPLACE INTO cameras (id, brand, name, chip_size, mega_pixel, is_monochrome, is_dslr) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+            "INSERT OR REPLACE INTO cameras (id, brand, name, pixel_size, pixel_x, pixel_y, is_monochrome, is_dslr)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
             params![
-                camera.id.to_string(),
-                camera.brand,
-                camera.name,
-                camera.chip_size,
-                camera.mega_pixel,
-                camera.is_monochrome as i32,
-                camera.is_dslr as i32
-            ],
+            camera.id.to_string(),
+            camera.brand,
+            camera.name,
+            camera.pixel_size,
+            camera.pixel_x,
+            camera.pixel_y,
+            camera.is_monochrome as i32,
+            camera.is_dslr as i32
+        ],
         )?;
 
         tx.execute(
@@ -214,11 +217,11 @@ impl Database {
             tx.execute(
                 "INSERT INTO equipment_notes (id, equipment_id, date, note) VALUES (?1, ?2, ?3, ?4)",
                 params![
-                    note.id.to_string(),
-                    camera.id.to_string(),
-                    note.date.to_rfc3339(),
-                    note.note
-                ],
+                note.id.to_string(),
+                camera.id.to_string(),
+                note.date.to_rfc3339(),
+                note.note
+            ],
             )?;
         }
         tx.commit()?;
@@ -237,9 +240,9 @@ impl Database {
     }
 
     pub fn get_camera_by_id(&self, id: Uuid) -> Result<Option<Camera>> {
-        let mut stmt = self
-            .conn
-            .prepare("SELECT brand, name, chip_size, mega_pixel, is_monochrome, is_dslr FROM cameras WHERE id = ?1")?;
+        let mut stmt = self.conn.prepare(
+            "SELECT brand, name, pixel_size, pixel_x, pixel_y, is_monochrome, is_dslr FROM cameras WHERE id = ?1",
+        )?;
         let mut rows = stmt.query(params![id.to_string()])?;
         if let Some(row) = rows.next()? {
             let notes = self.get_notes_for_equipment(id)?;
@@ -247,11 +250,12 @@ impl Database {
                 id,
                 brand: row.get(0)?,
                 name: row.get(1)?,
+                pixel_size: row.get(2)?,
+                pixel_x: row.get(3)?,
+                pixel_y: row.get(4)?,
+                is_monochrome: row.get::<_, i32>(5)? != 0,
+                is_dslr: row.get::<_, i32>(6)? != 0,
                 notes,
-                chip_size: row.get(2)?,
-                mega_pixel: row.get(3)?,
-                is_monochrome: row.get::<_, i32>(4)? != 0,
-                is_dslr: row.get::<_, i32>(5)? != 0,
             }))
         } else {
             Ok(None)
@@ -260,7 +264,7 @@ impl Database {
 
     pub fn get_cameras(&self) -> Result<HashMap<Uuid, Camera>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, brand, name, chip_size, mega_pixel, is_monochrome, is_dslr FROM cameras",
+            "SELECT id, brand, name, pixel_size, pixel_x, pixel_y, is_monochrome, is_dslr FROM cameras",
         )?;
         let mut rows = stmt.query([])?;
         let mut result = HashMap::new();
@@ -274,11 +278,12 @@ impl Database {
                     id,
                     brand: row.get(1)?,
                     name: row.get(2)?,
+                    pixel_size: row.get(3)?,
+                    pixel_x: row.get(4)?,
+                    pixel_y: row.get(5)?,
+                    is_monochrome: row.get::<_, i32>(6)? != 0,
+                    is_dslr: row.get::<_, i32>(7)? != 0,
                     notes,
-                    chip_size: row.get(3)?,
-                    mega_pixel: row.get(4)?,
-                    is_monochrome: row.get::<_, i32>(5)? != 0,
-                    is_dslr: row.get::<_, i32>(6)? != 0,
                 },
             );
         }
@@ -954,7 +959,7 @@ impl Database {
                 id,
                 DarkFrame {
                     id,
-                    camera_id: Uuid::parse_str(&row.get::<_, String>(0)?)
+                    camera_id: Uuid::parse_str(&row.get::<_, String>(1)?)
                         .unwrap_or_else(|_| Uuid::nil()),
                     total_subs: row.get(2)?,
                     gain: row.get(3)?,
@@ -1197,7 +1202,7 @@ impl Database {
                 id,
                 BiasFrame {
                     id,
-                    camera_id: Uuid::parse_str(&row.get::<_, String>(0)?)
+                    camera_id: Uuid::parse_str(&row.get::<_, String>(1)?)
                         .unwrap_or_else(|_| Uuid::nil()),
                     total_subs: row.get(2)?,
                     gain: row.get(3)?,

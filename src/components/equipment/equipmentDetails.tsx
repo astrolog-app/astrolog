@@ -121,15 +121,15 @@ function EquipmentDetailsTable({ selectedItem }: { selectedItem: EquipmentItem }
         {type === EquipmentType.CAMERA && (
           <>
             <TableRow>
-              <TableCell>Chip Size</TableCell>
-              <TableCell>{(selectedItem as Camera).chip_size}</TableCell>
+              <TableCell>Pixel</TableCell>
+              <TableCell>{(selectedItem as Camera).pixel_x} x {(selectedItem as Camera).pixel_y}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>Megapixel</TableCell>
-              <TableCell>{(selectedItem as Camera).mega_pixel} MP</TableCell>
+              <TableCell>Pixel Size</TableCell>
+              <TableCell>{(selectedItem as Camera).pixel_size}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>RGB</TableCell>
+              <TableCell>Monochrome</TableCell>
               <TableCell>{(selectedItem as Camera).is_monochrome ? 'Yes' : 'No'}</TableCell>
             </TableRow>
           </>

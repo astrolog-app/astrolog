@@ -98,8 +98,8 @@ pub async fn classify_dark_frame(
 
     let mut process = Process::spawn(
         &window,
-        "",
-        false,
+        "Classifying Dark Frames",
+        true,
         Some(0),
         Some(dark_frame.frames_to_classify.len() as u32),
     );
@@ -135,8 +135,8 @@ pub async fn classify_bias_frame(
 
     let mut process = Process::spawn(
         &window,
-        "",
-        false,
+        "Classifying Bias Frames",
+        true,
         Some(0),
         Some(bias_frame.frames_to_classify.len() as u32),
     );

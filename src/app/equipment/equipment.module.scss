@@ -1,10 +1,12 @@
 .page {
   display: flex;
   flex-direction: column;
+  height: 100%;
 
   .lower {
     display: flex;
     flex-grow: 1;
+    min-height: 0;
 
     .listView {
       margin-right: var(--padding);
@@ -13,6 +15,7 @@
 
     .details {
       flex-grow: 1;
+      min-width: 0;
     }
   }
 }

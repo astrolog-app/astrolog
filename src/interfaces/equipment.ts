@@ -20,8 +20,9 @@ export interface Telescope extends EquipmentItem {
 }
 
 export interface Camera extends EquipmentItem {
-  chip_size: string;
-  mega_pixel: number;
+  pixel_size: number;
+  pixel_x: number;
+  pixel_y: number;
   is_monochrome: boolean;
   is_dslr: boolean;
 }
@@ -42,7 +43,7 @@ export const getEquipmentType = (
   if ("focal_length" in item) {
     return EquipmentType.TELESCOPE;
   }
-  if ("chip_size" in item) {
+  if ("pixel_size" in item) {
     return EquipmentType.CAMERA;
   }
   if ("filter_type" in item) {

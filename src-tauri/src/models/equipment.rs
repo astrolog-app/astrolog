@@ -64,8 +64,9 @@ pub struct Camera {
     pub name: String,
     pub notes: HashMap<Uuid, EquipmentNote>,
 
-    pub chip_size: String,
-    pub mega_pixel: f64,
+    pub pixel_size: f64,
+    pub pixel_x: u32,
+    pub pixel_y: u32,
     pub is_monochrome: bool,
     pub is_dslr: bool,
 }

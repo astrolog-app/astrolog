@@ -126,7 +126,7 @@ impl LogTableRow {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CalibrationTableRow {
-    pub(crate) id: Uuid,
+    pub id: Uuid,
     pub camera: String,
     pub calibration_type: CalibrationType,
     pub gain: u32,
