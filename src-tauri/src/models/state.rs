@@ -1,3 +1,4 @@
+use std::env::temp_dir;
 use std::path::PathBuf;
 use crate::models::preferences::{Config, LocalConfig};
 use std::sync::{Arc, Mutex};
@@ -35,7 +36,13 @@ impl AppState {
             }
         }
 
-        let db = Database::new(&local_config.root_directory).unwrap(); // TODO: what if root_directory == ""
+        let root_directory: PathBuf = if local_config.root_directory.as_os_str().is_empty() {
+            temp_dir().join("astrolog_temp")
+        } else {
+            local_config.root_directory.clone()
+        };
+
+        let db = Database::new(&root_directory).unwrap();
 
         AppState {
             root_directory: local_config.root_directory.clone(),
