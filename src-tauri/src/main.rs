@@ -16,7 +16,7 @@ use commands::imaging_sessions::{
     open_imaging_session,
 };
 use commands::preferences::{
-    change_imaging_session_folder_path, save_preferences, set_root_directory, setup_backup,
+    change_imaging_session_folder_path, save_preferences, setup_astrolog, setup_backup,
 };
 use commands::state::{add_close_lock, load_frontend_app_state, remove_close_lock};
 use commands::utils::{open_browser, rename_directory};
@@ -112,7 +112,7 @@ fn main() {
             save_mount,
             save_preferences,
             save_telescope,
-            set_root_directory,
+            setup_astrolog,
             setup_backup,
         ])
         .run(tauri::generate_context!())

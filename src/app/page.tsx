@@ -15,7 +15,7 @@ import { toast } from '@/components/ui/use-toast';
 import { useModal } from '@/context/modalProvider';
 import { useAppState } from '@/context/stateProvider';
 import BottomBar from '@/components/bars/bottomBar';
-import RootDirectory from '@/components/modals/rootDirectory';
+import SetupAstrolog from '@/components/modals/setupAstrolog';
 
 export interface Tab {
   component: React.ReactNode;
@@ -94,7 +94,7 @@ export default function Home() {
   useEffect(() => {
     // checkLicense();
     if (appState.local_config.root_directory == '' && appState.initialised) {
-      openModal(<RootDirectory />);
+      openModal(<SetupAstrolog />);
     }
   }, [appState.initialised]);
 

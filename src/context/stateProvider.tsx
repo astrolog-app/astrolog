@@ -1,15 +1,7 @@
 'use client';
 
 import { invoke } from '@tauri-apps/api/core';
-import React, {
-  createContext,
-  Dispatch,
-  ReactNode,
-  SetStateAction,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
+import React, { createContext, Dispatch, ReactNode, SetStateAction, useContext, useEffect, useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import {
   AppState,
@@ -19,18 +11,20 @@ import {
   GalleryImage,
   ImagingSession,
   LocalConfig,
-  Location
+  Location,
 } from '@/interfaces/state';
 import { removeContextMenu } from '@/utils/browser';
 import { Camera, EquipmentItem, EquipmentNote, Filter, Flattener, Mount, Telescope } from '@/interfaces/equipment';
 import { UUID } from 'crypto';
 import { Analytics } from '@/interfaces/analytics';
+import { Unit } from '@/enums/unit';
 
 const defaultAppState: AppState = {
   initialised: false,
   local_config: {
     root_directory: '',
     source_directory: '',
+    unit: Unit.METRIC,
   },
   config: {
     folder_paths: {
@@ -149,10 +143,21 @@ export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): 
         };
       }
 
+      function toEnumUnit(value: unknown): Unit {
+        if (value === Unit.METRIC || value === "metric") return Unit.METRIC;
+        if (value === Unit.IMPERIAL || value === "imperial") return Unit.IMPERIAL;
+        return Unit.METRIC; // default fallback
+      }
+
+      const fixedLocalConfig: LocalConfig = {
+        ...responseData.local_config,
+        unit: toEnumUnit(responseData.local_config.unit),
+      };
+
       // Construct the final AppState with parsed dates, equipment Maps, and config.locations as a Map.
       const fixedAppState: AppState = {
         initialised: true,
-        local_config: responseData.local_config,
+        local_config: fixedLocalConfig,
         config: fixedConfig,
         table_data: {
           sessions,

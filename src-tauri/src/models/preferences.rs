@@ -9,9 +9,16 @@ use tauri::State;
 use uuid::Uuid;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub enum Unit {
+    METRIC,
+    IMPERIAL,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LocalConfig {
     pub root_directory: PathBuf,
     source_directory: PathBuf,
+    pub unit: Unit,
 }
 
 impl LocalConfig {
@@ -19,6 +26,7 @@ impl LocalConfig {
         LocalConfig {
             root_directory: PathBuf::from(""),
             source_directory: PathBuf::from(""),
+            unit: Unit::METRIC,
         }
     }
 

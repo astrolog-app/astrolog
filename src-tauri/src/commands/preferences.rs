@@ -1,8 +1,7 @@
 use crate::file_system::{dir_contains_metadata, is_directory_empty};
-use crate::models::preferences::{LocalConfig, Location};
+use crate::models::preferences::{LocalConfig, Location, Unit};
 use crate::models::state::AppState;
 use std::path::PathBuf;
-use std::sync::Mutex;
 use tauri::{AppHandle, Manager, State};
 
 #[tauri::command]
@@ -22,8 +21,9 @@ pub fn save_preferences(
 }
 
 #[tauri::command]
-pub fn set_root_directory(
+pub fn setup_astrolog(
     app_handle: AppHandle,
+    unit: Unit,
     root_directory: PathBuf,
     state: State<AppState>,
 ) -> Result<(), String> {
@@ -40,6 +40,7 @@ pub fn set_root_directory(
         );
     }
 
+    local_config.unit = unit;
     local_config.root_directory = root_directory;
     local_config
         .save(app_handle.path().app_data_dir().unwrap())
