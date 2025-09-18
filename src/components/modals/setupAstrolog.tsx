@@ -10,11 +10,11 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { open } from '@tauri-apps/plugin-dialog';
 import UnitToggle from '@/components/ui/custom/unitToggle';
-import { Unit } from '@/enums/unit';
+import { UnitSystem } from '@/enums/unitSystem';
 import { Label } from '@/components/ui/label';
 
 export default function SetupAstrolog() {
-  const [unit, setUnit] = useState<Unit | undefined>(undefined);
+  const [unit, setUnit] = useState<UnitSystem | undefined>(undefined);
 
   function onSubmit(): void {
     open({

@@ -14,7 +14,7 @@ import {
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useAppState } from '@/context/stateProvider';
-import { Unit } from '@/enums/unit';
+import { UnitSystem } from '@/enums/unitSystem';
 import UnitToggle from '@/components/ui/custom/unitToggle';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from '@/components/ui/use-toast';
@@ -29,7 +29,7 @@ export default function AppearanceForm() {
   const form = useForm<z.infer<typeof formSchema>>({});
   const { appState, setAppState } = useAppState();
 
-  function unitChange(value: Unit) {
+  function unitChange(value: UnitSystem) {
     const nextLocalConfig = { ...appState.local_config, unit: value };
 
     invoke("save_preferences", { localConfig: nextLocalConfig })

@@ -1,4 +1,4 @@
-export enum Unit {
+export enum UnitSystem {
   METRIC = "METRIC",
   IMPERIAL = "IMPERIAL"
 }

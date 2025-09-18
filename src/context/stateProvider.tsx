@@ -17,14 +17,14 @@ import { removeContextMenu } from '@/utils/browser';
 import { Camera, EquipmentItem, EquipmentNote, Filter, Flattener, Mount, Telescope } from '@/interfaces/equipment';
 import { UUID } from 'crypto';
 import { Analytics } from '@/interfaces/analytics';
-import { Unit } from '@/enums/unit';
+import { UnitSystem } from '@/enums/unitSystem';
 
 const defaultAppState: AppState = {
   initialised: false,
   local_config: {
     root_directory: '',
     source_directory: '',
-    unit: Unit.METRIC,
+    unit: UnitSystem.METRIC,
   },
   config: {
     folder_paths: {
@@ -143,10 +143,10 @@ export function fetchAppState(setAppState: Dispatch<SetStateAction<AppState>>): 
         };
       }
 
-      function toEnumUnit(value: unknown): Unit {
-        if (value === Unit.METRIC || value === "metric") return Unit.METRIC;
-        if (value === Unit.IMPERIAL || value === "imperial") return Unit.IMPERIAL;
-        return Unit.METRIC; // default fallback
+      function toEnumUnit(value: unknown): UnitSystem {
+        if (value === UnitSystem.METRIC || value === "metric") return UnitSystem.METRIC;
+        if (value === UnitSystem.IMPERIAL || value === "imperial") return UnitSystem.IMPERIAL;
+        return UnitSystem.METRIC; // default fallback
       }
 
       const fixedLocalConfig: LocalConfig = {

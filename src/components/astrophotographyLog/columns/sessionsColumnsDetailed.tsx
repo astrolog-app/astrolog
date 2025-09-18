@@ -1,9 +1,38 @@
 'use client';
 
-import { ColumnDef } from '@tanstack/react-table';
+import { Column, ColumnDef } from '@tanstack/react-table';
 import { Button } from '../../ui/button';
 import { ArrowUpDown } from 'lucide-react';
 import { ImagingSession } from '@/interfaces/state';
+import { DualUnit, TempCell, useUnit } from '@/components/ui/custom/units';
+
+const TEMP_UNITS = { metric: "°C", imperial: "°F" } as const;
+
+
+// TODO: separate
+type UnitsHeaderProps<TData, TUnit extends string> = {
+  column: Column<TData, unknown>;
+  title: string;
+  unitCfg: DualUnit<TUnit>;
+};
+
+export function UnitsHeader<TData, TUnit extends string>({
+                                                           column,
+                                                           title,
+                                                           unitCfg,
+                                                         }: UnitsHeaderProps<TData, TUnit>) {
+  const unit = useUnit(unitCfg);
+  return (
+    <Button
+      variant="ghost"
+      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    >
+      {title} [{unit}]
+      <ArrowUpDown className="ml-2 h-4 w-4" />
+    </Button>
+  );
+}
+// -----------
 
 export const sessionsColumnsDetailed: ColumnDef<ImagingSession>[] = [
   {
@@ -95,7 +124,10 @@ export const sessionsColumnsDetailed: ColumnDef<ImagingSession>[] = [
   },
   {
     accessorKey: 'outside_temp',
-    header: 'Outside Temp',
+    header: ({ column }) => (
+      <UnitsHeader column={column} title="Outside Temp" unitCfg={TEMP_UNITS} />
+    ),
+    cell: ({ getValue }) => <TempCell celsius={getValue<number | undefined>()} columnUnits={TEMP_UNITS} />
   },
   {
     accessorKey: 'average_seeing',

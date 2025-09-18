@@ -8,7 +8,7 @@ import {
   Telescope,
 } from '@/interfaces/equipment';
 import { Analytics } from '@/interfaces/analytics';
-import { Unit } from '@/enums/unit';
+import { UnitSystem } from '@/enums/unitSystem';
 
 export interface AppState {
   initialised: boolean;
@@ -23,7 +23,7 @@ export interface AppState {
 export interface LocalConfig {
   root_directory: string;
   source_directory: string;
-  unit: Unit;
+  unit: UnitSystem;
 }
 
 export interface Config {

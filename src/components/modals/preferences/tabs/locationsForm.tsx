@@ -37,6 +37,7 @@ import { UUID } from 'crypto';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from '@/components/ui/use-toast';
 import { fetchAppState, useAppState } from '@/context/stateProvider';
+import { DualUnit, LengthCell, UnitsInput, useUnit } from '@/components/ui/custom/units';
 
 export default function LocationsForm() {
   const [locations, setLocations] = useState<Location[]>([]);
@@ -242,14 +243,11 @@ export function LocationForm({ editingLocation, onCancel }: LocationFormProps) {
                       <FormItem>
                         <FormLabel>Height</FormLabel>
                         <FormControl>
-                          <Input
-                            type="number"
-                            step="any"
-                            placeholder="Height"
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(Number.parseFloat(e.target.value))
-                            }
+                          <UnitsInput
+                            kind="length"
+                            columnUnits={{ metric: "m", imperial: "ft" }}
+                            metricValue={field.value} // <-- always meters in state
+                            onMetricChange={(val) => field.onChange(val)}
                           />
                         </FormControl>
                         <FormDescription>E.g. 426</FormDescription>
@@ -318,6 +316,9 @@ export function LocationList({ onEditLocation }: LocationListProps) {
 
   const locations = Array.from(appState.config.locations.values());
 
+  const columnUnits = { metric: "m", imperial: "ft" } as const;
+  const unit = useUnit(columnUnits);
+
   if (locations.length === 0) {
     return (
       <Card className="p-6 text-center text-muted-foreground">
@@ -360,7 +361,7 @@ export function LocationList({ onEditLocation }: LocationListProps) {
               <TableHead>Name</TableHead>
               <TableHead>X</TableHead>
               <TableHead>Y</TableHead>
-              <TableHead>Height</TableHead>
+              <TableHead>Height [{unit}]</TableHead>
               <TableHead>Bortle</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
@@ -371,7 +372,9 @@ export function LocationList({ onEditLocation }: LocationListProps) {
                 <TableCell className="font-medium">{location.name}</TableCell>
                 <TableCell>{location.x}</TableCell>
                 <TableCell>{location.y}</TableCell>
-                <TableCell>{location.height}</TableCell>
+                <TableCell>
+                  <LengthCell meters={location.height} columnUnits={columnUnits} />
+                </TableCell>
                 <TableCell>{location.bortle}</TableCell>
                 <TableCell>
                   <div className="flex space-x-1">
