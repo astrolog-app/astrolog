@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import React, { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/utils/classNames';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ModalProps {
   className?: string;
@@ -54,7 +55,7 @@ export function Modal({
             <div className={styles.subtitle}>{subtitle}</div>
             {separator && <Separator className={styles.separator} />}
           </div>
-          <div className={className}>{children}</div>
+          <ScrollArea className={cn(className, styles.content)}>{children}</ScrollArea>
         </motion.div>
       </div>
     </motion.div>

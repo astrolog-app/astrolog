@@ -13,12 +13,21 @@
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 50;
+    max-height: 80vh;
+    height: 100%;
 
     .modal {
       background-color: hsl(var(--background));
       border-radius: var(--radius);
       padding: 1rem;
       border: 0.1rem solid hsl(var(--border));
+
+      display: flex;
+      flex-direction: column;
+
+      max-height: inherit;
+      min-height: 0;
+      height: 100%;
 
       .close {
         width: 1.25rem;
@@ -59,6 +68,10 @@
           height: 2px;
           margin-top: 1.25rem;
         }
+      }
+
+      .content {
+        flex-grow: 1;
       }
     }
   }
