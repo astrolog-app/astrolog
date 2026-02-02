@@ -2,30 +2,43 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 import { CalibrationFrame } from '@/interfaces/state';
+import { SortableHeader } from '@/components/ui/custom/tableHeader';
 
 export const calibrationColumnsDetailed: ColumnDef<CalibrationFrame>[] = [
   {
     accessorKey: 'camera',
-    header: 'Camera',
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Camera" />
+    ),
   },
   {
     accessorKey: 'calibration_type',
-    header: 'Calibration Type',
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Calibration Type" />
+    ),
   },
   {
     accessorKey: 'gain',
-    header: 'Gain',
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Gain" />
+    ),
   },
   {
     accessorKey: 'sub_length',
-    header: 'Sub Length',
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Sub Length" />
+    ),
   },
   {
     accessorKey: 'camera_temp',
-    header: 'Camera Temp',
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Camera Temp" />
+    ),
   },
   {
     accessorKey: 'total_subs',
-    header: 'Total Subs',
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Total Subs" />
+    ),
   },
 ];

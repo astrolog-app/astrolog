@@ -1,164 +1,131 @@
 'use client';
 
-import { Column, ColumnDef } from '@tanstack/react-table';
-import { Button } from '../../ui/button';
-import { ArrowUpDown } from 'lucide-react';
+import { ColumnDef } from '@tanstack/react-table';
 import { ImagingSession } from '@/interfaces/state';
-import { DualUnit, TempCell, useUnit } from '@/components/ui/custom/units';
+import { TempCell } from '@/components/ui/custom/units';
+import { SortableHeader, UnitsHeader } from '@/components/ui/custom/tableHeader';
 
 const TEMP_UNITS = { metric: "°C", imperial: "°F" } as const;
-
-
-// TODO: separate
-type UnitsHeaderProps<TData, TUnit extends string> = {
-  column: Column<TData, unknown>;
-  title: string;
-  unitCfg: DualUnit<TUnit>;
-};
-
-export function UnitsHeader<TData, TUnit extends string>({
-                                                           column,
-                                                           title,
-                                                           unitCfg,
-                                                         }: UnitsHeaderProps<TData, TUnit>) {
-  const unit = useUnit(unitCfg);
-  return (
-    <Button
-      variant="ghost"
-      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    >
-      {title} [{unit}]
-      <ArrowUpDown className="ml-2 h-4 w-4" />
-    </Button>
-  );
-}
-// -----------
 
 export const sessionsColumnsDetailed: ColumnDef<ImagingSession>[] = [
   {
     accessorKey: 'date',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Date
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Date" />
+    ),
     cell: ({ getValue }) => {
       const rawValue = getValue() as string;
       const date = new Date(rawValue);
-      // Ensure day and month have leading zeros
       const day = String(date.getDate()).padStart(2, '0');
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const year = date.getFullYear();
-      const formattedDate = `${day}.${month}.${year}`;
-
-      return (
-        <div>
-          {formattedDate}
-        </div>
-      );
+      return <div>{`${day}.${month}.${year}`}</div>;
     },
   },
   {
     accessorKey: 'target',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Target
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Target" />
+    ),
   },
   {
     accessorKey: 'sub_length',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Sub Length
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Sub Length" />
+    ),
   },
   {
     accessorKey: 'total_subs',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Total Subs
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Total Subs" />
+    ),
   },
   {
     accessorKey: 'filter',
-    header: 'Filter',
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Filter" />
+    ),
   },
   {
     accessorKey: 'gain',
-    header: 'Gain',
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Gain" />
+    ),
   },
   {
     accessorKey: 'offset',
-    header: 'Offset',
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Offset" />
+    ),
   },
   {
     accessorKey: 'camera_temp',
-    header: 'Camera Temp',
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Camera Temp" />
+    ),
   },
   {
     accessorKey: 'outside_temp',
     header: ({ column }) => (
-      <UnitsHeader column={column} title="Outside Temp" unitCfg={TEMP_UNITS} />
+      <UnitsHeader
+        column={column}
+        title="Outside Temp"
+        unitCfg={TEMP_UNITS}
+      />
     ),
-    cell: ({ getValue }) => <TempCell celsius={getValue<number | undefined>()} columnUnits={TEMP_UNITS} />
+    cell: ({ getValue }) => (
+      <TempCell
+        celsius={getValue<number | undefined>()}
+        columnUnits={TEMP_UNITS}
+      />
+    ),
   },
   {
     accessorKey: 'average_seeing',
-    header: 'Average Seeing',
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Average Seeing" />
+    ),
   },
   {
     accessorKey: 'average_cloud_cover',
-    header: 'Average Cloud Cover',
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Average Cloud Cover" />
+    ),
   },
   {
     accessorKey: 'average_moon',
-    header: 'Average Moon',
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Average Moon" />
+    ),
   },
   {
     accessorKey: 'telescope',
-    header: 'Telescope',
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Telescope" />
+    ),
   },
   {
     accessorKey: 'flattener',
-    header: 'Flattener',
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Flattener" />
+    ),
   },
   {
     accessorKey: 'mount',
-    header: 'Mount',
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Mount" />
+    ),
   },
   {
     accessorKey: 'camera',
-    header: 'Camera',
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Camera" />
+    ),
   },
   {
     accessorKey: 'notes',
-    header: 'Notes',
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Notes" />
+    ),
   },
 ];
