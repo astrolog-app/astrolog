@@ -16,14 +16,18 @@ pub enum Unit {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LocalConfig {
+    pub schema_version: u32,
     pub root_directory: PathBuf,
     source_directory: PathBuf,
     pub unit: Unit,
 }
 
 impl LocalConfig {
+    pub const CURRENT_SCHEMA_VERSION: u32 = 0;
+
     pub fn default() -> LocalConfig {
         LocalConfig {
+            schema_version: Self::CURRENT_SCHEMA_VERSION,
             root_directory: PathBuf::from(""),
             source_directory: PathBuf::from(""),
             unit: Unit::METRIC,
@@ -39,17 +43,21 @@ impl LocalConfig {
     pub fn save(&self, dir: PathBuf) -> Result<(), Box<dyn Error>> {
         let mut filename = dir;
         filename.push("local_config.json");
+
         Ok(file_store::save(&filename, &to_string_pretty(self)?)?)
     }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Config {
+    pub schema_version: u32,
     pub folder_paths: FolderPaths,
     pub locations: HashMap<Uuid, Location>,
 }
 
 impl Config {
+    pub const CURRENT_SCHEMA_VERSION: u32 = 0;
+
     pub fn default() -> Config {
         let folder_paths = FolderPaths {
             imaging_session_base_folder: PathBuf::new(),
@@ -60,6 +68,7 @@ impl Config {
         };
 
         Config {
+            schema_version: 1,
             folder_paths,
             locations: HashMap::new(),
         }
@@ -114,9 +123,7 @@ impl Location {
 
         config.locations.insert(self.id, self.clone());
 
-        if let Err(e) = config
-            .save(state.root_directory.clone())
-        {
+        if let Err(e) = config.save(state.root_directory.clone()) {
             config.locations = old_locations;
             return Err(e);
         }
@@ -144,9 +151,7 @@ impl Location {
 
         config.locations.remove(&self.id);
 
-        if let Err(e) = config
-            .save(state.root_directory.clone())
-        {
+        if let Err(e) = config.save(state.root_directory.clone()) {
             config.locations = old_locations;
             return Err(e);
         }
