@@ -15,7 +15,6 @@ use crate::models::database::Database;
 pub struct DarkFrame {
     pub id: Uuid,
     pub camera_id: Uuid,
-    pub total_subs: u32,
     pub gain: u32,
     pub frames_to_classify: Vec<PathBuf>,
     pub frames_classified: Vec<PathBuf>,
@@ -73,10 +72,6 @@ impl CalibrationFrame for DarkFrame {
         &self.camera_id
     }
 
-    fn total_subs(&self) -> &u32 {
-        &self.total_subs
-    }
-
     fn gain(&self) -> &u32 {
         &self.gain
     }
@@ -108,7 +103,7 @@ impl CalibrationFrame for DarkFrame {
             gain: self.gain,
             sub_length: Some(self.sub_length),
             camera_temp: Some(self.camera_temp),
-            total_subs: self.total_subs,
+            total_subs: self.total_subs(),
         };
 
         Ok(row)
@@ -120,7 +115,7 @@ impl CalibrationFrame for DarkFrame {
                 .clone()
                 .map_or("None".to_string(), |c| c.view_name().to_string()),
             "SUBLENGTH" => self.sub_length.to_string(),
-            "TOTALSUBS" => self.total_subs.to_string(),
+            "TOTALSUBS" => self.total_subs().to_string(),
             "GAIN" => self.gain.to_string(),
             "CAMERATEMP" => self.camera_temp.to_string(),
             _ => field.to_string(),

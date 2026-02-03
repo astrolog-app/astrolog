@@ -15,7 +15,6 @@ use crate::models::database::Database;
 pub struct BiasFrame {
     pub id: Uuid,
     pub camera_id: Uuid,
-    pub total_subs: u32,
     pub gain: u32,
     pub frames_to_classify: Vec<PathBuf>,
     pub frames_classified: Vec<PathBuf>,
@@ -59,10 +58,6 @@ impl CalibrationFrame for BiasFrame {
         &self.camera_id
     }
 
-    fn total_subs(&self) -> &u32 {
-        &self.total_subs
-    }
-
     fn gain(&self) -> &u32 {
         &self.gain
     }
@@ -87,7 +82,7 @@ impl CalibrationFrame for BiasFrame {
             gain: self.gain,
             sub_length: None,
             camera_temp: None,
-            total_subs: self.total_subs,
+            total_subs: self.total_subs(),
         };
 
         Ok(row)
@@ -98,7 +93,7 @@ impl CalibrationFrame for BiasFrame {
             "CAMERA" => camera
                 .clone()
                 .map_or("None".to_string(), |c| c.view_name().to_string()),
-            "TOTALSUBS" => self.total_subs.to_string(),
+            "TOTALSUBS" => self.total_subs().to_string(),
             "GAIN" => self.gain.to_string(),
             _ => field.to_string(),
         }

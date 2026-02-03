@@ -109,7 +109,6 @@ pub trait ImagingSessionFrame: ClassifiableFrame + Clone {
 
 pub trait CalibrationFrame: ClassifiableFrame + Clone + Any {
     fn camera_id(&self) -> &Uuid;
-    fn total_subs(&self) -> &u32;
     fn gain(&self) -> &u32;
 
     fn calibration_type(&self) -> CalibrationType;

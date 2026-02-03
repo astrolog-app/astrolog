@@ -71,9 +71,6 @@ export default function CalibrationRowEditor({
       }),
       subLength: z.coerce.number().optional(),
       cameraTemp: z.coerce.number().optional(),
-      totalSubs: z.coerce.number().min(1, {
-        message: 'Total subs must be at least 1.'
-      })
     })
     .superRefine((data, ctx) => {
       if (data.calibrationType === CalibrationType.DARK) {
@@ -101,7 +98,6 @@ export default function CalibrationRowEditor({
       calibrationType: calibrationFrame?.calibration_type || calibrationType,
       gain: analyzedFrames?.gain || calibrationFrame?.gain,
       subLength: analyzedFrames?.sub_length || calibrationFrame?.sub_length,
-      totalSubs: analyzedFrames?.total_subs || calibrationFrame?.total_subs,
       camera: calibrationFrame?.camera,
       cameraTemp: calibrationFrame?.camera_temp
     }
@@ -112,7 +108,6 @@ export default function CalibrationRowEditor({
       const darkFrame: DarkFrame = {
         id: calibrationFrame?.id || uuidv4() as UUID,
         camera_id: form.getValues().camera as UUID,
-        total_subs: paths?.length ?? 0,
         gain: Number(form.getValues().gain),
         frames_to_classify: paths ?? [],
         frames_classified: [],
@@ -124,7 +119,6 @@ export default function CalibrationRowEditor({
       const biasFrame: BiasFrame = {
         id: uuidv4() as UUID,
         camera_id: form.getValues().camera as UUID,
-        total_subs: paths?.length ?? 0,
         gain: Number(form.getValues().gain),
         frames_to_classify: paths ?? [],
         frames_classified: []
@@ -263,21 +257,6 @@ export default function CalibrationRowEditor({
               </div>
             </>
           )}
-          <div className={styles.row}>
-            <Label className={styles.label}>Total Subs</Label>
-            <FormField
-              control={form.control}
-              name="totalSubs"
-              render={({ field }) => (
-                <FormItem className={styles.item}>
-                  <FormControl>
-                    <Input type="number" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
           <div className={styles.buttons}>
             <Button
               className={styles.nextButton}

@@ -11,7 +11,6 @@ use serde::de::Error;
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Serialize, Serializer};
 use uuid::Uuid;
-use crate::models::database::Database;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FrontendAppState {

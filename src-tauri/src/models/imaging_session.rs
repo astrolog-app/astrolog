@@ -39,7 +39,6 @@ impl ImagingSession {
             let frame = FlatFrame {
                 id,
                 camera_id: light_frame.camera_id,
-                total_subs: calibration.flat_frames_to_classify.len() as u32,
                 gain: light_frame.gain,
                 frames_to_classify: calibration.flat_frames_to_classify.clone(),
                 frames_classified: vec![],
@@ -55,7 +54,6 @@ impl ImagingSession {
             let frame = DarkFrame {
                 id,
                 camera_id: light_frame.camera_id,
-                total_subs: calibration.dark_frames_to_classify.len() as u32,
                 gain: 0,
                 frames_to_classify: calibration.dark_frames_to_classify.clone(),
                 frames_classified: vec![],
@@ -201,10 +199,10 @@ impl ImagingSession {
 
         let mut len = light_frame.total_subs();
         if let Some(ref frame) = dark_frame {
-            len += frame.total_subs;
+            len += frame.total_subs();
         }
         if let Some(ref frame) = flat_frame {
-            len += frame.total_subs;
+            len += frame.total_subs();
         }
 
         let mut process = Process::spawn(
