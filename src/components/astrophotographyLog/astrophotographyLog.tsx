@@ -215,7 +215,7 @@ export function AstrophotographyLog({ setImages }: SessionTableProps) {
               <div>
                 <p className="flex items-center gap-2 mb-1 text-foreground">
                   <Sun className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">Gain:</span> {session?.gain}
+                  <span className="font-medium">Gain / ISO:</span> {session?.gain}
                 </p>
                 <p className="flex items-center gap-2 text-foreground">
                   <Cloud className="h-4 w-4 text-muted-foreground" />

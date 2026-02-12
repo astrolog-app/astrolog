@@ -49,7 +49,13 @@ export const sessionsColumnsDetailed: ColumnDef<ImagingSession>[] = [
   {
     accessorKey: 'gain',
     header: ({ column }) => (
-      <SortableHeader column={column} title="Gain" />
+      <SortableHeader column={column} title="Gain / ISO" />
+    ),
+  },
+  {
+    accessorKey: 'binning',
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Binning" />
     ),
   },
   {
