@@ -94,6 +94,7 @@ impl Database {
                 location_id TEXT NOT NULL,
 
                 gain INTEGER NOT NULL,
+                binning INTEGER NOT NULL,
                 offset INTEGER,
                 camera_temp REAL,
                 notes TEXT,
@@ -114,8 +115,11 @@ impl Database {
             M::up(
                 "CREATE TABLE IF NOT EXISTS dark_frames (
                 id TEXT PRIMARY KEY,
+                date TEXT NOT NULL,
                 camera_id TEXT NOT NULL,
                 gain INTEGER NOT NULL,
+                binning INTEGER NOT NULL,
+                offset INTEGER,
                 in_imaging_session BOOLEAN NOT NULL,
                 camera_temp REAL NOT NULL,
                 sub_length REAL NOT NULL
@@ -131,8 +135,11 @@ impl Database {
             M::up(
                 "CREATE TABLE IF NOT EXISTS bias_frames (
                 id TEXT PRIMARY KEY,
+                date TEXT NOT NULL,
                 camera_id TEXT NOT NULL,
-                gain INTEGER NOT NULL
+                gain INTEGER NOT NULL,
+                binning INTEGER NOT NULL,
+                offset INTEGER
             );",
             ),
             M::up(
@@ -706,6 +713,7 @@ impl Database {
             target: row.get("target")?,
             location_id: Uuid::parse_str(&row.get::<_, String>("location_id")?).unwrap(),
             gain: row.get("gain")?,
+            binning: row.get("binning")?,
             offset: row.get("offset")?,
             camera_temp: row.get("camera_temp")?,
             notes: row.get("notes")?,
@@ -760,16 +768,17 @@ impl Database {
 
         tx.execute(
             "INSERT OR REPLACE INTO light_frames (
-            id, date, target, location_id, gain, offset, camera_temp, notes, sub_length,
+            id, date, target, location_id, gain, binning, offset, camera_temp, notes, sub_length,
             camera_id, telescope_id, mount_id, flattener_id, filter_id,
             outside_temp, average_seeing, average_cloud_cover, average_moon
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             rusqlite::params![
             frame.id.to_string(),
             frame.date.to_rfc3339(),
             frame.target,
             frame.location_id.to_string(),
             frame.gain,
+            frame.binning,
             frame.offset,
             frame.camera_temp,
             frame.notes,
@@ -862,13 +871,16 @@ impl Database {
 
         tx.execute(
             "INSERT OR REPLACE INTO dark_frames (
-            id, camera_id, gain, in_imaging_session,
-            camera_temp, sub_length
-        ) VALUES (?, ?, ?, ?, ?, ?)",
+            id, date, camera_id, gain, binning, offset,
+            in_imaging_session, camera_temp, sub_length
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
             rusqlite::params![
             frame.id.to_string(),
+            frame.date.to_rfc3339(),
             frame.camera_id.to_string(),
             frame.gain,
+            frame.binning,
+            frame.offset,
             frame.in_imaging_session as i32,
             frame.camera_temp,
             frame.sub_length,
@@ -876,14 +888,15 @@ impl Database {
         )?;
 
         tx.execute(
-            "DELETE FROM frame_files WHERE frame_id = ?",
+            "DELETE FROM frame_files WHERE frame_id = ? AND frame_type = 'dark'",
             rusqlite::params![frame.id.to_string()],
         )?;
 
         let insert_file = |path: &PathBuf, classified: bool| -> Result<()> {
             let id = Uuid::new_v4();
             tx.execute(
-                "INSERT OR REPLACE INTO frame_files (id, frame_id, path, classified, frame_type) VALUES (?, ?, ?, ?, ?)",
+                "INSERT OR REPLACE INTO frame_files (id, frame_id, path, classified, frame_type)
+             VALUES (?, ?, ?, ?, ?)",
                 rusqlite::params![
                 id.to_string(),
                 frame.id.to_string(),
@@ -925,24 +938,33 @@ impl Database {
 
     pub fn get_dark_frame_by_id(&self, id: &Uuid) -> Result<Option<DarkFrame>> {
         let mut stmt = self.conn.prepare(
-            "SELECT camera_id, gain, in_imaging_session, camera_temp, sub_length FROM dark_frames WHERE id = ?1",
+            "SELECT date, camera_id, gain, binning, offset, in_imaging_session, camera_temp, sub_length
+         FROM dark_frames
+         WHERE id = ?1",
         )?;
 
         let mut rows = stmt.query([id.to_string()])?;
         if let Some(row) = rows.next()? {
-            let frames_to_classify = self.get_frame_files_by_classification(&id, false, "dark")?;
-            let frames_classified = self.get_frame_files_by_classification(&id, true, "dark")?;
+            let frames_to_classify = self.get_frame_files_by_classification(id, false, "dark")?;
+            let frames_classified = self.get_frame_files_by_classification(id, true, "dark")?;
+
             Ok(Some(DarkFrame {
                 id: *id,
-                camera_id: Uuid::parse_str(&row.get::<_, String>(0)?)
-                    .unwrap_or_else(|_| Uuid::nil()),
-                gain: row.get(1)?,
+                date: DateTime::parse_from_rfc3339(&row.get::<_, String>("date")?)
+                    .unwrap()
+                    .with_timezone(&Utc),
+                camera_id: Uuid::parse_str(&row.get::<_, String>("camera_id")?).unwrap(),
+                gain: row.get(2)?,
+                binning: row.get(3)?,
+                offset: row.get(4)?,
+
                 frames_to_classify,
                 frames_classified,
-                in_imaging_session: row.get(2)?,
+
+                in_imaging_session: row.get(5)?,
                 calibration_type: CalibrationType::DARK,
-                camera_temp: row.get(3)?,
-                sub_length: row.get(4)?,
+                camera_temp: row.get(6)?,
+                sub_length: row.get(7)?,
             }))
         } else {
             Ok(None)
@@ -951,27 +973,36 @@ impl Database {
 
     pub fn get_dark_frames(&self) -> Result<HashMap<Uuid, DarkFrame>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, camera_id, gain, in_imaging_session, camera_temp, sub_length FROM dark_frames",
+            "SELECT id, date, camera_id, gain, binning, offset, in_imaging_session, camera_temp, sub_length
+         FROM dark_frames",
         )?;
 
         let frames_iter = stmt.query_map([], |row| {
             let id_str: String = row.get(0)?;
             let id = Uuid::parse_str(&id_str).unwrap();
+
             let frames_to_classify = self.get_frame_files_by_classification(&id, false, "dark")?;
             let frames_classified = self.get_frame_files_by_classification(&id, true, "dark")?;
+
             Ok((
                 id,
                 DarkFrame {
                     id,
-                    camera_id: Uuid::parse_str(&row.get::<_, String>(1)?)
-                        .unwrap_or_else(|_| Uuid::nil()),
-                    gain: row.get(2)?,
+                    date: DateTime::parse_from_rfc3339(&row.get::<_, String>("date")?)
+                        .unwrap()
+                        .with_timezone(&Utc),
+                    camera_id: Uuid::parse_str(&row.get::<_, String>("camera_id")?).unwrap(),
+                    gain: row.get(3)?,
+                    binning: row.get(4)?,
+                    offset: row.get(5)?,
+
                     frames_to_classify,
                     frames_classified,
-                    in_imaging_session: row.get(3)?,
+
+                    in_imaging_session: row.get(6)?,
                     calibration_type: CalibrationType::DARK,
-                    camera_temp: row.get(4)?,
-                    sub_length: row.get(5)?,
+                    camera_temp: row.get(7)?,
+                    sub_length: row.get(8)?,
                 },
             ))
         })?;
@@ -981,7 +1012,6 @@ impl Database {
             let (id, frame) = result?;
             map.insert(id, frame);
         }
-
         Ok(map)
     }
 
@@ -1106,24 +1136,28 @@ impl Database {
 
         tx.execute(
             "INSERT OR REPLACE INTO bias_frames (
-            id, camera_id, gain
-        ) VALUES (?, ?, ?)",
+            id, date, camera_id, gain, binning, offset
+         ) VALUES (?, ?, ?, ?, ?, ?)",
             rusqlite::params![
             frame.id.to_string(),
+            frame.date.to_rfc3339(),
             frame.camera_id.to_string(),
             frame.gain,
+            frame.binning,
+            frame.offset,
         ],
         )?;
 
         tx.execute(
-            "DELETE FROM frame_files WHERE frame_id = ?",
+            "DELETE FROM frame_files WHERE frame_id = ? AND frame_type = 'bias'",
             rusqlite::params![frame.id.to_string()],
         )?;
 
         let insert_file = |path: &PathBuf, classified: bool| -> Result<()> {
             let id = Uuid::new_v4();
             tx.execute(
-                "INSERT OR REPLACE INTO frame_files (id, frame_id, path, classified, frame_type) VALUES (?, ?, ?, ?, ?)",
+                "INSERT OR REPLACE INTO frame_files (id, frame_id, path, classified, frame_type)
+             VALUES (?, ?, ?, ?, ?)",
                 rusqlite::params![
                 id.to_string(),
                 frame.id.to_string(),
@@ -1164,19 +1198,26 @@ impl Database {
     }
 
     pub fn get_bias_frame_by_id(&self, id: &Uuid) -> Result<Option<BiasFrame>> {
-        let mut stmt = self
-            .conn
-            .prepare("SELECT camera_id, gain FROM bias_frames WHERE id = ?1")?;
+        let mut stmt = self.conn.prepare(
+            "SELECT date, camera_id, gain, binning, offset
+         FROM bias_frames
+         WHERE id = ?1",
+        )?;
 
         let mut rows = stmt.query([id.to_string()])?;
         if let Some(row) = rows.next()? {
-            let frames_to_classify = self.get_frame_files_by_classification(&id, false, "bias")?;
-            let frames_classified = self.get_frame_files_by_classification(&id, true, "bias")?;
+            let frames_to_classify = self.get_frame_files_by_classification(id, false, "bias")?;
+            let frames_classified = self.get_frame_files_by_classification(id, true, "bias")?;
+
             Ok(Some(BiasFrame {
                 id: *id,
-                camera_id: Uuid::parse_str(&row.get::<_, String>(0)?)
-                    .unwrap_or_else(|_| Uuid::nil()),
-                gain: row.get(1)?,
+                date: DateTime::parse_from_rfc3339(&row.get::<_, String>("date")?)
+                    .unwrap()
+                    .with_timezone(&Utc),
+                camera_id: Uuid::parse_str(&row.get::<_, String>("camera_id")?).unwrap(),
+                gain: row.get(2)?,
+                binning: row.get(3)?,
+                offset: row.get(4)?,
                 frames_to_classify,
                 frames_classified,
                 calibration_type: CalibrationType::BIAS,
@@ -1187,22 +1228,29 @@ impl Database {
     }
 
     pub fn get_bias_frames(&self) -> Result<HashMap<Uuid, BiasFrame>> {
-        let mut stmt = self
-            .conn
-            .prepare("SELECT id, camera_id, gain FROM bias_frames")?;
+        let mut stmt = self.conn.prepare(
+            "SELECT id, date, camera_id, gain, binning, offset
+         FROM bias_frames",
+        )?;
 
         let frames_iter = stmt.query_map([], |row| {
             let id_str: String = row.get(0)?;
             let id = Uuid::parse_str(&id_str).unwrap();
+
             let frames_to_classify = self.get_frame_files_by_classification(&id, false, "bias")?;
             let frames_classified = self.get_frame_files_by_classification(&id, true, "bias")?;
+
             Ok((
                 id,
                 BiasFrame {
                     id,
-                    camera_id: Uuid::parse_str(&row.get::<_, String>(1)?)
-                        .unwrap_or_else(|_| Uuid::nil()),
-                    gain: row.get(2)?,
+                    date: DateTime::parse_from_rfc3339(&row.get::<_, String>("date")?)
+                        .unwrap()
+                        .with_timezone(&Utc),
+                    camera_id: Uuid::parse_str(&row.get::<_, String>("camera_id")?).unwrap(),
+                    gain: row.get(3)?,
+                    binning: row.get(4)?,
+                    offset: row.get(5)?,
                     frames_to_classify,
                     frames_classified,
                     calibration_type: CalibrationType::BIAS,

@@ -8,10 +8,11 @@ use crate::models::database::Database;
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct FlatFrame {
     pub id: Uuid,
-    pub camera_id: Uuid,
-    pub gain: u32,
     pub frames_to_classify: Vec<PathBuf>,
     pub frames_classified: Vec<PathBuf>,
+    
+    pub camera_id: Uuid,
+    pub gain: u32,
 }
 
 impl ClassifiableFrame for FlatFrame {

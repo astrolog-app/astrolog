@@ -19,6 +19,7 @@ pub struct LightFrame {
     pub location_id: Uuid,
 
     pub gain: u32,
+    pub binning: u32,
     pub offset: Option<u32>,
     pub camera_temp: Option<f64>,
     pub notes: Option<String>,
@@ -49,6 +50,7 @@ impl LightFrame {
             location_id: session.general.location_id.clone(),
 
             gain: session.details.gain,
+            binning: session.details.binning,
             offset: session.details.offset,
             camera_temp: session.details.camera_temp,
             notes: session.details.notes.clone(),
@@ -97,6 +99,8 @@ impl LightFrame {
         }
     }
 }
+
+
 
 impl ClassifiableFrame for LightFrame {
     fn id(&self) -> Uuid {

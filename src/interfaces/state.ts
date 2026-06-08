@@ -64,6 +64,7 @@ export interface ImagingSession {
   total_subs: number;
   filter: string;
   gain: number;
+  binning: number;
   offset: number | undefined;
   camera_temp: number | undefined;
   outside_temp: number | undefined;

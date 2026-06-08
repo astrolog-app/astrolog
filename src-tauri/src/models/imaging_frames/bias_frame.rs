@@ -7,6 +7,7 @@ use crate::models::state::AppState;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::path::PathBuf;
+use chrono::{DateTime, Utc};
 use tauri::State;
 use uuid::Uuid;
 use crate::models::database::Database;
@@ -14,10 +15,15 @@ use crate::models::database::Database;
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct BiasFrame {
     pub id: Uuid,
-    pub camera_id: Uuid,
-    pub gain: u32,
     pub frames_to_classify: Vec<PathBuf>,
     pub frames_classified: Vec<PathBuf>,
+
+    pub date: DateTime<Utc>,
+
+    pub camera_id: Uuid,
+    pub gain: u32,
+    pub binning: u32,
+    pub offset: Option<u32>,
 
     #[serde(skip_serializing, skip_deserializing)]
     pub calibration_type: CalibrationType,

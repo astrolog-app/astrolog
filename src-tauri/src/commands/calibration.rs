@@ -3,14 +3,11 @@ use crate::models::frontend::process::Process;
 use crate::models::imaging_frames::bias_frame::BiasFrame;
 use crate::models::imaging_frames::calibration_type::CalibrationType;
 use crate::models::imaging_frames::dark_frame::DarkFrame;
-use crate::models::imaging_frames::imaging_frame::{
-    CalibrationFrame, ClassifiableFrame, ImagingSessionFrame,
-};
+use crate::models::imaging_frames::imaging_frame::{CalibrationFrame, ClassifiableFrame};
 use crate::models::state::AppState;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
-use std::sync::Mutex;
 use tauri::{State, Window};
 
 #[derive(Debug, Serialize, Deserialize)]

@@ -53,8 +53,11 @@ impl ImagingSession {
 
             let frame = DarkFrame {
                 id,
+                date: light_frame.date,
                 camera_id: light_frame.camera_id,
                 gain: 0,
+                binning: light_frame.binning,
+                offset: None,
                 frames_to_classify: calibration.dark_frames_to_classify.clone(),
                 frames_classified: vec![],
                 in_imaging_session: true,

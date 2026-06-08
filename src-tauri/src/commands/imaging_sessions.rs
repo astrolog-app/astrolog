@@ -104,6 +104,7 @@ pub struct ImagingSessionGeneral {
 pub struct ImagingSessionDetails {
     pub gain: u32,
     pub sub_length: f64,
+    pub binning: u32,
     pub offset: Option<u32>,
     pub camera_temp: Option<f64>,
     pub notes: Option<String>,
