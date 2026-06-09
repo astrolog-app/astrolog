@@ -2,12 +2,17 @@ import { invoke } from "@tauri-apps/api/core"
 import type { AppApi } from "@/lib/api/types"
 import type { AppState } from "@/types/app-state"
 import type { Camera, Filter, Flattener, Mount, Telescope } from "@/types/equipment"
+import type { BiasFramePage, BiasFrameQuery } from "@/types/imaging-frames"
 import { UUID } from "crypto"
 
 // talks to the rust backend through tauri commands
 export const tauriApi: AppApi = {
   getAppState(): Promise<AppState> {
     return invoke<AppState>("get_app_state")
+  },
+
+  getBiasFrames(query: BiasFrameQuery): Promise<BiasFramePage> {
+    return invoke<BiasFramePage>("get_bias_frames", { query })
   },
 
   saveTelescope(telescope: Telescope): Promise<void> {

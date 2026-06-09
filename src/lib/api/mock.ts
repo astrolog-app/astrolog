@@ -1,6 +1,7 @@
 import type { AppApi } from "@/lib/api/types"
 import type { AppState } from "@/types/app-state"
 import type { Camera, EquipmentList, Filter, Flattener, Mount, Telescope } from "@/types/equipment"
+import type { BiasFramePage, BiasFrameQuery, BiasFrameRow } from "@/types/imaging-frames"
 import { UUID } from "crypto"
 
 // in-memory equipment used when running in the browser / v0 without a tauri backend
@@ -86,10 +87,39 @@ const mockAppState: AppState = {
   equipment,
 }
 
+// a couple of grouped bias rows so the calibration table renders in v0
+// (references the mock camera ids above so the names resolve)
+const mockBiasRows: BiasFrameRow[] = [
+  {
+    camera_id: "8f2e7263-cd79-48b7-a812-f1d470cecd4b" as UUID,
+    gain: 100,
+    binning: 1,
+    offset: 50,
+    night: "2026-06-07",
+    total_frames: 5,
+    first_captured: "2026-06-07T21:01:00Z",
+    last_captured: "2026-06-07T21:05:00Z",
+  },
+  {
+    camera_id: "b1769beb-2f9c-4c4e-ae52-dd0cd36d6e30" as UUID,
+    gain: 100,
+    binning: 1,
+    offset: 70,
+    night: "2026-05-30",
+    total_frames: 6,
+    first_captured: "2026-05-30T22:01:00Z",
+    last_captured: "2026-05-30T22:06:00Z",
+  },
+]
+
 // mirrors AppApi but serves static data, so the ui can run in the browser
 export const mockApi: AppApi = {
   async getAppState(): Promise<AppState> {
     return mockAppState
+  },
+
+  async getBiasFrames(_query: BiasFrameQuery): Promise<BiasFramePage> {
+    return { rows: mockBiasRows, total: mockBiasRows.length }
   },
 
   async saveTelescope(telescope: Telescope): Promise<void> {

@@ -3,6 +3,7 @@ use tauri::State;
 use uuid::Uuid;
 
 use crate::models::equipment::{Camera, EquipmentList, Filter, Flattener, Mount, Telescope};
+use crate::models::imaging_frames::bias_frame::{BiasFramePage, BiasFrameQuery};
 use crate::preferences::{Config, LocalConfig};
 use crate::state::AppState;
 
@@ -175,6 +176,25 @@ pub fn delete_flattener(state: State<AppState>, id: Uuid) -> Result<(), String> 
         .remove_flattener(id)
         .map_err(|e| {
             log::error!("delete_flattener {id} failed: {e}");
+            e.to_string()
+        })
+}
+
+// ------------ imaging frames ------------
+
+#[tauri::command]
+pub fn get_bias_frames(
+    state: State<AppState>,
+    query: BiasFrameQuery,
+) -> Result<BiasFramePage, String> {
+    log::debug!("get_bias_frames");
+    state
+        .db
+        .lock()
+        .unwrap()
+        .get_bias_frames(&query)
+        .map_err(|e| {
+            log::error!("get_bias_frames failed: {e}");
             e.to_string()
         })
 }

@@ -11,6 +11,7 @@
 /coverage
 
 package-lock.json
+CLAUDE.md
 
 # next.js
 /.next/

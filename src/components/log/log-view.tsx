@@ -54,8 +54,49 @@ import {
   Gauge,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { api } from "@/lib/api"
+import { useAppState } from "@/context/state-provider"
+import type { BiasFrameRow } from "@/types/imaging-frames"
 
 type ViewMode = "simple" | "detailed"
+
+// map a grouped bias row from the backend onto the calibration log shape so it
+// renders in the existing table; fields without a bias equivalent are blanked
+function biasRowToEntry(row: BiasFrameRow, cameraName: string): LogEntry {
+  return {
+    id: `bias:${row.camera_id}:${row.gain}:${row.binning}:${row.offset ?? "x"}:${row.night}`,
+    kind: "calibration",
+    target: `Bias · ${cameraName}`,
+    date: row.night,
+    frameType: "Bias",
+    frameCount: row.total_frames,
+    exposure: 0,
+    totalIntegration: 0,
+    filter: "—",
+    telescope: "—",
+    camera: cameraName,
+    mount: "—",
+    flattener: "—",
+    gain: row.gain,
+    offset: row.offset ?? 0,
+    binning: `${row.binning}x${row.binning}`,
+    sensorTemp: 0,
+    ambientTemp: 0,
+    fwhm: 0,
+    hfr: 0,
+    sqm: 0,
+    bortle: 0,
+    moonIllum: 0,
+    seeing: "—",
+    transparency: "—",
+    location: "—",
+    guideRms: 0,
+    filePath: `CALIBRATION/bias/${row.night}`,
+    processed: false,
+    notes: `captured ${row.first_captured} – ${row.last_captured}`,
+    images: [],
+  }
+}
 
 export function LogView() {
   const [entries, setEntries] = useState<LogEntry[]>(INITIAL_LOG)
@@ -70,14 +111,43 @@ export function LogView() {
     calibration: new Set(),
   })
 
+  // real bias-frame groups from the backend (mock returns a couple in web/v0)
+  const { appState } = useAppState()
+  const [biasRows, setBiasRows] = useState<BiasFrameRow[]>([])
+
+  useEffect(() => {
+    let cancelled = false
+    api
+      .getBiasFrames({ search: null, sort_by: "night", sort_dir: "desc", limit: 1000, offset: 0 })
+      .then((page) => {
+        if (!cancelled) setBiasRows(page.rows)
+      })
+      .catch((err) => console.error("failed to load bias frames", err))
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // resolve camera names lazily so they fill in once the equipment list loads
+  const biasEntries = useMemo<LogEntry[]>(() => {
+    const cameras = appState?.equipment.cameras ?? {}
+    return biasRows.map((row) =>
+      biasRowToEntry(row, cameras[row.camera_id]?.name ?? "Unknown camera"),
+    )
+  }, [biasRows, appState])
+
   const allColumns = useMemo(() => columnsFor(kind), [kind])
 
   const activeColumns: ColumnDef[] = useMemo(() => {
     if (mode === "simple") return allColumns.filter((c) => c.simple)
-    return allColumns.filter((c) => !hidden[kind].has(c.key as string))
+    return allColumns.filter((c) => !hidden[kind]?.has(c.key as string))
   }, [allColumns, mode, hidden, kind])
 
-  const byKind = useMemo(() => entries.filter((e) => e.kind === kind), [entries, kind])
+  // calibration rows come from the backend, sessions stay on the mock log
+  const byKind = useMemo(
+    () => (kind === "calibration" ? biasEntries : entries.filter((e) => e.kind === kind)),
+    [kind, entries, biasEntries],
+  )
 
   const { filtered, regexError } = useMemo(() => {
     if (!query.trim()) return { filtered: byKind, regexError: false }
@@ -101,7 +171,7 @@ export function LogView() {
     }
   }, [filtered, selectedId])
 
-  const selected = entries.find((e) => e.id === selectedId) ?? null
+  const selected = byKind.find((e) => e.id === selectedId) ?? null
 
   function toggleColumn(key: string) {
     setHidden((prev) => {
@@ -154,8 +224,9 @@ export function LogView() {
         </div>
 
         <ToggleGroup
-          value={[kind]}
-          onValueChange={(v: string[]) => v[0] && setKind(v[0] as LogKind)}
+          type="single"
+          value={kind}
+          onValueChange={(v: string) => v && setKind(v as LogKind)}
           variant="outline"
         >
           <ToggleGroupItem value="session">
@@ -169,8 +240,9 @@ export function LogView() {
         </ToggleGroup>
 
         <ToggleGroup
-          value={[mode]}
-          onValueChange={(v: string[]) => v[0] && setMode(v[0] as ViewMode)}
+          type="single"
+          value={mode}
+          onValueChange={(v: string) => v && setMode(v as ViewMode)}
           variant="outline"
         >
           <ToggleGroupItem value="simple">

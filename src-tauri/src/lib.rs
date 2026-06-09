@@ -64,6 +64,7 @@ pub fn run() {
             commands::delete_filter,
             commands::save_flattener,
             commands::delete_flattener,
+            commands::get_bias_frames,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
