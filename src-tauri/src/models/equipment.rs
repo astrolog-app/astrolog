@@ -1,4 +1,3 @@
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
@@ -29,7 +28,6 @@ pub struct Telescope {
     pub id: Uuid,
     pub brand: String,
     pub name: String,
-    pub notes: HashMap<Uuid, EquipmentNote>,
     pub focal_length: i32,
     pub aperture: i32,
 }
@@ -39,7 +37,6 @@ pub struct Camera {
     pub id: Uuid,
     pub brand: String,
     pub name: String,
-    pub notes: HashMap<Uuid, EquipmentNote>,
     pub pixel_size: f64,
     pub pixel_x: u32,
     pub pixel_y: u32,
@@ -52,7 +49,6 @@ pub struct Mount {
     pub id: Uuid,
     pub brand: String,
     pub name: String,
-    pub notes: HashMap<Uuid, EquipmentNote>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -60,7 +56,6 @@ pub struct Filter {
     pub id: Uuid,
     pub brand: String,
     pub name: String,
-    pub notes: HashMap<Uuid, EquipmentNote>,
     pub filter_type: String,
 }
 
@@ -69,13 +64,5 @@ pub struct Flattener {
     pub id: Uuid,
     pub brand: String,
     pub name: String,
-    pub notes: HashMap<Uuid, EquipmentNote>,
     pub factor: f64,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct EquipmentNote {
-    pub id: Uuid,
-    pub date: DateTime<Utc>,
-    pub note: String,
 }

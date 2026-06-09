@@ -1,8 +1,8 @@
 mod db;
 mod models;
 mod state;
-
-use std::sync::Mutex;
+mod file_store;
+mod preferences;
 
 use tauri::Manager;
 
@@ -10,31 +10,26 @@ use state::AppState;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-  tauri::Builder::default()
-    .setup(|app| {
-      if cfg!(debug_assertions) {
-        app.handle().plugin(
-          tauri_plugin_log::Builder::default()
-            .level(log::LevelFilter::Info)
-            .build(),
-        )?;
-      }
+    tauri::Builder::default()
+        .setup(|app| {
+            // init app_state
+            let app_state = AppState::new(app.handle());
 
-      // Open (or create) the database in the app data directory.
-      let data_dir = app.path().app_data_dir()?;
-      std::fs::create_dir_all(&data_dir)?;
-      let conn = db::open(&data_dir.join("astrolog.db"))?;
+            // state management
+            app.manage(app_state);
 
-      // Load the persisted equipment into memory once at startup.
-      let equipment = db::load_equipment(&conn)?;
-
-      app.manage(AppState {
-        db: Mutex::new(conn),
-        equipment: Mutex::new(equipment),
-      });
-
-      Ok(())
-    })
-    .run(tauri::generate_context!())
-    .expect("error while running tauri application");
+            Ok(())
+        })
+        .on_window_event(|window, event| {
+            // if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+            //     let state: tauri::State<AppState> = window.state();
+            //     if *state.close_lock.lock().unwrap() {
+            //         api.prevent_close();
+            //         window.emit("close_lock", ()).unwrap();
+            //     }
+            // }
+        })
+        .invoke_handler(tauri::generate_handler![])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
 }
