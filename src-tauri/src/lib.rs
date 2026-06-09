@@ -1,3 +1,4 @@
+mod commands;
 mod db;
 mod models;
 mod state;
@@ -29,7 +30,7 @@ pub fn run() {
             //     }
             // }
         })
-        .invoke_handler(tauri::generate_handler![])
+        .invoke_handler(tauri::generate_handler![commands::get_app_state])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

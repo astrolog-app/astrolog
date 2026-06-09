@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter } from 'next/font/google'
 import './globals.css'
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import StateProvider from "@/context/state-provider";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -43,8 +44,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn(geistSans.variable, geistMono.variable, "font-sans", inter.variable)}>
       <body className="font-sans antialiased">
-        <TooltipProvider delayDuration={0}>{children}</TooltipProvider>
-        {process.env.NODE_ENV === 'production'}
+        <StateProvider>
+          <TooltipProvider delayDuration={0}>
+            {children}
+          </TooltipProvider>
+        </StateProvider>
       </body>
     </html>
   )
