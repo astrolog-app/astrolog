@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Plus, Pencil, Trash2, Telescope } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -12,21 +12,66 @@ import { EquipmentDialog } from "@/components/equipment/equipment-dialog"
 import { EquipmentAnalytics } from "@/components/equipment/equipment-analytics"
 import {
   CATEGORIES,
-  INITIAL_EQUIPMENT,
   INITIAL_NOTES,
   getCategory,
   type CategoryId,
   type EquipmentItem,
   type EquipmentNote,
 } from "@/lib/equipment"
+import { useAppState } from "@/context/state-provider"
+import type { Camera, EquipmentList, Filter, Flattener, Telescope as TelescopeItem } from "@/types/equipment"
+
+// map the backend equipment list onto the v0 EquipmentItem shape used by the cards/dialog
+function mapEquipment(equipment: EquipmentList): EquipmentItem[] {
+  const items: EquipmentItem[] = []
+
+  for (const t of Object.values(equipment.telescopes) as TelescopeItem[]) {
+    items.push({
+      id: t.id,
+      category: "telescopes",
+      name: t.name,
+      brand: t.brand,
+      aperture: t.aperture,
+      focalLength: t.focal_length,
+    })
+  }
+  for (const c of Object.values(equipment.cameras) as Camera[]) {
+    items.push({
+      id: c.id,
+      category: "cameras",
+      name: c.name,
+      brand: c.brand,
+      type: c.is_dslr ? "DSLR" : c.is_monochrome ? "Monochrome" : "Color (OSC)",
+      resolution: `${c.pixel_x} x ${c.pixel_y}`,
+      pixelSize: c.pixel_size,
+    })
+  }
+  for (const m of Object.values(equipment.mounts)) {
+    items.push({ id: m.id, category: "mounts", name: m.name, brand: m.brand })
+  }
+  for (const f of Object.values(equipment.filters) as Filter[]) {
+    items.push({ id: f.id, category: "filters", name: f.name, brand: f.brand, type: f.filter_type })
+  }
+  for (const fl of Object.values(equipment.flatteners) as Flattener[]) {
+    items.push({ id: fl.id, category: "flatteners", name: fl.name, brand: fl.brand, factor: `${fl.factor}x` })
+  }
+
+  return items
+}
 
 export function EquipmentView() {
-  const [items, setItems] = useState<EquipmentItem[]>(INITIAL_EQUIPMENT)
+  const { appState } = useAppState()
+  const [items, setItems] = useState<EquipmentItem[]>([])
   const [notesByItem, setNotesByItem] = useState<Record<string, EquipmentNote[]>>(INITIAL_NOTES)
   const [activeTab, setActiveTab] = useState<CategoryId>("telescopes")
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editing, setEditing] = useState<EquipmentItem | null>(null)
-  const [selectedId, setSelectedId] = useState<string | null>("t1")
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+
+  // load equipment from the backend app state
+  useEffect(() => {
+    if (appState) setItems(mapEquipment(appState.equipment))
+  }, [appState])
 
   const category = getCategory(activeTab)
 
@@ -50,23 +95,9 @@ export function EquipmentView() {
     setDialogOpen(true)
   }
 
-  const handleSave = (item: EquipmentItem) => {
-    setItems((prev) => {
-      const exists = prev.some((p) => p.id === item.id)
-      return exists ? prev.map((p) => (p.id === item.id ? item : p)) : [...prev, item]
-    })
-    setSelectedId(item.id)
-  }
-
-  const handleDelete = (id: string) => {
-    setItems((prev) => prev.filter((p) => p.id !== id))
-    setNotesByItem((prev) => {
-      const next = { ...prev }
-      delete next[id]
-      return next
-    })
-    setSelectedId((cur) => (cur === id ? null : cur))
-  }
+  // add/delete are not wired to the backend yet
+  const handleSave = (_item: EquipmentItem) => {}
+  const handleDelete = (_id: string) => {}
 
   const addNote = (text: string) => {
     if (!selectedId) return
