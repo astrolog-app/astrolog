@@ -353,7 +353,7 @@ export function EquipmentView() {
                       })}
                     </div>
                   </div>
-                  <div className="hidden h-full min-h-0 lg:block">
+                  {/*<div className="hidden h-full min-h-0 lg:block">
                     <EquipmentAnalytics
                       item={selected}
                       notes={selectedNotes}
@@ -361,7 +361,7 @@ export function EquipmentView() {
                       onUpdateNote={updateNote}
                       onDeleteNote={deleteNote}
                     />
-                  </div>
+                  </div>*/}
                 </div>
               )}
             </TabsContent>

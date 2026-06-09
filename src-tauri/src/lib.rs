@@ -21,7 +21,7 @@ pub fn run() {
 
             Ok(())
         })
-        .on_window_event(|window, event| {
+        .on_window_event(|_window, _event| {
             // if let tauri::WindowEvent::CloseRequested { api, .. } = event {
             //     let state: tauri::State<AppState> = window.state();
             //     if *state.close_lock.lock().unwrap() {

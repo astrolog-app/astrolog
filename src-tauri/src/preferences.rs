@@ -1,12 +1,8 @@
 use crate::file_store;
 use serde::{Deserialize, Serialize};
 use serde_json::to_string_pretty;
-use std::collections::HashMap;
 use std::error::Error;
 use std::path::PathBuf;
-use tauri::State;
-use uuid::Uuid;
-use crate::state::AppState;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Unit {
@@ -65,7 +61,7 @@ impl Config {
         };
 
         Config {
-            schema_version: 1,
+            schema_version: Self::CURRENT_SCHEMA_VERSION,
             folder_paths,
         }
     }

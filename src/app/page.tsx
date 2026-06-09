@@ -24,9 +24,9 @@ export default function Home() {
           <Activity mode={view === "equipment" ? "visible" : "hidden"}>
             <EquipmentView />
           </Activity>
-          <Activity mode={view === "analytics" ? "visible" : "hidden"}>
+          {/*<Activity mode={view === "analytics" ? "visible" : "hidden"}>
             <AnalyticsView />
-          </Activity>
+          </Activity>*/}
         </main>
       </div>
       <StatusBar />

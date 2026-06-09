@@ -1,7 +1,7 @@
 use serde::de::DeserializeOwned;
 use std::error::Error;
 use std::fs::{create_dir_all, File};
-use std::io::{Read, Write};
+use std::io::Write;
 use std::path::Path;
 
 pub fn load<T>(filename: &Path) -> Result<T, Box<dyn Error>>

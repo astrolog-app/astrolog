@@ -9,7 +9,7 @@ export type ViewId = "log" | "equipment" | "analytics"
 const NAV_ITEMS: { id: ViewId; label: string; icon: typeof NotebookPen }[] = [
   { id: "log", label: "Log", icon: NotebookPen },
   { id: "equipment", label: "Equipment", icon: Telescope },
-  { id: "analytics", label: "Analytics", icon: ChartLine },
+  //{ id: "analytics", label: "Analytics", icon: ChartLine },
 ]
 
 interface SideNavProps {
