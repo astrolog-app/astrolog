@@ -8,6 +8,7 @@ export interface Telescope {
   id: UUID
   brand: string
   name: string
+  telescope_type: string
   focal_length: number
   aperture: number
 }
@@ -19,8 +20,7 @@ export interface Camera {
   pixel_size: number
   pixel_x: number
   pixel_y: number
-  is_monochrome: boolean
-  is_dslr: boolean
+  sensor_type: string
 }
 
 export interface Mount {
@@ -34,12 +34,14 @@ export interface Filter {
   brand: string
   name: string
   filter_type: string
+  size: string
 }
 
 export interface Flattener {
   id: UUID
   brand: string
   name: string
+  flattener_type: string
   factor: number
 }
 

@@ -28,6 +28,7 @@ pub struct Telescope {
     pub id: Uuid,
     pub brand: String,
     pub name: String,
+    pub telescope_type: String,
     pub focal_length: i32,
     pub aperture: i32,
 }
@@ -40,8 +41,7 @@ pub struct Camera {
     pub pixel_size: f64,
     pub pixel_x: u32,
     pub pixel_y: u32,
-    pub is_monochrome: bool,
-    pub is_dslr: bool,
+    pub sensor_type: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -57,6 +57,7 @@ pub struct Filter {
     pub brand: String,
     pub name: String,
     pub filter_type: String,
+    pub size: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -64,5 +65,6 @@ pub struct Flattener {
     pub id: Uuid,
     pub brand: String,
     pub name: String,
+    pub flattener_type: String,
     pub factor: f64,
 }

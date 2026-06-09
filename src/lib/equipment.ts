@@ -12,6 +12,8 @@ export interface FieldDef {
   unit?: string
   options?: string[]
   placeholder?: string
+  /** shown on the card but not editable in the dialog (e.g. computed values) */
+  display?: boolean
 }
 
 export interface CategoryDef {
@@ -39,10 +41,11 @@ export const CATEGORIES: CategoryDef[] = [
     noun: "Telescope",
     logField: "telescope",
     fields: [
-      { key: "type", label: "Type", type: "select", options: ["Refractor", "Reflector", "SCT", "RC", "Newtonian", "Maksutov"] },
+      { key: "type", label: "Type", type: "select", options: ["Refractor", "Reflector", "Newtonian", "SCT", "RC", "Maksutov"] },
       { key: "aperture", label: "Aperture", type: "number", unit: "mm", placeholder: "80" },
       { key: "focalLength", label: "Focal Length", type: "number", unit: "mm", placeholder: "480" },
-      { key: "focalRatio", label: "Focal Ratio", type: "text", placeholder: "f/6" },
+      // f-ratio is derived from aperture and focal length, shown but not editable
+      { key: "focalRatio", label: "Focal Ratio", type: "text", display: true },
     ],
   },
   {
@@ -51,10 +54,10 @@ export const CATEGORIES: CategoryDef[] = [
     noun: "Camera",
     logField: "camera",
     fields: [
-      { key: "type", label: "Sensor Type", type: "select", options: ["Monochrome", "Color (OSC)", "DSLR", "CCD"] },
-      { key: "sensor", label: "Sensor", type: "text", placeholder: "Sony IMX571" },
-      { key: "resolution", label: "Resolution", type: "text", placeholder: "6248 x 4176" },
+      { key: "type", label: "Sensor Type", type: "select", options: ["Mono", "OSC", "DSLR"] },
       { key: "pixelSize", label: "Pixel Size", type: "number", unit: "µm", placeholder: "3.76" },
+      { key: "pixelX", label: "Resolution X", type: "number", unit: "px", placeholder: "6248" },
+      { key: "pixelY", label: "Resolution Y", type: "number", unit: "px", placeholder: "4176" },
     ],
   },
   {
@@ -62,11 +65,7 @@ export const CATEGORIES: CategoryDef[] = [
     label: "Mounts",
     noun: "Mount",
     logField: "mount",
-    fields: [
-      { key: "type", label: "Type", type: "select", options: ["Equatorial (GEM)", "Alt-Azimuth", "Strain Wave", "Fork"] },
-      { key: "payload", label: "Payload Capacity", type: "number", unit: "kg", placeholder: "20" },
-      { key: "connection", label: "Connection", type: "select", options: ["USB", "WiFi", "Ethernet", "Serial"] },
-    ],
+    fields: [],
   },
   {
     id: "filters",
@@ -74,9 +73,8 @@ export const CATEGORIES: CategoryDef[] = [
     noun: "Filter",
     logField: "filter",
     fields: [
-      { key: "type", label: "Type", type: "select", options: ["Luminance", "Red", "Green", "Blue", "Ha", "OIII", "SII", "UHC", "Dual Band"] },
+      { key: "type", label: "Type", type: "select", options: ["Broadband", "Narrowband", "Luminance", "Red", "Green", "Blue", "Ha", "OIII", "SII", "Dual Band"] },
       { key: "size", label: "Size", type: "select", options: ['1.25"', '2"', "31mm", "36mm", "50mm"] },
-      { key: "bandwidth", label: "Bandwidth", type: "text", placeholder: "3nm" },
     ],
   },
   {
@@ -85,9 +83,8 @@ export const CATEGORIES: CategoryDef[] = [
     noun: "Flattener",
     logField: "flattener",
     fields: [
-      { key: "type", label: "Type", type: "select", options: ["Flattener", "Reducer/Flattener", "Coma Corrector", "Barlow"] },
-      { key: "factor", label: "Factor", type: "text", placeholder: "0.8x" },
-      { key: "backFocus", label: "Back Focus", type: "number", unit: "mm", placeholder: "55" },
+      { key: "type", label: "Type", type: "select", options: ["Flattener", "Reducer", "Coma Corrector", "Barlow"] },
+      { key: "factor", label: "Factor", type: "number", placeholder: "0.8" },
     ],
   },
 ]

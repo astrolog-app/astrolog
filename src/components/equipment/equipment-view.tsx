@@ -22,6 +22,12 @@ import { useAppState } from "@/context/state-provider"
 import type { Camera, EquipmentList, Filter, Flattener, Telescope as TelescopeItem } from '@/types/equipment';
 import { UUID } from 'crypto';
 
+// derive the focal ratio (f-number) from focal length and aperture
+function focalRatio(focalLength: number, aperture: number): string {
+  if (!aperture) return "—"
+  return `f/${(focalLength / aperture).toFixed(1)}`
+}
+
 // map the backend equipment list onto the v0 EquipmentItem shape used by the cards/dialog
 function mapEquipment(equipment: EquipmentList): EquipmentItem[] {
   const items: EquipmentItem[] = []
@@ -32,8 +38,11 @@ function mapEquipment(equipment: EquipmentList): EquipmentItem[] {
       category: "telescopes",
       name: t.name,
       brand: t.brand,
+      type: t.telescope_type,
       aperture: t.aperture,
       focalLength: t.focal_length,
+      // f-ratio is derived, not stored
+      focalRatio: focalRatio(t.focal_length, t.aperture),
     })
   }
   for (const c of Object.values(equipment.cameras) as Camera[]) {
@@ -42,19 +51,27 @@ function mapEquipment(equipment: EquipmentList): EquipmentItem[] {
       category: "cameras",
       name: c.name,
       brand: c.brand,
-      type: c.is_dslr ? "DSLR" : c.is_monochrome ? "Monochrome" : "Color (OSC)",
-      resolution: `${c.pixel_x} x ${c.pixel_y}`,
+      type: c.sensor_type,
       pixelSize: c.pixel_size,
+      pixelX: c.pixel_x,
+      pixelY: c.pixel_y,
     })
   }
   for (const m of Object.values(equipment.mounts)) {
     items.push({ id: m.id, category: "mounts", name: m.name, brand: m.brand })
   }
   for (const f of Object.values(equipment.filters) as Filter[]) {
-    items.push({ id: f.id, category: "filters", name: f.name, brand: f.brand, type: f.filter_type })
+    items.push({ id: f.id, category: "filters", name: f.name, brand: f.brand, type: f.filter_type, size: f.size })
   }
   for (const fl of Object.values(equipment.flatteners) as Flattener[]) {
-    items.push({ id: fl.id, category: "flatteners", name: fl.name, brand: fl.brand, factor: `${fl.factor}x` })
+    items.push({
+      id: fl.id,
+      category: "flatteners",
+      name: fl.name,
+      brand: fl.brand,
+      type: fl.flattener_type,
+      factor: fl.factor,
+    })
   }
 
   return items

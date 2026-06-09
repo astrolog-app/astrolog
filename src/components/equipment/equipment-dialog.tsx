@@ -46,13 +46,16 @@ export function EquipmentDialog({
 }: EquipmentDialogProps) {
   const [values, setValues] = useState<Record<string, string>>({})
 
+  // computed/display-only fields are not editable boxes in the dialog
+  const editableFields = category.fields.filter((f) => !f.display)
+
   useEffect(() => {
     if (!open) return
     const next: Record<string, string> = {
       name: item?.name?.toString() ?? "",
       brand: item?.brand?.toString() ?? "",
     }
-    for (const f of category.fields) {
+    for (const f of editableFields) {
       next[f.key] = item?.[f.key]?.toString() ?? ""
     }
     setValues(next)
@@ -69,7 +72,7 @@ export function EquipmentDialog({
       name: values.name.trim(),
       brand: values.brand.trim(),
     }
-    for (const f of category.fields) {
+    for (const f of editableFields) {
       const raw = values[f.key]?.trim() ?? ""
       result[f.key] = f.type === "number" && raw !== "" ? Number(raw) : raw
     }
@@ -115,7 +118,7 @@ export function EquipmentDialog({
               />
             </Field>
 
-            {category.fields.map((f) => (
+            {editableFields.map((f) => (
               <Field key={f.key}>
                 <FieldLabel htmlFor={f.key}>
                   {f.label}

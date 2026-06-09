@@ -24,6 +24,7 @@ impl Database {
                     id TEXT PRIMARY KEY,
                     brand TEXT NOT NULL,
                     name TEXT NOT NULL,
+                    telescope_type TEXT NOT NULL,
                     focal_length INTEGER NOT NULL,
                     aperture INTEGER NOT NULL
                 );",
@@ -36,8 +37,7 @@ impl Database {
                     pixel_size REAL NOT NULL,
                     pixel_x INTEGER NOT NULL,
                     pixel_y INTEGER NOT NULL,
-                    is_monochrome INTEGER NOT NULL,
-                    is_dslr INTEGER NOT NULL
+                    sensor_type TEXT NOT NULL
                 );",
             ),
             M::up(
@@ -52,7 +52,8 @@ impl Database {
                     id TEXT PRIMARY KEY,
                     brand TEXT NOT NULL,
                     name TEXT NOT NULL,
-                    filter_type TEXT NOT NULL
+                    filter_type TEXT NOT NULL,
+                    size TEXT NOT NULL
                 );",
             ),
             M::up(
@@ -60,6 +61,7 @@ impl Database {
                     id TEXT PRIMARY KEY,
                     brand TEXT NOT NULL,
                     name TEXT NOT NULL,
+                    flattener_type TEXT NOT NULL,
                     factor REAL NOT NULL
                 );",
             ),
@@ -82,8 +84,8 @@ impl Database {
 
     pub fn insert_camera(&self, camera: &Camera) -> Result<()> {
         self.conn.execute(
-            "INSERT OR REPLACE INTO cameras (id, brand, name, pixel_size, pixel_x, pixel_y, is_monochrome, is_dslr)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+            "INSERT OR REPLACE INTO cameras (id, brand, name, pixel_size, pixel_x, pixel_y, sensor_type)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
             params![
                 camera.id.to_string(),
                 camera.brand,
@@ -91,8 +93,7 @@ impl Database {
                 camera.pixel_size,
                 camera.pixel_x,
                 camera.pixel_y,
-                camera.is_monochrome as i32,
-                camera.is_dslr as i32
+                camera.sensor_type
             ],
         )?;
         Ok(())
@@ -106,7 +107,7 @@ impl Database {
 
     pub fn get_camera_by_id(&self, id: Uuid) -> Result<Option<Camera>> {
         let mut stmt = self.conn.prepare(
-            "SELECT brand, name, pixel_size, pixel_x, pixel_y, is_monochrome, is_dslr FROM cameras WHERE id = ?1",
+            "SELECT brand, name, pixel_size, pixel_x, pixel_y, sensor_type FROM cameras WHERE id = ?1",
         )?;
         let mut rows = stmt.query(params![id.to_string()])?;
         if let Some(row) = rows.next()? {
@@ -117,8 +118,7 @@ impl Database {
                 pixel_size: row.get(2)?,
                 pixel_x: row.get(3)?,
                 pixel_y: row.get(4)?,
-                is_monochrome: row.get::<_, i32>(5)? != 0,
-                is_dslr: row.get::<_, i32>(6)? != 0,
+                sensor_type: row.get(5)?,
             }))
         } else {
             Ok(None)
@@ -127,7 +127,7 @@ impl Database {
 
     pub fn get_cameras(&self) -> Result<HashMap<Uuid, Camera>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, brand, name, pixel_size, pixel_x, pixel_y, is_monochrome, is_dslr FROM cameras",
+            "SELECT id, brand, name, pixel_size, pixel_x, pixel_y, sensor_type FROM cameras",
         )?;
         let mut rows = stmt.query([])?;
         let mut result = HashMap::new();
@@ -143,8 +143,7 @@ impl Database {
                     pixel_size: row.get(3)?,
                     pixel_x: row.get(4)?,
                     pixel_y: row.get(5)?,
-                    is_monochrome: row.get::<_, i32>(6)? != 0,
-                    is_dslr: row.get::<_, i32>(7)? != 0,
+                    sensor_type: row.get(6)?,
                 },
             );
         }
@@ -153,11 +152,12 @@ impl Database {
 
     pub fn insert_telescope(&self, telescope: &Telescope) -> Result<()> {
         self.conn.execute(
-            "INSERT OR REPLACE INTO telescopes (id, brand, name, focal_length, aperture) VALUES (?1, ?2, ?3, ?4, ?5)",
+            "INSERT OR REPLACE INTO telescopes (id, brand, name, telescope_type, focal_length, aperture) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
             params![
                 telescope.id.to_string(),
                 telescope.brand,
                 telescope.name,
+                telescope.telescope_type,
                 telescope.focal_length,
                 telescope.aperture,
             ],
@@ -176,15 +176,16 @@ impl Database {
     pub fn get_telescope_by_id(&self, id: Uuid) -> Result<Option<Telescope>> {
         let mut stmt = self
             .conn
-            .prepare("SELECT brand, name, focal_length, aperture FROM telescopes WHERE id = ?1")?;
+            .prepare("SELECT brand, name, telescope_type, focal_length, aperture FROM telescopes WHERE id = ?1")?;
         let mut rows = stmt.query(params![id.to_string()])?;
         if let Some(row) = rows.next()? {
             Ok(Some(Telescope {
                 id,
                 brand: row.get(0)?,
                 name: row.get(1)?,
-                focal_length: row.get(2)?,
-                aperture: row.get(3)?,
+                telescope_type: row.get(2)?,
+                focal_length: row.get(3)?,
+                aperture: row.get(4)?,
             }))
         } else {
             Ok(None)
@@ -194,7 +195,7 @@ impl Database {
     pub fn get_telescopes(&self) -> Result<HashMap<Uuid, Telescope>> {
         let mut stmt = self
             .conn
-            .prepare("SELECT id, brand, name, focal_length, aperture FROM telescopes")?;
+            .prepare("SELECT id, brand, name, telescope_type, focal_length, aperture FROM telescopes")?;
         let mut rows = stmt.query([])?;
         let mut result = HashMap::new();
         while let Some(row) = rows.next()? {
@@ -206,8 +207,9 @@ impl Database {
                     id,
                     brand: row.get(1)?,
                     name: row.get(2)?,
-                    focal_length: row.get(3)?,
-                    aperture: row.get(4)?,
+                    telescope_type: row.get(3)?,
+                    focal_length: row.get(4)?,
+                    aperture: row.get(5)?,
                 },
             );
         }
@@ -265,12 +267,13 @@ impl Database {
 
     pub fn insert_filter(&self, filter: &Filter) -> Result<()> {
         self.conn.execute(
-            "INSERT OR REPLACE INTO filters (id, brand, name, filter_type) VALUES (?1, ?2, ?3, ?4)",
+            "INSERT OR REPLACE INTO filters (id, brand, name, filter_type, size) VALUES (?1, ?2, ?3, ?4, ?5)",
             params![
                 filter.id.to_string(),
                 filter.brand,
                 filter.name,
                 filter.filter_type,
+                filter.size,
             ],
         )?;
         Ok(())
@@ -285,7 +288,7 @@ impl Database {
     pub fn get_filter_by_id(&self, id: Uuid) -> Result<Option<Filter>> {
         let mut stmt = self
             .conn
-            .prepare("SELECT brand, name, filter_type FROM filters WHERE id = ?1")?;
+            .prepare("SELECT brand, name, filter_type, size FROM filters WHERE id = ?1")?;
         let mut rows = stmt.query(params![id.to_string()])?;
         if let Some(row) = rows.next()? {
             Ok(Some(Filter {
@@ -293,6 +296,7 @@ impl Database {
                 brand: row.get(0)?,
                 name: row.get(1)?,
                 filter_type: row.get(2)?,
+                size: row.get(3)?,
             }))
         } else {
             Ok(None)
@@ -302,7 +306,7 @@ impl Database {
     pub fn get_filters(&self) -> Result<HashMap<Uuid, Filter>> {
         let mut stmt = self
             .conn
-            .prepare("SELECT id, brand, name, filter_type FROM filters")?;
+            .prepare("SELECT id, brand, name, filter_type, size FROM filters")?;
         let mut rows = stmt.query([])?;
         let mut result = HashMap::new();
         while let Some(row) = rows.next()? {
@@ -315,6 +319,7 @@ impl Database {
                     brand: row.get(1)?,
                     name: row.get(2)?,
                     filter_type: row.get(3)?,
+                    size: row.get(4)?,
                 },
             );
         }
@@ -323,11 +328,12 @@ impl Database {
 
     pub fn insert_flattener(&self, flattener: &Flattener) -> Result<()> {
         self.conn.execute(
-            "INSERT OR REPLACE INTO flatteners (id, brand, name, factor) VALUES (?1, ?2, ?3, ?4)",
+            "INSERT OR REPLACE INTO flatteners (id, brand, name, flattener_type, factor) VALUES (?1, ?2, ?3, ?4, ?5)",
             params![
                 flattener.id.to_string(),
                 flattener.brand,
                 flattener.name,
+                flattener.flattener_type,
                 flattener.factor,
             ],
         )?;
@@ -345,14 +351,15 @@ impl Database {
     pub fn get_flattener_by_id(&self, id: Uuid) -> Result<Option<Flattener>> {
         let mut stmt = self
             .conn
-            .prepare("SELECT brand, name, factor FROM flatteners WHERE id = ?1")?;
+            .prepare("SELECT brand, name, flattener_type, factor FROM flatteners WHERE id = ?1")?;
         let mut rows = stmt.query(params![id.to_string()])?;
         if let Some(row) = rows.next()? {
             Ok(Some(Flattener {
                 id,
                 brand: row.get(0)?,
                 name: row.get(1)?,
-                factor: row.get(2)?,
+                flattener_type: row.get(2)?,
+                factor: row.get(3)?,
             }))
         } else {
             Ok(None)
@@ -362,7 +369,7 @@ impl Database {
     pub fn get_flatteners(&self) -> Result<HashMap<Uuid, Flattener>> {
         let mut stmt = self
             .conn
-            .prepare("SELECT id, brand, name, factor FROM flatteners")?;
+            .prepare("SELECT id, brand, name, flattener_type, factor FROM flatteners")?;
         let mut rows = stmt.query([])?;
         let mut result = HashMap::new();
         while let Some(row) = rows.next()? {
@@ -374,7 +381,8 @@ impl Database {
                     id,
                     brand: row.get(1)?,
                     name: row.get(2)?,
-                    factor: row.get(3)?,
+                    flattener_type: row.get(3)?,
+                    factor: row.get(4)?,
                 },
             );
         }
