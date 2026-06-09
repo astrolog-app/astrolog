@@ -3,4 +3,4 @@
 /target/
 /gen/schemas
 
-cargo.lock
+Cargo.lock
