@@ -26,6 +26,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import type { CategoryDef, EquipmentItem } from "@/lib/equipment"
+import { validateEquipment } from "@/schemas/equipment"
 import { UUID } from 'crypto'
 
 interface EquipmentDialogProps {
@@ -48,6 +49,8 @@ export function EquipmentDialog({
   const [values, setValues] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // per-field validation errors keyed by field key (name, brand, …)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   // computed/display-only fields are not editable boxes in the dialog
   const editableFields = category.fields.filter((f) => !f.display)
@@ -55,6 +58,7 @@ export function EquipmentDialog({
   useEffect(() => {
     if (!open) return
     setError(null)
+    setFieldErrors({})
     const next: Record<string, string> = {
       name: item?.name?.toString() ?? "",
       brand: item?.brand?.toString() ?? "",
@@ -65,11 +69,28 @@ export function EquipmentDialog({
     setValues(next)
   }, [open, item, category])
 
-  const setValue = (key: string, value: string) =>
+  const setValue = (key: string, value: string) => {
     setValues((prev) => ({ ...prev, [key]: value }))
+    // clear a field's error as soon as the user edits it
+    setFieldErrors((prev) => {
+      if (!prev[key]) return prev
+      const next = { ...prev }
+      delete next[key]
+      return next
+    })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // validate against the category schema before doing anything else
+    const errors = validateEquipment(category.id, values)
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors)
+      return
+    }
+    setFieldErrors({})
+
     const result: EquipmentItem = {
       id: item?.id ?? (crypto.randomUUID() as UUID),
       category: category.id,
@@ -116,20 +137,27 @@ export function EquipmentDialog({
               <FieldLabel htmlFor="name">Name</FieldLabel>
               <Input
                 id="name"
-                required
+                aria-invalid={Boolean(fieldErrors.name)}
                 value={values.name ?? ""}
                 onChange={(e) => setValue("name", e.target.value)}
                 placeholder={`e.g. ${category.noun} model`}
               />
+              {fieldErrors.name ? (
+                <p className="text-sm text-destructive">{fieldErrors.name}</p>
+              ) : null}
             </Field>
             <Field>
               <FieldLabel htmlFor="brand">Brand</FieldLabel>
               <Input
                 id="brand"
+                aria-invalid={Boolean(fieldErrors.brand)}
                 value={values.brand ?? ""}
                 onChange={(e) => setValue("brand", e.target.value)}
                 placeholder="Manufacturer"
               />
+              {fieldErrors.brand ? (
+                <p className="text-sm text-destructive">{fieldErrors.brand}</p>
+              ) : null}
             </Field>
 
             {editableFields.map((f) => (
@@ -143,7 +171,7 @@ export function EquipmentDialog({
                     value={values[f.key] || undefined}
                     onValueChange={(v) => setValue(f.key, v)}
                   >
-                    <SelectTrigger id={f.key}>
+                    <SelectTrigger id={f.key} aria-invalid={Boolean(fieldErrors[f.key])}>
                       <SelectValue placeholder="Select..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -159,11 +187,15 @@ export function EquipmentDialog({
                     id={f.key}
                     type={f.type === "number" ? "number" : "text"}
                     step="any"
+                    aria-invalid={Boolean(fieldErrors[f.key])}
                     value={values[f.key] ?? ""}
                     onChange={(e) => setValue(f.key, e.target.value)}
                     placeholder={f.placeholder}
                   />
                 )}
+                {fieldErrors[f.key] ? (
+                  <p className="text-sm text-destructive">{fieldErrors[f.key]}</p>
+                ) : null}
               </Field>
             ))}
           </FieldGroup>
