@@ -20,6 +20,7 @@ import {
 } from "@/lib/equipment"
 import { useAppState } from "@/context/state-provider"
 import { api } from "@/lib/api"
+import { toast } from "sonner"
 import type { Camera, EquipmentList, Filter, Flattener, Telescope as TelescopeItem } from '@/types/equipment';
 import { UUID } from 'crypto';
 
@@ -185,17 +186,25 @@ export function EquipmentView() {
 
   // errors propagate to the dialog, which keeps itself open and shows the message
   const handleSave = async (item: EquipmentItem) => {
+    const wasEditing = Boolean(editing)
     await persistItem(item)
     await refresh()
     setSelectedId(item.id)
+    const noun = getCategory(item.category).noun
+    toast.success(`${noun} successfully ${wasEditing ? "updated" : "added"}`)
   }
 
   const handleDelete = async (item: EquipmentItem) => {
+    const noun = getCategory(item.category).noun
     try {
       await removeItem(item)
       await refresh()
+      toast.success(`${noun} successfully deleted`)
     } catch (err) {
       console.error("failed to delete equipment", err)
+      toast.error(`Failed to delete ${noun.toLowerCase()}`, {
+        description: err instanceof Error ? err.message : String(err),
+      })
     }
   }
 
