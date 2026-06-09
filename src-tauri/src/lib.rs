@@ -30,7 +30,19 @@ pub fn run() {
             //     }
             // }
         })
-        .invoke_handler(tauri::generate_handler![commands::get_app_state])
+        .invoke_handler(tauri::generate_handler![
+            commands::get_app_state,
+            commands::save_telescope,
+            commands::delete_telescope,
+            commands::save_camera,
+            commands::delete_camera,
+            commands::save_mount,
+            commands::delete_mount,
+            commands::save_filter,
+            commands::delete_filter,
+            commands::save_flattener,
+            commands::delete_flattener,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

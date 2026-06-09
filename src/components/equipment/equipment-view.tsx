@@ -19,6 +19,7 @@ import {
   type EquipmentNote,
 } from "@/lib/equipment"
 import { useAppState } from "@/context/state-provider"
+import { api } from "@/lib/api"
 import type { Camera, EquipmentList, Filter, Flattener, Telescope as TelescopeItem } from '@/types/equipment';
 import { UUID } from 'crypto';
 
@@ -26,6 +27,66 @@ import { UUID } from 'crypto';
 function focalRatio(focalLength: number, aperture: number): string {
   if (!aperture) return "—"
   return `f/${(focalLength / aperture).toFixed(1)}`
+}
+
+// convert a v0 EquipmentItem back into the backend struct and persist it (add or edit)
+function persistItem(item: EquipmentItem): Promise<void> {
+  const { id, name, brand } = item
+  switch (item.category) {
+    case "telescopes":
+      return api.saveTelescope({
+        id,
+        brand,
+        name,
+        telescope_type: String(item.type ?? ""),
+        focal_length: Number(item.focalLength ?? 0),
+        aperture: Number(item.aperture ?? 0),
+      })
+    case "cameras":
+      return api.saveCamera({
+        id,
+        brand,
+        name,
+        sensor_type: String(item.type ?? ""),
+        pixel_size: Number(item.pixelSize ?? 0),
+        pixel_x: Number(item.pixelX ?? 0),
+        pixel_y: Number(item.pixelY ?? 0),
+      })
+    case "mounts":
+      return api.saveMount({ id, brand, name })
+    case "filters":
+      return api.saveFilter({
+        id,
+        brand,
+        name,
+        filter_type: String(item.type ?? ""),
+        size: String(item.size ?? ""),
+      })
+    case "flatteners":
+      return api.saveFlattener({
+        id,
+        brand,
+        name,
+        flattener_type: String(item.type ?? ""),
+        factor: Number(item.factor ?? 0),
+      })
+  }
+}
+
+// delete an item via the category-specific backend command
+function removeItem(item: EquipmentItem): Promise<void> {
+  switch (item.category) {
+    case "telescopes":
+      return api.deleteTelescope(item.id)
+    case "cameras":
+      return api.deleteCamera(item.id)
+    case "mounts":
+      return api.deleteMount(item.id)
+    case "filters":
+      return api.deleteFilter(item.id)
+    case "flatteners":
+      return api.deleteFlattener(item.id)
+  }
 }
 
 // map the backend equipment list onto the v0 EquipmentItem shape used by the cards/dialog
@@ -78,7 +139,7 @@ function mapEquipment(equipment: EquipmentList): EquipmentItem[] {
 }
 
 export function EquipmentView() {
-  const { appState } = useAppState()
+  const { appState, setAppState } = useAppState()
   const [items, setItems] = useState<EquipmentItem[]>([])
   const [notesByItem, setNotesByItem] = useState<Record<string, EquipmentNote[]>>(INITIAL_NOTES)
   const [activeTab, setActiveTab] = useState<CategoryId>("telescopes")
@@ -113,9 +174,30 @@ export function EquipmentView() {
     setDialogOpen(true)
   }
 
-  // add/delete are not wired to the backend yet
-  const handleSave = (_item: EquipmentItem) => {}
-  const handleDelete = (_id: string) => {}
+  // re-load the whole app state from the backend after a mutation
+  const refresh = async () => {
+    try {
+      setAppState(await api.getAppState())
+    } catch (err) {
+      console.error("failed to refresh app state", err)
+    }
+  }
+
+  // errors propagate to the dialog, which keeps itself open and shows the message
+  const handleSave = async (item: EquipmentItem) => {
+    await persistItem(item)
+    await refresh()
+    setSelectedId(item.id)
+  }
+
+  const handleDelete = async (item: EquipmentItem) => {
+    try {
+      await removeItem(item)
+      await refresh()
+    } catch (err) {
+      console.error("failed to delete equipment", err)
+    }
+  }
 
   const addNote = (text: string) => {
     if (!selectedId) return
@@ -240,7 +322,7 @@ export function EquipmentView() {
                                     className="size-7 text-muted-foreground hover:text-destructive"
                                     onClick={(e) => {
                                       e.stopPropagation()
-                                      handleDelete(item.id)
+                                      handleDelete(item)
                                     }}
                                     aria-label={`Delete ${item.name}`}
                                   >

@@ -1,6 +1,7 @@
 import type { AppApi } from "@/lib/api/types"
 import type { AppState } from "@/types/app-state"
-import type { EquipmentList } from "@/types/equipment"
+import type { Camera, EquipmentList, Filter, Flattener, Mount, Telescope } from "@/types/equipment"
+import { UUID } from "crypto"
 
 // in-memory equipment used when running in the browser / v0 without a tauri backend
 const equipment: EquipmentList = {
@@ -89,5 +90,40 @@ const mockAppState: AppState = {
 export const mockApi: AppApi = {
   async getAppState(): Promise<AppState> {
     return mockAppState
+  },
+
+  async saveTelescope(telescope: Telescope): Promise<void> {
+    equipment.telescopes[telescope.id] = telescope
+  },
+  async deleteTelescope(id: UUID): Promise<void> {
+    delete equipment.telescopes[id]
+  },
+
+  async saveCamera(camera: Camera): Promise<void> {
+    equipment.cameras[camera.id] = camera
+  },
+  async deleteCamera(id: UUID): Promise<void> {
+    delete equipment.cameras[id]
+  },
+
+  async saveMount(mount: Mount): Promise<void> {
+    equipment.mounts[mount.id] = mount
+  },
+  async deleteMount(id: UUID): Promise<void> {
+    delete equipment.mounts[id]
+  },
+
+  async saveFilter(filter: Filter): Promise<void> {
+    equipment.filters[filter.id] = filter
+  },
+  async deleteFilter(id: UUID): Promise<void> {
+    delete equipment.filters[id]
+  },
+
+  async saveFlattener(flattener: Flattener): Promise<void> {
+    equipment.flatteners[flattener.id] = flattener
+  },
+  async deleteFlattener(id: UUID): Promise<void> {
+    delete equipment.flatteners[id]
   },
 }

@@ -34,7 +34,8 @@ interface EquipmentDialogProps {
   category: CategoryDef
   /** item being edited, or null when adding */
   item: EquipmentItem | null
-  onSave: (item: EquipmentItem) => void
+  /** persists the item, may reject on a backend error */
+  onSave: (item: EquipmentItem) => Promise<void>
 }
 
 export function EquipmentDialog({
@@ -45,12 +46,15 @@ export function EquipmentDialog({
   onSave,
 }: EquipmentDialogProps) {
   const [values, setValues] = useState<Record<string, string>>({})
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // computed/display-only fields are not editable boxes in the dialog
   const editableFields = category.fields.filter((f) => !f.display)
 
   useEffect(() => {
     if (!open) return
+    setError(null)
     const next: Record<string, string> = {
       name: item?.name?.toString() ?? "",
       brand: item?.brand?.toString() ?? "",
@@ -64,7 +68,7 @@ export function EquipmentDialog({
   const setValue = (key: string, value: string) =>
     setValues((prev) => ({ ...prev, [key]: value }))
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const result: EquipmentItem = {
       id: item?.id ?? (crypto.randomUUID() as UUID),
@@ -76,8 +80,18 @@ export function EquipmentDialog({
       const raw = values[f.key]?.trim() ?? ""
       result[f.key] = f.type === "number" && raw !== "" ? Number(raw) : raw
     }
-    onSave(result)
-    onOpenChange(false)
+
+    setSaving(true)
+    setError(null)
+    try {
+      // only close on success — keep the dialog open and show the error otherwise
+      await onSave(result)
+      onOpenChange(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err))
+    } finally {
+      setSaving(false)
+    }
   }
 
   const isEditing = Boolean(item)
@@ -154,11 +168,19 @@ export function EquipmentDialog({
             ))}
           </FieldGroup>
 
+          {error ? (
+            <p role="alert" className="pb-2 text-sm text-destructive">
+              {error}
+            </p>
+          ) : null}
+
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" disabled={saving} onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit">{isEditing ? "Save changes" : `Add ${category.noun}`}</Button>
+            <Button type="submit" disabled={saving}>
+              {saving ? "Saving..." : isEditing ? "Save changes" : `Add ${category.noun}`}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
