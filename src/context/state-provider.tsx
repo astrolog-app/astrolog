@@ -9,7 +9,7 @@ import {
   type ReactNode,
   type SetStateAction,
 } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { api } from '@/lib/api';
 import type { AppState } from '@/types/app-state';
 
 interface AppStateContextType {
@@ -26,7 +26,7 @@ async function fetchAppState(
   setAppState: Dispatch<SetStateAction<AppState | null>>,
 ) {
   try {
-    const state = await invoke<AppState>('get_app_state');
+    const state = await api.getAppState();
     setAppState(state);
   } catch (err) {
     console.error('failed to load app state from backend', err);

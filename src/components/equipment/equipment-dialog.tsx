@@ -26,6 +26,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import type { CategoryDef, EquipmentItem } from "@/lib/equipment"
+import { UUID } from 'crypto'
 
 interface EquipmentDialogProps {
   open: boolean
@@ -63,7 +64,7 @@ export function EquipmentDialog({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const result: EquipmentItem = {
-      id: item?.id ?? crypto.randomUUID(),
+      id: item?.id ?? (crypto.randomUUID() as UUID),
       category: category.id,
       name: values.name.trim(),
       brand: values.brand.trim(),

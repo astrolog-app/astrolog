@@ -19,7 +19,8 @@ import {
   type EquipmentNote,
 } from "@/lib/equipment"
 import { useAppState } from "@/context/state-provider"
-import type { Camera, EquipmentList, Filter, Flattener, Telescope as TelescopeItem } from "@/types/equipment"
+import type { Camera, EquipmentList, Filter, Flattener, Telescope as TelescopeItem } from '@/types/equipment';
+import { UUID } from 'crypto';
 
 // map the backend equipment list onto the v0 EquipmentItem shape used by the cards/dialog
 function mapEquipment(equipment: EquipmentList): EquipmentItem[] {
@@ -102,7 +103,7 @@ export function EquipmentView() {
   const addNote = (text: string) => {
     if (!selectedId) return
     const now = new Date().toISOString()
-    const note: EquipmentNote = { id: crypto.randomUUID(), text, createdAt: now, updatedAt: now }
+    const note: EquipmentNote = { id: crypto.randomUUID() as UUID, text, createdAt: now, updatedAt: now }
     setNotesByItem((prev) => ({ ...prev, [selectedId]: [...(prev[selectedId] ?? []), note] }))
   }
 

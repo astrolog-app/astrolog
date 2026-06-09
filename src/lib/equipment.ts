@@ -1,4 +1,5 @@
 import type { LogEntry } from "@/lib/log"
+import { UUID } from 'crypto';
 
 export type CategoryId = "telescopes" | "cameras" | "mounts" | "filters" | "flatteners"
 
@@ -24,7 +25,7 @@ export interface CategoryDef {
 }
 
 export interface EquipmentItem {
-  id: string
+  id: UUID
   category: CategoryId
   name: string
   brand: string
@@ -96,7 +97,7 @@ export function getCategory(id: CategoryId): CategoryDef {
 }
 
 export interface EquipmentNote {
-  id: string
+  id: UUID
   text: string
   createdAt: string
   updatedAt: string
@@ -154,34 +155,34 @@ export function computeEquipmentStats(item: EquipmentItem, log: LogEntry[]): Equ
 }
 
 export const INITIAL_EQUIPMENT: EquipmentItem[] = [
-  { id: "t1", category: "telescopes", name: "Esprit 100ED", brand: "Sky-Watcher", type: "Refractor", aperture: 100, focalLength: 550, focalRatio: "f/5.5" },
-  { id: "t2", category: "telescopes", name: "EdgeHD 8", brand: "Celestron", type: "SCT", aperture: 203, focalLength: 2032, focalRatio: "f/10" },
-  { id: "c1", category: "cameras", name: "ASI2600MM Pro", brand: "ZWO", type: "Monochrome", sensor: "Sony IMX571", resolution: "6248 x 4176", pixelSize: 3.76 },
-  { id: "c2", category: "cameras", name: "ASI533MC Pro", brand: "ZWO", type: "Color (OSC)", sensor: "Sony IMX533", resolution: "3008 x 3008", pixelSize: 3.76 },
-  { id: "m1", category: "mounts", name: "EQ6-R Pro", brand: "Sky-Watcher", type: "Equatorial (GEM)", payload: 20, connection: "USB" },
-  { id: "f1", category: "filters", name: "Ha 3nm", brand: "Antlia", type: "Ha", size: "36mm", bandwidth: "3nm" },
-  { id: "f2", category: "filters", name: "OIII 3nm", brand: "Antlia", type: "OIII", size: "36mm", bandwidth: "3nm" },
-  { id: "fl1", category: "flatteners", name: "Esprit Flattener", brand: "Sky-Watcher", type: "Flattener", factor: "1.0x", backFocus: 55 },
+  { id: "8cbe8a07-7a56-412c-8dcc-ac3c8110dad2", category: "telescopes", name: "Esprit 100ED", brand: "Sky-Watcher", type: "Refractor", aperture: 100, focalLength: 550, focalRatio: "f/5.5" },
+  { id: "029d7183-beb8-475f-a0b7-7b3348b974b5", category: "telescopes", name: "EdgeHD 8", brand: "Celestron", type: "SCT", aperture: 203, focalLength: 2032, focalRatio: "f/10" },
+  { id: "0ee6c936-e6a8-46af-9600-2df19cd65476", category: "cameras", name: "ASI2600MM Pro", brand: "ZWO", type: "Monochrome", sensor: "Sony IMX571", resolution: "6248 x 4176", pixelSize: 3.76 },
+  { id: "11fe80fb-d477-4815-9fff-d3a33e5e1b07", category: "cameras", name: "ASI533MC Pro", brand: "ZWO", type: "Color (OSC)", sensor: "Sony IMX533", resolution: "3008 x 3008", pixelSize: 3.76 },
+  { id: "6d2fb2a9-ff56-46b9-a425-ef88eb9fd4f4", category: "mounts", name: "EQ6-R Pro", brand: "Sky-Watcher", type: "Equatorial (GEM)", payload: 20, connection: "USB" },
+  { id: "a48cfed5-5d25-48d3-8a31-16526ec13ea1", category: "filters", name: "Ha 3nm", brand: "Antlia", type: "Ha", size: "36mm", bandwidth: "3nm" },
+  { id: "fe25ab29-8113-4e20-b121-10766ff81433", category: "filters", name: "OIII 3nm", brand: "Antlia", type: "OIII", size: "36mm", bandwidth: "3nm" },
+  { id: "0b06c2a4-d871-400b-82cd-90617f54db4a", category: "flatteners", name: "Esprit Flattener", brand: "Sky-Watcher", type: "Flattener", factor: "1.0x", backFocus: 55 },
 ]
 
 export const INITIAL_NOTES: Record<string, EquipmentNote[]> = {
-  t1: [
+  "8cbe8a07-7a56-412c-8dcc-ac3c8110dad2": [
     {
-      id: "n1",
+      id: "43692f38-23ff-478d-99e3-7d9775f1cc8a",
       text: "Collimation checked and stars are pin-sharp across the field with the matching flattener at 55mm back focus.",
       createdAt: "2025-03-14T21:30:00Z",
       updatedAt: "2025-03-14T21:30:00Z",
     },
     {
-      id: "n2",
+      id: "a69cd71e-6a3d-4142-894b-c4f9e6c0b338",
       text: "Slight tilt noticed in the lower-left corner. Need to inspect the camera adapter spacing.",
       createdAt: "2025-08-02T19:05:00Z",
       updatedAt: "2025-09-21T22:10:00Z",
     },
   ],
-  c1: [
+  "0ee6c936-e6a8-46af-9600-2df19cd65476": [
     {
-      id: "n3",
+      id: "70756693-8e67-467c-aa6b-988fa3f1e56f",
       text: "Best results at gain 100, offset 50. Cooling to -10°C keeps dark current negligible.",
       createdAt: "2025-04-01T18:45:00Z",
       updatedAt: "2025-04-01T18:45:00Z",

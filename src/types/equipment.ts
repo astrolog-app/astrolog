@@ -1,9 +1,11 @@
+import { UUID } from 'crypto'
+
 // typescript mirror of the rust equipment models in src-tauri/src/models/equipment.rs
 // keys are snake_case to match the serde json output (the rust structs use no rename)
-// Uuid serializes to a string, HashMap<Uuid, T> to a Record<string, T>
+// Uuid serializes to a string, HashMap<Uuid, T> to a Record<UUID, T>
 
 export interface Telescope {
-  id: string
+  id: UUID
   brand: string
   name: string
   focal_length: number
@@ -11,7 +13,7 @@ export interface Telescope {
 }
 
 export interface Camera {
-  id: string
+  id: UUID
   brand: string
   name: string
   pixel_size: number
@@ -22,29 +24,29 @@ export interface Camera {
 }
 
 export interface Mount {
-  id: string
+  id: UUID
   brand: string
   name: string
 }
 
 export interface Filter {
-  id: string
+  id: UUID
   brand: string
   name: string
   filter_type: string
 }
 
 export interface Flattener {
-  id: string
+  id: UUID
   brand: string
   name: string
   factor: number
 }
 
 export interface EquipmentList {
-  telescopes: Record<string, Telescope>
-  cameras: Record<string, Camera>
-  mounts: Record<string, Mount>
-  filters: Record<string, Filter>
-  flatteners: Record<string, Flattener>
+  telescopes: Record<UUID, Telescope>
+  cameras: Record<UUID, Camera>
+  mounts: Record<UUID, Mount>
+  filters: Record<UUID, Filter>
+  flatteners: Record<UUID, Flattener>
 }
