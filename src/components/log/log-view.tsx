@@ -34,9 +34,9 @@ import { LogDialog } from "@/components/log/log-dialog"
 import { SessionPreview } from "@/components/log/session-preview"
 import {
   columnsFor,
-  INITIAL_LOG,
   formatCell,
   type ColumnDef,
+  type FrameType,
   type LogEntry,
   type LogKind,
 } from "@/lib/log"
@@ -56,31 +56,60 @@ import {
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api"
 import { useAppState } from "@/context/state-provider"
-import type { BiasFrameRow } from "@/types/imaging-frames"
+import type {
+  BiasFrameRow,
+  DarkFlatFrameRow,
+  DarkFrameRow,
+  FlatFrameRow,
+  LightFrameRow,
+} from "@/types/imaging-frames"
+import type { UUID } from "crypto"
 
 type ViewMode = "simple" | "detailed"
 
-// map a grouped bias row from the backend onto the calibration log shape so it
-// renders in the existing table; fields without a bias equivalent are blanked
-function biasRowToEntry(row: BiasFrameRow, cameraName: string): LogEntry {
+// shared fields a calibration row contributes to the log shape; everything a
+// given frame type lacks is blanked by calibEntry below
+interface CalibInput {
+  // path segment + a unique-per-group suffix together form the row id
+  pathSeg: string
+  idKey: string
+  frameType: FrameType
+  name: string
+  night: string
+  frameCount: number
+  exposure?: number
+  filter?: string
+  telescope?: string
+  camera: string
+  gain: number
+  offset: number | null
+  binning: number
+  sensorTemp?: number | null
+  first: string
+  last: string
+}
+
+// map any grouped calibration row onto the calibration log shape so it renders
+// in the existing table; fields without an equivalent are blanked
+function calibEntry(i: CalibInput): LogEntry {
   return {
-    id: `bias:${row.camera_id}:${row.gain}:${row.binning}:${row.offset ?? "x"}:${row.night}`,
+    id: `${i.pathSeg}:${i.idKey}`,
     kind: "calibration",
-    target: `Bias · ${cameraName}`,
-    date: row.night,
-    frameType: "Bias",
-    frameCount: row.total_frames,
-    exposure: 0,
+    target: i.name,
+    date: i.night,
+    frameType: i.frameType,
+    frameCount: i.frameCount,
+    exposure: i.exposure ?? 0,
     totalIntegration: 0,
-    filter: "—",
-    telescope: "—",
-    camera: cameraName,
+    filter: i.filter ?? "—",
+    telescope: i.telescope ?? "—",
+    camera: i.camera,
     mount: "—",
     flattener: "—",
-    gain: row.gain,
-    offset: row.offset ?? 0,
-    binning: `${row.binning}x${row.binning}`,
-    sensorTemp: 0,
+    gain: i.gain,
+    offset: i.offset ?? 0,
+    binning: `${i.binning}x${i.binning}`,
+    sensorTemp: i.sensorTemp ?? 0,
     ambientTemp: 0,
     fwhm: 0,
     hfr: 0,
@@ -91,7 +120,49 @@ function biasRowToEntry(row: BiasFrameRow, cameraName: string): LogEntry {
     transparency: "—",
     location: "—",
     guideRms: 0,
-    filePath: `CALIBRATION/bias/${row.night}`,
+    filePath: `CALIBRATION/${i.pathSeg}/${i.night}`,
+    processed: false,
+    notes: `captured ${i.first} – ${i.last}`,
+    images: [],
+  }
+}
+
+// map a grouped light row onto the imaging-session log shape
+function lightRowToEntry(
+  row: LightFrameRow,
+  cameraName: string,
+  telescopeName: string,
+  filterName: string,
+): LogEntry {
+  return {
+    id: `light:${row.camera_id}:${row.telescope_id ?? "x"}:${row.filter_id ?? "x"}:${row.target}:${row.gain}:${row.binning}:${row.offset ?? "x"}:${row.exposure}:${row.sensor_temp ?? "x"}:${row.night}`,
+    kind: "session",
+    target: row.target,
+    date: row.night,
+    frameType: "Light",
+    frameCount: row.total_frames,
+    exposure: row.exposure,
+    totalIntegration: Math.round((row.total_frames * row.exposure) / 60),
+    filter: filterName,
+    telescope: telescopeName,
+    camera: cameraName,
+    mount: "—",
+    flattener: "—",
+    gain: row.gain,
+    offset: row.offset ?? 0,
+    binning: `${row.binning}x${row.binning}`,
+    sensorTemp: row.sensor_temp ?? 0,
+    ambientTemp: 0,
+    fwhm: 0,
+    hfr: 0,
+    sqm: 0,
+    bortle: 0,
+    moonIllum: 0,
+    seeing: "—",
+    transparency: "—",
+    location: "—",
+    guideRms: 0,
+    filePath: `DATA/${row.target}/${row.night}`,
     processed: false,
     notes: `captured ${row.first_captured} – ${row.last_captured}`,
     images: [],
@@ -99,7 +170,8 @@ function biasRowToEntry(row: BiasFrameRow, cameraName: string): LogEntry {
 }
 
 export function LogView() {
-  const [entries, setEntries] = useState<LogEntry[]>(INITIAL_LOG)
+  // backend frames drive the table; entries holds only dialog-added rows
+  const [entries, setEntries] = useState<LogEntry[]>([])
   const [kind, setKind] = useState<LogKind>("session")
   const [mode, setMode] = useState<ViewMode>("simple")
   const [query, setQuery] = useState("")
@@ -111,30 +183,136 @@ export function LogView() {
     calibration: new Set(),
   })
 
-  // real bias-frame groups from the backend (mock returns a couple in web/v0)
+  // grouped frame rows from the backend (the mock returns samples in web/v0)
   const { appState } = useAppState()
   const [biasRows, setBiasRows] = useState<BiasFrameRow[]>([])
+  const [darkRows, setDarkRows] = useState<DarkFrameRow[]>([])
+  const [darkFlatRows, setDarkFlatRows] = useState<DarkFlatFrameRow[]>([])
+  const [flatRows, setFlatRows] = useState<FlatFrameRow[]>([])
+  const [lightRows, setLightRows] = useState<LightFrameRow[]>([])
 
   useEffect(() => {
     let cancelled = false
-    api
-      .getBiasFrames({ search: null, sort_by: "night", sort_dir: "desc", limit: 1000, offset: 0 })
-      .then((page) => {
-        if (!cancelled) setBiasRows(page.rows)
+    Promise.all([
+      api.getBiasFrames({ search: null, sort_by: "night", sort_dir: "desc", limit: 1000, offset: 0 }),
+      api.getDarkFrames({ search: null, sort_by: "night", sort_dir: "desc", limit: 1000, offset: 0 }),
+      api.getDarkFlatFrames({ search: null, sort_by: "night", sort_dir: "desc", limit: 1000, offset: 0 }),
+      api.getFlatFrames({ search: null, sort_by: "night", sort_dir: "desc", limit: 1000, offset: 0 }),
+      api.getLightFrames({ search: null, sort_by: "night", sort_dir: "desc", limit: 1000, offset: 0 }),
+    ])
+      .then(([bias, dark, darkFlat, flat, light]) => {
+        if (cancelled) return
+        setBiasRows(bias.rows)
+        setDarkRows(dark.rows)
+        setDarkFlatRows(darkFlat.rows)
+        setFlatRows(flat.rows)
+        setLightRows(light.rows)
       })
-      .catch((err) => console.error("failed to load bias frames", err))
+      .catch((err) => console.error("failed to load frames", err))
     return () => {
       cancelled = true
     }
   }, [])
 
-  // resolve camera names lazily so they fill in once the equipment list loads
-  const biasEntries = useMemo<LogEntry[]>(() => {
+  // resolve gear names lazily so they fill in once the equipment list loads
+  const calibrationEntries = useMemo<LogEntry[]>(() => {
     const cameras = appState?.equipment.cameras ?? {}
-    return biasRows.map((row) =>
-      biasRowToEntry(row, cameras[row.camera_id]?.name ?? "Unknown camera"),
+    const telescopes = appState?.equipment.telescopes ?? {}
+    const filters = appState?.equipment.filters ?? {}
+    const camName = (id: UUID) => cameras[id]?.name ?? "Unknown camera"
+    const optName = (map: Record<UUID, { name: string }>, id: UUID | null) =>
+      id ? map[id]?.name ?? "Unknown" : "—"
+
+    const bias = biasRows.map((r) =>
+      calibEntry({
+        pathSeg: "bias",
+        idKey: `${r.camera_id}:${r.gain}:${r.binning}:${r.offset ?? "x"}:${r.night}`,
+        frameType: "Bias",
+        name: `Bias · ${camName(r.camera_id)}`,
+        night: r.night,
+        frameCount: r.total_frames,
+        camera: camName(r.camera_id),
+        gain: r.gain,
+        offset: r.offset,
+        binning: r.binning,
+        first: r.first_captured,
+        last: r.last_captured,
+      }),
     )
-  }, [biasRows, appState])
+
+    const dark = darkRows.map((r) =>
+      calibEntry({
+        pathSeg: "darks",
+        idKey: `${r.camera_id}:${r.gain}:${r.binning}:${r.offset ?? "x"}:${r.exposure}:${r.sensor_temp ?? "x"}:${r.night}`,
+        frameType: "Dark",
+        name: `Dark · ${r.exposure}s · ${camName(r.camera_id)}`,
+        night: r.night,
+        frameCount: r.total_frames,
+        exposure: r.exposure,
+        camera: camName(r.camera_id),
+        gain: r.gain,
+        offset: r.offset,
+        binning: r.binning,
+        sensorTemp: r.sensor_temp,
+        first: r.first_captured,
+        last: r.last_captured,
+      }),
+    )
+
+    const darkFlat = darkFlatRows.map((r) =>
+      calibEntry({
+        pathSeg: "darkflats",
+        idKey: `${r.camera_id}:${r.gain}:${r.binning}:${r.offset ?? "x"}:${r.exposure}:${r.night}`,
+        frameType: "Dark Flat",
+        name: `Dark Flat · ${r.exposure}s · ${camName(r.camera_id)}`,
+        night: r.night,
+        frameCount: r.total_frames,
+        exposure: r.exposure,
+        camera: camName(r.camera_id),
+        gain: r.gain,
+        offset: r.offset,
+        binning: r.binning,
+        first: r.first_captured,
+        last: r.last_captured,
+      }),
+    )
+
+    const flat = flatRows.map((r) =>
+      calibEntry({
+        pathSeg: "flats",
+        idKey: `${r.camera_id}:${r.telescope_id ?? "x"}:${r.filter_id ?? "x"}:${r.gain}:${r.binning}:${r.offset ?? "x"}:${r.exposure}:${r.night}`,
+        frameType: "Flat",
+        name: `Flat · ${optName(filters, r.filter_id)} · ${camName(r.camera_id)}`,
+        night: r.night,
+        frameCount: r.total_frames,
+        exposure: r.exposure,
+        filter: optName(filters, r.filter_id),
+        telescope: optName(telescopes, r.telescope_id),
+        camera: camName(r.camera_id),
+        gain: r.gain,
+        offset: r.offset,
+        binning: r.binning,
+        first: r.first_captured,
+        last: r.last_captured,
+      }),
+    )
+
+    return [...bias, ...dark, ...flat, ...darkFlat]
+  }, [biasRows, darkRows, darkFlatRows, flatRows, appState])
+
+  const sessionEntries = useMemo<LogEntry[]>(() => {
+    const cameras = appState?.equipment.cameras ?? {}
+    const telescopes = appState?.equipment.telescopes ?? {}
+    const filters = appState?.equipment.filters ?? {}
+    return lightRows.map((r) =>
+      lightRowToEntry(
+        r,
+        cameras[r.camera_id]?.name ?? "Unknown camera",
+        r.telescope_id ? telescopes[r.telescope_id]?.name ?? "Unknown" : "—",
+        r.filter_id ? filters[r.filter_id]?.name ?? "Unknown" : "—",
+      ),
+    )
+  }, [lightRows, appState])
 
   const allColumns = useMemo(() => columnsFor(kind), [kind])
 
@@ -143,10 +321,13 @@ export function LogView() {
     return allColumns.filter((c) => !hidden[kind]?.has(c.key as string))
   }, [allColumns, mode, hidden, kind])
 
-  // calibration rows come from the backend, sessions stay on the mock log
+  // both tabs are backend-driven; dialog-added rows are layered on top by kind
   const byKind = useMemo(
-    () => (kind === "calibration" ? biasEntries : entries.filter((e) => e.kind === kind)),
-    [kind, entries, biasEntries],
+    () =>
+      kind === "calibration"
+        ? [...calibrationEntries, ...entries.filter((e) => e.kind === "calibration")]
+        : [...sessionEntries, ...entries.filter((e) => e.kind === "session")],
+    [kind, entries, calibrationEntries, sessionEntries],
   )
 
   const { filtered, regexError } = useMemo(() => {

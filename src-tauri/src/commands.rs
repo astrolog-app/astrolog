@@ -4,6 +4,10 @@ use uuid::Uuid;
 
 use crate::models::equipment::{Camera, EquipmentList, Filter, Flattener, Mount, Telescope};
 use crate::models::imaging_frames::bias_frame::{BiasFramePage, BiasFrameQuery};
+use crate::models::imaging_frames::dark_flat_frame::{DarkFlatFramePage, DarkFlatFrameQuery};
+use crate::models::imaging_frames::dark_frame::{DarkFramePage, DarkFrameQuery};
+use crate::models::imaging_frames::flat_frame::{FlatFramePage, FlatFrameQuery};
+use crate::models::imaging_frames::light_frame::{LightFramePage, LightFrameQuery};
 use crate::preferences::{Config, LocalConfig};
 use crate::state::AppState;
 
@@ -195,6 +199,74 @@ pub fn get_bias_frames(
         .get_bias_frames(&query)
         .map_err(|e| {
             log::error!("get_bias_frames failed: {e}");
+            e.to_string()
+        })
+}
+
+#[tauri::command]
+pub fn get_dark_frames(
+    state: State<AppState>,
+    query: DarkFrameQuery,
+) -> Result<DarkFramePage, String> {
+    log::debug!("get_dark_frames");
+    state
+        .db
+        .lock()
+        .unwrap()
+        .get_dark_frames(&query)
+        .map_err(|e| {
+            log::error!("get_dark_frames failed: {e}");
+            e.to_string()
+        })
+}
+
+#[tauri::command]
+pub fn get_dark_flat_frames(
+    state: State<AppState>,
+    query: DarkFlatFrameQuery,
+) -> Result<DarkFlatFramePage, String> {
+    log::debug!("get_dark_flat_frames");
+    state
+        .db
+        .lock()
+        .unwrap()
+        .get_dark_flat_frames(&query)
+        .map_err(|e| {
+            log::error!("get_dark_flat_frames failed: {e}");
+            e.to_string()
+        })
+}
+
+#[tauri::command]
+pub fn get_flat_frames(
+    state: State<AppState>,
+    query: FlatFrameQuery,
+) -> Result<FlatFramePage, String> {
+    log::debug!("get_flat_frames");
+    state
+        .db
+        .lock()
+        .unwrap()
+        .get_flat_frames(&query)
+        .map_err(|e| {
+            log::error!("get_flat_frames failed: {e}");
+            e.to_string()
+        })
+}
+
+#[tauri::command]
+pub fn get_light_frames(
+    state: State<AppState>,
+    query: LightFrameQuery,
+) -> Result<LightFramePage, String> {
+    log::debug!("get_light_frames");
+    state
+        .db
+        .lock()
+        .unwrap()
+        .get_light_frames(&query)
+        .map_err(|e| {
+            log::error!("get_light_frames failed: {e}");
             e.to_string()
         })
 }

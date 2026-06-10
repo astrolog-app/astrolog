@@ -1,4 +1,8 @@
 pub mod bias_frame;
+pub mod dark_flat_frame;
+pub mod dark_frame;
+pub mod flat_frame;
+pub mod light_frame;
 
 use serde::Deserialize;
 

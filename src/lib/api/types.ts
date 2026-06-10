@@ -1,6 +1,17 @@
 import type { AppState } from "@/types/app-state"
 import type { Camera, Filter, Flattener, Mount, Telescope } from "@/types/equipment"
-import type { BiasFramePage, BiasFrameQuery } from "@/types/imaging-frames"
+import type {
+  BiasFramePage,
+  BiasFrameQuery,
+  DarkFlatFramePage,
+  DarkFlatFrameQuery,
+  DarkFramePage,
+  DarkFrameQuery,
+  FlatFramePage,
+  FlatFrameQuery,
+  LightFramePage,
+  LightFrameQuery,
+} from "@/types/imaging-frames"
 import { UUID } from "crypto"
 
 // the surface the frontend uses to talk to the backend
@@ -8,8 +19,12 @@ import { UUID } from "crypto"
 export interface AppApi {
   getAppState(): Promise<AppState>
 
-  // grouped bias-frame rows, with regex search, sort and pagination
+  // grouped frame rows, each with regex search, sort and pagination
   getBiasFrames(query: BiasFrameQuery): Promise<BiasFramePage>
+  getDarkFrames(query: DarkFrameQuery): Promise<DarkFramePage>
+  getDarkFlatFrames(query: DarkFlatFrameQuery): Promise<DarkFlatFramePage>
+  getFlatFrames(query: FlatFrameQuery): Promise<FlatFramePage>
+  getLightFrames(query: LightFrameQuery): Promise<LightFramePage>
 
   // save_* upsert (add or edit), delete_* remove by id
   saveTelescope(telescope: Telescope): Promise<void>
