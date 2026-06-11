@@ -1,26 +1,36 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::SortDir;
 
-// one physical dark frame on disk (storage model, one row per file)
-// mirrors BiasFrame, plus exposure and the set sensor temperature that
-// distinguish a dark set (darks must match the lights' exposure and temp)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DarkFrame {
     pub id: Uuid,
-    pub hash: Option<String>,
+    // dslr/uncooled darks are bound to a session; cooled library darks are not.
+    // invariant (db CHECK): session_id IS NOT NULL OR sensor_temp IS NOT NULL,
+    // so a dark is always matchable — by session or by temperature
+    pub session_id: Option<Uuid>,
+    pub hash: Option<String>, // TODO: after being able to classify, it should no longer be an Option<>
+
     pub rel_path: String,
+    pub file_size_bytes: i64,
+
+    // day the frames were shot, user-declared (night / calibration-age anchor)
+    pub creation_day: NaiveDate,
+    pub captured_at: Option<DateTime<Utc>>,
+    pub imported_at: DateTime<Utc>,
+    pub updated_at: Option<DateTime<Utc>>,
+
+    pub binning: u32,
+    pub gain: u32,
+    pub offset: Option<u32>,
+    pub sensor_set_temp: Option<f64>,
+    pub sensor_temp: Option<f64>,
 
     pub camera_id: Uuid,
-    pub captured_at: DateTime<Utc>,
 
-    pub gain: u32,
-    pub binning: u32,
-    pub offset: Option<u32>,
-    pub exposure: f64,
-    pub sensor_temp: Option<f64>,
+    pub exposure_ms: i64,
 }
 
 // one aggregated table row: all dark frames sharing camera + settings + night
@@ -31,7 +41,7 @@ pub struct DarkFrameRow {
     pub gain: u32,
     pub binning: u32,
     pub offset: Option<u32>,
-    pub exposure: f64,
+    pub exposure_ms: i32,
     pub sensor_temp: Option<f64>,
     // noon-to-noon night, "YYYY-MM-DD"
     pub night: String,

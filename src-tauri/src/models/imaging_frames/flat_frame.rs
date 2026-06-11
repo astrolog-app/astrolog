@@ -1,27 +1,37 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::SortDir;
 
-// one physical flat frame on disk (storage model, one row per file)
-// flats depend on the optical train, so they mirror BiasFrame plus exposure
-// and the telescope + filter they were taken through (both optional)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FlatFrame {
     pub id: Uuid,
-    pub hash: Option<String>,
+    pub session_id: Uuid,
+    pub hash: Option<String>, // TODO: after being able to classify, it should no longer be an Option<>
+
     pub rel_path: String,
+    pub file_size_bytes: i64,
+
+    // day the frames were shot, user-declared (night / calibration-age anchor)
+    pub creation_day: NaiveDate,
+    pub captured_at: Option<DateTime<Utc>>,
+    pub imported_at: DateTime<Utc>,
+    pub updated_at: Option<DateTime<Utc>>,
+
+    pub binning: u32,
+    pub gain: u32,
+    pub offset: Option<u32>,
+    pub sensor_set_temp: Option<f64>,
+    pub sensor_temp: Option<f64>,
 
     pub camera_id: Uuid,
-    pub telescope_id: Option<Uuid>,
+    pub telescope_id: Uuid,
     pub filter_id: Option<Uuid>,
-    pub captured_at: DateTime<Utc>,
+    pub flattener_id: Option<Uuid>,
 
-    pub gain: u32,
-    pub binning: u32,
-    pub offset: Option<u32>,
-    pub exposure: f64,
+    // exposure in milliseconds
+    pub exposure_ms: i64,
 }
 
 // one aggregated table row: flat frames sharing optics + settings + night
@@ -34,7 +44,7 @@ pub struct FlatFrameRow {
     pub gain: u32,
     pub binning: u32,
     pub offset: Option<u32>,
-    pub exposure: f64,
+    pub exposure_ms: i32,
     // noon-to-noon night, "YYYY-MM-DD"
     pub night: String,
 

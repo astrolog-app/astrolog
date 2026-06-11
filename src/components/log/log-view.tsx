@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { Fragment, useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { LogDialog } from "@/components/log/log-dialog"
 import { SessionPreview } from "@/components/log/session-preview"
+import { SubFrameTable } from "@/components/log/subframe-table"
 import {
   columnsFor,
   formatCell,
@@ -52,6 +53,7 @@ import {
   Sun,
   Cloud,
   Gauge,
+  ChevronRight,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api"
@@ -176,6 +178,7 @@ export function LogView() {
   const [mode, setMode] = useState<ViewMode>("simple")
   const [query, setQuery] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [dialogKind, setDialogKind] = useState<LogKind | null>(null)
   // detailed-view hidden columns, tracked per kind
   const [hidden, setHidden] = useState<Record<LogKind, Set<string>>>({
@@ -354,13 +357,21 @@ export function LogView() {
 
   const selected = byKind.find((e) => e.id === selectedId) ?? null
 
-  function toggleColumn(key: string) {
-    setHidden((prev) => {
-      const next = new Set(prev[kind])
-      if (next.has(key)) next.delete(key)
-      else next.add(key)
-      return { ...prev, [kind]: next }
+  function toggleExpand(id: string) {
+    setExpandedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
     })
+  }
+
+  function toggleColumn(key: string) {    setHidden((prev) => {
+    const next = new Set(prev[kind])
+    if (next.has(key)) next.delete(key)
+    else next.add(key)
+    return { ...prev, [kind]: next }
+  })
   }
 
   function addEntry(entry: LogEntry) {
@@ -476,6 +487,7 @@ export function LogView() {
             <Table>
               <TableHeader className="sticky top-0 z-10 bg-muted">
                 <TableRow>
+                  <TableHead className="w-8" aria-label="Expand" />
                   {activeColumns.map((c) => (
                     <TableHead key={c.key as string} className={cn(c.align === "right" && "text-right")}>
                       {c.label}
@@ -484,54 +496,84 @@ export function LogView() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map((entry) => (
-                  <TableRow
-                    key={entry.id}
-                    className="cursor-pointer"
-                    data-state={selectedId === entry.id ? "selected" : undefined}
-                    onClick={() => setSelectedId(entry.id)}
-                  >
-                    {activeColumns.map((c) => (
-                      <TableCell
-                        key={c.key as string}
-                        className={cn(
-                          c.align === "right" && "text-right tabular-nums",
-                          c.key === "target" && "font-medium text-foreground",
-                          c.key === "notes" && "max-w-56 truncate",
-                          c.key === "filePath" && "font-mono text-xs text-muted-foreground",
-                        )}
+                {filtered.map((entry) => {
+                  const expanded = expandedIds.has(entry.id)
+                  return (
+                    <Fragment key={entry.id}>
+                      <TableRow
+                        className="cursor-pointer"
+                        data-state={selectedId === entry.id ? "selected" : undefined}
+                        aria-expanded={expanded}
+                        onClick={() => setSelectedId(entry.id)}
                       >
-                        {c.key === "target" ? (
-                          <span className="flex items-center gap-2">
-                            {entry.kind === "session" ? (
-                              <Telescope className="size-3.5 text-muted-foreground" />
-                            ) : (
-                              <Wrench className="size-3.5 text-muted-foreground" />
+                        <TableCell className="w-8 pr-0">
+                          <button
+                            type="button"
+                            aria-label={expanded ? "Collapse subframes" : "Expand subframes"}
+                            className="flex size-6 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              toggleExpand(entry.id)
+                            }}
+                          >
+                            <ChevronRight
+                              className={cn(
+                                "size-4 transition-transform",
+                                expanded && "rotate-90",
+                              )}
+                            />
+                          </button>
+                        </TableCell>
+                        {activeColumns.map((c) => (
+                          <TableCell
+                            key={c.key as string}
+                            className={cn(
+                              c.align === "right" && "text-right tabular-nums",
+                              c.key === "target" && "font-medium text-foreground",
+                              c.key === "notes" && "max-w-56 truncate",
+                              c.key === "filePath" && "font-mono text-xs text-muted-foreground",
                             )}
-                            {entry.target}
-                          </span>
-                        ) : c.key === "frameType" ? (
-                          <Badge variant="secondary">{entry.frameType}</Badge>
-                        ) : c.key === "processed" ? (
-                          entry.processed ? (
-                            <span className="flex items-center gap-1 text-muted-foreground">
-                              <CheckCircle2 className="size-3.5" /> Done
-                            </span>
-                          ) : (
-                            <span className="flex items-center gap-1 text-muted-foreground">
-                              <AlertCircle className="size-3.5" /> Pending
-                            </span>
-                          )
-                        ) : (
-                          formatCell(entry, c)
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
+                          >
+                            {c.key === "target" ? (
+                              <span className="flex items-center gap-2">
+                                {entry.kind === "session" ? (
+                                  <Telescope className="size-3.5 text-muted-foreground" />
+                                ) : (
+                                  <Wrench className="size-3.5 text-muted-foreground" />
+                                )}
+                                {entry.target}
+                              </span>
+                            ) : c.key === "frameType" ? (
+                              <Badge variant="secondary">{entry.frameType}</Badge>
+                            ) : c.key === "processed" ? (
+                              entry.processed ? (
+                                <span className="flex items-center gap-1 text-muted-foreground">
+                                  <CheckCircle2 className="size-3.5" /> Done
+                                </span>
+                              ) : (
+                                <span className="flex items-center gap-1 text-muted-foreground">
+                                  <AlertCircle className="size-3.5" /> Pending
+                                </span>
+                              )
+                            ) : (
+                              formatCell(entry, c)
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                      {expanded && (
+                        <TableRow className="hover:bg-transparent">
+                          <TableCell colSpan={activeColumns.length + 1} className="p-0">
+                            <SubFrameTable entry={entry} />
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </Fragment>
+                  )
+                })}
                 {filtered.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={activeColumns.length} className="h-32 text-center text-muted-foreground">
+                    <TableCell colSpan={activeColumns.length + 1} className="h-32 text-center text-muted-foreground">
                       {regexError ? "Invalid regular expression." : "No entries match your search."}
                     </TableCell>
                   </TableRow>

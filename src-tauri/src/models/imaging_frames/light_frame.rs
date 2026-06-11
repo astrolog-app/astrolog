@@ -1,29 +1,39 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::SortDir;
 
-// one physical light frame on disk (storage model, one row per file)
-// the richest frame type: a target plus the optical train and the sensor temp,
-// otherwise mirroring the bias storage shape
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LightFrame {
     pub id: Uuid,
-    pub hash: Option<String>,
+    pub session_id: Uuid,
+    pub hash: Option<String>, // TODO: after being able to classify, it should no longer be an Option<>
+
     pub rel_path: String,
+    pub file_size_bytes: i64,
+
+    // day the frames were shot, user-declared (night / calibration-age anchor)
+    pub creation_day: NaiveDate,
+    pub captured_at: Option<DateTime<Utc>>,
+    pub imported_at: DateTime<Utc>,
+    pub updated_at: Option<DateTime<Utc>>,
+
+    pub binning: u32,
+    pub gain: u32,
+    pub offset: Option<u32>,
+    pub sensor_set_temp: Option<f64>,
+    pub sensor_temp: Option<f64>,
 
     pub camera_id: Uuid,
-    pub telescope_id: Option<Uuid>,
+    pub telescope_id: Uuid,
+    pub mount_id: Uuid,
     pub filter_id: Option<Uuid>,
-    pub captured_at: DateTime<Utc>,
+    pub flattener_id: Option<Uuid>,
+
+    pub exposure_ms: i64,
 
     pub target: String,
-    pub gain: u32,
-    pub binning: u32,
-    pub offset: Option<u32>,
-    pub exposure: f64,
-    pub sensor_temp: Option<f64>,
 }
 
 // one aggregated table row: light frames sharing target + optics + settings + night

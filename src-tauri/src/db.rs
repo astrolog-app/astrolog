@@ -94,31 +94,45 @@ impl Database {
                     id TEXT PRIMARY KEY,
                     hash TEXT UNIQUE,
                     rel_path TEXT NOT NULL,
-                    camera_id TEXT NOT NULL,
-                    captured_at TEXT NOT NULL,
-                    gain INTEGER NOT NULL,
+                    file_size_bytes INTEGER NOT NULL,
+                    creation_day TEXT NOT NULL,
+                    captured_at TEXT,
+                    imported_at TEXT NOT NULL,
+                    updated_at TEXT,
                     binning INTEGER NOT NULL,
-                    \"offset\" INTEGER
+                    gain INTEGER NOT NULL,
+                    \"offset\" INTEGER,
+                    sensor_set_temp REAL,
+                    sensor_temp REAL,
+                    camera_id TEXT NOT NULL
                 );
-                CREATE INDEX IF NOT EXISTS idx_bias_frames_camera_captured
-                    ON bias_frames(camera_id, captured_at);",
+                CREATE INDEX IF NOT EXISTS idx_bias_frames_camera_day
+                    ON bias_frames(camera_id, creation_day);",
             ),
             M::up(
-                // darks mirror bias plus exposure and the set sensor temperature
+                // darks mirror bias plus exposure; a dark is matchable either by
+                // session (dslr) or by temperature (cooled) — hence the CHECK
                 "CREATE TABLE IF NOT EXISTS dark_frames (
                     id TEXT PRIMARY KEY,
+                    session_id TEXT,
                     hash TEXT UNIQUE,
                     rel_path TEXT NOT NULL,
-                    camera_id TEXT NOT NULL,
-                    captured_at TEXT NOT NULL,
-                    gain INTEGER NOT NULL,
+                    file_size_bytes INTEGER NOT NULL,
+                    creation_day TEXT NOT NULL,
+                    captured_at TEXT,
+                    imported_at TEXT NOT NULL,
+                    updated_at TEXT,
                     binning INTEGER NOT NULL,
+                    gain INTEGER NOT NULL,
                     \"offset\" INTEGER,
-                    exposure REAL NOT NULL,
-                    sensor_temp REAL
+                    sensor_set_temp REAL,
+                    sensor_temp REAL,
+                    camera_id TEXT NOT NULL,
+                    exposure_ms INTEGER NOT NULL,
+                    CHECK (session_id IS NOT NULL OR sensor_temp IS NOT NULL)
                 );
-                CREATE INDEX IF NOT EXISTS idx_dark_frames_camera_captured
-                    ON dark_frames(camera_id, captured_at);",
+                CREATE INDEX IF NOT EXISTS idx_dark_frames_camera_day
+                    ON dark_frames(camera_id, creation_day);",
             ),
             M::up(
                 // dark flats mirror bias plus exposure (matched to the flats)
@@ -126,53 +140,77 @@ impl Database {
                     id TEXT PRIMARY KEY,
                     hash TEXT UNIQUE,
                     rel_path TEXT NOT NULL,
-                    camera_id TEXT NOT NULL,
-                    captured_at TEXT NOT NULL,
-                    gain INTEGER NOT NULL,
+                    file_size_bytes INTEGER NOT NULL,
+                    creation_day TEXT NOT NULL,
+                    captured_at TEXT,
+                    imported_at TEXT NOT NULL,
+                    updated_at TEXT,
                     binning INTEGER NOT NULL,
+                    gain INTEGER NOT NULL,
                     \"offset\" INTEGER,
-                    exposure REAL NOT NULL
+                    sensor_set_temp REAL,
+                    sensor_temp REAL,
+                    camera_id TEXT NOT NULL,
+                    exposure_ms INTEGER NOT NULL
                 );
-                CREATE INDEX IF NOT EXISTS idx_dark_flat_frames_camera_captured
-                    ON dark_flat_frames(camera_id, captured_at);",
+                CREATE INDEX IF NOT EXISTS idx_dark_flat_frames_camera_day
+                    ON dark_flat_frames(camera_id, creation_day);",
             ),
             M::up(
-                // flats add the optical train (telescope + filter) and exposure
+                // flats add the optical train (telescope + filter + flattener),
+                // exposure and the session they calibrate
                 "CREATE TABLE IF NOT EXISTS flat_frames (
                     id TEXT PRIMARY KEY,
+                    session_id TEXT NOT NULL,
                     hash TEXT UNIQUE,
                     rel_path TEXT NOT NULL,
-                    camera_id TEXT NOT NULL,
-                    telescope_id TEXT,
-                    filter_id TEXT,
-                    captured_at TEXT NOT NULL,
-                    gain INTEGER NOT NULL,
+                    file_size_bytes INTEGER NOT NULL,
+                    creation_day TEXT NOT NULL,
+                    captured_at TEXT,
+                    imported_at TEXT NOT NULL,
+                    updated_at TEXT,
                     binning INTEGER NOT NULL,
+                    gain INTEGER NOT NULL,
                     \"offset\" INTEGER,
-                    exposure REAL NOT NULL
+                    sensor_set_temp REAL,
+                    sensor_temp REAL,
+                    camera_id TEXT NOT NULL,
+                    telescope_id TEXT NOT NULL,
+                    filter_id TEXT,
+                    flattener_id TEXT,
+                    exposure_ms INTEGER NOT NULL
                 );
-                CREATE INDEX IF NOT EXISTS idx_flat_frames_camera_captured
-                    ON flat_frames(camera_id, captured_at);",
+                CREATE INDEX IF NOT EXISTS idx_flat_frames_camera_day
+                    ON flat_frames(camera_id, creation_day);",
             ),
             M::up(
-                // lights add a target, the optical train and the sensor temp
+                // lights add a target, the optical train (telescope + mount +
+                // filter + flattener), exposure, sensor temp and the session
                 "CREATE TABLE IF NOT EXISTS light_frames (
                     id TEXT PRIMARY KEY,
+                    session_id TEXT NOT NULL,
                     hash TEXT UNIQUE,
                     rel_path TEXT NOT NULL,
-                    camera_id TEXT NOT NULL,
-                    telescope_id TEXT,
-                    filter_id TEXT,
-                    captured_at TEXT NOT NULL,
-                    target TEXT NOT NULL,
-                    gain INTEGER NOT NULL,
+                    file_size_bytes INTEGER NOT NULL,
+                    creation_day TEXT NOT NULL,
+                    captured_at TEXT,
+                    imported_at TEXT NOT NULL,
+                    updated_at TEXT,
                     binning INTEGER NOT NULL,
+                    gain INTEGER NOT NULL,
                     \"offset\" INTEGER,
-                    exposure REAL NOT NULL,
-                    sensor_temp REAL
+                    sensor_set_temp REAL,
+                    sensor_temp REAL,
+                    camera_id TEXT NOT NULL,
+                    telescope_id TEXT NOT NULL,
+                    mount_id TEXT NOT NULL,
+                    filter_id TEXT,
+                    flattener_id TEXT,
+                    exposure_ms INTEGER NOT NULL,
+                    target TEXT NOT NULL
                 );
-                CREATE INDEX IF NOT EXISTS idx_light_frames_camera_captured
-                    ON light_frames(camera_id, captured_at);",
+                CREATE INDEX IF NOT EXISTS idx_light_frames_camera_day
+                    ON light_frames(camera_id, creation_day);",
             ),
         ]);
 
@@ -503,17 +541,23 @@ impl Database {
     pub fn insert_bias_frame(&self, frame: &BiasFrame) -> Result<()> {
         self.conn.execute(
             "INSERT OR REPLACE INTO bias_frames
-                (id, hash, rel_path, camera_id, captured_at, gain, binning, \"offset\")
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+                (id, hash, rel_path, file_size_bytes, creation_day, captured_at, imported_at, updated_at, binning, gain, \"offset\", sensor_set_temp, sensor_temp, camera_id)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)",
             params![
                 frame.id.to_string(),
                 frame.hash,
                 frame.rel_path,
-                frame.camera_id.to_string(),
+                frame.file_size_bytes,
+                frame.creation_day,
                 frame.captured_at,
-                frame.gain,
+                frame.imported_at,
+                frame.updated_at,
                 frame.binning,
+                frame.gain,
                 frame.offset,
+                frame.sensor_set_temp,
+                frame.sensor_temp,
+                frame.camera_id.to_string(),
             ],
         )?;
         Ok(())
@@ -529,7 +573,7 @@ impl Database {
 
     pub fn get_bias_frame_by_id(&self, id: Uuid) -> Result<Option<BiasFrame>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, hash, rel_path, camera_id, captured_at, gain, binning, \"offset\"
+            "SELECT id, hash, rel_path, file_size_bytes, creation_day, captured_at, imported_at, updated_at, binning, gain, \"offset\", sensor_set_temp, sensor_temp, camera_id
              FROM bias_frames WHERE id = ?1",
         )?;
         let mut rows = stmt.query(params![id.to_string()])?;
@@ -566,7 +610,7 @@ impl Database {
             .filter(|s| !s.is_empty());
 
         let where_clause = if search.is_some() {
-            "WHERE date(captured_at, '-12 hours') REGEXP :search \
+            "WHERE creation_day REGEXP :search \
                OR CAST(gain AS TEXT) REGEXP :search \
                OR CAST(binning AS TEXT) REGEXP :search \
                OR CAST(IFNULL(\"offset\", '') AS TEXT) REGEXP :search"
@@ -578,7 +622,7 @@ impl Database {
         let count_sql = format!(
             "SELECT COUNT(*) FROM (\
                 SELECT 1 FROM bias_frames {where_clause} \
-                GROUP BY camera_id, gain, binning, \"offset\", date(captured_at, '-12 hours')\
+                GROUP BY camera_id, gain, binning, \"offset\", creation_day\
              )"
         );
         let total: u32 = {
@@ -593,12 +637,12 @@ impl Database {
 
         let rows_sql = format!(
             "SELECT camera_id, gain, binning, \"offset\", \
-                    date(captured_at, '-12 hours') AS night, \
+                    creation_day AS night, \
                     COUNT(*) AS total_frames, \
                     MIN(captured_at) AS first_captured, \
                     MAX(captured_at) AS last_captured \
              FROM bias_frames {where_clause} \
-             GROUP BY camera_id, gain, binning, \"offset\", date(captured_at, '-12 hours') \
+             GROUP BY camera_id, gain, binning, \"offset\", creation_day \
              ORDER BY {sort_col} {sort_dir} \
              LIMIT :limit OFFSET :offset"
         );
@@ -634,11 +678,11 @@ impl Database {
         night: &str,
     ) -> Result<Vec<BiasFrame>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, hash, rel_path, camera_id, captured_at, gain, binning, \"offset\"
+            "SELECT id, hash, rel_path, file_size_bytes, creation_day, captured_at, imported_at, updated_at, binning, gain, \"offset\", sensor_set_temp, sensor_temp, camera_id
              FROM bias_frames
              WHERE camera_id = ?1 AND gain = ?2 AND binning = ?3
                AND \"offset\" IS ?4
-               AND date(captured_at, '-12 hours') = ?5
+               AND creation_day = ?5
              ORDER BY captured_at ASC",
         )?;
         let rows = stmt
@@ -655,19 +699,25 @@ impl Database {
     pub fn insert_dark_frame(&self, frame: &DarkFrame) -> Result<()> {
         self.conn.execute(
             "INSERT OR REPLACE INTO dark_frames
-                (id, hash, rel_path, camera_id, captured_at, gain, binning, \"offset\", exposure, sensor_temp)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+                (id, session_id, hash, rel_path, file_size_bytes, creation_day, captured_at, imported_at, updated_at, binning, gain, \"offset\", sensor_set_temp, sensor_temp, camera_id, exposure_ms)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16)",
             params![
                 frame.id.to_string(),
+                frame.session_id.map(|u| u.to_string()),
                 frame.hash,
                 frame.rel_path,
-                frame.camera_id.to_string(),
+                frame.file_size_bytes,
+                frame.creation_day,
                 frame.captured_at,
-                frame.gain,
+                frame.imported_at,
+                frame.updated_at,
                 frame.binning,
+                frame.gain,
                 frame.offset,
-                frame.exposure,
+                frame.sensor_set_temp,
                 frame.sensor_temp,
+                frame.camera_id.to_string(),
+                frame.exposure_ms,
             ],
         )?;
         Ok(())
@@ -683,7 +733,7 @@ impl Database {
 
     pub fn get_dark_frame_by_id(&self, id: Uuid) -> Result<Option<DarkFrame>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, hash, rel_path, camera_id, captured_at, gain, binning, \"offset\", exposure, sensor_temp
+            "SELECT id, session_id, hash, rel_path, file_size_bytes, creation_day, captured_at, imported_at, updated_at, binning, gain, \"offset\", sensor_set_temp, sensor_temp, camera_id, exposure_ms
              FROM dark_frames WHERE id = ?1",
         )?;
         let mut rows = stmt.query(params![id.to_string()])?;
@@ -701,7 +751,7 @@ impl Database {
             DarkFrameSortKey::TotalFrames => "total_frames",
             DarkFrameSortKey::Gain => "gain",
             DarkFrameSortKey::Binning => "binning",
-            DarkFrameSortKey::Exposure => "exposure",
+            DarkFrameSortKey::Exposure => "exposure_ms",
             DarkFrameSortKey::FirstCaptured => "first_captured",
             DarkFrameSortKey::LastCaptured => "last_captured",
         };
@@ -717,11 +767,11 @@ impl Database {
             .filter(|s| !s.is_empty());
 
         let where_clause = if search.is_some() {
-            "WHERE date(captured_at, '-12 hours') REGEXP :search \
+            "WHERE creation_day REGEXP :search \
                OR CAST(gain AS TEXT) REGEXP :search \
                OR CAST(binning AS TEXT) REGEXP :search \
                OR CAST(IFNULL(\"offset\", '') AS TEXT) REGEXP :search \
-               OR CAST(exposure AS TEXT) REGEXP :search \
+               OR CAST(exposure_ms AS TEXT) REGEXP :search \
                OR CAST(IFNULL(sensor_temp, '') AS TEXT) REGEXP :search"
         } else {
             ""
@@ -730,7 +780,7 @@ impl Database {
         let count_sql = format!(
             "SELECT COUNT(*) FROM (\
                 SELECT 1 FROM dark_frames {where_clause} \
-                GROUP BY camera_id, gain, binning, \"offset\", exposure, sensor_temp, date(captured_at, '-12 hours')\
+                GROUP BY camera_id, gain, binning, \"offset\", exposure_ms, sensor_temp, creation_day\
              )"
         );
         let total: u32 = {
@@ -744,13 +794,13 @@ impl Database {
         };
 
         let rows_sql = format!(
-            "SELECT camera_id, gain, binning, \"offset\", exposure, sensor_temp, \
-                    date(captured_at, '-12 hours') AS night, \
+            "SELECT camera_id, gain, binning, \"offset\", exposure_ms, sensor_temp, \
+                    creation_day AS night, \
                     COUNT(*) AS total_frames, \
                     MIN(captured_at) AS first_captured, \
                     MAX(captured_at) AS last_captured \
              FROM dark_frames {where_clause} \
-             GROUP BY camera_id, gain, binning, \"offset\", exposure, sensor_temp, date(captured_at, '-12 hours') \
+             GROUP BY camera_id, gain, binning, \"offset\", exposure_ms, sensor_temp, creation_day \
              ORDER BY {sort_col} {sort_dir} \
              LIMIT :limit OFFSET :offset"
         );
@@ -783,18 +833,18 @@ impl Database {
         gain: u32,
         binning: u32,
         offset: Option<u32>,
-        exposure: f64,
+        exposure_ms: i64,
         sensor_temp: Option<f64>,
         night: &str,
     ) -> Result<Vec<DarkFrame>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, hash, rel_path, camera_id, captured_at, gain, binning, \"offset\", exposure, sensor_temp
+            "SELECT id, session_id, hash, rel_path, file_size_bytes, creation_day, captured_at, imported_at, updated_at, binning, gain, \"offset\", sensor_set_temp, sensor_temp, camera_id, exposure_ms
              FROM dark_frames
              WHERE camera_id = ?1 AND gain = ?2 AND binning = ?3
                AND \"offset\" IS ?4
-               AND exposure = ?5
+               AND exposure_ms = ?5
                AND sensor_temp IS ?6
-               AND date(captured_at, '-12 hours') = ?7
+               AND creation_day = ?7
              ORDER BY captured_at ASC",
         )?;
         let rows = stmt
@@ -804,7 +854,7 @@ impl Database {
                     gain,
                     binning,
                     offset,
-                    exposure,
+                    exposure_ms,
                     sensor_temp,
                     night
                 ],
@@ -819,18 +869,24 @@ impl Database {
     pub fn insert_dark_flat_frame(&self, frame: &DarkFlatFrame) -> Result<()> {
         self.conn.execute(
             "INSERT OR REPLACE INTO dark_flat_frames
-                (id, hash, rel_path, camera_id, captured_at, gain, binning, \"offset\", exposure)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+                (id, hash, rel_path, file_size_bytes, creation_day, captured_at, imported_at, updated_at, binning, gain, \"offset\", sensor_set_temp, sensor_temp, camera_id, exposure_ms)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)",
             params![
                 frame.id.to_string(),
                 frame.hash,
                 frame.rel_path,
-                frame.camera_id.to_string(),
+                frame.file_size_bytes,
+                frame.creation_day,
                 frame.captured_at,
-                frame.gain,
+                frame.imported_at,
+                frame.updated_at,
                 frame.binning,
+                frame.gain,
                 frame.offset,
-                frame.exposure,
+                frame.sensor_set_temp,
+                frame.sensor_temp,
+                frame.camera_id.to_string(),
+                frame.exposure_ms,
             ],
         )?;
         Ok(())
@@ -846,7 +902,7 @@ impl Database {
 
     pub fn get_dark_flat_frame_by_id(&self, id: Uuid) -> Result<Option<DarkFlatFrame>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, hash, rel_path, camera_id, captured_at, gain, binning, \"offset\", exposure
+            "SELECT id, hash, rel_path, file_size_bytes, creation_day, captured_at, imported_at, updated_at, binning, gain, \"offset\", sensor_set_temp, sensor_temp, camera_id, exposure_ms
              FROM dark_flat_frames WHERE id = ?1",
         )?;
         let mut rows = stmt.query(params![id.to_string()])?;
@@ -864,7 +920,7 @@ impl Database {
             DarkFlatFrameSortKey::TotalFrames => "total_frames",
             DarkFlatFrameSortKey::Gain => "gain",
             DarkFlatFrameSortKey::Binning => "binning",
-            DarkFlatFrameSortKey::Exposure => "exposure",
+            DarkFlatFrameSortKey::Exposure => "exposure_ms",
             DarkFlatFrameSortKey::FirstCaptured => "first_captured",
             DarkFlatFrameSortKey::LastCaptured => "last_captured",
         };
@@ -880,11 +936,11 @@ impl Database {
             .filter(|s| !s.is_empty());
 
         let where_clause = if search.is_some() {
-            "WHERE date(captured_at, '-12 hours') REGEXP :search \
+            "WHERE creation_day REGEXP :search \
                OR CAST(gain AS TEXT) REGEXP :search \
                OR CAST(binning AS TEXT) REGEXP :search \
                OR CAST(IFNULL(\"offset\", '') AS TEXT) REGEXP :search \
-               OR CAST(exposure AS TEXT) REGEXP :search"
+               OR CAST(exposure_ms AS TEXT) REGEXP :search"
         } else {
             ""
         };
@@ -892,7 +948,7 @@ impl Database {
         let count_sql = format!(
             "SELECT COUNT(*) FROM (\
                 SELECT 1 FROM dark_flat_frames {where_clause} \
-                GROUP BY camera_id, gain, binning, \"offset\", exposure, date(captured_at, '-12 hours')\
+                GROUP BY camera_id, gain, binning, \"offset\", exposure_ms, creation_day\
              )"
         );
         let total: u32 = {
@@ -906,13 +962,13 @@ impl Database {
         };
 
         let rows_sql = format!(
-            "SELECT camera_id, gain, binning, \"offset\", exposure, \
-                    date(captured_at, '-12 hours') AS night, \
+            "SELECT camera_id, gain, binning, \"offset\", exposure_ms, \
+                    creation_day AS night, \
                     COUNT(*) AS total_frames, \
                     MIN(captured_at) AS first_captured, \
                     MAX(captured_at) AS last_captured \
              FROM dark_flat_frames {where_clause} \
-             GROUP BY camera_id, gain, binning, \"offset\", exposure, date(captured_at, '-12 hours') \
+             GROUP BY camera_id, gain, binning, \"offset\", exposure_ms, creation_day \
              ORDER BY {sort_col} {sort_dir} \
              LIMIT :limit OFFSET :offset"
         );
@@ -945,21 +1001,21 @@ impl Database {
         gain: u32,
         binning: u32,
         offset: Option<u32>,
-        exposure: f64,
+        exposure_ms: i64,
         night: &str,
     ) -> Result<Vec<DarkFlatFrame>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, hash, rel_path, camera_id, captured_at, gain, binning, \"offset\", exposure
+            "SELECT id, hash, rel_path, file_size_bytes, creation_day, captured_at, imported_at, updated_at, binning, gain, \"offset\", sensor_set_temp, sensor_temp, camera_id, exposure_ms
              FROM dark_flat_frames
              WHERE camera_id = ?1 AND gain = ?2 AND binning = ?3
                AND \"offset\" IS ?4
-               AND exposure = ?5
-               AND date(captured_at, '-12 hours') = ?6
+               AND exposure_ms = ?5
+               AND creation_day = ?6
              ORDER BY captured_at ASC",
         )?;
         let rows = stmt
             .query_map(
-                params![camera_id.to_string(), gain, binning, offset, exposure, night],
+                params![camera_id.to_string(), gain, binning, offset, exposure_ms, night],
                 map_dark_flat_frame,
             )?
             .collect::<Result<Vec<_>>>()?;
@@ -971,20 +1027,28 @@ impl Database {
     pub fn insert_flat_frame(&self, frame: &FlatFrame) -> Result<()> {
         self.conn.execute(
             "INSERT OR REPLACE INTO flat_frames
-                (id, hash, rel_path, camera_id, telescope_id, filter_id, captured_at, gain, binning, \"offset\", exposure)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+                (id, session_id, hash, rel_path, file_size_bytes, creation_day, captured_at, imported_at, updated_at, binning, gain, \"offset\", sensor_set_temp, sensor_temp, camera_id, telescope_id, filter_id, flattener_id, exposure_ms)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19)",
             params![
                 frame.id.to_string(),
+                frame.session_id.to_string(),
                 frame.hash,
                 frame.rel_path,
-                frame.camera_id.to_string(),
-                frame.telescope_id.map(|u| u.to_string()),
-                frame.filter_id.map(|u| u.to_string()),
+                frame.file_size_bytes,
+                frame.creation_day,
                 frame.captured_at,
-                frame.gain,
+                frame.imported_at,
+                frame.updated_at,
                 frame.binning,
+                frame.gain,
                 frame.offset,
-                frame.exposure,
+                frame.sensor_set_temp,
+                frame.sensor_temp,
+                frame.camera_id.to_string(),
+                frame.telescope_id.to_string(),
+                frame.filter_id.map(|u| u.to_string()),
+                frame.flattener_id.map(|u| u.to_string()),
+                frame.exposure_ms,
             ],
         )?;
         Ok(())
@@ -1000,7 +1064,7 @@ impl Database {
 
     pub fn get_flat_frame_by_id(&self, id: Uuid) -> Result<Option<FlatFrame>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, hash, rel_path, camera_id, telescope_id, filter_id, captured_at, gain, binning, \"offset\", exposure
+            "SELECT id, session_id, hash, rel_path, file_size_bytes, creation_day, captured_at, imported_at, updated_at, binning, gain, \"offset\", sensor_set_temp, sensor_temp, camera_id, telescope_id, filter_id, flattener_id, exposure_ms
              FROM flat_frames WHERE id = ?1",
         )?;
         let mut rows = stmt.query(params![id.to_string()])?;
@@ -1018,7 +1082,7 @@ impl Database {
             FlatFrameSortKey::TotalFrames => "total_frames",
             FlatFrameSortKey::Gain => "gain",
             FlatFrameSortKey::Binning => "binning",
-            FlatFrameSortKey::Exposure => "exposure",
+            FlatFrameSortKey::Exposure => "exposure_ms",
             FlatFrameSortKey::FirstCaptured => "first_captured",
             FlatFrameSortKey::LastCaptured => "last_captured",
         };
@@ -1034,11 +1098,11 @@ impl Database {
             .filter(|s| !s.is_empty());
 
         let where_clause = if search.is_some() {
-            "WHERE date(captured_at, '-12 hours') REGEXP :search \
+            "WHERE creation_day REGEXP :search \
                OR CAST(gain AS TEXT) REGEXP :search \
                OR CAST(binning AS TEXT) REGEXP :search \
                OR CAST(IFNULL(\"offset\", '') AS TEXT) REGEXP :search \
-               OR CAST(exposure AS TEXT) REGEXP :search"
+               OR CAST(exposure_ms AS TEXT) REGEXP :search"
         } else {
             ""
         };
@@ -1046,7 +1110,7 @@ impl Database {
         let count_sql = format!(
             "SELECT COUNT(*) FROM (\
                 SELECT 1 FROM flat_frames {where_clause} \
-                GROUP BY camera_id, telescope_id, filter_id, gain, binning, \"offset\", exposure, date(captured_at, '-12 hours')\
+                GROUP BY camera_id, telescope_id, filter_id, gain, binning, \"offset\", exposure_ms, creation_day\
              )"
         );
         let total: u32 = {
@@ -1060,13 +1124,13 @@ impl Database {
         };
 
         let rows_sql = format!(
-            "SELECT camera_id, telescope_id, filter_id, gain, binning, \"offset\", exposure, \
-                    date(captured_at, '-12 hours') AS night, \
+            "SELECT camera_id, telescope_id, filter_id, gain, binning, \"offset\", exposure_ms, \
+                    creation_day AS night, \
                     COUNT(*) AS total_frames, \
                     MIN(captured_at) AS first_captured, \
                     MAX(captured_at) AS last_captured \
              FROM flat_frames {where_clause} \
-             GROUP BY camera_id, telescope_id, filter_id, gain, binning, \"offset\", exposure, date(captured_at, '-12 hours') \
+             GROUP BY camera_id, telescope_id, filter_id, gain, binning, \"offset\", exposure_ms, creation_day \
              ORDER BY {sort_col} {sort_dir} \
              LIMIT :limit OFFSET :offset"
         );
@@ -1101,19 +1165,19 @@ impl Database {
         gain: u32,
         binning: u32,
         offset: Option<u32>,
-        exposure: f64,
+        exposure_ms: i64,
         night: &str,
     ) -> Result<Vec<FlatFrame>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, hash, rel_path, camera_id, telescope_id, filter_id, captured_at, gain, binning, \"offset\", exposure
+            "SELECT id, session_id, hash, rel_path, file_size_bytes, creation_day, captured_at, imported_at, updated_at, binning, gain, \"offset\", sensor_set_temp, sensor_temp, camera_id, telescope_id, filter_id, flattener_id, exposure_ms
              FROM flat_frames
              WHERE camera_id = ?1
                AND telescope_id IS ?2
                AND filter_id IS ?3
                AND gain = ?4 AND binning = ?5
                AND \"offset\" IS ?6
-               AND exposure = ?7
-               AND date(captured_at, '-12 hours') = ?8
+               AND exposure_ms = ?7
+               AND creation_day = ?8
              ORDER BY captured_at ASC",
         )?;
         let rows = stmt
@@ -1125,7 +1189,7 @@ impl Database {
                     gain,
                     binning,
                     offset,
-                    exposure,
+                    exposure_ms,
                     night
                 ],
                 map_flat_frame,
@@ -1139,22 +1203,30 @@ impl Database {
     pub fn insert_light_frame(&self, frame: &LightFrame) -> Result<()> {
         self.conn.execute(
             "INSERT OR REPLACE INTO light_frames
-                (id, hash, rel_path, camera_id, telescope_id, filter_id, captured_at, target, gain, binning, \"offset\", exposure, sensor_temp)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)",
+                (id, session_id, hash, rel_path, file_size_bytes, creation_day, captured_at, imported_at, updated_at, binning, gain, \"offset\", sensor_set_temp, sensor_temp, camera_id, telescope_id, mount_id, filter_id, flattener_id, exposure_ms, target)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21)",
             params![
                 frame.id.to_string(),
+                frame.session_id.to_string(),
                 frame.hash,
                 frame.rel_path,
-                frame.camera_id.to_string(),
-                frame.telescope_id.map(|u| u.to_string()),
-                frame.filter_id.map(|u| u.to_string()),
+                frame.file_size_bytes,
+                frame.creation_day,
                 frame.captured_at,
-                frame.target,
-                frame.gain,
+                frame.imported_at,
+                frame.updated_at,
                 frame.binning,
+                frame.gain,
                 frame.offset,
-                frame.exposure,
+                frame.sensor_set_temp,
                 frame.sensor_temp,
+                frame.camera_id.to_string(),
+                frame.telescope_id.to_string(),
+                frame.mount_id.to_string(),
+                frame.filter_id.map(|u| u.to_string()),
+                frame.flattener_id.map(|u| u.to_string()),
+                frame.exposure_ms,
+                frame.target,
             ],
         )?;
         Ok(())
@@ -1170,7 +1242,7 @@ impl Database {
 
     pub fn get_light_frame_by_id(&self, id: Uuid) -> Result<Option<LightFrame>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, hash, rel_path, camera_id, telescope_id, filter_id, captured_at, target, gain, binning, \"offset\", exposure, sensor_temp
+            "SELECT id, session_id, hash, rel_path, file_size_bytes, creation_day, captured_at, imported_at, updated_at, binning, gain, \"offset\", sensor_set_temp, sensor_temp, camera_id, telescope_id, mount_id, filter_id, flattener_id, exposure_ms, target
              FROM light_frames WHERE id = ?1",
         )?;
         let mut rows = stmt.query(params![id.to_string()])?;
@@ -1189,7 +1261,7 @@ impl Database {
             LightFrameSortKey::TotalFrames => "total_frames",
             LightFrameSortKey::Gain => "gain",
             LightFrameSortKey::Binning => "binning",
-            LightFrameSortKey::Exposure => "exposure",
+            LightFrameSortKey::Exposure => "exposure_ms",
             LightFrameSortKey::FirstCaptured => "first_captured",
             LightFrameSortKey::LastCaptured => "last_captured",
         };
@@ -1206,11 +1278,11 @@ impl Database {
 
         let where_clause = if search.is_some() {
             "WHERE target REGEXP :search \
-               OR date(captured_at, '-12 hours') REGEXP :search \
+               OR creation_day REGEXP :search \
                OR CAST(gain AS TEXT) REGEXP :search \
                OR CAST(binning AS TEXT) REGEXP :search \
                OR CAST(IFNULL(\"offset\", '') AS TEXT) REGEXP :search \
-               OR CAST(exposure AS TEXT) REGEXP :search \
+               OR CAST(exposure_ms AS TEXT) REGEXP :search \
                OR CAST(IFNULL(sensor_temp, '') AS TEXT) REGEXP :search"
         } else {
             ""
@@ -1219,7 +1291,7 @@ impl Database {
         let count_sql = format!(
             "SELECT COUNT(*) FROM (\
                 SELECT 1 FROM light_frames {where_clause} \
-                GROUP BY camera_id, telescope_id, filter_id, target, gain, binning, \"offset\", exposure, sensor_temp, date(captured_at, '-12 hours')\
+                GROUP BY camera_id, telescope_id, filter_id, target, gain, binning, \"offset\", exposure_ms, sensor_temp, creation_day\
              )"
         );
         let total: u32 = {
@@ -1233,13 +1305,13 @@ impl Database {
         };
 
         let rows_sql = format!(
-            "SELECT camera_id, telescope_id, filter_id, target, gain, binning, \"offset\", exposure, sensor_temp, \
-                    date(captured_at, '-12 hours') AS night, \
+            "SELECT camera_id, telescope_id, filter_id, target, gain, binning, \"offset\", exposure_ms, sensor_temp, \
+                    creation_day AS night, \
                     COUNT(*) AS total_frames, \
                     MIN(captured_at) AS first_captured, \
                     MAX(captured_at) AS last_captured \
              FROM light_frames {where_clause} \
-             GROUP BY camera_id, telescope_id, filter_id, target, gain, binning, \"offset\", exposure, sensor_temp, date(captured_at, '-12 hours') \
+             GROUP BY camera_id, telescope_id, filter_id, target, gain, binning, \"offset\", exposure_ms, sensor_temp, creation_day \
              ORDER BY {sort_col} {sort_dir} \
              LIMIT :limit OFFSET :offset"
         );
@@ -1275,12 +1347,12 @@ impl Database {
         gain: u32,
         binning: u32,
         offset: Option<u32>,
-        exposure: f64,
+        exposure_ms: i64,
         sensor_temp: Option<f64>,
         night: &str,
     ) -> Result<Vec<LightFrame>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, hash, rel_path, camera_id, telescope_id, filter_id, captured_at, target, gain, binning, \"offset\", exposure, sensor_temp
+            "SELECT id, session_id, hash, rel_path, file_size_bytes, creation_day, captured_at, imported_at, updated_at, binning, gain, \"offset\", sensor_set_temp, sensor_temp, camera_id, telescope_id, mount_id, filter_id, flattener_id, exposure_ms, target
              FROM light_frames
              WHERE camera_id = ?1
                AND telescope_id IS ?2
@@ -1288,9 +1360,9 @@ impl Database {
                AND target = ?4
                AND gain = ?5 AND binning = ?6
                AND \"offset\" IS ?7
-               AND exposure = ?8
+               AND exposure_ms = ?8
                AND sensor_temp IS ?9
-               AND date(captured_at, '-12 hours') = ?10
+               AND creation_day = ?10
              ORDER BY captured_at ASC",
         )?;
         let rows = stmt
@@ -1303,7 +1375,7 @@ impl Database {
                     gain,
                     binning,
                     offset,
-                    exposure,
+                    exposure_ms,
                     sensor_temp,
                     night
                 ],
@@ -1319,16 +1391,22 @@ impl Database {
 // function items (not closures) so they can be reused across query_map calls
 fn map_bias_frame(row: &rusqlite::Row) -> Result<BiasFrame> {
     let id_str: String = row.get(0)?;
-    let camera_id_str: String = row.get(3)?;
+    let camera_id_str: String = row.get(13)?;
     Ok(BiasFrame {
         id: Uuid::parse_str(&id_str).unwrap_or_else(|_| Uuid::nil()),
         hash: row.get(1)?,
         rel_path: row.get(2)?,
+        file_size_bytes: row.get(3)?,
+        creation_day: row.get(4)?,
+        captured_at: row.get(5)?,
+        imported_at: row.get(6)?,
+        updated_at: row.get(7)?,
+        binning: row.get(8)?,
+        gain: row.get(9)?,
+        offset: row.get(10)?,
+        sensor_set_temp: row.get(11)?,
+        sensor_temp: row.get(12)?,
         camera_id: Uuid::parse_str(&camera_id_str).unwrap_or_else(|_| Uuid::nil()),
-        captured_at: row.get(4)?,
-        gain: row.get(5)?,
-        binning: row.get(6)?,
-        offset: row.get(7)?,
     })
 }
 
@@ -1350,18 +1428,25 @@ fn map_bias_frame_row(row: &rusqlite::Row) -> Result<BiasFrameRow> {
 
 fn map_dark_frame(row: &rusqlite::Row) -> Result<DarkFrame> {
     let id_str: String = row.get(0)?;
-    let camera_id_str: String = row.get(3)?;
+    let session_id: Option<String> = row.get(1)?;
+    let camera_id_str: String = row.get(14)?;
     Ok(DarkFrame {
         id: Uuid::parse_str(&id_str).unwrap_or_else(|_| Uuid::nil()),
-        hash: row.get(1)?,
-        rel_path: row.get(2)?,
+        session_id: parse_opt_uuid(session_id),
+        hash: row.get(2)?,
+        rel_path: row.get(3)?,
+        file_size_bytes: row.get(4)?,
+        creation_day: row.get(5)?,
+        captured_at: row.get(6)?,
+        imported_at: row.get(7)?,
+        updated_at: row.get(8)?,
+        binning: row.get(9)?,
+        gain: row.get(10)?,
+        offset: row.get(11)?,
+        sensor_set_temp: row.get(12)?,
+        sensor_temp: row.get(13)?,
         camera_id: Uuid::parse_str(&camera_id_str).unwrap_or_else(|_| Uuid::nil()),
-        captured_at: row.get(4)?,
-        gain: row.get(5)?,
-        binning: row.get(6)?,
-        offset: row.get(7)?,
-        exposure: row.get(8)?,
-        sensor_temp: row.get(9)?,
+        exposure_ms: row.get(15)?,
     })
 }
 
@@ -1372,7 +1457,7 @@ fn map_dark_frame_row(row: &rusqlite::Row) -> Result<DarkFrameRow> {
         gain: row.get(1)?,
         binning: row.get(2)?,
         offset: row.get(3)?,
-        exposure: row.get(4)?,
+        exposure_ms: row.get(4)?,
         sensor_temp: row.get(5)?,
         night: row.get(6)?,
         total_frames: row.get::<_, i64>(7)? as u32,
@@ -1385,17 +1470,23 @@ fn map_dark_frame_row(row: &rusqlite::Row) -> Result<DarkFrameRow> {
 
 fn map_dark_flat_frame(row: &rusqlite::Row) -> Result<DarkFlatFrame> {
     let id_str: String = row.get(0)?;
-    let camera_id_str: String = row.get(3)?;
+    let camera_id_str: String = row.get(13)?;
     Ok(DarkFlatFrame {
         id: Uuid::parse_str(&id_str).unwrap_or_else(|_| Uuid::nil()),
         hash: row.get(1)?,
         rel_path: row.get(2)?,
+        file_size_bytes: row.get(3)?,
+        creation_day: row.get(4)?,
+        captured_at: row.get(5)?,
+        imported_at: row.get(6)?,
+        updated_at: row.get(7)?,
+        binning: row.get(8)?,
+        gain: row.get(9)?,
+        offset: row.get(10)?,
+        sensor_set_temp: row.get(11)?,
+        sensor_temp: row.get(12)?,
         camera_id: Uuid::parse_str(&camera_id_str).unwrap_or_else(|_| Uuid::nil()),
-        captured_at: row.get(4)?,
-        gain: row.get(5)?,
-        binning: row.get(6)?,
-        offset: row.get(7)?,
-        exposure: row.get(8)?,
+        exposure_ms: row.get(14)?,
     })
 }
 
@@ -1406,7 +1497,7 @@ fn map_dark_flat_frame_row(row: &rusqlite::Row) -> Result<DarkFlatFrameRow> {
         gain: row.get(1)?,
         binning: row.get(2)?,
         offset: row.get(3)?,
-        exposure: row.get(4)?,
+        exposure_ms: row.get(4)?,
         night: row.get(5)?,
         total_frames: row.get::<_, i64>(6)? as u32,
         first_captured: row.get(7)?,
@@ -1418,21 +1509,31 @@ fn map_dark_flat_frame_row(row: &rusqlite::Row) -> Result<DarkFlatFrameRow> {
 
 fn map_flat_frame(row: &rusqlite::Row) -> Result<FlatFrame> {
     let id_str: String = row.get(0)?;
-    let camera_id_str: String = row.get(3)?;
-    let telescope_id: Option<String> = row.get(4)?;
-    let filter_id: Option<String> = row.get(5)?;
+    let session_id_str: String = row.get(1)?;
+    let camera_id_str: String = row.get(14)?;
+    let telescope_id_str: String = row.get(15)?;
+    let filter_id: Option<String> = row.get(16)?;
+    let flattener_id: Option<String> = row.get(17)?;
     Ok(FlatFrame {
         id: Uuid::parse_str(&id_str).unwrap_or_else(|_| Uuid::nil()),
-        hash: row.get(1)?,
-        rel_path: row.get(2)?,
-        camera_id: Uuid::parse_str(&camera_id_str).unwrap_or_else(|_| Uuid::nil()),
-        telescope_id: parse_opt_uuid(telescope_id),
-        filter_id: parse_opt_uuid(filter_id),
+        session_id: Uuid::parse_str(&session_id_str).unwrap_or_else(|_| Uuid::nil()),
+        hash: row.get(2)?,
+        rel_path: row.get(3)?,
+        file_size_bytes: row.get(4)?,
+        creation_day: row.get(5)?,
         captured_at: row.get(6)?,
-        gain: row.get(7)?,
-        binning: row.get(8)?,
-        offset: row.get(9)?,
-        exposure: row.get(10)?,
+        imported_at: row.get(7)?,
+        updated_at: row.get(8)?,
+        binning: row.get(9)?,
+        gain: row.get(10)?,
+        offset: row.get(11)?,
+        sensor_set_temp: row.get(12)?,
+        sensor_temp: row.get(13)?,
+        camera_id: Uuid::parse_str(&camera_id_str).unwrap_or_else(|_| Uuid::nil()),
+        telescope_id: Uuid::parse_str(&telescope_id_str).unwrap_or_else(|_| Uuid::nil()),
+        filter_id: parse_opt_uuid(filter_id),
+        flattener_id: parse_opt_uuid(flattener_id),
+        exposure_ms: row.get(18)?,
     })
 }
 
@@ -1447,7 +1548,7 @@ fn map_flat_frame_row(row: &rusqlite::Row) -> Result<FlatFrameRow> {
         gain: row.get(3)?,
         binning: row.get(4)?,
         offset: row.get(5)?,
-        exposure: row.get(6)?,
+        exposure_ms: row.get(6)?,
         night: row.get(7)?,
         total_frames: row.get::<_, i64>(8)? as u32,
         first_captured: row.get(9)?,
@@ -1459,23 +1560,34 @@ fn map_flat_frame_row(row: &rusqlite::Row) -> Result<FlatFrameRow> {
 
 fn map_light_frame(row: &rusqlite::Row) -> Result<LightFrame> {
     let id_str: String = row.get(0)?;
-    let camera_id_str: String = row.get(3)?;
-    let telescope_id: Option<String> = row.get(4)?;
-    let filter_id: Option<String> = row.get(5)?;
+    let session_id_str: String = row.get(1)?;
+    let camera_id_str: String = row.get(14)?;
+    let telescope_id_str: String = row.get(15)?;
+    let mount_id_str: String = row.get(16)?;
+    let filter_id: Option<String> = row.get(17)?;
+    let flattener_id: Option<String> = row.get(18)?;
     Ok(LightFrame {
         id: Uuid::parse_str(&id_str).unwrap_or_else(|_| Uuid::nil()),
-        hash: row.get(1)?,
-        rel_path: row.get(2)?,
-        camera_id: Uuid::parse_str(&camera_id_str).unwrap_or_else(|_| Uuid::nil()),
-        telescope_id: parse_opt_uuid(telescope_id),
-        filter_id: parse_opt_uuid(filter_id),
+        session_id: Uuid::parse_str(&session_id_str).unwrap_or_else(|_| Uuid::nil()),
+        hash: row.get(2)?,
+        rel_path: row.get(3)?,
+        file_size_bytes: row.get(4)?,
+        creation_day: row.get(5)?,
         captured_at: row.get(6)?,
-        target: row.get(7)?,
-        gain: row.get(8)?,
+        imported_at: row.get(7)?,
+        updated_at: row.get(8)?,
         binning: row.get(9)?,
-        offset: row.get(10)?,
-        exposure: row.get(11)?,
-        sensor_temp: row.get(12)?,
+        gain: row.get(10)?,
+        offset: row.get(11)?,
+        sensor_set_temp: row.get(12)?,
+        sensor_temp: row.get(13)?,
+        camera_id: Uuid::parse_str(&camera_id_str).unwrap_or_else(|_| Uuid::nil()),
+        telescope_id: Uuid::parse_str(&telescope_id_str).unwrap_or_else(|_| Uuid::nil()),
+        mount_id: Uuid::parse_str(&mount_id_str).unwrap_or_else(|_| Uuid::nil()),
+        filter_id: parse_opt_uuid(filter_id),
+        flattener_id: parse_opt_uuid(flattener_id),
+        exposure_ms: row.get(19)?,
+        target: row.get(20)?,
     })
 }
 

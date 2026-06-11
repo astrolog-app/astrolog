@@ -1,25 +1,32 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::SortDir;
 
-// one physical dark-flat frame on disk (storage model, one row per file)
-// a dark flat is physically a dark matched to the flats' exposure, so it
-// mirrors BiasFrame plus exposure (temperature is not tracked separately here)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DarkFlatFrame {
     pub id: Uuid,
-    pub hash: Option<String>,
+    pub hash: Option<String>, // TODO: after being able to classify, it should no longer be an Option<>
+
     pub rel_path: String,
+    pub file_size_bytes: i64,
+
+    // day the frames were shot, user-declared (night / calibration-age anchor)
+    pub creation_day: NaiveDate,
+    pub captured_at: Option<DateTime<Utc>>,
+    pub imported_at: DateTime<Utc>,
+    pub updated_at: Option<DateTime<Utc>>,
+
+    pub binning: u32,
+    pub gain: u32,
+    pub offset: Option<u32>,
+    pub sensor_set_temp: Option<f64>,
+    pub sensor_temp: Option<f64>,
 
     pub camera_id: Uuid,
-    pub captured_at: DateTime<Utc>,
 
-    pub gain: u32,
-    pub binning: u32,
-    pub offset: Option<u32>,
-    pub exposure: f64,
+    pub exposure_ms: i64,
 }
 
 // one aggregated table row: dark-flat frames sharing camera + settings + night
@@ -30,7 +37,7 @@ pub struct DarkFlatFrameRow {
     pub gain: u32,
     pub binning: u32,
     pub offset: Option<u32>,
-    pub exposure: f64,
+    pub exposure_ms: i32,
     // noon-to-noon night, "YYYY-MM-DD"
     pub night: String,
 

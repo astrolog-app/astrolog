@@ -1,22 +1,30 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::SortDir;
 
-// one physical bias frame on disk (storage model, one row per file)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BiasFrame {
     pub id: Uuid,
-    pub hash: Option<String>,
+    pub hash: Option<String>, // TODO: after being able to classify, it should no longer be an Option<>
+
     pub rel_path: String,
+    pub file_size_bytes: i64,
+
+    // day the frames were shot, user-declared (night / calibration-age anchor)
+    pub creation_day: NaiveDate,
+    pub captured_at: Option<DateTime<Utc>>,
+    pub imported_at: DateTime<Utc>,
+    pub updated_at: Option<DateTime<Utc>>,
+
+    pub binning: u32,
+    pub gain: u32,
+    pub offset: Option<u32>,
+    pub sensor_set_temp: Option<f64>,
+    pub sensor_temp: Option<f64>,
 
     pub camera_id: Uuid,
-    pub captured_at: DateTime<Utc>,
-
-    pub gain: u32,
-    pub binning: u32,
-    pub offset: Option<u32>,
 }
 
 // one aggregated table row: all bias frames sharing camera + settings + night
