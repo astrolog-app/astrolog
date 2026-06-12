@@ -35,8 +35,16 @@ impl Database {
         if let Some(parent) = db_path.parent() {
             std::fs::create_dir_all(parent)?;
         }
-        let mut conn = Connection::open(db_path)?;
+        Self::init(Connection::open(db_path)?)
+    }
 
+    // throwaway db used before first-run setup has produced a real root directory;
+    // guaranteed fresh on every start and leaves no trace on disk
+    pub fn new_in_memory() -> std::result::Result<Self, Box<dyn Error>> {
+        Self::init(Connection::open_in_memory()?)
+    }
+
+    fn init(mut conn: Connection) -> std::result::Result<Self, Box<dyn Error>> {
         // register REGEXP so SQL queries can filter with `col REGEXP pattern`
         add_regexp_function(&conn)?;
 

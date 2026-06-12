@@ -1,5 +1,5 @@
 import type { AppApi } from "@/lib/api/types"
-import type { AppState } from "@/types/app-state"
+import type { AppState, Unit } from "@/types/app-state"
 import type { Camera, EquipmentList, Filter, Flattener, Mount, Telescope } from "@/types/equipment"
 import type {
   BiasFramePage,
@@ -231,6 +231,16 @@ export const mockApi: AppApi = {
   async getAppState(): Promise<AppState> {
     return mockAppState
   },
+
+  // first-run setup is a no-op in the browser; the picker returns a fake
+  // path so the welcome flow stays clickable in v0
+  async pickFolder(): Promise<string | null> {
+    return "/Users/you/AstroLog"
+  },
+  async pickLibraryFolder(): Promise<string | null> {
+    return "/Users/you/AstroLog"
+  },
+  async finishSetup(_rootDirectory: string, _unit: Unit): Promise<void> {},
 
   async getBiasFrames(_query: BiasFrameQuery): Promise<BiasFramePage> {
     return { rows: mockBiasRows, total: mockBiasRows.length }

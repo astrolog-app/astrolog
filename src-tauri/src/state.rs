@@ -1,12 +1,11 @@
 use crate::db::Database;
 use crate::preferences::{Config, LocalConfig};
-use std::env::temp_dir;
-use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
 
 pub struct AppState {
-    pub root_directory: PathBuf,
+    // false until first-run setup has persisted a local config with a root directory
+    pub is_configured: bool,
     pub local_config: Mutex<LocalConfig>,
     pub config: Mutex<Config>,
     pub db: Mutex<Database>,
@@ -26,25 +25,27 @@ impl AppState {
             }
         }
 
-        match Config::load(local_config.root_directory.clone()) {
-            Ok(data) => {
-                config = data;
-            }
-            Err(err) => {
-                eprintln!("Error loading config {}: {}", "", err);
-            }
-        }
+        let is_configured = !local_config.root_directory.as_os_str().is_empty();
 
-        let root_directory: PathBuf = if local_config.root_directory.as_os_str().is_empty() {
-            temp_dir().join("astrolog_temp")
+        let db = if is_configured {
+            match Config::load(local_config.root_directory.clone()) {
+                Ok(data) => {
+                    config = data;
+                }
+                Err(err) => {
+                    eprintln!("Error loading config {}: {}", "", err);
+                }
+            }
+
+            Database::new(&local_config.root_directory).unwrap()
         } else {
-            local_config.root_directory.clone()
+            // no library yet (first run) — use a throwaway in-memory db so every
+            // command stays callable while the welcome flow is on screen
+            Database::new_in_memory().unwrap()
         };
 
-        let db = Database::new(&root_directory).unwrap();
-
         AppState {
-            root_directory: local_config.root_directory.clone(),
+            is_configured,
             local_config: Mutex::new(local_config),
             config: Mutex::new(config),
             db: Mutex::new(db),

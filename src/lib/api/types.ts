@@ -1,4 +1,4 @@
-import type { AppState } from "@/types/app-state"
+import type { AppState, Unit } from "@/types/app-state"
 import type { Camera, Filter, Flattener, Mount, Telescope } from "@/types/equipment"
 import type {
   BiasFramePage,
@@ -18,6 +18,13 @@ import { UUID } from "crypto"
 // implemented by the real tauri bridge and by a web mock
 export interface AppApi {
   getAppState(): Promise<AppState>
+
+  // first-run setup: native folder pickers (null when cancelled; the library
+  // picker rejects folders that are neither empty nor an existing library)
+  // and the finish step that persists the library choice and restarts the app
+  pickFolder(): Promise<string | null>
+  pickLibraryFolder(): Promise<string | null>
+  finishSetup(rootDirectory: string, unit: Unit): Promise<void>
 
   // grouped frame rows, each with regex search, sort and pagination
   getBiasFrames(query: BiasFrameQuery): Promise<BiasFramePage>

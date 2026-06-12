@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core"
 import type { AppApi } from "@/lib/api/types"
-import type { AppState } from "@/types/app-state"
+import type { AppState, Unit } from "@/types/app-state"
 import type { Camera, Filter, Flattener, Mount, Telescope } from "@/types/equipment"
 import type {
   BiasFramePage,
@@ -20,6 +20,16 @@ import { UUID } from "crypto"
 export const tauriApi: AppApi = {
   getAppState(): Promise<AppState> {
     return invoke<AppState>("get_app_state")
+  },
+
+  pickFolder(): Promise<string | null> {
+    return invoke<string | null>("pick_folder")
+  },
+  pickLibraryFolder(): Promise<string | null> {
+    return invoke<string | null>("pick_library_folder")
+  },
+  finishSetup(rootDirectory: string, unit: Unit): Promise<void> {
+    return invoke("finish_setup", { rootDirectory, unit })
   },
 
   getBiasFrames(query: BiasFrameQuery): Promise<BiasFramePage> {

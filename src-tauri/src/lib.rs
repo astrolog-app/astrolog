@@ -5,7 +5,7 @@ mod state;
 mod file_store;
 mod preferences;
 
-use tauri::Manager;
+use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_log::{Target, TargetKind};
 
 use state::AppState;
@@ -32,14 +32,41 @@ pub fn run() {
                 ])
                 .build(),
         )
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             // init app_state
             let app_state = AppState::new(app.handle());
+            let is_configured = app_state.is_configured;
 
             // state management
             app.manage(app_state);
 
-            log::info!("astrolog started, app state initialized");
+            // the window is built here instead of tauri.conf.json so the
+            // backend decides the initial route: first run (no local config
+            // yet) opens the welcome flow, every later start the main ui
+            let url = if is_configured { "/" } else { "/welcome" };
+            let builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::App(url.into()))
+                .title("AstroLog");
+            // the welcome flow runs in a fixed-size dialog-style window,
+            // the main ui in a freely resizable one
+            let builder = if is_configured {
+                builder.resizable(true)
+                    .inner_size(900.0, 700.0)
+                    .min_inner_size(900.0, 700.0)
+            } else {
+                builder.resizable(false)
+                    .maximizable(false)
+                    .decorations(false)
+                    .inner_size(1000.0, 750.0)
+                    .center()
+            };
+            #[cfg(any(windows, target_os = "android"))]
+            let builder = builder.use_https_scheme(true);
+            builder.build()?;
+
+            log::info!(
+                "astrolog started, app state initialized (configured: {is_configured})"
+            );
 
             Ok(())
         })
@@ -54,6 +81,9 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::get_app_state,
+            commands::pick_folder,
+            commands::pick_library_folder,
+            commands::finish_setup,
             commands::save_telescope,
             commands::delete_telescope,
             commands::save_camera,

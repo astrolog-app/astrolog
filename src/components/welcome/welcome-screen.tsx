@@ -1,23 +1,35 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import {
   Telescope,
   FolderOpen,
-  Camera,
   Check,
   ArrowRight,
   ArrowLeft,
+  Loader2,
   Sparkles,
+  SlidersHorizontal,
+  Stars,
+  Ruler,
+  Sun,
+  Moon,
+  Monitor,
+  FolderPlus,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { api } from "@/lib/api"
+import type { Unit } from "@/types/app-state"
 import { cn } from "@/lib/utils"
 
 type Step = {
   id: number
+  label: string
   title: string
   description: string
   icon: React.ElementType
@@ -26,32 +38,88 @@ type Step = {
 const STEPS: Step[] = [
   {
     id: 1,
+    label: "Welcome",
     title: "Welcome to AstroLog",
     description: "Set up your workspace to start logging your astrophotography sessions.",
     icon: Sparkles,
   },
   {
     id: 2,
+    label: "Library",
     title: "Choose your library",
-    description: "Pick the folder where AstroLog stores your imaging frames and database.",
+    description:
+      "Select an empty folder for a fresh library, or an existing folder that already contains an .astrolog directory.",
     icon: FolderOpen,
   },
   {
     id: 3,
-    title: "Add your first gear",
-    description: "Register a telescope or camera so your sessions are linked to equipment.",
-    icon: Camera,
+    label: "Appearance",
+    title: "Appearance & units",
+    description: "Pick your preferred measurement system and color theme.",
+    icon: SlidersHorizontal,
+  },
+  {
+    id: 4,
+    label: "Plate solving",
+    title: "Plate solving database",
+    description: "Optional: point AstroLog to your local star database for plate solving.",
+    icon: Stars,
   },
 ]
 
+type ThemeMode = "DARK" | "WHITE" | "SYSTEM"
+
 export function WelcomeScreen() {
+  const router = useRouter()
   const [current, setCurrent] = useState(1)
+  const [libraryPath, setLibraryPath] = useState("")
+  const [unit, setUnit] = useState<Unit>("METRIC")
+  const [theme, setTheme] = useState<ThemeMode>("SYSTEM")
+  const [starDbPath, setStarDbPath] = useState("")
+  const [finishing, setFinishing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
   const total = STEPS.length
   const progress = (current / total) * 100
   const active = STEPS[current - 1]
 
   const next = () => setCurrent((c) => Math.min(c + 1, total))
   const back = () => setCurrent((c) => Math.max(c - 1, 1))
+
+  // the backend validates the hard block (empty folder or existing library)
+  // during picking, so an invalid choice never lands in libraryPath and the
+  // continue button stays disabled
+  const browseLibrary = async () => {
+    try {
+      const picked = await api.pickLibraryFolder()
+      if (picked) {
+        setLibraryPath(picked)
+        setError(null)
+      }
+    } catch (e) {
+      setLibraryPath("")
+      setError(String(e))
+    }
+  }
+
+  const browseStarDb = async () => {
+    const picked = await api.pickFolder()
+    if (picked) setStarDbPath(picked)
+  }
+
+  // on success the tauri backend restarts the app into the main ui and the
+  // promise never resolves; the redirect below only runs in the browser mock
+  const finish = async () => {
+    setFinishing(true)
+    setError(null)
+    try {
+      await api.finishSetup(libraryPath, unit)
+      router.replace("/")
+    } catch (e) {
+      setError(String(e))
+      setFinishing(false)
+    }
+  }
 
   return (
     <div className="grid h-screen grid-cols-1 overflow-hidden bg-background font-sans md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.1fr)]">
@@ -109,10 +177,8 @@ export function WelcomeScreen() {
                       className={cn(
                         "flex size-9 items-center justify-center rounded-full border text-sm font-medium transition-colors",
                         done && "border-primary bg-primary text-primary-foreground",
-                        isActive &&
-                        "border-primary bg-primary/10 text-primary",
-                        !done && !isActive &&
-                        "border-border bg-card text-muted-foreground",
+                        isActive && "border-primary bg-primary/10 text-primary",
+                        !done && !isActive && "border-border bg-card text-muted-foreground",
                       )}
                     >
                       {done ? <Check className="size-4" /> : <StepIcon className="size-4" />}
@@ -123,7 +189,7 @@ export function WelcomeScreen() {
                         isActive ? "text-foreground" : "text-muted-foreground",
                       )}
                     >
-                      {step.id === 1 ? "Welcome" : step.id === 2 ? "Library" : "Equipment"}
+                      {step.label}
                     </span>
                   </li>
                 )
@@ -132,7 +198,7 @@ export function WelcomeScreen() {
           </div>
 
           {/* Step content */}
-          <div className="min-h-[180px]">
+          <div className="min-h-[220px]">
             <h2 className="text-xl font-semibold tracking-tight text-foreground">
               {active.title}
             </h2>
@@ -155,25 +221,88 @@ export function WelcomeScreen() {
                     <Input
                       id="library-path"
                       readOnly
+                      value={libraryPath}
                       placeholder="/Users/you/AstroLog"
                       className="flex-1"
                     />
-                    <Button variant="outline" size="default">
+                    <Button variant="outline" onClick={browseLibrary}>
                       <FolderOpen className="size-4" />
                       Browse
                     </Button>
                   </div>
+                  <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <FolderPlus className="size-3.5" />
+                    Empty folder creates a new library. A folder with{" "}
+                    <code className="rounded bg-muted px-1 py-0.5 text-[11px]">.astrolog</code>{" "}
+                    opens an existing one.
+                  </p>
                 </div>
               )}
 
               {current === 3 && (
-                <div className="space-y-3">
+                <div className="space-y-5">
                   <div className="space-y-2">
-                    <Label htmlFor="gear-name">Equipment name</Label>
-                    <Input id="gear-name" placeholder="e.g. Sky-Watcher Esprit 100ED" />
+                    <Label>Measurement system</Label>
+                    <ToggleGroup
+                      type="single"
+                      value={unit}
+                      onValueChange={(v) => v && setUnit(v as Unit)}
+                      className="grid grid-cols-2 gap-2"
+                    >
+                      <ToggleGroupItem value="METRIC" className="gap-2">
+                        <Ruler className="size-4" />
+                        Metric
+                      </ToggleGroupItem>
+                      <ToggleGroupItem value="IMPERIAL" className="gap-2">
+                        <Ruler className="size-4" />
+                        Imperial
+                      </ToggleGroupItem>
+                    </ToggleGroup>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Theme</Label>
+                    <ToggleGroup
+                      type="single"
+                      value={theme}
+                      onValueChange={(v) => v && setTheme(v as ThemeMode)}
+                      className="grid grid-cols-3 gap-2"
+                    >
+                      <ToggleGroupItem value="DARK" className="gap-2">
+                        <Moon className="size-4" />
+                        Dark
+                      </ToggleGroupItem>
+                      <ToggleGroupItem value="WHITE" className="gap-2">
+                        <Sun className="size-4" />
+                        Light
+                      </ToggleGroupItem>
+                      <ToggleGroupItem value="SYSTEM" className="gap-2">
+                        <Monitor className="size-4" />
+                        System
+                      </ToggleGroupItem>
+                    </ToggleGroup>
+                  </div>
+                </div>
+              )}
+
+              {current === 4 && (
+                <div className="space-y-2">
+                  <Label htmlFor="star-db-path">Star database folder</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="star-db-path"
+                      readOnly
+                      value={starDbPath}
+                      placeholder="Optional — e.g. /Users/you/astrometry"
+                      className="flex-1"
+                    />
+                    <Button variant="outline" onClick={browseStarDb}>
+                      <FolderOpen className="size-4" />
+                      Browse
+                    </Button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    You can add more telescopes, cameras, mounts and filters later.
+                    You can skip this and configure plate solving later in settings.
                   </p>
                 </div>
               )}
@@ -181,28 +310,40 @@ export function WelcomeScreen() {
           </div>
 
           {/* Navigation */}
-          <div className="mt-8 flex items-center justify-between gap-3">
-            <Button
-              variant="ghost"
-              onClick={back}
-              disabled={current === 1}
-              className={cn(current === 1 && "invisible")}
-            >
-              <ArrowLeft className="size-4" />
-              Back
-            </Button>
-
-            {current < total ? (
-              <Button onClick={next}>
-                Continue
-                <ArrowRight className="size-4" />
-              </Button>
-            ) : (
-              <Button>
-                <Check className="size-4" />
-                Finish setup
-              </Button>
+          <div className="mt-8 space-y-3">
+            {error && (
+              <p className="text-sm text-destructive" role="alert">
+                {error}
+              </p>
             )}
+
+            <div className="flex items-center justify-between gap-3">
+              <Button
+                variant="ghost"
+                onClick={back}
+                disabled={current === 1 || finishing}
+                className={cn(current === 1 && "invisible")}
+              >
+                <ArrowLeft className="size-4" />
+                Back
+              </Button>
+
+              {current < total ? (
+                <Button onClick={next} disabled={current === 2 && !libraryPath}>
+                  Continue
+                  <ArrowRight className="size-4" />
+                </Button>
+              ) : (
+                <Button onClick={finish} disabled={finishing}>
+                  {finishing ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Check className="size-4" />
+                  )}
+                  Finish setup
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </section>

@@ -53,18 +53,7 @@
     }
   },
   "app": {
-    "windows": [
-      {
-        "fullscreen": false,
-        "height": 700,
-        "resizable": true,
-        "title": "AstroLog",
-        "width": 900,
-        "useHttpsScheme": true,
-        "minWidth": 900,
-        "minHeight": 700
-      }
-    ],
+    "windows": [],
     "security": {
       "assetProtocol": {
         "scope": [
