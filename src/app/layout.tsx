@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import StateProvider from "@/context/state-provider";
+import { ThemeProvider } from 'next-themes';
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -43,15 +44,26 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={cn(geistSans.variable, geistMono.variable, "font-sans", inter.variable)}>
+    <html
+      lang="en"
+      className={cn(geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
+      suppressHydrationWarning
+    >
       <body className="font-sans antialiased">
-        <StateProvider>
-          <TooltipProvider delayDuration={0}>
-            {children}
-          </TooltipProvider>
-        </StateProvider>
-        {/* richColors gives success green / error red so the two are clearly distinct */}
-        <Toaster richColors />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <StateProvider>
+            <TooltipProvider delayDuration={0}>
+              {children}
+            </TooltipProvider>
+          </StateProvider>
+          {/* richColors gives success green / error red so the two are clearly distinct */}
+          <Toaster richColors />
+        </ThemeProvider>
       </body>
     </html>
   )

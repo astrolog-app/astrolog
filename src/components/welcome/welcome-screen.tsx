@@ -26,6 +26,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { api } from "@/lib/api"
 import type { Unit } from "@/types/app-state"
 import { cn } from "@/lib/utils"
+import { useTheme } from 'next-themes';
 
 type Step = {
   id: number
@@ -67,17 +68,16 @@ const STEPS: Step[] = [
   },
 ]
 
-type ThemeMode = "DARK" | "WHITE" | "SYSTEM"
-
 export function WelcomeScreen() {
   const router = useRouter()
   const [current, setCurrent] = useState(1)
   const [libraryPath, setLibraryPath] = useState("")
   const [unit, setUnit] = useState<Unit>("METRIC")
-  const [theme, setTheme] = useState<ThemeMode>("SYSTEM")
   const [starDbPath, setStarDbPath] = useState("")
   const [finishing, setFinishing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const { theme, setTheme } = useTheme()
 
   const total = STEPS.length
   const progress = (current / total) * 100
@@ -265,18 +265,18 @@ export function WelcomeScreen() {
                     <ToggleGroup
                       type="single"
                       value={theme}
-                      onValueChange={(v) => v && setTheme(v as ThemeMode)}
+                      onValueChange={(v) => v && setTheme(v)}
                       className="grid grid-cols-3 gap-2"
                     >
-                      <ToggleGroupItem value="DARK" className="gap-2">
+                      <ToggleGroupItem value="dark" className="gap-2">
                         <Moon className="size-4" />
                         Dark
                       </ToggleGroupItem>
-                      <ToggleGroupItem value="WHITE" className="gap-2">
+                      <ToggleGroupItem value="light" className="gap-2">
                         <Sun className="size-4" />
                         Light
                       </ToggleGroupItem>
-                      <ToggleGroupItem value="SYSTEM" className="gap-2">
+                      <ToggleGroupItem value="system" className="gap-2">
                         <Monitor className="size-4" />
                         System
                       </ToggleGroupItem>
