@@ -348,9 +348,9 @@ impl Database {
     }
 
     pub fn get_telescopes(&self) -> Result<HashMap<Uuid, Telescope>> {
-        let mut stmt = self
-            .conn
-            .prepare("SELECT id, brand, name, telescope_type, focal_length, aperture FROM telescopes")?;
+        let mut stmt = self.conn.prepare(
+            "SELECT id, brand, name, telescope_type, focal_length, aperture FROM telescopes",
+        )?;
         let mut rows = stmt.query([])?;
         let mut result = HashMap::new();
         while let Some(row) = rows.next()? {
@@ -1023,7 +1023,14 @@ impl Database {
         )?;
         let rows = stmt
             .query_map(
-                params![camera_id.to_string(), gain, binning, offset, exposure_ms, night],
+                params![
+                    camera_id.to_string(),
+                    gain,
+                    binning,
+                    offset,
+                    exposure_ms,
+                    night
+                ],
                 map_dark_flat_frame,
             )?
             .collect::<Result<Vec<_>>>()?;
@@ -1634,9 +1641,10 @@ fn add_regexp_function(conn: &Connection) -> Result<()> {
         FunctionFlags::SQLITE_UTF8 | FunctionFlags::SQLITE_DETERMINISTIC,
         move |ctx| {
             type BoxError = Box<dyn std::error::Error + Send + Sync + 'static>;
-            let regexp: Arc<Regex> = ctx.get_or_create_aux(0, |vr| -> std::result::Result<_, BoxError> {
-                Ok(Regex::new(vr.as_str()?)?)
-            })?;
+            let regexp: Arc<Regex> = ctx
+                .get_or_create_aux(0, |vr| -> std::result::Result<_, BoxError> {
+                    Ok(Regex::new(vr.as_str()?)?)
+                })?;
             let text = ctx
                 .get_raw(1)
                 .as_str()

@@ -19,6 +19,16 @@ import { UUID } from "crypto"
 export interface AppApi {
   getAppState(): Promise<AppState>
 
+  // window chrome for the custom titlebar: windows/linux run frameless and
+  // render their own caption buttons in the top bar, macos keeps the native
+  // traffic lights, the browser/v0 mock is a no-op (controls stay hidden)
+  minimizeWindow(): Promise<void>
+  toggleMaximizeWindow(): Promise<void>
+  closeWindow(): Promise<void>
+  isWindowMaximized(): Promise<boolean>
+  // fires on any window resize (incl. maximize/restore), returns unsubscribe
+  onWindowResized(callback: () => void): Promise<() => void>
+
   // first-run setup: native folder pickers (null when cancelled; the library
   // picker rejects folders that are neither empty nor an existing library)
   // and the finish step that persists the library choice and restarts the app

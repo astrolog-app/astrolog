@@ -40,14 +40,17 @@ impl LocalConfig {
         let mut filename = dir;
         filename.push("local_config.json");
 
-        Ok(file_store::save(filename.as_path(), &to_string_pretty(self)?)?)
+        Ok(file_store::save(
+            filename.as_path(),
+            &to_string_pretty(self)?,
+        )?)
     }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Config {
     pub schema_version: u32,
-    pub folder_paths: FolderPaths
+    pub folder_paths: FolderPaths,
 }
 
 impl Config {
@@ -77,7 +80,10 @@ impl Config {
         let mut filename = dir;
         filename.push(".astrolog");
         filename.push("config.json");
-        Ok(file_store::save(filename.as_path(), &to_string_pretty(self)?)?)
+        Ok(file_store::save(
+            filename.as_path(),
+            &to_string_pretty(self)?,
+        )?)
     }
 }
 

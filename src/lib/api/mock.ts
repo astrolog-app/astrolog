@@ -292,4 +292,15 @@ export const mockApi: AppApi = {
   async deleteFlattener(id: UUID): Promise<void> {
     delete equipment.flatteners[id]
   },
+
+  // window chrome is a no-op in the browser, the controls stay hidden there
+  async minimizeWindow(): Promise<void> {},
+  async toggleMaximizeWindow(): Promise<void> {},
+  async closeWindow(): Promise<void> {},
+  async isWindowMaximized(): Promise<boolean> {
+    return false
+  },
+  async onWindowResized(): Promise<() => void> {
+    return () => {}
+  },
 }

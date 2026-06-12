@@ -348,16 +348,10 @@ export function LogView() {
             Add imaging sessions and calibration frames, then review your log.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setDialogKind("calibration")}>
-            <Plus data-icon="inline-start" />
-            Add Calibration
-          </Button>
-          <Button onClick={() => setDialogKind("session")}>
-            <Plus data-icon="inline-start" />
-            Add Session
-          </Button>
-        </div>
+        <Button className="flex items-center gap-2" onClick={() => setDialogKind("session")}>
+          <Plus data-icon="inline-start" />
+            Import Frames
+        </Button>
       </div>
 
       {/* controls: search + kind switch + view mode + columns */}

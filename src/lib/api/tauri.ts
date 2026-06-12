@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core"
+import { getCurrentWindow } from "@tauri-apps/api/window"
 import type { AppApi } from "@/lib/api/types"
 import type { AppState, Unit } from "@/types/app-state"
 import type { Camera, Filter, Flattener, Mount, Telescope } from "@/types/equipment"
@@ -20,6 +21,22 @@ import { UUID } from "crypto"
 export const tauriApi: AppApi = {
   getAppState(): Promise<AppState> {
     return invoke<AppState>("get_app_state")
+  },
+
+  minimizeWindow(): Promise<void> {
+    return getCurrentWindow().minimize()
+  },
+  toggleMaximizeWindow(): Promise<void> {
+    return getCurrentWindow().toggleMaximize()
+  },
+  closeWindow(): Promise<void> {
+    return getCurrentWindow().close()
+  },
+  isWindowMaximized(): Promise<boolean> {
+    return getCurrentWindow().isMaximized()
+  },
+  onWindowResized(callback: () => void): Promise<() => void> {
+    return getCurrentWindow().onResized(() => callback())
   },
 
   pickFolder(): Promise<string | null> {

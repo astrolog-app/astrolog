@@ -25,15 +25,10 @@ pub struct AppStateDto {
 
 #[tauri::command]
 pub fn get_app_state(state: State<AppState>) -> Result<AppStateDto, String> {
-    let equipment = state
-        .db
-        .lock()
-        .unwrap()
-        .get_equipment_list()
-        .map_err(|e| {
-            log::error!("get_app_state: failed to load equipment list: {e}");
-            e.to_string()
-        })?;
+    let equipment = state.db.lock().unwrap().get_equipment_list().map_err(|e| {
+        log::error!("get_app_state: failed to load equipment list: {e}");
+        e.to_string()
+    })?;
 
     let local_config = state.local_config.lock().unwrap().clone();
     let config = state.config.lock().unwrap().clone();
@@ -121,10 +116,12 @@ pub async fn finish_setup(
         log::error!("finish_setup: failed to create library database: {e}");
         e.to_string()
     })?;
-    Config::default().save(root_directory.clone()).map_err(|e| {
-        log::error!("finish_setup: failed to save config: {e}");
-        e.to_string()
-    })?;
+    Config::default()
+        .save(root_directory.clone())
+        .map_err(|e| {
+            log::error!("finish_setup: failed to save config: {e}");
+            e.to_string()
+        })?;
 
     let mut local_config = LocalConfig::default();
     local_config.root_directory = root_directory;
@@ -163,15 +160,10 @@ pub fn save_telescope(state: State<AppState>, telescope: Telescope) -> Result<()
 #[tauri::command]
 pub fn delete_telescope(state: State<AppState>, id: Uuid) -> Result<(), String> {
     log::debug!("delete_telescope: {id}");
-    state
-        .db
-        .lock()
-        .unwrap()
-        .remove_telescope(id)
-        .map_err(|e| {
-            log::error!("delete_telescope {id} failed: {e}");
-            e.to_string()
-        })
+    state.db.lock().unwrap().remove_telescope(id).map_err(|e| {
+        log::error!("delete_telescope {id} failed: {e}");
+        e.to_string()
+    })
 }
 
 #[tauri::command]
@@ -191,43 +183,28 @@ pub fn save_camera(state: State<AppState>, camera: Camera) -> Result<(), String>
 #[tauri::command]
 pub fn delete_camera(state: State<AppState>, id: Uuid) -> Result<(), String> {
     log::debug!("delete_camera: {id}");
-    state
-        .db
-        .lock()
-        .unwrap()
-        .remove_camera(id)
-        .map_err(|e| {
-            log::error!("delete_camera {id} failed: {e}");
-            e.to_string()
-        })
+    state.db.lock().unwrap().remove_camera(id).map_err(|e| {
+        log::error!("delete_camera {id} failed: {e}");
+        e.to_string()
+    })
 }
 
 #[tauri::command]
 pub fn save_mount(state: State<AppState>, mount: Mount) -> Result<(), String> {
     log::debug!("save_mount: {}", mount.id);
-    state
-        .db
-        .lock()
-        .unwrap()
-        .insert_mount(&mount)
-        .map_err(|e| {
-            log::error!("save_mount {} failed: {e}", mount.id);
-            e.to_string()
-        })
+    state.db.lock().unwrap().insert_mount(&mount).map_err(|e| {
+        log::error!("save_mount {} failed: {e}", mount.id);
+        e.to_string()
+    })
 }
 
 #[tauri::command]
 pub fn delete_mount(state: State<AppState>, id: Uuid) -> Result<(), String> {
     log::debug!("delete_mount: {id}");
-    state
-        .db
-        .lock()
-        .unwrap()
-        .remove_mount(id)
-        .map_err(|e| {
-            log::error!("delete_mount {id} failed: {e}");
-            e.to_string()
-        })
+    state.db.lock().unwrap().remove_mount(id).map_err(|e| {
+        log::error!("delete_mount {id} failed: {e}");
+        e.to_string()
+    })
 }
 
 #[tauri::command]
@@ -247,15 +224,10 @@ pub fn save_filter(state: State<AppState>, filter: Filter) -> Result<(), String>
 #[tauri::command]
 pub fn delete_filter(state: State<AppState>, id: Uuid) -> Result<(), String> {
     log::debug!("delete_filter: {id}");
-    state
-        .db
-        .lock()
-        .unwrap()
-        .remove_filter(id)
-        .map_err(|e| {
-            log::error!("delete_filter {id} failed: {e}");
-            e.to_string()
-        })
+    state.db.lock().unwrap().remove_filter(id).map_err(|e| {
+        log::error!("delete_filter {id} failed: {e}");
+        e.to_string()
+    })
 }
 
 #[tauri::command]
@@ -275,15 +247,10 @@ pub fn save_flattener(state: State<AppState>, flattener: Flattener) -> Result<()
 #[tauri::command]
 pub fn delete_flattener(state: State<AppState>, id: Uuid) -> Result<(), String> {
     log::debug!("delete_flattener: {id}");
-    state
-        .db
-        .lock()
-        .unwrap()
-        .remove_flattener(id)
-        .map_err(|e| {
-            log::error!("delete_flattener {id} failed: {e}");
-            e.to_string()
-        })
+    state.db.lock().unwrap().remove_flattener(id).map_err(|e| {
+        log::error!("delete_flattener {id} failed: {e}");
+        e.to_string()
+    })
 }
 
 // ------------ imaging frames ------------
