@@ -1637,3 +1637,198 @@ fn add_regexp_function(conn: &Connection) -> Result<()> {
         },
     )
 }
+
+// one-off dummy-data seeder, run explicitly:
+//   cargo test --manifest-path src-tauri/Cargo.toml seed_dummy_data -- --ignored --nocapture
+// deletes the existing db first so the reworked schema is applied fresh
+#[cfg(test)]
+mod seed {
+    use super::Database;
+    use crate::models::equipment::{Camera, Filter, Mount, Telescope};
+    use crate::models::imaging_frames::bias_frame::BiasFrame;
+    use crate::models::imaging_frames::dark_flat_frame::DarkFlatFrame;
+    use crate::models::imaging_frames::dark_frame::DarkFrame;
+    use crate::models::imaging_frames::flat_frame::FlatFrame;
+    use crate::models::imaging_frames::light_frame::LightFrame;
+    use chrono::{NaiveDate, TimeZone, Utc};
+    use std::path::PathBuf;
+    use uuid::Uuid;
+
+    #[test]
+    #[ignore]
+    fn seed_dummy_data() {
+        let root = PathBuf::from(r"C:\Users\rouve\Documents\Astolog");
+        let db_path = root.join(".astrolog").join("astrolog.db");
+        // start fresh: we edited migrations in place, so a stale db keeps old columns
+        let _ = std::fs::remove_file(&db_path);
+
+        let db = Database::new(&root).expect("open db");
+
+        let cam = Uuid::parse_str("11111111-1111-1111-1111-111111111111").unwrap();
+        let scope = Uuid::parse_str("22222222-2222-2222-2222-222222222222").unwrap();
+        let mount = Uuid::parse_str("33333333-3333-3333-3333-333333333333").unwrap();
+        let filter = Uuid::parse_str("44444444-4444-4444-4444-444444444444").unwrap();
+
+        db.insert_camera(&Camera {
+            id: cam,
+            brand: "ZWO".into(),
+            name: "ASI2600MM Pro".into(),
+            pixel_size: 3.76,
+            pixel_x: 6248,
+            pixel_y: 4176,
+            sensor_type: "Mono".into(),
+        })
+        .unwrap();
+        db.insert_telescope(&Telescope {
+            id: scope,
+            brand: "Sky-Watcher".into(),
+            name: "Esprit 100ED".into(),
+            telescope_type: "Refractor".into(),
+            focal_length: 550,
+            aperture: 100,
+        })
+        .unwrap();
+        db.insert_mount(&Mount {
+            id: mount,
+            brand: "Sky-Watcher".into(),
+            name: "EQ6-R Pro".into(),
+        })
+        .unwrap();
+        db.insert_filter(&Filter {
+            id: filter,
+            brand: "Antlia".into(),
+            name: "Ha 3nm".into(),
+            filter_type: "Narrowband".into(),
+            size: "36mm".into(),
+        })
+        .unwrap();
+
+        let night = NaiveDate::from_ymd_opt(2026, 6, 7).unwrap();
+        let imported = Utc::now();
+        let cap = |h: u32, m: u32| Utc.with_ymd_and_hms(2026, 6, 7, h, m, 0).unwrap();
+        let flat_session = Uuid::new_v4();
+        let light_session = Uuid::new_v4();
+
+        // 3 bias
+        for i in 0..3 {
+            db.insert_bias_frame(&BiasFrame {
+                id: Uuid::new_v4(),
+                hash: None,
+                rel_path: format!("CALIBRATION/bias/bias_{:03}.fits", i + 1),
+                file_size_bytes: 52_000_000,
+                creation_day: night,
+                captured_at: Some(cap(21, i)),
+                imported_at: imported,
+                updated_at: None,
+                binning: 1,
+                gain: 100,
+                offset: Some(50),
+                sensor_set_temp: Some(-10.0),
+                sensor_temp: Some(-10.0),
+                camera_id: cam,
+            })
+            .unwrap();
+        }
+
+        // 2 darks (300s, -10 °C, cooled library -> no session)
+        for i in 0..2 {
+            db.insert_dark_frame(&DarkFrame {
+                id: Uuid::new_v4(),
+                session_id: None,
+                hash: None,
+                rel_path: format!("CALIBRATION/darks/dark_{:03}.fits", i + 1),
+                file_size_bytes: 52_000_000,
+                creation_day: night,
+                captured_at: Some(cap(22, i)),
+                imported_at: imported,
+                updated_at: None,
+                binning: 1,
+                gain: 100,
+                offset: Some(50),
+                sensor_set_temp: Some(-10.0),
+                sensor_temp: Some(-10.0),
+                camera_id: cam,
+                exposure_ms: 300_000,
+            })
+            .unwrap();
+        }
+
+        // 2 dark flats (3s)
+        for i in 0..2 {
+            db.insert_dark_flat_frame(&DarkFlatFrame {
+                id: Uuid::new_v4(),
+                hash: None,
+                rel_path: format!("CALIBRATION/darkflats/darkflat_{:03}.fits", i + 1),
+                file_size_bytes: 52_000_000,
+                creation_day: night,
+                captured_at: Some(cap(8, i)),
+                imported_at: imported,
+                updated_at: None,
+                binning: 1,
+                gain: 100,
+                offset: Some(50),
+                sensor_set_temp: Some(-10.0),
+                sensor_temp: Some(-10.0),
+                camera_id: cam,
+                exposure_ms: 3_000,
+            })
+            .unwrap();
+        }
+
+        // 2 flats (3s, Ha)
+        for i in 0..2 {
+            db.insert_flat_frame(&FlatFrame {
+                id: Uuid::new_v4(),
+                session_id: flat_session,
+                hash: None,
+                rel_path: format!("CALIBRATION/flats/flat_{:03}.fits", i + 1),
+                file_size_bytes: 52_000_000,
+                creation_day: night,
+                captured_at: Some(cap(8, i + 10)),
+                imported_at: imported,
+                updated_at: None,
+                binning: 1,
+                gain: 100,
+                offset: Some(50),
+                sensor_set_temp: Some(-10.0),
+                sensor_temp: Some(-10.0),
+                camera_id: cam,
+                telescope_id: scope,
+                filter_id: Some(filter),
+                flattener_id: None,
+                exposure_ms: 3_000,
+            })
+            .unwrap();
+        }
+
+        // 5 lights (300s, M31, Ha)
+        for i in 0..5 {
+            db.insert_light_frame(&LightFrame {
+                id: Uuid::new_v4(),
+                session_id: light_session,
+                hash: None,
+                rel_path: format!("DATA/M31/light_{:03}.fits", i + 1),
+                file_size_bytes: 52_000_000,
+                creation_day: night,
+                captured_at: Some(cap(23, i)),
+                imported_at: imported,
+                updated_at: None,
+                binning: 1,
+                gain: 100,
+                offset: Some(50),
+                sensor_set_temp: Some(-10.0),
+                sensor_temp: Some(-10.0),
+                camera_id: cam,
+                telescope_id: scope,
+                mount_id: mount,
+                filter_id: Some(filter),
+                flattener_id: None,
+                exposure_ms: 300_000,
+                target: "M31".into(),
+            })
+            .unwrap();
+        }
+
+        println!("seeded dummy data into {}", db_path.display());
+    }
+}

@@ -48,10 +48,7 @@ import {
   Sparkles,
   Telescope,
   Wrench,
-  CheckCircle2,
-  AlertCircle,
   Sun,
-  Cloud,
   Gauge,
   ChevronRight,
 } from "lucide-react"
@@ -87,8 +84,6 @@ interface CalibInput {
   offset: number | null
   binning: number
   sensorTemp?: number | null
-  first: string
-  last: string
 }
 
 // map any grouped calibration row onto the calibration log shape so it renders
@@ -106,25 +101,10 @@ function calibEntry(i: CalibInput): LogEntry {
     filter: i.filter ?? "—",
     telescope: i.telescope ?? "—",
     camera: i.camera,
-    mount: "—",
-    flattener: "—",
     gain: i.gain,
     offset: i.offset ?? 0,
     binning: `${i.binning}x${i.binning}`,
     sensorTemp: i.sensorTemp ?? 0,
-    ambientTemp: 0,
-    fwhm: 0,
-    hfr: 0,
-    sqm: 0,
-    bortle: 0,
-    moonIllum: 0,
-    seeing: "—",
-    transparency: "—",
-    location: "—",
-    guideRms: 0,
-    filePath: `CALIBRATION/${i.pathSeg}/${i.night}`,
-    processed: false,
-    notes: `captured ${i.first} – ${i.last}`,
     images: [],
   }
 }
@@ -136,6 +116,7 @@ function lightRowToEntry(
   telescopeName: string,
   filterName: string,
 ): LogEntry {
+  const expSec = row.exposure / 1000
   return {
     id: `light:${row.camera_id}:${row.telescope_id ?? "x"}:${row.filter_id ?? "x"}:${row.target}:${row.gain}:${row.binning}:${row.offset ?? "x"}:${row.exposure}:${row.sensor_temp ?? "x"}:${row.night}`,
     kind: "session",
@@ -143,30 +124,15 @@ function lightRowToEntry(
     date: row.night,
     frameType: "Light",
     frameCount: row.total_frames,
-    exposure: row.exposure,
-    totalIntegration: Math.round((row.total_frames * row.exposure) / 60),
+    exposure: expSec,
+    totalIntegration: Math.round((row.total_frames * expSec) / 60),
     filter: filterName,
     telescope: telescopeName,
     camera: cameraName,
-    mount: "—",
-    flattener: "—",
     gain: row.gain,
     offset: row.offset ?? 0,
     binning: `${row.binning}x${row.binning}`,
     sensorTemp: row.sensor_temp ?? 0,
-    ambientTemp: 0,
-    fwhm: 0,
-    hfr: 0,
-    sqm: 0,
-    bortle: 0,
-    moonIllum: 0,
-    seeing: "—",
-    transparency: "—",
-    location: "—",
-    guideRms: 0,
-    filePath: `DATA/${row.target}/${row.night}`,
-    processed: false,
-    notes: `captured ${row.first_captured} – ${row.last_captured}`,
     images: [],
   }
 }
@@ -238,65 +204,57 @@ export function LogView() {
         gain: r.gain,
         offset: r.offset,
         binning: r.binning,
-        first: r.first_captured,
-        last: r.last_captured,
       }),
     )
 
     const dark = darkRows.map((r) =>
       calibEntry({
         pathSeg: "darks",
-        idKey: `${r.camera_id}:${r.gain}:${r.binning}:${r.offset ?? "x"}:${r.exposure}:${r.sensor_temp ?? "x"}:${r.night}`,
+        idKey: `${r.camera_id}:${r.gain}:${r.binning}:${r.offset ?? "x"}:${r.exposure_ms}:${r.sensor_temp ?? "x"}:${r.night}`,
         frameType: "Dark",
-        name: `Dark · ${r.exposure}s · ${camName(r.camera_id)}`,
+        name: `Dark · ${r.exposure_ms / 1000}s · ${camName(r.camera_id)}`,
         night: r.night,
         frameCount: r.total_frames,
-        exposure: r.exposure,
+        exposure: r.exposure_ms / 1000,
         camera: camName(r.camera_id),
         gain: r.gain,
         offset: r.offset,
         binning: r.binning,
         sensorTemp: r.sensor_temp,
-        first: r.first_captured,
-        last: r.last_captured,
       }),
     )
 
     const darkFlat = darkFlatRows.map((r) =>
       calibEntry({
         pathSeg: "darkflats",
-        idKey: `${r.camera_id}:${r.gain}:${r.binning}:${r.offset ?? "x"}:${r.exposure}:${r.night}`,
+        idKey: `${r.camera_id}:${r.gain}:${r.binning}:${r.offset ?? "x"}:${r.exposure_ms}:${r.night}`,
         frameType: "Dark Flat",
-        name: `Dark Flat · ${r.exposure}s · ${camName(r.camera_id)}`,
+        name: `Dark Flat · ${r.exposure_ms / 1000}s · ${camName(r.camera_id)}`,
         night: r.night,
         frameCount: r.total_frames,
-        exposure: r.exposure,
+        exposure: r.exposure_ms / 1000,
         camera: camName(r.camera_id),
         gain: r.gain,
         offset: r.offset,
         binning: r.binning,
-        first: r.first_captured,
-        last: r.last_captured,
       }),
     )
 
     const flat = flatRows.map((r) =>
       calibEntry({
         pathSeg: "flats",
-        idKey: `${r.camera_id}:${r.telescope_id ?? "x"}:${r.filter_id ?? "x"}:${r.gain}:${r.binning}:${r.offset ?? "x"}:${r.exposure}:${r.night}`,
+        idKey: `${r.camera_id}:${r.telescope_id ?? "x"}:${r.filter_id ?? "x"}:${r.gain}:${r.binning}:${r.offset ?? "x"}:${r.exposure_ms}:${r.night}`,
         frameType: "Flat",
         name: `Flat · ${optName(filters, r.filter_id)} · ${camName(r.camera_id)}`,
         night: r.night,
         frameCount: r.total_frames,
-        exposure: r.exposure,
+        exposure: r.exposure_ms / 1000,
         filter: optName(filters, r.filter_id),
         telescope: optName(telescopes, r.telescope_id),
         camera: camName(r.camera_id),
         gain: r.gain,
         offset: r.offset,
         binning: r.binning,
-        first: r.first_captured,
-        last: r.last_captured,
       }),
     )
 
@@ -530,8 +488,6 @@ export function LogView() {
                             className={cn(
                               c.align === "right" && "text-right tabular-nums",
                               c.key === "target" && "font-medium text-foreground",
-                              c.key === "notes" && "max-w-56 truncate",
-                              c.key === "filePath" && "font-mono text-xs text-muted-foreground",
                             )}
                           >
                             {c.key === "target" ? (
@@ -545,16 +501,6 @@ export function LogView() {
                               </span>
                             ) : c.key === "frameType" ? (
                               <Badge variant="secondary">{entry.frameType}</Badge>
-                            ) : c.key === "processed" ? (
-                              entry.processed ? (
-                                <span className="flex items-center gap-1 text-muted-foreground">
-                                  <CheckCircle2 className="size-3.5" /> Done
-                                </span>
-                              ) : (
-                                <span className="flex items-center gap-1 text-muted-foreground">
-                                  <AlertCircle className="size-3.5" /> Pending
-                                </span>
-                              )
                             ) : (
                               formatCell(entry, c)
                             )}
@@ -620,19 +566,6 @@ function SessionDetails({ entry }: { entry: LogEntry | null }) {
           <Gauge className="size-4 text-muted-foreground" />
           <span className="text-muted-foreground">Offset:</span>
           <span className="font-medium text-foreground tabular-nums">{entry.offset}</span>
-        </span>
-        {entry.kind === "session" && (
-          <span className="flex items-center gap-1.5">
-            <Cloud className="size-4 text-muted-foreground" />
-            <span className="text-muted-foreground">Conditions:</span>
-            <span className="font-medium text-foreground">
-              Seeing {entry.fwhm}&quot;, Bortle {entry.bortle}, Moon {entry.moonIllum}%
-            </span>
-          </span>
-        )}
-        <span className="flex items-center gap-1.5">
-          <span className="text-muted-foreground">Notes:</span>
-          <span className="text-foreground">{entry.notes || "—"}</span>
         </span>
       </div>
     </div>

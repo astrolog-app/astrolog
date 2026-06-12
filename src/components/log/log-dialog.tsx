@@ -11,7 +11,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import {
   Field,
   FieldGroup,
@@ -45,14 +44,8 @@ const empty = {
   exposure: "",
   telescope: "",
   camera: "",
-  mount: "",
-  flattener: "",
   gain: "",
-  offset: "",
   binning: "1x1",
-  sensorTemp: "",
-  location: "",
-  notes: "",
 }
 
 export function LogDialog({ open, onOpenChange, kind, onSave }: LogDialogProps) {
@@ -78,25 +71,10 @@ export function LogDialog({ open, onOpenChange, kind, onSave }: LogDialogProps) 
       filter: form.filter || "—",
       telescope: form.telescope || "—",
       camera: form.camera || "—",
-      mount: form.mount || "—",
-      flattener: form.flattener || "—",
       gain: Number(form.gain) || 0,
-      offset: Number(form.offset) || 0,
+      offset: 0,
       binning: form.binning,
-      sensorTemp: Number(form.sensorTemp) || 0,
-      ambientTemp: 0,
-      fwhm: 0,
-      hfr: 0,
-      sqm: 0,
-      bortle: 0,
-      moonIllum: 0,
-      seeing: "—",
-      transparency: "—",
-      location: form.location || "—",
-      guideRms: 0,
-      filePath: `${isSession ? "DATA" : "CALIBRATION"}/${form.target || "untitled"}/${form.date}`,
-      processed: false,
-      notes: form.notes,
+      sensorTemp: 0,
       images: [],
     }
     onSave(entry)
@@ -184,30 +162,12 @@ export function LogDialog({ open, onOpenChange, kind, onSave }: LogDialogProps) 
                 <FieldLabel htmlFor="camera">Camera</FieldLabel>
                 <Input id="camera" value={form.camera} onChange={(e) => set("camera", e.target.value)} placeholder="ASI2600MM Pro" />
               </Field>
-              {isSession && (
-                <Field>
-                  <FieldLabel htmlFor="mount">Mount</FieldLabel>
-                  <Input id="mount" value={form.mount} onChange={(e) => set("mount", e.target.value)} placeholder="EQ6-R Pro" />
-                </Field>
-              )}
               <Field>
                 <FieldLabel htmlFor="gain">Gain</FieldLabel>
                 <Input id="gain" type="number" value={form.gain} onChange={(e) => set("gain", e.target.value)} placeholder="100" />
               </Field>
             </div>
           </FieldSet>
-
-          {isSession && (
-            <Field>
-              <FieldLabel htmlFor="location">Location</FieldLabel>
-              <Input id="location" value={form.location} onChange={(e) => set("location", e.target.value)} placeholder="Backyard Observatory" />
-            </Field>
-          )}
-
-          <Field>
-            <FieldLabel htmlFor="notes">Notes</FieldLabel>
-            <Textarea id="notes" value={form.notes} onChange={(e) => set("notes", e.target.value)} placeholder="Conditions, issues, observations…" rows={2} />
-          </Field>
         </FieldGroup>
 
         <DialogFooter>

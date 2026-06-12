@@ -22,28 +22,14 @@ export interface LogEntry {
   exposure: number // seconds
   totalIntegration: number // minutes
   filter: string
-  // --- detailed view (everything else) ---
+  // --- detailed view ---
   telescope: string
   camera: string
-  mount: string
-  flattener: string
   gain: number
   offset: number
   binning: string
   sensorTemp: number // °C
-  ambientTemp: number // °C
-  fwhm: number // arcsec
-  hfr: number // px
-  sqm: number // mag/arcsec²
-  bortle: number
-  moonIllum: number // %
-  seeing: string
-  transparency: string
-  location: string
-  guideRms: number // arcsec
-  filePath: string
-  processed: boolean
-  notes: string
+  // individual frames, shown in the preview panel
   images: LogImage[]
 }
 
@@ -67,25 +53,10 @@ export const SESSION_COLUMNS: ColumnDef[] = [
   { key: "frameType", label: "Frame" },
   { key: "telescope", label: "Telescope" },
   { key: "camera", label: "Camera" },
-  { key: "mount", label: "Mount" },
-  { key: "flattener", label: "Flattener" },
   { key: "gain", label: "Gain", align: "right" },
   { key: "offset", label: "Offset", align: "right" },
   { key: "binning", label: "Binning" },
   { key: "sensorTemp", label: "Sensor Temp", unit: "°C", align: "right" },
-  { key: "ambientTemp", label: "Ambient", unit: "°C", align: "right" },
-  { key: "fwhm", label: "FWHM", unit: '"', align: "right" },
-  { key: "hfr", label: "HFR", unit: "px", align: "right" },
-  { key: "sqm", label: "SQM", align: "right" },
-  { key: "bortle", label: "Bortle", align: "right" },
-  { key: "moonIllum", label: "Moon", unit: "%", align: "right" },
-  { key: "seeing", label: "Seeing" },
-  { key: "transparency", label: "Transparency" },
-  { key: "location", label: "Location" },
-  { key: "guideRms", label: "Guide RMS", unit: '"', align: "right" },
-  { key: "filePath", label: "File Path" },
-  { key: "processed", label: "Processed" },
-  { key: "notes", label: "Notes" },
 ]
 
 /** Columns for calibration frames — no sky metrics, gear/sensor oriented. */
@@ -102,23 +73,10 @@ export const CALIBRATION_COLUMNS: ColumnDef[] = [
   { key: "offset", label: "Offset", align: "right" },
   { key: "binning", label: "Binning" },
   { key: "sensorTemp", label: "Sensor Temp", unit: "°C", align: "right" },
-  { key: "ambientTemp", label: "Ambient", unit: "°C", align: "right" },
-  { key: "filePath", label: "File Path" },
-  { key: "processed", label: "Processed" },
-  { key: "notes", label: "Notes" },
 ]
 
 export function columnsFor(kind: LogKind): ColumnDef[] {
   return kind === "session" ? SESSION_COLUMNS : CALIBRATION_COLUMNS
-}
-
-function makeImages(target: string, frameType: FrameType, n: number, baseHue: number): LogImage[] {
-  return Array.from({ length: n }, (_, i) => ({
-    id: `${target}-${frameType}-${i}`,
-    label: `${target} · ${frameType} ${String(i + 1).padStart(3, "0")}`,
-    frameType,
-    hue: (baseHue + i * 17) % 360,
-  }))
 }
 
 export const FRAME_TYPES: FrameType[] = ["Light", "Dark", "Flat", "Dark Flat", "Bias"]
@@ -135,8 +93,6 @@ export interface SubFrame {
   offset: number
   binning: string
   sensorTemp: number // °C
-  hfr: number // px
-  fwhm: number // arcsec
   accepted: boolean
 }
 
@@ -156,8 +112,6 @@ export const SUBFRAME_COLUMNS: SubFrameColumn[] = [
   { key: "offset", label: "Offset", align: "right" },
   { key: "binning", label: "Binning" },
   { key: "sensorTemp", label: "Sensor Temp", unit: "°C", align: "right" },
-  { key: "hfr", label: "HFR", unit: "px", align: "right" },
-  { key: "fwhm", label: "FWHM", unit: '"', align: "right" },
   { key: "accepted", label: "Status" },
 ]
 
@@ -194,7 +148,6 @@ export function makeSubFrames(entry: LogEntry): SubFrame[] {
   const prefix = FRAME_TYPE_PREFIX[entry.frameType]
   const slug = entry.target.replace(/[^a-zA-Z0-9]+/g, "_").replace(/^_|_$/g, "") || "FRAME"
   const baseTemp = entry.sensorTemp || -10
-  const isLight = entry.frameType === "Light"
 
   return Array.from({ length: entry.frameCount }, (_, i) => {
     const seq = String(i + 1).padStart(4, "0")
@@ -202,10 +155,6 @@ export function makeSubFrames(entry: LogEntry): SubFrame[] {
     const hh = String((20 + Math.floor(totalMinutes / 60)) % 24).padStart(2, "0")
     const mm = String(totalMinutes % 60).padStart(2, "0")
     const ss = String(Math.floor(rand() * 60)).padStart(2, "0")
-    const hfr = isLight ? +(1.6 + rand() * 1.4).toFixed(2) : 0
-    const fwhm = isLight ? +(1.4 + rand() * 1.6).toFixed(2) : 0
-    // mark the worst ~10% of light frames as rejected
-    const accepted = isLight ? hfr < 2.7 : true
     return {
       id: `${entry.id}#${i}`,
       index: i + 1,
@@ -216,9 +165,8 @@ export function makeSubFrames(entry: LogEntry): SubFrame[] {
       offset: entry.offset,
       binning: entry.binning,
       sensorTemp: +(baseTemp + (rand() - 0.5)).toFixed(1),
-      hfr,
-      fwhm,
-      accepted,
+      // no frame analysis yet, so every subframe is accepted for now
+      accepted: true,
     }
   })
 }
@@ -226,18 +174,12 @@ export function makeSubFrames(entry: LogEntry): SubFrame[] {
 export function formatSubCell(frame: SubFrame, col: SubFrameColumn): string {
   const value = frame[col.key]
   if (typeof value === "boolean") return value ? "Accepted" : "Rejected"
-  if (value === 0 && (col.key === "hfr" || col.key === "fwhm")) return "—"
   return col.unit ? `${value}${col.unit}` : String(value)
 }
 
 export function formatCell(entry: LogEntry, col: ColumnDef): string {
   const value = entry[col.key]
-  if (typeof value === "boolean") return value ? "Yes" : "No"
-  if (value === 0 && col.align === "right" && col.key !== "frameCount") {
-    // keep zeros for counts but show dash for irrelevant metrics on calibration
-    if (entry.kind === "calibration" && ["fwhm", "hfr", "sqm", "bortle", "moonIllum", "guideRms"].includes(col.key as string)) {
-      return "—"
-    }
-  }
+  // calibration frames without a regulated temp report 0 — show a dash
+  if (value === 0 && col.key === "sensorTemp") return "—"
   return col.unit ? `${value}${col.unit}` : String(value)
 }

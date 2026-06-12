@@ -1,17 +1,26 @@
 import { UUID } from "crypto"
 
 // mirrors the rust models in src-tauri/src/models/imaging_frames (snake_case)
+// dates are serialized as strings: creation_day is "YYYY-MM-DD" (NaiveDate),
+// captured_at/imported_at/updated_at are RFC3339 (DateTime<Utc>)
+// exposure_ms is in milliseconds; sensor temps are °C
 
 // one physical bias frame on disk
 export interface BiasFrame {
   id: UUID
   hash: string | null
   rel_path: string
-  camera_id: UUID
-  captured_at: string
-  gain: number
+  file_size_bytes: number
+  creation_day: string
+  captured_at: string | null
+  imported_at: string
+  updated_at: string | null
   binning: number
+  gain: number
   offset: number | null
+  sensor_set_temp: number | null
+  sensor_temp: number | null
+  camera_id: UUID
 }
 
 // one aggregated table row: bias frames sharing camera + settings + night
@@ -56,15 +65,22 @@ export interface BiasFramePage {
 // one physical dark frame on disk
 export interface DarkFrame {
   id: UUID
+  // dslr/uncooled darks are bound to a session; cooled library darks are not
+  session_id: UUID | null
   hash: string | null
   rel_path: string
-  camera_id: UUID
-  captured_at: string
-  gain: number
+  file_size_bytes: number
+  creation_day: string
+  captured_at: string | null
+  imported_at: string
+  updated_at: string | null
   binning: number
+  gain: number
   offset: number | null
-  exposure: number
+  sensor_set_temp: number | null
   sensor_temp: number | null
+  camera_id: UUID
+  exposure_ms: number
 }
 
 // dark frames sharing camera + settings + exposure + temp + night
@@ -73,7 +89,7 @@ export interface DarkFrameRow {
   gain: number
   binning: number
   offset: number | null
-  exposure: number
+  exposure_ms: number
   sensor_temp: number | null
   night: string
   total_frames: number
@@ -110,12 +126,18 @@ export interface DarkFlatFrame {
   id: UUID
   hash: string | null
   rel_path: string
-  camera_id: UUID
-  captured_at: string
-  gain: number
+  file_size_bytes: number
+  creation_day: string
+  captured_at: string | null
+  imported_at: string
+  updated_at: string | null
   binning: number
+  gain: number
   offset: number | null
-  exposure: number
+  sensor_set_temp: number | null
+  sensor_temp: number | null
+  camera_id: UUID
+  exposure_ms: number
 }
 
 // dark-flat frames sharing camera + settings + exposure + night
@@ -124,7 +146,7 @@ export interface DarkFlatFrameRow {
   gain: number
   binning: number
   offset: number | null
-  exposure: number
+  exposure_ms: number
   night: string
   total_frames: number
   first_captured: string
@@ -158,16 +180,24 @@ export interface DarkFlatFramePage {
 // one physical flat frame on disk
 export interface FlatFrame {
   id: UUID
+  session_id: UUID
   hash: string | null
   rel_path: string
-  camera_id: UUID
-  telescope_id: UUID | null
-  filter_id: UUID | null
-  captured_at: string
-  gain: number
+  file_size_bytes: number
+  creation_day: string
+  captured_at: string | null
+  imported_at: string
+  updated_at: string | null
   binning: number
+  gain: number
   offset: number | null
-  exposure: number
+  sensor_set_temp: number | null
+  sensor_temp: number | null
+  camera_id: UUID
+  telescope_id: UUID
+  filter_id: UUID | null
+  flattener_id: UUID | null
+  exposure_ms: number
 }
 
 // flat frames sharing optics + settings + exposure + night
@@ -178,7 +208,7 @@ export interface FlatFrameRow {
   gain: number
   binning: number
   offset: number | null
-  exposure: number
+  exposure_ms: number
   night: string
   total_frames: number
   first_captured: string
@@ -212,18 +242,26 @@ export interface FlatFramePage {
 // one physical light frame on disk
 export interface LightFrame {
   id: UUID
+  session_id: UUID
   hash: string | null
   rel_path: string
-  camera_id: UUID
-  telescope_id: UUID | null
-  filter_id: UUID | null
-  captured_at: string
-  target: string
-  gain: number
+  file_size_bytes: number
+  creation_day: string
+  captured_at: string | null
+  imported_at: string
+  updated_at: string | null
   binning: number
+  gain: number
   offset: number | null
-  exposure: number
+  sensor_set_temp: number | null
   sensor_temp: number | null
+  camera_id: UUID
+  telescope_id: UUID
+  mount_id: UUID
+  filter_id: UUID | null
+  flattener_id: UUID | null
+  exposure_ms: number
+  target: string
 }
 
 // light frames sharing target + optics + settings + exposure + temp + night
