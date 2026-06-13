@@ -71,11 +71,20 @@ fn validate_library_folder(root: &Path) -> Result<(), String> {
     Ok(())
 }
 
-// async so the blocking native dialog runs off the main thread
+// the dialog's blocking api must not run on the async runtime (panics in
+// tokio) nor on the main thread (deadlocks), so it gets its own thread
+async fn pick_folder_off_runtime(
+    app: tauri::AppHandle,
+) -> Result<Option<tauri_plugin_dialog::FilePath>, String> {
+    tauri::async_runtime::spawn_blocking(move || app.dialog().file().blocking_pick_folder())
+        .await
+        .map_err(|e| e.to_string())
+}
+
 #[tauri::command]
 pub async fn pick_folder(app: tauri::AppHandle) -> Result<Option<String>, String> {
     log::debug!("pick_folder");
-    let folder = app.dialog().file().blocking_pick_folder();
+    let folder = pick_folder_off_runtime(app).await?;
     Ok(folder.map(|f| f.to_string()))
 }
 
@@ -84,7 +93,7 @@ pub async fn pick_folder(app: tauri::AppHandle) -> Result<Option<String>, String
 #[tauri::command]
 pub async fn pick_library_folder(app: tauri::AppHandle) -> Result<Option<String>, String> {
     log::debug!("pick_library_folder");
-    let Some(folder) = app.dialog().file().blocking_pick_folder() else {
+    let Some(folder) = pick_folder_off_runtime(app).await? else {
         return Ok(None);
     };
     let path = folder.into_path().map_err(|e| e.to_string())?;

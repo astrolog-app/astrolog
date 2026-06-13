@@ -58,8 +58,13 @@ pub fn run() {
             } else {
                 ("welcome", "/welcome")
             };
+            // shadow(true) is load-bearing on windows: for frameless windows
+            // the shadow provides the dwm frame that carries the resize grips
+            // (and the win11 rounded corners) — without it edges can't be
+            // grabbed; the json config defaults to true, the builder may not
             let builder = WebviewWindowBuilder::new(app, label, WebviewUrl::App(url.into()))
-                .title("AstroLog");
+                .title("AstroLog")
+                .shadow(true);
             // the welcome flow runs in a fixed-size dialog-style window,
             // the main ui in a freely resizable one
             let builder = if is_configured {
