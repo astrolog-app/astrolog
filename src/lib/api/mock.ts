@@ -193,38 +193,50 @@ const mockFlatRows: FlatFrameRow[] = [
   },
 ]
 
-const mockLightRows: LightFrameRow[] = [
-  {
-    camera_id: CAM_2600,
+const mockLightRows: LightFrameRow[] = Array.from({ length: 30 }, (_, index) => {
+  const targets = [
+    "NGC 7000",
+    "M31",
+    "IC 1396",
+    "M42",
+    "M45",
+    "Rosette Nebula",
+    "Horsehead Nebula",
+    "Heart Nebula",
+    "Soul Nebula",
+    "Andromeda Galaxy",
+  ]
+
+  const isMonoSetup = index % 2 === 0
+  const exposure = isMonoSetup ? 300000 : 180000
+  const start = new Date(
+    Date.UTC(
+      2026,
+      5,
+      7 + Math.floor(index / 5),
+      22 + (index % 3),
+      (index * 7) % 60,
+      0,
+    ),
+  )
+  const end = new Date(start.getTime() + exposure)
+
+  return {
+    camera_id: isMonoSetup ? CAM_2600 : CAM_533,
     telescope_id: SCOPE_ESPRIT,
-    filter_id: FILTER_HA,
-    target: "NGC 7000",
+    filter_id: isMonoSetup ? FILTER_HA : FILTER_LPRO,
+    target: targets[index % targets.length],
     gain: 100,
     binning: 1,
-    offset: 50,
-    exposure: 300000,
-    sensor_temp: -10,
-    night: "2026-06-07",
-    total_frames: 20,
-    first_captured: "2026-06-07T23:00:00Z",
-    last_captured: "2026-06-07T23:19:00Z",
-  },
-  {
-    camera_id: CAM_533,
-    telescope_id: SCOPE_ESPRIT,
-    filter_id: FILTER_LPRO,
-    target: "M31",
-    gain: 100,
-    binning: 1,
-    offset: 30,
-    exposure: 180000,
-    sensor_temp: -5,
-    night: "2026-05-30",
-    total_frames: 12,
-    first_captured: "2026-05-30T23:00:00Z",
-    last_captured: "2026-05-30T23:11:00Z",
-  },
-]
+    offset: isMonoSetup ? 50 : 30,
+    exposure,
+    sensor_temp: isMonoSetup ? -10 : -5,
+    night: start.toISOString().slice(0, 10),
+    total_frames: 30,
+    first_captured: start.toISOString(),
+    last_captured: end.toISOString(),
+  }
+})
 
 // mirrors AppApi but serves static data, so the ui can run in the browser
 export const mockApi: AppApi = {
@@ -240,7 +252,7 @@ export const mockApi: AppApi = {
   async pickLibraryFolder(): Promise<string | null> {
     return "/Users/you/AstroLog"
   },
-  async finishSetup(_rootDirectory: string, _unit: Unit): Promise<void> {},
+  async finishSetup(_rootDirectory: string, _unit: Unit): Promise<void> { },
 
   async getBiasFrames(_query: BiasFrameQuery): Promise<BiasFramePage> {
     return { rows: mockBiasRows, total: mockBiasRows.length }
@@ -294,13 +306,13 @@ export const mockApi: AppApi = {
   },
 
   // window chrome is a no-op in the browser, the controls stay hidden there
-  async minimizeWindow(): Promise<void> {},
-  async toggleMaximizeWindow(): Promise<void> {},
-  async closeWindow(): Promise<void> {},
+  async minimizeWindow(): Promise<void> { },
+  async toggleMaximizeWindow(): Promise<void> { },
+  async closeWindow(): Promise<void> { },
   async isWindowMaximized(): Promise<boolean> {
     return false
   },
   async onWindowResized(): Promise<() => void> {
-    return () => {}
+    return () => { }
   },
 }

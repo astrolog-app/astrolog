@@ -20,16 +20,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
-  FRAME_TYPES,
   SUBFRAME_COLUMNS,
   formatSubCell,
   makeSubFrames,
   type LogEntry,
 } from "@/lib/log"
 import { cn } from "@/lib/utils"
-import { CheckCircle2, Search, SlidersHorizontal, Filter, XCircle } from "lucide-react"
-import { useMemo } from "react"
+import { CheckCircle2, Search, SlidersHorizontal, Telescope, Moon, Sun, XCircle } from "lucide-react"
+import { useMemo, useState } from "react"
+
+// frame types a session's subframe table can switch between (UI only for now)
+const SUBFRAME_SETS = [
+  { value: "Light", label: "Light Frames", icon: Telescope },
+  { value: "Dark", label: "Dark Frames", icon: Moon },
+  { value: "Flat", label: "Flat Frames", icon: Sun },
+] as const
 
 /**
  * Renders the individual subframes that make up one grouped log entry as a
@@ -38,6 +45,14 @@ import { useMemo } from "react"
 export function SubFrameTable({ entry }: { entry: LogEntry }) {
   const frames = useMemo(() => makeSubFrames(entry), [entry])
   const accepted = frames.filter((f) => f.accepted).length
+
+  // dummy per-group availability — not every session has all frame types yet
+  // (UI only; switching does not change the rendered data for now)
+  const available = useMemo(() => {
+    const h = entry.id.split("").reduce((sum, c) => sum + c.charCodeAt(0), 0)
+    return { Light: true, Dark: h % 2 === 0, Flat: h % 3 !== 0 }
+  }, [entry.id])
+  const [frameSet, setFrameSet] = useState<"Light" | "Dark" | "Flat">("Light")
 
   return (
     <div className="bg-muted/40 px-4 py-3">
@@ -53,27 +68,25 @@ export function SubFrameTable({ entry }: { entry: LogEntry }) {
         </div>
 
         {entry.kind === "session" && (
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button variant="outline" size="sm" className="h-8">
-                  <Filter data-icon="inline-start" />
-                  Frame type
-                </Button>
-              }
-            />
-            <DropdownMenuContent align="start" className="w-44">
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>Frame type</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {FRAME_TYPES.map((t) => (
-                  <DropdownMenuCheckboxItem key={t} checked closeOnClick={false}>
-                    {t}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ToggleGroup
+            type="single"
+            size="sm"
+            variant="outline"
+            value={frameSet}
+            onValueChange={(v: string) => v && setFrameSet(v as "Light" | "Dark" | "Flat")}
+          >
+            {SUBFRAME_SETS.map(({ value, label, icon: Icon }) => (
+              <ToggleGroupItem
+                key={value}
+                value={value}
+                className="h-8"
+                disabled={!available[value]}
+              >
+                <Icon data-icon="inline-start" />
+                {label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
         )}
 
         <DropdownMenu>

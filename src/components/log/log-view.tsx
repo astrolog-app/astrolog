@@ -1,6 +1,6 @@
 "use client"
 
-import { Fragment, useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -21,6 +21,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -30,7 +31,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { LogDialog } from "@/components/log/log-dialog"
 import { SessionPreview } from "@/components/log/session-preview"
 import { SubFrameTable } from "@/components/log/subframe-table"
 import {
@@ -51,6 +51,7 @@ import {
   Sun,
   Gauge,
   ChevronRight,
+  ChevronLeft,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api"
@@ -145,6 +146,7 @@ export function LogView() {
   const [query, setQuery] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+  const [page, setPage] = useState(1)
   const [dialogKind, setDialogKind] = useState<LogKind | null>(null)
   // detailed-view hidden columns, tracked per kind
   const [hidden, setHidden] = useState<Record<LogKind, Set<string>>>({
@@ -313,16 +315,52 @@ export function LogView() {
     }
   }, [filtered, selectedId])
 
+  // show at most PAGE_SIZE rows at a time; the table body still scrolls
+  const PAGE_SIZE = 25
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const paged = useMemo(
+    () => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filtered, page],
+  )
+
+  // reset to the first page whenever the data set changes
+  useEffect(() => {
+    setPage(1)
+  }, [kind, query])
+
+  // clamp the page if the filtered set shrinks below it
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages)
+  }, [page, totalPages])
+
   const selected = byKind.find((e) => e.id === selectedId) ?? null
 
+  // keep references to each session row so we can scroll one to the top
+  const rowRefs = useRef(new Map<string, HTMLTableRowElement>())
+  const scrollToIdRef = useRef<string | null>(null)
+
   function toggleExpand(id: string) {
+    // only one row may be expanded at a time
     setExpandedIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
+      const willOpen = !prev.has(id)
+      // when opening, remember which row to scroll to the top after render
+      scrollToIdRef.current = willOpen ? id : null
+      return willOpen ? new Set([id]) : new Set()
     })
   }
+
+  // after a row expands, scroll it just below the sticky header
+  useEffect(() => {
+    const id = scrollToIdRef.current
+    if (!id) return
+    scrollToIdRef.current = null
+    const row = rowRefs.current.get(id)
+    const viewport = row?.closest<HTMLElement>("[data-slot=scroll-area-viewport]")
+    if (!row || !viewport) return
+    const headerHeight = 40 // sticky TableHeader (h-10)
+    const delta = row.getBoundingClientRect().top - viewport.getBoundingClientRect().top - headerHeight
+    viewport.scrollTo({ top: viewport.scrollTop + delta, behavior: "smooth" })
+  }, [expandedIds])
 
   function toggleColumn(key: string) {    setHidden((prev) => {
     const next = new Set(prev[kind])
@@ -350,7 +388,7 @@ export function LogView() {
         </div>
         <Button className="flex items-center gap-2" onClick={() => setDialogKind("session")}>
           <Plus data-icon="inline-start" />
-            Import Frames
+          Import Frames
         </Button>
       </div>
 
@@ -435,24 +473,28 @@ export function LogView() {
         className="min-h-0 flex-1 rounded-lg border border-border"
       >
         <ResizablePanel defaultSize={68} minSize={35}>
-          <div className="h-full overflow-auto">
-            <Table>
-              <TableHeader className="sticky top-0 z-10 bg-muted">
-                <TableRow>
-                  <TableHead className="w-8" aria-label="Expand" />
-                  {activeColumns.map((c) => (
-                    <TableHead key={c.key as string} className={cn(c.align === "right" && "text-right")}>
-                      {c.label}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((entry) => {
+          <div className="flex h-full flex-col">
+            <ScrollArea className="min-h-0 flex-1 [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!w-max [&_[data-slot=scroll-area-viewport]>div]:!min-w-full [&_[data-slot=table-container]]:overflow-visible">
+              <Table>
+                <TableHeader className="sticky top-0 z-10 bg-muted">
+                  <TableRow>
+                    <TableHead className="w-8" aria-label="Expand" />
+                    {activeColumns.map((c) => (
+                      <TableHead key={c.key as string} className={cn(c.align === "right" && "text-right")}>
+                        {c.label}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                {paged.map((entry) => {
                   const expanded = expandedIds.has(entry.id)
                   return (
-                    <Fragment key={entry.id}>
+                    <TableBody key={entry.id}>
                       <TableRow
+                        ref={(el) => {
+                          if (el) rowRefs.current.set(entry.id, el)
+                          else rowRefs.current.delete(entry.id)
+                        }}
                         className="cursor-pointer"
                         data-state={selectedId === entry.id ? "selected" : undefined}
                         aria-expanded={expanded}
@@ -508,18 +550,57 @@ export function LogView() {
                           </TableCell>
                         </TableRow>
                       )}
-                    </Fragment>
+                    </TableBody>
                   )
                 })}
                 {filtered.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={activeColumns.length + 1} className="h-32 text-center text-muted-foreground">
-                      {regexError ? "Invalid regular expression." : "No entries match your search."}
-                    </TableCell>
-                  </TableRow>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell colSpan={activeColumns.length + 1} className="h-32 text-center text-muted-foreground">
+                        {regexError ? "Invalid regular expression." : "No entries match your search."}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
                 )}
-              </TableBody>
-            </Table>
+              </Table>
+            </ScrollArea>
+            {filtered.length > 0 && (
+              <div className="flex shrink-0 items-center justify-between gap-2 border-t border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+              <span>
+                Showing{" "}
+                <span className="font-medium text-foreground tabular-nums">
+                  {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)}
+                </span>{" "}
+                of{" "}
+                <span className="font-medium text-foreground tabular-nums">{filtered.length}</span>
+              </span>
+                <div className="flex items-center gap-2">
+                <span className="tabular-nums">
+                  Page {page} of {totalPages}
+                </span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="size-7"
+                    aria-label="Previous page"
+                    disabled={page <= 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  >
+                    <ChevronLeft className="size-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="size-7"
+                    aria-label="Next page"
+                    disabled={page >= totalPages}
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  >
+                    <ChevronRight className="size-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </ResizablePanel>
 
@@ -532,13 +613,6 @@ export function LogView() {
 
       {/* details strip */}
       <SessionDetails entry={selected} />
-
-      <LogDialog
-        open={dialogKind !== null}
-        onOpenChange={(o) => !o && setDialogKind(null)}
-        kind={dialogKind ?? "session"}
-        onSave={addEntry}
-      />
     </div>
   )
 }
