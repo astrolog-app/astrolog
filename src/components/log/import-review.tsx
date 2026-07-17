@@ -78,7 +78,7 @@ export function ImportReview({ frames }: { frames: ImportFrame[] }) {
   const selected = frames.find((f) => f.id === selectedId) ?? null
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex h-full flex-col gap-3">
       {/* summary alert boxes */}
       {errors.length > 0 && (
         <AlertBox
@@ -104,9 +104,9 @@ export function ImportReview({ frames }: { frames: ImportFrame[] }) {
       )}
 
       {/* table + preview */}
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_260px]">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[1fr_300px]">
         <div className="min-w-0 overflow-hidden rounded-md border border-border bg-background">
-          <ScrollArea className="h-[340px]">
+          <ScrollArea className="h-full">
             <Table>
               <TableHeader className="sticky top-0 z-10 bg-muted/95 backdrop-blur">
                 <TableRow>
@@ -160,7 +160,7 @@ export function ImportReview({ frames }: { frames: ImportFrame[] }) {
         </div>
 
         {/* image preview for the selected frame */}
-        <div className="flex flex-col gap-2 rounded-md border border-border bg-background p-3">
+        <div className="flex flex-col gap-2 overflow-y-auto rounded-md border border-border bg-background p-3">
           <div className="flex items-center gap-2">
             <ImageIcon className="size-4 text-primary" />
             <span className="text-sm font-semibold text-foreground">Preview</span>

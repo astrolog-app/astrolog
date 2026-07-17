@@ -66,6 +66,15 @@ const equipment: EquipmentList = {
       pixel_y: 3008,
       sensor_type: "OSC",
     },
+    "c3a5d0f2-6b1e-4d8a-9f2c-7e0a1b4c8d55": {
+      id: "c3a5d0f2-6b1e-4d8a-9f2c-7e0a1b4c8d55",
+      brand: "Canon",
+      name: "EOS Ra",
+      pixel_size: 5.36,
+      pixel_x: 6720,
+      pixel_y: 4480,
+      sensor_type: "DSLR",
+    },
   },
   mounts: {
     "551a1881-bdbf-4166-926c-a4e3900b32f1": {

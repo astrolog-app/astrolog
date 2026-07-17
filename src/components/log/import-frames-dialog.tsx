@@ -21,13 +21,22 @@ import {
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field"
 import { useAppState } from "@/context/state-provider"
 import { ImportReview } from "@/components/log/import-review"
-import { makeImportFrames } from "@/lib/import-frames"
-import { ArrowLeft, ArrowRight } from "lucide-react"
+import { ImportLibraryStep, type LibrarySelection } from "@/components/log/import-library-step"
+import { isDslr, makeImportFrames, type ImportFrameType } from "@/lib/import-frames"
+import { cn } from "@/lib/utils"
+import { ArrowLeft, ArrowRight, Check } from "lucide-react"
 import type { UUID } from "crypto"
 
-// the wizard steps; step 1 collects the shared metadata for every selected
-// light frame, step 2 (built later) will review the individual frames
-type Step = 1 | 2
+// every step renders a distinct panel; review steps import frames from files,
+// the library step matches existing calibration groups to the session
+type StepId = "settings" | "lights" | "flats" | "darks" | "library"
+
+interface StepDef {
+  id: StepId
+  label: string
+  // review steps carry the frame type they collect from disk
+  frameType?: ImportFrameType
+}
 
 interface ImportFramesDialogProps {
   open: boolean
@@ -36,7 +45,7 @@ interface ImportFramesDialogProps {
   files?: string[]
 }
 
-// the general settings + equipment mapping the user picks on step 1
+// the general settings + equipment mapping the user picks on the first step
 interface FrameMeta {
   night: string
   telescopeId: string
@@ -55,16 +64,20 @@ const EMPTY_META: FrameMeta = {
   flattenerId: "",
 }
 
+const EMPTY_SELECTION: LibrarySelection = { bias: [], darks: [] }
+
 export function ImportFramesDialog({ open, onOpenChange, files = [] }: ImportFramesDialogProps) {
   const { appState } = useAppState()
-  const [step, setStep] = useState<Step>(1)
+  const [stepIndex, setStepIndex] = useState(0)
   const [meta, setMeta] = useState<FrameMeta>(EMPTY_META)
+  const [library, setLibrary] = useState<LibrarySelection>(EMPTY_SELECTION)
 
   // reset to a clean first step whenever the dialog is (re)opened
   useEffect(() => {
     if (!open) return
-    setStep(1)
+    setStepIndex(0)
     setMeta(EMPTY_META)
+    setLibrary(EMPTY_SELECTION)
   }, [open])
 
   // equipment records come back keyed by UUID; turn them into sorted options
@@ -78,139 +91,201 @@ export function ImportFramesDialog({ open, onOpenChange, files = [] }: ImportFra
   const setField = (key: keyof FrameMeta, value: string) =>
     setMeta((prev) => ({ ...prev, [key]: value }))
 
-  // telescope, camera and mount are required to identify a light frame; the
-  // filter and flattener are optional (mono vs. one-shot color, etc.)
-  const canContinue = Boolean(meta.night && meta.telescopeId && meta.cameraId && meta.mountId)
+  // a DSLR shoots matched darks each session (imported from files); a cooled
+  // astro camera reuses a dark library, so its darks come from the library step
+  const cameraIsDslr = isDslr(meta.cameraId ? equipment?.cameras[meta.cameraId as UUID]?.sensor_type : undefined)
 
-  // build the review set once we reach step 2 (frame analysis is mocked)
-  const frames = useMemo(
-    () => (step === 2 ? makeImportFrames(files, meta.night) : []),
-    [step, files, meta.night],
+  // the wizard is built dynamically: the darks-from-files step only exists for
+  // a DSLR, and the library step covers bias (+ darks for cooled cameras)
+  const steps = useMemo<StepDef[]>(() => {
+    const list: StepDef[] = [
+      { id: "settings", label: "Settings" },
+      { id: "lights", label: "Lights", frameType: "Light" },
+      { id: "flats", label: "Flats", frameType: "Flat" },
+    ]
+    if (cameraIsDslr) list.push({ id: "darks", label: "Darks", frameType: "Dark" })
+    list.push({ id: "library", label: "Library" })
+    return list
+  }, [cameraIsDslr])
+
+  // stepIndex can outrun the list when the camera type shrinks it (dslr -> cooled)
+  const safeIndex = Math.min(stepIndex, steps.length - 1)
+  const step = steps[safeIndex]
+  const isFirst = safeIndex === 0
+  const isLast = safeIndex === steps.length - 1
+
+  // telescope, camera and mount are required to identify a frame; the filter
+  // and flattener are optional (mono vs. one-shot color, etc.)
+  const settingsValid = Boolean(meta.night && meta.telescopeId && meta.cameraId && meta.mountId)
+
+  // review frames for the current file-review step (analysis is mocked)
+  const reviewFrames = useMemo(
+    () => (step.frameType ? makeImportFrames(files, meta.night, step.frameType) : []),
+    [step.frameType, files, meta.night],
   )
-  const importableCount = frames.filter((f) => f.status !== "error").length
+
+  // importable light frames gate the final Import action
+  const importableLights = useMemo(
+    () => makeImportFrames(files, meta.night, "Light").filter((f) => f.status !== "error").length,
+    [files, meta.night],
+  )
+
+  const canAdvance = step.id === "settings" ? settingsValid : true
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={step === 2 ? "sm:max-w-4xl" : "sm:max-w-lg"}>
+      <DialogContent
+        className="flex h-[88vh] w-[min(96vw,72rem)] max-w-none flex-col gap-4 sm:max-w-none"
+        showCloseButton={false}
+      >
         <DialogHeader>
-          <DialogTitle>Import Light Frames</DialogTitle>
-          <DialogDescription>
-            {step === 1
-              ? "Set the general settings and equipment used for the selected light frames."
-              : "Review the frames before adding them to your log."}
-          </DialogDescription>
+          <DialogTitle>Import Frames</DialogTitle>
+          <DialogDescription>{descriptionFor(step.id, cameraIsDslr)}</DialogDescription>
         </DialogHeader>
 
         {/* step indicator */}
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <StepDot active={step === 1} done={step > 1} label="Settings" />
-          <div className="h-px flex-1 bg-border" />
-          <StepDot active={step === 2} done={false} label="Review" />
+        <nav className="flex items-center gap-2 text-xs text-muted-foreground">
+          {steps.map((s, i) => (
+            <div key={s.id} className="flex flex-1 items-center gap-2 last:flex-none">
+              <StepDot
+                n={i + 1}
+                label={s.label}
+                active={i === safeIndex}
+                done={i < safeIndex}
+              />
+              {i < steps.length - 1 && <div className="h-px flex-1 bg-border" />}
+            </div>
+          ))}
+        </nav>
+
+        {/* body */}
+        <div className="min-h-0 flex-1">
+          {step.id === "settings" ? (
+            <div className="h-full overflow-y-auto pr-1">
+              <div className="flex flex-col gap-6">
+                <FieldSet>
+                  <FieldLegend variant="label">General</FieldLegend>
+                  <FieldGroup>
+                    <Field>
+                      <FieldLabel htmlFor="import-night">Imaging Night</FieldLabel>
+                      <Input
+                        id="import-night"
+                        type="date"
+                        value={meta.night}
+                        onChange={(e) => setField("night", e.target.value)}
+                      />
+                    </Field>
+                  </FieldGroup>
+                </FieldSet>
+
+                <FieldSet>
+                  <FieldLegend variant="label">Equipment</FieldLegend>
+                  <FieldGroup>
+                    <EquipmentSelect
+                      id="import-telescope"
+                      label="Telescope"
+                      placeholder="Select a telescope…"
+                      options={telescopes}
+                      value={meta.telescopeId}
+                      onChange={(v) => setField("telescopeId", v)}
+                    />
+                    <EquipmentSelect
+                      id="import-camera"
+                      label="Camera"
+                      placeholder="Select a camera…"
+                      options={cameras}
+                      value={meta.cameraId}
+                      onChange={(v) => setField("cameraId", v)}
+                    />
+                    <EquipmentSelect
+                      id="import-mount"
+                      label="Mount"
+                      placeholder="Select a mount…"
+                      options={mounts}
+                      value={meta.mountId}
+                      onChange={(v) => setField("mountId", v)}
+                    />
+                    <EquipmentSelect
+                      id="import-filter"
+                      label="Filter"
+                      optional
+                      placeholder="Select a filter…"
+                      options={filters}
+                      value={meta.filterId}
+                      onChange={(v) => setField("filterId", v)}
+                    />
+                    <EquipmentSelect
+                      id="import-flattener"
+                      label="Flattener"
+                      optional
+                      placeholder="Select a flattener…"
+                      options={flatteners}
+                      value={meta.flattenerId}
+                      onChange={(v) => setField("flattenerId", v)}
+                    />
+                  </FieldGroup>
+                </FieldSet>
+              </div>
+            </div>
+          ) : step.id === "library" ? (
+            <div className="h-full overflow-y-auto pr-1">
+              <ImportLibraryStep
+                cameraId={meta.cameraId}
+                includeDarks={!cameraIsDslr}
+                selection={library}
+                onChange={setLibrary}
+              />
+            </div>
+          ) : (
+            <ImportReview frames={reviewFrames} />
+          )}
         </div>
 
-        {files.length > 0 ? (
-          <p className="text-sm text-muted-foreground">
-            <span className="font-medium text-foreground tabular-nums">{files.length}</span> file
-            {files.length === 1 ? "" : "s"} selected.
-          </p>
-        ) : null}
-
-        {step === 1 ? (
-          <div className="flex flex-col gap-6">
-            <FieldSet>
-              <FieldLegend variant="label">General</FieldLegend>
-              <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor="import-night">Imaging Night</FieldLabel>
-                  <Input
-                    id="import-night"
-                    type="date"
-                    value={meta.night}
-                    onChange={(e) => setField("night", e.target.value)}
-                  />
-                </Field>
-              </FieldGroup>
-            </FieldSet>
-
-            <FieldSet>
-              <FieldLegend variant="label">Equipment</FieldLegend>
-              <FieldGroup>
-                <EquipmentSelect
-                  id="import-telescope"
-                  label="Telescope"
-                  placeholder="Select a telescope…"
-                  options={telescopes}
-                  value={meta.telescopeId}
-                  onChange={(v) => setField("telescopeId", v)}
-                />
-                <EquipmentSelect
-                  id="import-camera"
-                  label="Camera"
-                  placeholder="Select a camera…"
-                  options={cameras}
-                  value={meta.cameraId}
-                  onChange={(v) => setField("cameraId", v)}
-                />
-                <EquipmentSelect
-                  id="import-mount"
-                  label="Mount"
-                  placeholder="Select a mount…"
-                  options={mounts}
-                  value={meta.mountId}
-                  onChange={(v) => setField("mountId", v)}
-                />
-                <EquipmentSelect
-                  id="import-filter"
-                  label="Filter"
-                  optional
-                  placeholder="Select a filter…"
-                  options={filters}
-                  value={meta.filterId}
-                  onChange={(v) => setField("filterId", v)}
-                />
-                <EquipmentSelect
-                  id="import-flattener"
-                  label="Flattener"
-                  optional
-                  placeholder="Select a flattener…"
-                  options={flatteners}
-                  value={meta.flattenerId}
-                  onChange={(v) => setField("flattenerId", v)}
-                />
-              </FieldGroup>
-            </FieldSet>
-          </div>
-        ) : (
-          <ImportReview frames={frames} />
-        )}
-
-        <DialogFooter>
-          {step === 1 ? (
-            <>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button type="button" disabled={!canContinue} onClick={() => setStep(2)}>
-                Continue
-                <ArrowRight data-icon="inline-end" />
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button type="button" variant="outline" onClick={() => setStep(1)}>
+        <DialogFooter className="sm:justify-between">
+          <div className="flex items-center gap-2">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            {!isFirst && (
+              <Button type="button" variant="outline" onClick={() => setStepIndex(safeIndex - 1)}>
                 <ArrowLeft data-icon="inline-start" />
                 Back
               </Button>
-              <Button type="button" disabled={importableCount === 0}>
-                Import {importableCount > 0 ? importableCount : ""}
-                {importableCount > 0 ? ` frame${importableCount === 1 ? "" : "s"}` : ""}
-              </Button>
-            </>
+            )}
+          </div>
+          {isLast ? (
+            <Button type="button" disabled={importableLights === 0}>
+              <Check data-icon="inline-start" />
+              Import {importableLights > 0 ? `${importableLights} ` : ""}light
+              {importableLights === 1 ? "" : "s"}
+            </Button>
+          ) : (
+            <Button type="button" disabled={!canAdvance} onClick={() => setStepIndex(safeIndex + 1)}>
+              Continue
+              <ArrowRight data-icon="inline-end" />
+            </Button>
           )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
   )
+}
+
+function descriptionFor(id: StepId, dslr: boolean): string {
+  switch (id) {
+    case "settings":
+      return "Set the general settings and equipment used for this imaging session."
+    case "lights":
+      return "Review the light frames before adding them to your log."
+    case "flats":
+      return "Select and review the flat frames captured for this session."
+    case "darks":
+      return "Select and review the dark frames captured for this DSLR session."
+    case "library":
+      return dslr
+        ? "Match bias frames from your library to this session."
+        : "Match dark and bias frames from your library to this session."
+  }
 }
 
 interface Option {
@@ -265,21 +340,26 @@ function EquipmentSelect({
   )
 }
 
-function StepDot({ active, done, label }: { active: boolean; done: boolean; label: string }) {
+function StepDot({
+  n,
+  label,
+  active,
+  done,
+}: {
+  n: number
+  label: string
+  active: boolean
+  done: boolean
+}) {
   return (
-    <span
-      className="flex items-center gap-1.5"
-      data-state={active ? "active" : done ? "done" : "idle"}
-    >
+    <span className="flex items-center gap-1.5" data-state={active ? "active" : done ? "done" : "idle"}>
       <span
-        className={
-          "flex size-5 items-center justify-center rounded-full text-[10px] font-medium " +
-          (active || done
-            ? "bg-primary text-primary-foreground"
-            : "bg-muted text-muted-foreground")
-        }
+        className={cn(
+          "flex size-5 items-center justify-center rounded-full text-[10px] font-medium",
+          active || done ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+        )}
       >
-        {label === "Settings" ? "1" : "2"}
+        {done ? <Check className="size-3" /> : n}
       </span>
       <span className={active ? "font-medium text-foreground" : ""}>{label}</span>
     </span>

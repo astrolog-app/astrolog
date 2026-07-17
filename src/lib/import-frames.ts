@@ -1,7 +1,17 @@
 import type { LogImage } from "@/lib/log"
+import type { FrameType } from "@/lib/log"
 
 // per-frame validation outcome shown in the review step
 export type FrameStatus = "ok" | "warning" | "error"
+
+// the frame types imported directly from files during a session import
+export type ImportFrameType = "Light" | "Flat" | "Dark"
+
+// cooled astro cameras ("Mono"/"OSC") reuse dark + bias libraries; an uncooled
+// DSLR shoots matched darks per session, so its darks are imported from files
+export function isDslr(sensorType: string | undefined): boolean {
+  return (sensorType ?? "").trim().toUpperCase() === "DSLR"
+}
 
 export interface ImportFrame {
   id: string
@@ -62,27 +72,44 @@ function baseName(path: string): string {
   return parts[parts.length - 1] || path
 }
 
+// per-type generation defaults for the mock (file prefix, count, exposure, …)
+const FRAME_PRESETS: Record<
+  ImportFrameType,
+  { prefix: string; count: number; exposure: number; baseTemp: number; startHour: number }
+> = {
+  Light: { prefix: "LIGHT", count: 12, exposure: 120, baseTemp: -10, startHour: 21 },
+  Flat: { prefix: "FLAT", count: 20, exposure: 3, baseTemp: -10, startHour: 8 },
+  Dark: { prefix: "DARK", count: 10, exposure: 120, baseTemp: -10, startHour: 10 },
+}
+
 /**
- * Build the list of frames to review. When the native picker returned file
- * paths we map those 1:1; otherwise we synthesize a demo set for the web mock.
- * Real FITS header parsing / analysis is not wired up yet, so the exposure,
- * temps and validation results are generated deterministically.
+ * Build the list of frames to review for a given frame type. When the native
+ * picker returned file paths we map those 1:1; otherwise we synthesize a demo
+ * set for the web mock. Real FITS header parsing / analysis is not wired up
+ * yet, so the exposure, temps and validation results are generated
+ * deterministically per frame type.
  */
-export function makeImportFrames(files: string[], night: string): ImportFrame[] {
+export function makeImportFrames(
+  files: string[],
+  night: string,
+  frameType: ImportFrameType = "Light",
+): ImportFrame[] {
+  const preset = FRAME_PRESETS[frameType]
   const names =
     files.length > 0
       ? files.map(baseName)
-      : Array.from({ length: 12 }, (_, i) => `LIGHT_${String(i + 1).padStart(4, "0")}.fits`)
+      : Array.from(
+          { length: preset.count },
+          (_, i) => `${preset.prefix}_${String(i + 1).padStart(4, "0")}.fits`,
+        )
 
-  const rand = seededRandom(hashString(names.join("|") + night) + names.length)
-  const baseExposure = 120
+  const rand = seededRandom(hashString(names.join("|") + night + frameType) + names.length)
   const baseGain = 100
-  const baseTemp = -10
 
   return names.map((fileName, i) => {
     const seq = i + 1
     const totalMinutes = Math.floor(rand() * 40) + i * 3
-    const hh = String((21 + Math.floor(totalMinutes / 60)) % 24).padStart(2, "0")
+    const hh = String((preset.startHour + Math.floor(totalMinutes / 60)) % 24).padStart(2, "0")
     const mm = String(totalMinutes % 60).padStart(2, "0")
     const ss = String(Math.floor(rand() * 60)).padStart(2, "0")
 
@@ -92,16 +119,22 @@ export function makeImportFrames(files: string[], night: string): ImportFrame[] 
     // ~1 in 8 frames can't be read at all -> hard error
     const roll = rand()
     const unreadable = roll < 0.12
-    // a couple of soft issues -> warning
-    const highTemp = +(baseTemp + (rand() - 0.3) * 6).toFixed(1)
-    const exposure = unreadable ? 0 : baseExposure
+    const highTemp = +(preset.baseTemp + (rand() - 0.3) * 6).toFixed(1)
+    const exposure = unreadable ? 0 : preset.exposure
     const gain = baseGain
     const offset = 30
 
     if (unreadable) {
       status = "error"
       messages.push(`Can't read file "${fileName}" — header is missing or corrupt.`)
+    } else if (frameType === "Flat") {
+      // flats are judged on illumination level rather than temperature
+      if (roll > 0.8) {
+        status = "warning"
+        messages.push("Median ADU is outside the recommended 20–40k range.")
+      }
     } else {
+      // lights + darks care about sensor temperature matching the set point
       if (highTemp > -7) {
         status = "warning"
         messages.push(`Sensor temperature ${highTemp}°C is warmer than the set point (-10°C).`)
@@ -113,7 +146,7 @@ export function makeImportFrames(files: string[], night: string): ImportFrame[] 
     }
 
     return {
-      id: `${fileName}#${i}`,
+      id: `${frameType}:${fileName}#${i}`,
       index: seq,
       fileName,
       capturedAt: unreadable ? "—" : `${hh}:${mm}:${ss}`,
@@ -127,8 +160,8 @@ export function makeImportFrames(files: string[], night: string): ImportFrame[] 
       image: {
         id: `${fileName}#img`,
         label: fileName,
-        frameType: "Light",
-        hue: (hashString(fileName) % 360),
+        frameType: frameType as FrameType,
+        hue: hashString(fileName) % 360,
       },
     }
   })
