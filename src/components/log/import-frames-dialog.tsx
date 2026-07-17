@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/select"
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field"
 import { useAppState } from "@/context/state-provider"
+import { ImportReview } from "@/components/log/import-review"
+import { makeImportFrames } from "@/lib/import-frames"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 import type { UUID } from "crypto"
 
@@ -80,9 +82,16 @@ export function ImportFramesDialog({ open, onOpenChange, files = [] }: ImportFra
   // filter and flattener are optional (mono vs. one-shot color, etc.)
   const canContinue = Boolean(meta.night && meta.telescopeId && meta.cameraId && meta.mountId)
 
+  // build the review set once we reach step 2 (frame analysis is mocked)
+  const frames = useMemo(
+    () => (step === 2 ? makeImportFrames(files, meta.night) : []),
+    [step, files, meta.night],
+  )
+  const importableCount = frames.filter((f) => f.status !== "error").length
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className={step === 2 ? "sm:max-w-4xl" : "sm:max-w-lg"}>
         <DialogHeader>
           <DialogTitle>Import Light Frames</DialogTitle>
           <DialogDescription>
@@ -172,9 +181,7 @@ export function ImportFramesDialog({ open, onOpenChange, files = [] }: ImportFra
             </FieldSet>
           </div>
         ) : (
-          <div className="flex min-h-40 items-center justify-center rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-            Frame review coming next.
-          </div>
+          <ImportReview frames={frames} />
         )}
 
         <DialogFooter>
@@ -194,8 +201,9 @@ export function ImportFramesDialog({ open, onOpenChange, files = [] }: ImportFra
                 <ArrowLeft data-icon="inline-start" />
                 Back
               </Button>
-              <Button type="button" disabled>
-                Import
+              <Button type="button" disabled={importableCount === 0}>
+                Import {importableCount > 0 ? importableCount : ""}
+                {importableCount > 0 ? ` frame${importableCount === 1 ? "" : "s"}` : ""}
               </Button>
             </>
           )}
