@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { SessionPreview } from "@/components/log/session-preview"
 import { SubFrameTable } from "@/components/log/subframe-table"
+import { ImportFramesDialog } from "@/components/log/import-frames-dialog"
 import {
   columnsFor,
   formatCell,
@@ -147,7 +148,10 @@ export function LogView() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [page, setPage] = useState(1)
-  const [dialogKind, setDialogKind] = useState<LogKind | null>(null)
+  // import-frames wizard; on desktop the native file picker runs first, then
+  // this dialog collects settings/equipment. in web there is no picker, so the
+  // button opens the dialog directly.
+  const [importOpen, setImportOpen] = useState(false)
   // detailed-view hidden columns, tracked per kind
   const [hidden, setHidden] = useState<Record<LogKind, Set<string>>>({
     session: new Set(),
@@ -386,7 +390,7 @@ export function LogView() {
             Add imaging sessions and calibration frames, then review your log.
           </p>
         </div>
-        <Button className="flex items-center gap-2" onClick={() => setDialogKind("session")}>
+        <Button className="flex items-center gap-2" onClick={() => setImportOpen(true)}>
           <Plus data-icon="inline-start" />
           Import Frames
         </Button>
@@ -613,6 +617,8 @@ export function LogView() {
 
       {/* details strip */}
       <SessionDetails entry={selected} />
+
+      <ImportFramesDialog open={importOpen} onOpenChange={setImportOpen} />
     </div>
   )
 }
