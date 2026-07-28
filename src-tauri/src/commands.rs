@@ -150,7 +150,8 @@ pub async fn finish_setup(
 }
 
 // ------------ equipment: save (upsert) + delete ------------
-// save_* use INSERT OR REPLACE under the hood, so they handle both add and edit
+// save_* upsert via INSERT ... ON CONFLICT(id) DO UPDATE, so they handle both
+// add and edit without the delete+insert churn of INSERT OR REPLACE
 
 #[tauri::command]
 pub fn save_telescope(state: State<AppState>, telescope: Telescope) -> Result<(), String> {

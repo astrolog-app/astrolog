@@ -203,8 +203,9 @@ export interface FlatFrame {
 // flat frames sharing optics + settings + exposure + night
 export interface FlatFrameRow {
   camera_id: UUID
-  telescope_id: UUID | null
+  telescope_id: UUID
   filter_id: UUID | null
+  flattener_id: UUID | null
   gain: number
   binning: number
   offset: number | null
@@ -267,8 +268,10 @@ export interface LightFrame {
 // light frames sharing target + optics + settings + exposure + temp + night
 export interface LightFrameRow {
   camera_id: UUID
-  telescope_id: UUID | null
+  telescope_id: UUID
+  mount_id: UUID
   filter_id: UUID | null
+  flattener_id: UUID | null
   target: string
   gain: number
   binning: number

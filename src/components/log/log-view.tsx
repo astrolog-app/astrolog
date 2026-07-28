@@ -119,7 +119,7 @@ function lightRowToEntry(
 ): LogEntry {
   const expSec = row.exposure / 1000
   return {
-    id: `light:${row.camera_id}:${row.telescope_id ?? "x"}:${row.filter_id ?? "x"}:${row.target}:${row.gain}:${row.binning}:${row.offset ?? "x"}:${row.exposure}:${row.sensor_temp ?? "x"}:${row.night}`,
+    id: `light:${row.camera_id}:${row.telescope_id ?? "x"}:${row.mount_id ?? "x"}:${row.filter_id ?? "x"}:${row.flattener_id ?? "x"}:${row.target}:${row.gain}:${row.binning}:${row.offset ?? "x"}:${row.exposure}:${row.sensor_temp ?? "x"}:${row.night}`,
     kind: "session",
     target: row.target,
     date: row.night,
@@ -245,7 +245,7 @@ export function LogView() {
     const flat = flatRows.map((r) =>
       calibEntry({
         pathSeg: "flats",
-        idKey: `${r.camera_id}:${r.telescope_id ?? "x"}:${r.filter_id ?? "x"}:${r.gain}:${r.binning}:${r.offset ?? "x"}:${r.exposure_ms}:${r.night}`,
+        idKey: `${r.camera_id}:${r.telescope_id ?? "x"}:${r.filter_id ?? "x"}:${r.flattener_id ?? "x"}:${r.gain}:${r.binning}:${r.offset ?? "x"}:${r.exposure_ms}:${r.night}`,
         frameType: "Flat",
         name: `Flat · ${optName(filters, r.filter_id)} · ${camName(r.camera_id)}`,
         night: r.night,

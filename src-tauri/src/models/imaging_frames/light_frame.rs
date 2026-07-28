@@ -41,8 +41,10 @@ pub struct LightFrame {
 #[derive(Debug, Clone, Serialize)]
 pub struct LightFrameRow {
     pub camera_id: Uuid,
-    pub telescope_id: Option<Uuid>,
+    pub telescope_id: Uuid,
+    pub mount_id: Uuid,
     pub filter_id: Option<Uuid>,
+    pub flattener_id: Option<Uuid>,
     pub target: String,
     pub gain: u32,
     pub binning: u32,

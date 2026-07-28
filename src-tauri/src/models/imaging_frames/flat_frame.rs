@@ -39,8 +39,9 @@ pub struct FlatFrame {
 #[derive(Debug, Clone, Serialize)]
 pub struct FlatFrameRow {
     pub camera_id: Uuid,
-    pub telescope_id: Option<Uuid>,
+    pub telescope_id: Uuid,
     pub filter_id: Option<Uuid>,
+    pub flattener_id: Option<Uuid>,
     pub gain: u32,
     pub binning: u32,
     pub offset: Option<u32>,
