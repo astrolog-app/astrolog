@@ -36,6 +36,7 @@ import { SubFrameTable } from "@/components/log/subframe-table"
 import {
   columnsFor,
   formatCell,
+  makeSubFrames,
   type ColumnDef,
   type FrameType,
   type LogEntry,
@@ -145,6 +146,8 @@ export function LogView() {
   const [mode, setMode] = useState<ViewMode>("simple")
   const [query, setQuery] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  // subframe row selected within the expanded entry; drives the image preview
+  const [selectedSubId, setSelectedSubId] = useState<string | null>(null)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [page, setPage] = useState(1)
   const [dialogKind, setDialogKind] = useState<LogKind | null>(null)
@@ -335,6 +338,18 @@ export function LogView() {
 
   const selected = byKind.find((e) => e.id === selectedId) ?? null
 
+  // when the selected entry changes, default the preview to its first subframe
+  useEffect(() => {
+    if (!selected) {
+      setSelectedSubId(null)
+      return
+    }
+    const frames = makeSubFrames(selected)
+    setSelectedSubId(frames[0]?.id ?? null)
+    // key on selectedId only: the entry object is derived fresh each render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId])
+
   // keep references to each session row so we can scroll one to the top
   const rowRefs = useRef(new Map<string, HTMLTableRowElement>())
   const scrollToIdRef = useRef<string | null>(null)
@@ -367,6 +382,27 @@ export function LogView() {
       }, 300)
       return new Set()
     })
+  }
+
+  // open (never toggle closed) the given row — used when a row is selected so
+  // the selected row is always the expanded one
+  function openExpand(id: string) {
+    setExpandedIds((prev) => {
+      if (prev.has(id)) return prev
+      scrollToIdRef.current = id
+      if (closeTimer.current) {
+        window.clearTimeout(closeTimer.current)
+        closeTimer.current = null
+      }
+      setClosingId(null)
+      return new Set([id])
+    })
+  }
+
+  // selecting a row also expands it and picks its first subframe for the preview
+  function selectRow(id: string) {
+    setSelectedId(id)
+    openExpand(id)
   }
 
   // position the expanded row under the sticky header and lock the outer scroll.
@@ -559,7 +595,7 @@ export function LogView() {
                         className="cursor-pointer"
                         data-state={selectedId === entry.id ? "selected" : undefined}
                         aria-expanded={expanded}
-                        onClick={() => setSelectedId(entry.id)}
+                        onClick={() => selectRow(entry.id)}
                       >
                         <TableCell className="w-8 pr-0">
                           <button
@@ -614,7 +650,11 @@ export function LogView() {
                               )}
                             >
                               <div className="overflow-hidden">
-                                <SubFrameTable entry={entry} />
+                                <SubFrameTable
+                                  entry={entry}
+                                  selectedSubId={selectedSubId}
+                                  onSelectSubFrame={setSelectedSubId}
+                                />
                               </div>
                             </div>
                           </TableCell>
@@ -678,7 +718,11 @@ export function LogView() {
         <ResizableHandle withHandle />
 
         <ResizablePanel defaultSize={32} minSize={20}>
-          <SessionPreview entry={selected} />
+          <SessionPreview
+            entry={selected}
+            selectedSubId={selectedSubId}
+            onSelectSub={setSelectedSubId}
+          />
         </ResizablePanel>
       </ResizablePanelGroup>
 
