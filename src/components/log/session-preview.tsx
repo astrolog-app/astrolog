@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { ImageIcon, ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { LogEntry, LogImage } from "@/lib/log"
+import { makeImages, type LogEntry, type LogImage } from "@/lib/log"
 
 function StarField({
   image,
@@ -39,6 +39,14 @@ function StarField({
 export function SessionPreview({ entry }: { entry: LogEntry | null }) {
   const [index, setIndex] = useState(0)
 
+  // the selected entry carries the frames it contains; fall back to deriving
+  // them from the entry's subframes so a freshly selected row previews its
+  // images even before any are explicitly linked
+  const images = useMemo<LogImage[]>(() => {
+    if (!entry) return []
+    return entry.images.length ? entry.images : makeImages(entry)
+  }, [entry])
+
   // reset to first frame whenever the selected entry changes
   useEffect(() => {
     setIndex(0)
@@ -54,7 +62,6 @@ export function SessionPreview({ entry }: { entry: LogEntry | null }) {
     )
   }
 
-  const images = entry.images
   const total = images.length
   const safeIndex = Math.min(index, Math.max(total - 1, 0))
   const active = images[safeIndex] ?? null
