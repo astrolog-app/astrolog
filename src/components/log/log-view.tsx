@@ -360,9 +360,11 @@ export function LogView() {
   const closeTimer = useRef<number | null>(null)
 
   function toggleExpand(id: string) {
+    const willOpen = !expandedIds.has(id)
+    // opening a row also selects it so its subframes drive the image preview
+    if (willOpen) setSelectedId(id)
     // only one row may be expanded at a time
     setExpandedIds((prev) => {
-      const willOpen = !prev.has(id)
       // when opening, remember which row to scroll to the top after render
       scrollToIdRef.current = willOpen ? id : null
       if (closeTimer.current) {
@@ -382,27 +384,6 @@ export function LogView() {
       }, 300)
       return new Set()
     })
-  }
-
-  // open (never toggle closed) the given row — used when a row is selected so
-  // the selected row is always the expanded one
-  function openExpand(id: string) {
-    setExpandedIds((prev) => {
-      if (prev.has(id)) return prev
-      scrollToIdRef.current = id
-      if (closeTimer.current) {
-        window.clearTimeout(closeTimer.current)
-        closeTimer.current = null
-      }
-      setClosingId(null)
-      return new Set([id])
-    })
-  }
-
-  // selecting a row also expands it and picks its first subframe for the preview
-  function selectRow(id: string) {
-    setSelectedId(id)
-    openExpand(id)
   }
 
   // position the expanded row under the sticky header and lock the outer scroll.
@@ -595,7 +576,7 @@ export function LogView() {
                         className="cursor-pointer"
                         data-state={selectedId === entry.id ? "selected" : undefined}
                         aria-expanded={expanded}
-                        onClick={() => selectRow(entry.id)}
+                        onClick={() => setSelectedId(entry.id)}
                       >
                         <TableCell className="w-8 pr-0">
                           <button
