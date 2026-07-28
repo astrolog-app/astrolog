@@ -4,9 +4,20 @@ import { useMemo } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
-import { ImageIcon, ChevronLeft, ChevronRight } from "lucide-react"
+import {
+  ImageIcon,
+  ChevronLeft,
+  ChevronRight,
+  Layers,
+  Clock,
+  Timer,
+  Thermometer,
+  CircleCheck,
+  Gauge,
+  Filter,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
-import { makeImages, type LogEntry, type LogImage } from "@/lib/log"
+import { makeImages, makeSubFrames, type LogEntry, type LogImage } from "@/lib/log"
 
 function StarField({
   image,
@@ -33,6 +44,32 @@ function StarField({
   )
 }
 
+/** minutes → compact "12.5h" / "45min" for the integration readout */
+function formatIntegration(min: number): string {
+  return min >= 60 ? `${(min / 60).toFixed(1)}h` : `${min}min`
+}
+
+/** one compact metric row in the session analytics grid */
+function PreviewStat({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  value: string | number
+}) {
+  return (
+    <div className="flex items-center gap-2 text-sm">
+      <Icon className="size-4 shrink-0 text-muted-foreground" />
+      <span className="text-muted-foreground">{label}</span>
+      <span className="ml-auto truncate font-medium tabular-nums text-foreground" title={String(value)}>
+        {value}
+      </span>
+    </div>
+  )
+}
+
 /** Permanent, resizable preview panel — large main image with filename,
  *  Previous/Next navigation, an "x of y" counter, and a thumbnail strip.
  *  Does not block the screen. */
@@ -51,6 +88,20 @@ export function SessionPreview({
   const images = useMemo<LogImage[]>(() => {
     if (!entry) return []
     return entry.images.length ? entry.images : makeImages(entry)
+  }, [entry])
+
+  // session-level aggregates (not per-subframe): accepted ratio and the sensor
+  // temperature spread come from the individual frames, everything else from
+  // the grouped entry itself
+  const sessionStats = useMemo(() => {
+    if (!entry) return null
+    const frames = makeSubFrames(entry)
+    const accepted = frames.filter((f) => f.accepted).length
+    const temps = frames.map((f) => f.sensorTemp)
+    const avgTemp = temps.length
+      ? temps.reduce((a, b) => a + b, 0) / temps.length
+      : entry.sensorTemp
+    return { accepted, total: frames.length, avgTemp }
   }, [entry])
 
   if (!entry) {
@@ -143,6 +194,40 @@ export function SessionPreview({
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
+
+          {/* session-level analytics (aggregate for this entry, not per frame) */}
+          {sessionStats && (
+            <div className="mt-auto rounded-lg border border-border bg-muted/40 p-3">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {entry.kind === "session" ? "Session Analytics" : "Calibration Analytics"}
+              </p>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                <PreviewStat
+                  icon={CircleCheck}
+                  label="Accepted"
+                  value={`${sessionStats.accepted}/${sessionStats.total}`}
+                />
+                <PreviewStat icon={Layers} label="Frames" value={entry.frameCount} />
+                <PreviewStat icon={Timer} label="Exposure" value={`${entry.exposure}s`} />
+                {entry.totalIntegration > 0 && (
+                  <PreviewStat
+                    icon={Clock}
+                    label="Integration"
+                    value={formatIntegration(entry.totalIntegration)}
+                  />
+                )}
+                <PreviewStat
+                  icon={Thermometer}
+                  label="Avg Temp"
+                  value={`${sessionStats.avgTemp.toFixed(1)}°C`}
+                />
+                <PreviewStat icon={Gauge} label="Gain" value={entry.gain} />
+                {entry.filter && entry.filter !== "—" && (
+                  <PreviewStat icon={Filter} label="Filter" value={entry.filter} />
+                )}
+              </div>
+            </div>
+          )}
         </>
       ) : (
         <div className="flex flex-1 items-center justify-center gap-2 text-sm text-muted-foreground">

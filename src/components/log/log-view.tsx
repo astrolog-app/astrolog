@@ -49,10 +49,14 @@ import {
   Sparkles,
   Telescope,
   Wrench,
-  Sun,
-  Gauge,
   ChevronRight,
   ChevronLeft,
+  Target,
+  Layers,
+  CalendarDays,
+  Clock,
+  Filter,
+  Camera,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api"
@@ -707,31 +711,64 @@ export function LogView() {
         </ResizablePanel>
       </ResizablePanelGroup>
 
-      {/* details strip */}
-      <SessionDetails entry={selected} />
+      {/* dataset-wide analytics strip (whole set for the current tab) */}
+      <DatasetAnalytics entries={byKind} kind={kind} />
     </div>
   )
 }
 
-function SessionDetails({ entry }: { entry: LogEntry | null }) {
-  if (!entry) return null
+/** Thin, dataset-wide analytics strip for the current tab — aggregates across
+ *  every grouped row, independent of the selected row. */
+function DatasetAnalytics({ entries, kind }: { entries: LogEntry[]; kind: LogKind }) {
+  const stats = useMemo(() => {
+    const totalFrames = entries.reduce((s, e) => s + e.frameCount, 0)
+    const integrationMin = entries.reduce((s, e) => s + e.totalIntegration, 0)
+    const nights = new Set(entries.map((e) => e.date)).size
+    const targets = new Set(entries.map((e) => e.target)).size
+    const filters = new Set(
+      entries.map((e) => e.filter).filter((f) => f && f !== "—"),
+    ).size
+    const cameras = new Set(
+      entries.map((e) => e.camera).filter((c) => c && c !== "—"),
+    ).size
+    return { count: entries.length, totalFrames, integrationMin, nights, targets, filters, cameras }
+  }, [entries])
+
+  const integration =
+    stats.integrationMin >= 60
+      ? `${(stats.integrationMin / 60).toFixed(1)}h`
+      : `${stats.integrationMin}min`
+
+  const items =
+    kind === "session"
+      ? [
+          { icon: Telescope, label: "Sessions", value: stats.count },
+          { icon: Target, label: "Targets", value: stats.targets },
+          { icon: Layers, label: "Frames", value: stats.totalFrames.toLocaleString() },
+          { icon: Clock, label: "Integration", value: integration },
+          { icon: Filter, label: "Filters", value: stats.filters },
+          { icon: CalendarDays, label: "Nights", value: stats.nights },
+        ]
+      : [
+          { icon: Wrench, label: "Groups", value: stats.count },
+          { icon: Layers, label: "Frames", value: stats.totalFrames.toLocaleString() },
+          { icon: Camera, label: "Cameras", value: stats.cameras },
+          { icon: Filter, label: "Filters", value: stats.filters },
+          { icon: CalendarDays, label: "Nights", value: stats.nights },
+        ]
+
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
-      <h2 className="mb-3 text-sm font-semibold text-foreground">
-        {entry.kind === "session" ? "Session Details" : "Calibration Details"}
-      </h2>
-      <div className="flex flex-wrap items-start gap-x-8 gap-y-2 text-sm">
-        <span className="flex items-center gap-1.5">
-          <Sun className="size-4 text-muted-foreground" />
-          <span className="text-muted-foreground">Gain:</span>
-          <span className="font-medium text-foreground tabular-nums">{entry.gain}</span>
+    <div className="flex items-center gap-x-6 gap-y-1 overflow-x-auto rounded-lg border border-border bg-card px-4 py-2">
+      <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        Dataset
+      </span>
+      {items.map(({ icon: Icon, label, value }) => (
+        <span key={label} className="flex shrink-0 items-center gap-1.5 text-sm">
+          <Icon className="size-4 text-muted-foreground" />
+          <span className="font-semibold tabular-nums text-foreground">{value}</span>
+          <span className="text-muted-foreground">{label}</span>
         </span>
-        <span className="flex items-center gap-1.5">
-          <Gauge className="size-4 text-muted-foreground" />
-          <span className="text-muted-foreground">Offset:</span>
-          <span className="font-medium text-foreground tabular-nums">{entry.offset}</span>
-        </span>
-      </div>
+      ))}
     </div>
   )
 }
