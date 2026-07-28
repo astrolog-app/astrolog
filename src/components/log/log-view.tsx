@@ -21,7 +21,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -119,7 +119,7 @@ function lightRowToEntry(
 ): LogEntry {
   const expSec = row.exposure / 1000
   return {
-    id: `light:${row.camera_id}:${row.telescope_id ?? "x"}:${row.mount_id ?? "x"}:${row.filter_id ?? "x"}:${row.flattener_id ?? "x"}:${row.target}:${row.gain}:${row.binning}:${row.offset ?? "x"}:${row.exposure}:${row.sensor_temp ?? "x"}:${row.night}`,
+    id: `light:${row.camera_id}:${row.telescope_id ?? "x"}:${row.filter_id ?? "x"}:${row.target}:${row.gain}:${row.binning}:${row.offset ?? "x"}:${row.exposure}:${row.sensor_temp ?? "x"}:${row.night}`,
     kind: "session",
     target: row.target,
     date: row.night,
@@ -245,7 +245,7 @@ export function LogView() {
     const flat = flatRows.map((r) =>
       calibEntry({
         pathSeg: "flats",
-        idKey: `${r.camera_id}:${r.telescope_id ?? "x"}:${r.filter_id ?? "x"}:${r.flattener_id ?? "x"}:${r.gain}:${r.binning}:${r.offset ?? "x"}:${r.exposure_ms}:${r.night}`,
+        idKey: `${r.camera_id}:${r.telescope_id ?? "x"}:${r.filter_id ?? "x"}:${r.gain}:${r.binning}:${r.offset ?? "x"}:${r.exposure_ms}:${r.night}`,
         frameType: "Flat",
         name: `Flat · ${optName(filters, r.filter_id)} · ${camName(r.camera_id)}`,
         night: r.night,
@@ -338,6 +338,11 @@ export function LogView() {
   // keep references to each session row so we can scroll one to the top
   const rowRefs = useRef(new Map<string, HTMLTableRowElement>())
   const scrollToIdRef = useRef<string | null>(null)
+  // once an expanded row is scrolled into place, lock the outer table scroll
+  const [viewLocked, setViewLocked] = useState(false)
+  // id of a row that is animating closed (still mounted, collapsing to 0 height)
+  const [closingId, setClosingId] = useState<string | null>(null)
+  const closeTimer = useRef<number | null>(null)
 
   function toggleExpand(id: string) {
     // only one row may be expanded at a time
@@ -345,22 +350,72 @@ export function LogView() {
       const willOpen = !prev.has(id)
       // when opening, remember which row to scroll to the top after render
       scrollToIdRef.current = willOpen ? id : null
-      return willOpen ? new Set([id]) : new Set()
+      if (closeTimer.current) {
+        window.clearTimeout(closeTimer.current)
+        closeTimer.current = null
+      }
+      if (willOpen) {
+        // opening a row: cancel any pending close so it doesn't linger
+        setClosingId(null)
+        return new Set([id])
+      }
+      // closing: keep the row mounted so it can animate collapsed, then unmount
+      setClosingId(id)
+      closeTimer.current = window.setTimeout(() => {
+        setClosingId(null)
+        closeTimer.current = null
+      }, 300)
+      return new Set()
     })
   }
 
-  // after a row expands, scroll it just below the sticky header
+  // position the expanded row under the sticky header and lock the outer scroll.
+  // NOTE: derive everything from `expandedIds` (not just the one-shot
+  // scrollToIdRef) so that when this effect re-runs after the view is hidden and
+  // shown again (React <Activity> tears down and recreates effects), we RE-apply
+  // the lock and re-position the row instead of unlocking it. Also depends on
+  // `paged` so paginating away from and back to the expanded row re-positions
+  // and re-locks it instead of leaving it stuck at the top.
   useEffect(() => {
-    const id = scrollToIdRef.current
-    if (!id) return
+    const expandedId = expandedIds.size ? [...expandedIds][0] : null
+    // treat as "not expanded here" if nothing is open OR the expanded row lives
+    // on another page (paged away): release the lock so that page scrolls freely
+    if (!expandedId || !paged.some((e) => e.id === expandedId)) {
+      setViewLocked(false)
+      return
+    }
+    // a fresh open animates smoothly; a re-show just snaps back into place
+    const smooth = scrollToIdRef.current === expandedId
     scrollToIdRef.current = null
-    const row = rowRefs.current.get(id)
+
+    const row = rowRefs.current.get(expandedId)
     const viewport = row?.closest<HTMLElement>("[data-slot=scroll-area-viewport]")
     if (!row || !viewport) return
     const headerHeight = 40 // sticky TableHeader (h-10)
-    const delta = row.getBoundingClientRect().top - viewport.getBoundingClientRect().top - headerHeight
-    viewport.scrollTo({ top: viewport.scrollTop + delta, behavior: "smooth" })
-  }, [expandedIds])
+
+    let raf1 = 0
+    let raf2 = 0
+    let lockTimer = 0
+    // Wait for the expanded subframe table to commit its height before
+    // scrolling: it grows the scrollable content so the last rows have enough
+    // room to reach the top. Without this the scroll is clamped and the row
+    // stays low, leaving the expanded view not filling the screen.
+    raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        const delta = row.getBoundingClientRect().top - viewport.getBoundingClientRect().top - headerHeight
+        // reset horizontal scroll to 0 so the viewport-width expanded content
+        // pins flush to the visible left edge before scroll is locked
+        viewport.scrollTo({ top: viewport.scrollTop + delta, left: 0, behavior: smooth ? "smooth" : "auto" })
+        // lock once the smooth scroll settles; on a re-show lock immediately
+        lockTimer = window.setTimeout(() => setViewLocked(true), smooth ? 450 : 0)
+      })
+    })
+    return () => {
+      cancelAnimationFrame(raf1)
+      cancelAnimationFrame(raf2)
+      clearTimeout(lockTimer)
+    }
+  }, [expandedIds, paged])
 
   function toggleColumn(key: string) {    setHidden((prev) => {
     const next = new Set(prev[kind])
@@ -474,7 +529,13 @@ export function LogView() {
       >
         <ResizablePanel defaultSize={68} minSize={35}>
           <div className="flex h-full flex-col">
-            <ScrollArea className="min-h-0 flex-1 [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!w-max [&_[data-slot=scroll-area-viewport]>div]:!min-w-full [&_[data-slot=table-container]]:overflow-visible">
+            <ScrollArea
+              className={cn(
+                "min-h-0 flex-1 [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!w-max [&_[data-slot=scroll-area-viewport]>div]:!min-w-full [&_[data-slot=table-container]]:overflow-visible",
+                viewLocked &&
+                "[&_[data-slot=scroll-area-scrollbar]]:hidden [&_[data-slot=scroll-area-viewport]]:!overflow-hidden"
+              )}
+            >
               <Table>
                 <TableHeader className="sticky top-0 z-10 bg-muted">
                   <TableRow>
@@ -543,10 +604,19 @@ export function LogView() {
                           </TableCell>
                         ))}
                       </TableRow>
-                      {expanded && (
+                      {(expanded || closingId === entry.id) && (
                         <TableRow className="hover:bg-transparent">
                           <TableCell colSpan={activeColumns.length + 1} className="p-0">
-                            <SubFrameTable entry={entry} />
+                            <div
+                              className={cn(
+                                "grid transition-[grid-template-rows] duration-300 ease-out",
+                                expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+                              )}
+                            >
+                              <div className="overflow-hidden">
+                                <SubFrameTable entry={entry} />
+                              </div>
+                            </div>
                           </TableCell>
                         </TableRow>
                       )}
@@ -563,6 +633,7 @@ export function LogView() {
                   </TableBody>
                 )}
               </Table>
+              <ScrollBar orientation="horizontal" />
             </ScrollArea>
             {filtered.length > 0 && (
               <div className="flex shrink-0 items-center justify-between gap-2 border-t border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">

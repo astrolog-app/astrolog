@@ -29,7 +29,7 @@ import {
 } from "@/lib/log"
 import { cn } from "@/lib/utils"
 import { CheckCircle2, Search, SlidersHorizontal, Telescope, Moon, Sun, XCircle } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 // frame types a session's subframe table can switch between (UI only for now)
 const SUBFRAME_SETS = [
@@ -54,8 +54,58 @@ export function SubFrameTable({ entry }: { entry: LogEntry }) {
   }, [entry.id])
   const [frameSet, setFrameSet] = useState<"Light" | "Dark" | "Flat">("Light")
 
+  // fix the inner table height to fill down to the bottom of the outer scroll
+  // viewport: it never grows past the visible area (scrolls internally), and
+  // when there are few subframes it adds empty space instead of shrinking
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const [height, setHeight] = useState<number>()
+  // the outer table is `w-max` (as wide as its widest row); the expanded cell
+  // would inherit that width. Instead pin the expanded content to the visible
+  // viewport width so it is "as wide as possible, but not wider".
+  const [width, setWidth] = useState<number>()
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const viewport = el.closest<HTMLElement>("[data-slot=scroll-area-viewport]")
+    if (!viewport) return
+    // sticky header height the parent anchors the expanded row to (see log-view)
+    const HEADER_OFFSET = 40
+    const measure = () => {
+      // compute scroll-INDEPENDENTLY: when expanded, the parent scrolls the
+      // session row to sit HEADER_OFFSET below the viewport top. The gap between
+      // that row and this table wrapper is constant, so the available height is
+      // viewport visible height minus the anchor offset, that gap, and padding.
+      const sessionRow = el.closest("tr")?.previousElementSibling
+      const gap = sessionRow
+        ? el.getBoundingClientRect().top - sessionRow.getBoundingClientRect().top
+        : el.getBoundingClientRect().top - viewport.getBoundingClientRect().top
+      setHeight(Math.max(96, viewport.clientHeight - HEADER_OFFSET - gap - 8))
+      setWidth(viewport.clientWidth)
+    }
+    measure()
+    // measure once the parent's smooth scroll-to-row has settled, then keep
+    // the height fixed — do NOT recompute on scroll, otherwise the table would
+    // grow to track the viewport bottom and appear to "stick" to it
+    const raf = requestAnimationFrame(measure)
+    const settle = setTimeout(measure, 350)
+    window.addEventListener("resize", measure)
+    // a resizable panel changes the viewport size WITHOUT firing window resize,
+    // so observe the viewport directly. ResizeObserver only fires on actual size
+    // changes (not on scroll), so it won't reintroduce the stick-on-scroll bug.
+    const ro = new ResizeObserver(measure)
+    ro.observe(viewport)
+    return () => {
+      cancelAnimationFrame(raf)
+      clearTimeout(settle)
+      window.removeEventListener("resize", measure)
+      ro.disconnect()
+    }
+  }, [])
+
   return (
-    <div className="bg-muted/40 px-4 py-3">
+    <div ref={rootRef} className="sticky left-0 bg-muted/40 px-4 py-3" style={{ width }}>
       {/* toolbar: search + (sessions only) frame-type filter + columns — UI only, no logic yet */}
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <div className="relative min-w-44 max-w-64 flex-1">
@@ -124,9 +174,13 @@ export function SubFrameTable({ entry }: { entry: LogEntry }) {
         )}
       </div>
 
-      <div className="overflow-hidden rounded-md border border-border bg-background">
+      <div
+        ref={scrollRef}
+        className="overflow-auto rounded-md border border-border bg-background"
+        style={{ height }}
+      >
         <Table>
-          <TableHeader className="bg-muted/60">
+          <TableHeader className="sticky top-0 z-10 bg-muted">
             <TableRow>
               {SUBFRAME_COLUMNS.map((c) => (
                 <TableHead
