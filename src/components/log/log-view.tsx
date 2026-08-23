@@ -65,6 +65,7 @@ import type {
   LightFrameRow,
 } from "@/types/imaging-frames"
 import type { UUID } from "crypto"
+import { ImportFramesDialog } from '@/components/log/import-frames-dialog';
 
 type ViewMode = "simple" | "detailed"
 
@@ -150,6 +151,10 @@ export function LogView() {
   const [selectedSubId, setSelectedSubId] = useState<string | null>(null)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [page, setPage] = useState(1)
+  // import-frames wizard; on desktop the native file picker runs first, then
+  // this dialog collects settings/equipment. in web there is no picker, so the
+  // button opens the dialog directly.
+  const [importOpen, setImportOpen] = useState(false)
   const [dialogKind, setDialogKind] = useState<LogKind | null>(null)
   // detailed-view hidden columns, tracked per kind
   const [hidden, setHidden] = useState<Record<LogKind, Set<string>>>({
@@ -458,7 +463,7 @@ export function LogView() {
             Add imaging sessions and calibration frames, then review your log.
           </p>
         </div>
-        <Button className="flex items-center gap-2" onClick={() => setDialogKind("session")}>
+        <Button className="flex items-center gap-2" onClick={() => setImportOpen(true)}>
           <Plus data-icon="inline-start" />
           Import Frames
         </Button>
@@ -706,6 +711,8 @@ export function LogView() {
           />
         </ResizablePanel>
       </ResizablePanelGroup>
+
+      <ImportFramesDialog open={importOpen} onOpenChange={setImportOpen} />
     </div>
   )
 }

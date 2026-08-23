@@ -26,7 +26,6 @@ const CAM_533 = "b1769beb-2f9c-4c4e-ae52-dd0cd36d6e30" as UUID
 const SCOPE_ESPRIT = "5812b156-91a9-461e-a02b-f981bb7029bf" as UUID
 const FILTER_HA = "bc57ba0a-1ef5-4cac-ba16-17372d3dd365" as UUID
 const FILTER_LPRO = "e214a270-d266-442a-b9dc-ad56877accc7" as UUID
-const MOUNT_EQ6 = "551a1881-bdbf-4166-926c-a4e3900b32f1" as UUID
 
 // in-memory equipment used when running in the browser / v0 without a tauri backend
 const equipment: EquipmentList = {
@@ -66,6 +65,15 @@ const equipment: EquipmentList = {
       pixel_x: 3008,
       pixel_y: 3008,
       sensor_type: "OSC",
+    },
+    "c3a5d0f2-6b1e-4d8a-9f2c-7e0a1b4c8d55": {
+      id: "c3a5d0f2-6b1e-4d8a-9f2c-7e0a1b4c8d55",
+      brand: "Canon",
+      name: "EOS Ra",
+      pixel_size: 5.36,
+      pixel_x: 6720,
+      pixel_y: 4480,
+      sensor_type: "DSLR",
     },
   },
   mounts: {
@@ -183,7 +191,6 @@ const mockFlatRows: FlatFrameRow[] = [
     camera_id: CAM_2600,
     telescope_id: SCOPE_ESPRIT,
     filter_id: FILTER_HA,
-    flattener_id: null,
     gain: 100,
     binning: 1,
     offset: 50,
@@ -226,9 +233,7 @@ const mockLightRows: LightFrameRow[] = Array.from({ length: 30 }, (_, index) => 
   return {
     camera_id: isMonoSetup ? CAM_2600 : CAM_533,
     telescope_id: SCOPE_ESPRIT,
-    mount_id: MOUNT_EQ6,
     filter_id: isMonoSetup ? FILTER_HA : FILTER_LPRO,
-    flattener_id: null,
     target: targets[index % targets.length],
     gain: 100,
     binning: 1,
