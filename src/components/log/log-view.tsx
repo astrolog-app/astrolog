@@ -36,6 +36,7 @@ import { SubFrameTable } from "@/components/log/subframe-table"
 import {
   columnsFor,
   formatCell,
+  makeSubFrames,
   type ColumnDef,
   type FrameType,
   type LogEntry,
@@ -145,6 +146,8 @@ export function LogView() {
   const [mode, setMode] = useState<ViewMode>("simple")
   const [query, setQuery] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  // subframe row selected within the expanded entry; drives the image preview
+  const [selectedSubId, setSelectedSubId] = useState<string | null>(null)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [page, setPage] = useState(1)
   const [dialogKind, setDialogKind] = useState<LogKind | null>(null)
@@ -335,6 +338,18 @@ export function LogView() {
 
   const selected = byKind.find((e) => e.id === selectedId) ?? null
 
+  // when the selected entry changes, default the preview to its first subframe
+  useEffect(() => {
+    if (!selected) {
+      setSelectedSubId(null)
+      return
+    }
+    const frames = makeSubFrames(selected)
+    setSelectedSubId(frames[0]?.id ?? null)
+    // key on selectedId only: the entry object is derived fresh each render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId])
+
   // keep references to each session row so we can scroll one to the top
   const rowRefs = useRef(new Map<string, HTMLTableRowElement>())
   const scrollToIdRef = useRef<string | null>(null)
@@ -345,9 +360,11 @@ export function LogView() {
   const closeTimer = useRef<number | null>(null)
 
   function toggleExpand(id: string) {
+    const willOpen = !expandedIds.has(id)
+    // opening a row also selects it so its subframes drive the image preview
+    if (willOpen) setSelectedId(id)
     // only one row may be expanded at a time
     setExpandedIds((prev) => {
-      const willOpen = !prev.has(id)
       // when opening, remember which row to scroll to the top after render
       scrollToIdRef.current = willOpen ? id : null
       if (closeTimer.current) {
@@ -527,7 +544,7 @@ export function LogView() {
         direction="horizontal"
         className="min-h-0 flex-1 rounded-lg border border-border"
       >
-        <ResizablePanel defaultSize={68} minSize={35}>
+          <ResizablePanel defaultSize={68} minSize={35}>
           <div className="flex h-full flex-col">
             <ScrollArea
               className={cn(
@@ -614,7 +631,11 @@ export function LogView() {
                               )}
                             >
                               <div className="overflow-hidden">
-                                <SubFrameTable entry={entry} />
+                                <SubFrameTable
+                                  entry={entry}
+                                  selectedSubId={selectedSubId}
+                                  onSelectSubFrame={setSelectedSubId}
+                                />
                               </div>
                             </div>
                           </TableCell>
@@ -678,35 +699,13 @@ export function LogView() {
         <ResizableHandle withHandle />
 
         <ResizablePanel defaultSize={32} minSize={20}>
-          <SessionPreview entry={selected} />
+          <SessionPreview
+            entry={selected}
+            selectedSubId={selectedSubId}
+            onSelectSub={setSelectedSubId}
+          />
         </ResizablePanel>
       </ResizablePanelGroup>
-
-      {/* details strip */}
-      <SessionDetails entry={selected} />
-    </div>
-  )
-}
-
-function SessionDetails({ entry }: { entry: LogEntry | null }) {
-  if (!entry) return null
-  return (
-    <div className="rounded-lg border border-border bg-card p-4">
-      <h2 className="mb-3 text-sm font-semibold text-foreground">
-        {entry.kind === "session" ? "Session Details" : "Calibration Details"}
-      </h2>
-      <div className="flex flex-wrap items-start gap-x-8 gap-y-2 text-sm">
-        <span className="flex items-center gap-1.5">
-          <Sun className="size-4 text-muted-foreground" />
-          <span className="text-muted-foreground">Gain:</span>
-          <span className="font-medium text-foreground tabular-nums">{entry.gain}</span>
-        </span>
-        <span className="flex items-center gap-1.5">
-          <Gauge className="size-4 text-muted-foreground" />
-          <span className="text-muted-foreground">Offset:</span>
-          <span className="font-medium text-foreground tabular-nums">{entry.offset}</span>
-        </span>
-      </div>
     </div>
   )
 }

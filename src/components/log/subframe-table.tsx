@@ -42,7 +42,15 @@ const SUBFRAME_SETS = [
  * Renders the individual subframes that make up one grouped log entry as a
  * nested table. Data is generated on the frontend for now (no real logic yet).
  */
-export function SubFrameTable({ entry }: { entry: LogEntry }) {
+export function SubFrameTable({
+                                entry,
+                                selectedSubId,
+                                onSelectSubFrame,
+                              }: {
+  entry: LogEntry
+  selectedSubId?: string | null
+  onSelectSubFrame?: (id: string) => void
+}) {
   const frames = useMemo(() => makeSubFrames(entry), [entry])
   const accepted = frames.filter((f) => f.accepted).length
 
@@ -194,7 +202,12 @@ export function SubFrameTable({ entry }: { entry: LogEntry }) {
           </TableHeader>
           <TableBody>
             {frames.map((frame) => (
-              <TableRow key={frame.id}>
+              <TableRow
+                key={frame.id}
+                className="cursor-pointer"
+                data-state={selectedSubId === frame.id ? "selected" : undefined}
+                onClick={() => onSelectSubFrame?.(frame.id)}
+              >
                 {SUBFRAME_COLUMNS.map((c) => (
                   <TableCell
                     key={c.key}

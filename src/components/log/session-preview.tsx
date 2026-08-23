@@ -1,18 +1,18 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useMemo } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { ImageIcon, ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { LogEntry, LogImage } from "@/lib/log"
+import { makeImages, type LogEntry, type LogImage } from "@/lib/log"
 
 function StarField({
-  image,
-  className,
-  children,
-}: {
+                     image,
+                     className,
+                     children,
+                   }: {
   image: LogImage
   className?: string
   children?: React.ReactNode
@@ -36,12 +36,21 @@ function StarField({
 /** Permanent, resizable preview panel — large main image with filename,
  *  Previous/Next navigation, an "x of y" counter, and a thumbnail strip.
  *  Does not block the screen. */
-export function SessionPreview({ entry }: { entry: LogEntry | null }) {
-  const [index, setIndex] = useState(0)
-
-  // reset to first frame whenever the selected entry changes
-  useEffect(() => {
-    setIndex(0)
+export function SessionPreview({
+                                 entry,
+                                 selectedSubId,
+                                 onSelectSub,
+                               }: {
+  entry: LogEntry | null
+  selectedSubId?: string | null
+  onSelectSub?: (id: string) => void
+}) {
+  // the selected entry carries the frames it contains; fall back to deriving
+  // them from the entry's subframes so a freshly selected row previews its
+  // images even before any are explicitly linked
+  const images = useMemo<LogImage[]>(() => {
+    if (!entry) return []
+    return entry.images.length ? entry.images : makeImages(entry)
   }, [entry])
 
   if (!entry) {
@@ -54,10 +63,18 @@ export function SessionPreview({ entry }: { entry: LogEntry | null }) {
     )
   }
 
-  const images = entry.images
   const total = images.length
-  const safeIndex = Math.min(index, Math.max(total - 1, 0))
+  // the active image mirrors the subframe selected in the expanded table; fall
+  // back to the first frame when nothing is selected yet
+  const selectedIndex = images.findIndex((img) => img.id === selectedSubId)
+  const safeIndex = selectedIndex >= 0 ? selectedIndex : 0
   const active = images[safeIndex] ?? null
+
+  // navigating the preview updates the shared subframe selection
+  const selectAt = (i: number) => {
+    const img = images[i]
+    if (img) onSelectSub?.(img.id)
+  }
 
   return (
     <div className="flex h-full flex-col gap-3 p-3">
@@ -88,7 +105,7 @@ export function SessionPreview({ entry }: { entry: LogEntry | null }) {
               variant="outline"
               size="sm"
               disabled={safeIndex <= 0}
-              onClick={() => setIndex((i) => Math.max(i - 1, 0))}
+              onClick={() => selectAt(safeIndex - 1)}
             >
               <ChevronLeft data-icon="inline-start" />
               Previous
@@ -100,7 +117,7 @@ export function SessionPreview({ entry }: { entry: LogEntry | null }) {
               variant="outline"
               size="sm"
               disabled={safeIndex >= total - 1}
-              onClick={() => setIndex((i) => Math.min(i + 1, total - 1))}
+              onClick={() => selectAt(safeIndex + 1)}
             >
               Next
               <ChevronRight data-icon="inline-end" />
@@ -113,7 +130,7 @@ export function SessionPreview({ entry }: { entry: LogEntry | null }) {
                 <button
                   key={img.id}
                   type="button"
-                  onClick={() => setIndex(i)}
+                  onClick={() => selectAt(i)}
                   aria-label={`Preview ${img.label}`}
                   className={cn(
                     "shrink-0 rounded-md border-2 transition-colors",

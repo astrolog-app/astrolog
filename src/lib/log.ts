@@ -171,6 +171,21 @@ export function makeSubFrames(entry: LogEntry): SubFrame[] {
   })
 }
 
+/** Build the preview images for one grouped log entry from its subframes, so
+ *  selecting a row shows the individual frames it contains. Placeholder star
+ *  fields get a deterministic per-frame hue (no real image is imported). */
+export function makeImages(entry: LogEntry): LogImage[] {
+  const frames = makeSubFrames(entry)
+  const baseHue = hashString(entry.id) % 360
+  return frames.map((frame, i) => ({
+    id: frame.id,
+    label: frame.fileName,
+    frameType: entry.frameType,
+    // spread hues slightly around the entry's base so frames look distinct
+    hue: (baseHue + i * 12) % 360,
+  }))
+}
+
 export function formatSubCell(frame: SubFrame, col: SubFrameColumn): string {
   const value = frame[col.key]
   if (typeof value === "boolean") return value ? "Accepted" : "Rejected"
